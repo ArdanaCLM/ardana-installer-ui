@@ -1,0 +1,23 @@
+{
+  "errors": {
+    "title": {
+      "saveModel": "Error saving configuration files",
+      "commit": "Error committing configuration files to git",
+      "validate": "Error validating configuration files",
+      "readyDeploy": "Error when readying for deployment",
+      "deploy": "Error with deployment"
+    },
+
+    "subtitle": {
+      "saveModel": "Please review your configuration and check your connection to the host. Resolve any issues and press 'Deploy' again.",
+      "commit": "Please review your configuration and check your connection to the host. Resolve any issues and press 'Deploy' again.",
+      "validate": "Please review your configuration and fill in any missing information. Resolve any issues and press 'Deploy' again.",
+      "readyDeploy": "Please check the ready deployment log below. Resolve any issues and press 'Deploy' again.",
+      "deploy": "Please review your configuration and check the deployment log below. Resolve any issues and press 'Deploy' again."
+    },
+
+    "help": {
+      "p1": "Please review your configuration and fill in any missing information."
+    }
+  }
+}

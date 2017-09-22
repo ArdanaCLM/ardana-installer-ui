@@ -1,0 +1,41 @@
+<div ng-controller="EditInterfaceModelsController as interfacesDrawerCtrl">
+  <div class="help-icon-header">
+    <help-popover class="pull-right"
+      template-url="'app/installer/server_assocs/edit_network_interfaces/edit_interfaces.drawer.help.html'">
+    </help-popover>
+  </div>
+  <div class="drawer-body">
+    <div class="input-control small-control-input">
+      <label class="control-label">{{'server_assocs.interface_models.name' | translate}}</label>
+      <div class="error-message" role="alert"
+           ng-show="!drawerForm.interface_model_name.$pristine && drawerForm.interface_model_name.$error.ardanaUnique">
+        {{'error.unique_name' | translate}}
+      </div>
+      <input type="text"
+             name="interface_model_name"
+             class="control-input"
+             ng-model="interfacesDrawerCtrl.interfaceRow.model.name"
+             ardana-unique ardana-valid-name
+             items="config.metadata.interfaceModels"
+             key="'name'"
+             required/>
+    </div>
+
+    <hr class="drawer-divider">
+
+    <editable-placeholder
+      label="server_assocs.interface_models.interfaces.title"
+      add-action-label="server_assocs.interface_models.interfaces.btn.add"
+      add-action="interfacesDrawerCtrl.addInterface()"
+      is-set="interfacesDrawerCtrl.tableData.length > 0">
+      <action-table table-data="interfacesDrawerCtrl.tableData"
+        actions-label="'installer.actions.header'"
+        table-headers="interfacesDrawerCtrl.tableHeaders"
+        config="interfacesDrawerCtrl.tableConfig"
+        add-action="interfacesDrawerCtrl.addInterface"
+        edit-action="interfacesDrawerCtrl.editInterface"
+        delete-action="interfacesDrawerCtrl.deleteInterface">
+      </action-table>
+    </editable-placeholder>
+  </div>
+</div>

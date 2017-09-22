@@ -1,0 +1,27 @@
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p1' | translate"></p>
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p2' | translate"></p>
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p3' | translate"></p>
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p4' | translate"></p>
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p5' | translate"></p>
+<p ng-bind-html="'server_assocs.interface_models.drawer_help.p6' | translate"></p>
+<pre>
+interface-models:
+  - name: INTERFACE_SET_CONTROLLER
+    network-interfaces:
+      - name: BOND0
+        device:
+          name: bond0
+        bond-data:
+          options:
+            bond-mode: active-backup
+            bond-miimon: 200
+          provider: linux
+          devices:
+            - name: eth3
+            - name: eth4
+        network-groups:
+          - EXTERNAL_API
+          - EXTERNAL_VM
+          - GUEST
+          - MGMT
+</pre>

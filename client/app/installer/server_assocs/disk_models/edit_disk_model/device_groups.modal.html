@@ -1,0 +1,88 @@
+<div class='modal-header'>
+  <div class="modal-title vertical-middle">
+    {{deviceGroupsModalCtrl.title | translate}}
+  </div>
+</div>
+
+<div class="modal-body">
+    <div class="col-md-6 col-lg-6">
+      <form name="newDeviceGroupForm">
+      <div class="form-group">
+
+        <div class="input-control">
+          <label class="control-label" for="groupName">{{'server_assocs.disk_models.device_groups.name' | translate}}</label>
+          <input class="control-input" type="text" id="groupName" name="groupName" ng-model="deviceGroupsModalCtrl.groupName" required>
+        </div>
+
+        <div class="input-control">
+          <label class="control-label" for="consumer">{{'server_assocs.disk_models.device_groups.consumer' | translate}}</label>
+          <input class="control-input" type="text" id="consumer" name="consumer" ng-model="deviceGroupsModalCtrl.consumerName" required>
+
+        </div>
+        <div class="input-control">
+          <label class="control-label" for="consumerUsage">{{'server_assocs.disk_models.device_groups.consumer_usage' | translate}}</label>
+          <input class="control-input" type="text" id="consumerUsage" name="consumerUsage" ng-model="deviceGroupsModalCtrl.consumerUsage">
+
+        </div>
+        <div class="input-control">
+          <label class="control-label" for="consumerAttributes">{{'server_assocs.disk_models.device_groups.consumer_attr' | translate}}</label>
+          <textarea rows="8" class="control-input" type="text" id="consumerAttributes" name="consumerAttributes" yamlize ng-model="deviceGroupsModalCtrl.consumerAttributes"/>
+        </div>
+      </div>
+    </form>
+    </div>
+
+  <div class="col-md-6 col-lg-6">
+    <editable-placeholder
+      label="server_assocs.disk_models.devices.title"
+      add-action-label="server_assocs.disk_models.devices.btn.add"
+      add-action="deviceGroupsModalCtrl.addDevice()"
+      is-set="deviceGroupsModalCtrl.devices.length > 0">
+      <action-table
+        table-data="deviceGroupsModalCtrl.devices"
+        table-headers="deviceGroupsModalCtrl.headers"
+        actions-label="'installer.actions.header'"
+        config="deviceGroupsModalCtrl.tableConfig"
+        detail-template="deviceGroupsModalCtrl.editDeviceTemplate"
+        edit-action="deviceGroupsModalCtrl.editDevice"
+        add-action="deviceGroupsModalCtrl.addDevice">
+      </action-table>
+    </editable-placeholder>
+    <div class="row-form" ng-show="deviceGroupsModalCtrl.isAddingDevice">
+      <form name="newDeviceForm">
+        <div class="form-group">
+          <div class="input-control">
+          <label class="control-label" for="deviceName">{{'server_assocs.disk_models.devices.add' | translate}}</label>
+          <input class="control-input" type="text" id="deviceName" ng-model="deviceGroupsModalCtrl.newDeviceName" required>
+        </div>
+        </div>
+
+        <div class="pull-right">
+          <button class="btn btn-secondary"
+            ng-click="deviceGroupsModalCtrl.cancelAdd()">
+            {{'installer.btn.cancel' | translate}}
+          </button>
+          <button class="btn btn-primary"
+            ng-disabled="newDeviceForm.$invalid"
+            ng-click="deviceGroupsModalCtrl.saveNewDevice()">
+            {{'installer.btn.save' | translate}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <div class="pull-right vertical-middle">
+    <button class="btn btn-secondary "
+      ng-click="deviceGroupsModalCtrl.cancel()">
+      {{'installer.btn.cancel' | translate}}
+    </button>
+    <button class="btn btn-primary"
+      ng-disabled="newDeviceGroupForm.$invalid || !deviceGroupsModalCtrl.validDevices"
+      ng-click="deviceGroupsModalCtrl.save()">
+      {{'server_assocs.disk_models.device_groups.btn.update' | translate}}
+    </button>
+  </div>
+</div>

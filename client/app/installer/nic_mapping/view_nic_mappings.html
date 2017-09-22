@@ -1,0 +1,18 @@
+<div ng-controller="NicMappingDrawerController as nicDrawerCtrl">
+  <div class="help-icon-header">
+    <help-popover class="pull-right"
+      template-url="'app/installer/nic_mapping/view_nic_mappings.help.html'">
+    </help-popover>
+  </div>
+  <editable-placeholder label="nic_mapping.placeholder.nic_maps"
+    is-set="this_data.length > 0"
+    add-action="nicDrawerCtrl.editNicMap()"
+    add-action-label="nic_mapping.btn.add">
+    <action-table table-data="this_data"
+      table-headers="config.table.tableHeaders"
+      actions-label="'installer.actions.header'"
+      config="config.table.config" add-action="nicDrawerCtrl.editNicMap"
+      edit-action="nicDrawerCtrl.editNicMap">
+    </action-table>
+  </editable-placeholder>
+</div>

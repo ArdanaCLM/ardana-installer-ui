@@ -1,0 +1,283 @@
+@import 'custom/variables';
+
+$ardana-form-field-height: 55px;
+$ardana-form-field-left-margin: 14px;
+$ardana-form-border-width: 1px;
+$ardana-form-field-label-top: 8px;
+$ardana-form-field-checkbox-size: 24px;
+
+// This helped: http://stackoverflow.com/questions/29351883/overlapping-border-hover
+.input-control {
+    background-color: $ardana-white;
+    margin: 0;
+    position: relative;
+
+    //  Split allowing two fields side-bys-side
+    &.input-control-sxs {
+        .input-control {
+            width: 50%;
+            display: inline-block;
+
+            &:not(:first-child) {
+                position: absolute;
+                margin-top: 0;
+                width: calc(50% + 1px);
+                margin-left: -1px;
+            }
+        }
+    }
+
+    .input-block {
+        border: 1px solid $ardana-form-border;
+        padding: 30px 14px 14px 14px;
+    }
+
+    &:not(:first-child) {
+        margin-top: -1px;
+    }
+
+    .control-label {
+        font-size: 14px;
+        font-weight: normal;
+        color: $ardana-black-light;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        padding-left: $ardana-form-field-left-margin;
+        padding-top: $ardana-form-field-label-top;
+        //z-index: 3; // This would fix BRUI-503 but makes help tooltips come back and they're broken
+    }
+
+    .error-message {
+        font-size: 14px;
+        font-weight: normal;
+        color: $ardana-red;
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        padding-right: $ardana-form-field-left-margin;
+        padding-top: $ardana-form-field-label-top;
+        right: 0;
+    }
+
+    &.input-box {
+        border: 1px solid $ardana-form-border;
+        height: $ardana-form-field-height;
+
+        .control-label {
+            font-size: 16px;
+            line-height: $ardana-form-field-height - $ardana-form-border-width;
+            position: relative;
+            padding-top: 0;
+            display: inline-block;
+        }
+
+        input[type='checkbox'] + label {
+            float: right;
+            margin-top: ($ardana-form-field-height - $ardana-form-border-width - $ardana-form-field-checkbox-size)/2;
+            margin-right: 15px;
+        }
+    }
+
+    input.control-input[type="text"], input.control-input[type="password"], input.control-input[type="number"], textarea {
+        font-size: 16px;
+        margin: 0;
+        padding-top: 25px;
+        padding-bottom: 8px;
+        padding-left: $ardana-form-field-left-margin - $ardana-form-border-width;
+        position: relative;
+        background-color: transparent;
+        height: $ardana-form-field-height;
+    }
+
+    textarea {
+        padding-top: 25px;
+        height: auto;
+
+        &[disabled] {
+            background-color: rgba(255,255,255,0.5);
+            opacity: 1;
+            border: 1px solid $ardana-form-border;
+        }
+
+        &.ng-dirty.ng-invalid {
+            background-color: transparent;
+        }
+    }
+
+    input.control-input[type="number"] {
+        padding-top: 20px;
+        height: $ardana-form-field-height;
+        padding-bottom: 0;
+    }
+
+    input.ng-dirty.ng-invalid {
+        z-index: 1;
+    }
+
+    input[type='text']:focus, input[type='text']:hover:focus, input[type='number']:focus, input[type='number']:hover:focus, input[type='password']:focus, input[type='password']:hover:focus {
+        z-index: 2;
+    }
+
+    input[type='text'][readonly] {
+        opacity: 1;
+    }
+
+    input[type='text'][disabled] {
+        background-color: rgba(255,255,255,0.5);
+        opacity: 1;
+        border: 1px solid $ardana-form-border;
+    }
+
+    textarea:focus, textarea:hover:focus {
+        z-index: 1;
+    }
+
+    .ardana-password-box > span {
+        top: 16px;
+        z-index: 2;
+    }
+
+    .btn-group.dropdown {
+        background-color: transparent;
+        border: 1px solid $ardana-form-border;
+        padding-top: 19px;
+
+        &.open {
+            border: 1px solid $ardana-turquoise;
+            z-index: 1;
+        }
+    }
+
+    selector .btn-group .btn.btn-select {
+        padding-left: $ardana-form-field-left-margin - $ardana-form-border-width;
+        background-color: transparent;
+        border: 0;
+        color: $ardana-black-light;
+
+        &:active {
+            background-color: transparent;
+            border: 0;
+            color: $ardana-black-light;
+        }
+    }
+
+    selector .btn-group.open .btn.btn-select {
+        border: 0;
+        background-color: transparent;
+        color: $ardana-black-light;
+    }
+}
+
+input[type='text'], input[type='text'][readonly], input[type='number'], input[type='password'], input[type='password']:hover, input[type='text']:hover, input[type='number']:hover, textarea, textarea:hover {
+    border: 1px solid $ardana-form-border;
+}
+
+// Helper clases when extra DIVs are used to ensure there is no double
+// border between rows in the form
+.input-control-wrapper:not(:first-child), .input-control-continue {
+    margin-top: -1px;
+}
+
+.numeric-input {
+    z-index: 10;
+    display: none;
+    width: auto;
+    height: auto;
+    position: absolute;
+    bottom: 6px;
+    margin-right: 12px;
+    cursor: pointer;
+    color: $ardana-black-light;
+    overflow: hidden;
+    font-size: 16px;
+    font-family: "GrommetIcons";
+    font-weight: normal;
+    text-transform: none;
+
+    &.numeric-input-plus {
+        right: 0;
+        &::before {
+          content: "a";
+        }
+    }
+
+    &.numeric-input-minus {
+        right: 32px;
+        &::before {
+          content: "d";
+        }
+    }
+}
+
+// Webkit only
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+    .numeric-input {
+        display: inline-block;
+    }
+
+    input.custom-spinner.control-input {
+        &::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    }
+
+    // This next bit of trickery is used to change the input
+    // text caret color, but not change the text color itself
+    // This is only possible on webkit
+    input[type="text"]:focus, input[type="number"]:focus {
+        color: $ardana-turquoise;
+        -webkit-text-fill-color:  $ardana-black-light;
+        z-index: 2;
+
+        &.ng-invalid:not(.ng-pristine) {
+            color: $ardana-red;
+        }
+    }
+}
+
+@-moz-document url-prefix() {
+    input[type=number].custom-spinner {
+        -moz-appearance:textfield;
+    }
+
+    .numeric-input {
+        display: inline-block;
+    }
+}
+
+.control-upload-btn {
+    color: $ardana-charcoal;
+    display: inline;
+    position: absolute;
+    right: 8px;
+    bottom: 2px;
+    z-index: 5;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.file-upload {
+    margin-top: 30px;
+    max-width: 560px;
+
+    .file-upload-btn {
+        margin-top: 20px;
+        float: right;
+    }
+}
+
+.input-control {
+    input[type="file"].input-file {
+        height: 0;
+        padding: 0;
+        border: 0;
+    }
+}

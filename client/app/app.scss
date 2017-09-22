@@ -1,0 +1,38 @@
+@import 'scss/custom/variables';
+@import 'scss/variables';
+
+$icon-font-path: "../lib/bootstrap-sass-official/assets/fonts/bootstrap/";
+$body-bg: $body-background-color;
+$font-family-sans-serif: 'Metric';
+$font-size-base: 16px;
+
+$tooltip-bg: #FFF;
+$tooltip-color: #000;
+$tooltip-opacity: 1.0;
+
+@import '../lib/bootstrap-sass-official/assets/stylesheets/bootstrap';
+
+@import 'scss/metric';
+@import 'scss/grommet-icons';
+@import 'scss/mixins';
+@import 'scss/common';
+
+@import 'scss/workflow';
+@import 'scss/drawer';
+@import 'scss/config-table';
+@import 'scss/confirm-modal';
+@import 'scss/radio-options';
+@import 'scss/editable-placeholder';
+@import 'scss/table';
+@import 'scss/selector';
+@import 'scss/help-popover';
+@import 'scss/password-box';
+@import 'scss/ardana-forms';
+
+@import 'scss/installer';
+@import 'scss/new-interface';
+@import 'scss/detail-template-form';
+
+@import 'scss/reset-firefox';
+
+@import 'scss/terminal-colours';

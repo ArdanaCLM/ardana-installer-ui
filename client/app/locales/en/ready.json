@@ -1,0 +1,6 @@
+{
+  "ready": {
+    "title": "Ready to deploy!",
+    "intro": "At this point you have configured your cloud and installed SLES for Ardana OpenStack as the operating system on all of your nodes (servers). Clicking \"Deploy\" will cause the Ardana OpenStack cloud to be installed on the nodes as you have defined them."
+  }
+}

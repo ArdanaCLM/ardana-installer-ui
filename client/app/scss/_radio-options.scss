@@ -1,0 +1,142 @@
+@import 'custom/variables';
+
+$radio-bg-color: #FFFFFF !default;
+$radio-border: 1px solid #CCCCCC !default;
+$radio-border-radius: 0px !default;
+$radio-check-color: $ardana-green !default;
+$radio-check-font-size: 30px !default;
+$radio-check-height: 80px !default;
+$radio-check-width: 80px !default;
+$radio-selected-border-color: #767676 !default;
+
+radio-options {
+    display: table;
+    margin: 10px 0;
+    width: 100%;
+
+    .option-list {
+        display: table-cell;
+        padding-right: 20px;
+        width: 50%;
+
+        .option-button {
+            background-color: $radio-bg-color;
+            border: $radio-border;
+            border-radius: $radio-border-radius;
+            cursor: pointer;
+            display: block;
+            margin: 8px 0 0;
+            padding: 0;
+            position: relative;
+            width: 100%;
+            outline: none;
+
+            &.locked {
+              opacity: 0.6;
+              pointer-events: none;
+
+              &.selected {
+                opacity: 1;
+              }
+            }
+
+            &:first-child {
+                margin-top: 0;
+            }
+
+            &.selected {
+                border-color: $radio-selected-border-color;
+
+                .option-labels {
+                    border-left-color: $radio-selected-border-color;
+                }
+
+                .option-checkbox {
+                    color: $radio-check-color;
+
+                    .ardana-checkmark-icon {
+                      visibility: visible;
+                    }
+                }
+
+            }
+
+            .option-checkbox {
+                color: transparent;
+                display: table-cell;
+                font-size: $radio-check-font-size;
+                height: $radio-check-height;
+                width: $radio-check-width;
+                min-width: $radio-check-width;
+                vertical-align: middle;
+
+                .ardana-checkmark-icon {
+                  visibility: hidden;
+                }
+            }
+
+            .option-labels {
+                border-left: $radio-border;
+                display: table-cell;
+                font: 600 16pt 'Metric';
+                padding: 0 30px;
+                text-align: left;
+                vertical-align: middle;
+
+                .option-desc {
+                    font: 15px 'Metric';
+                    line-height: 14pt;
+                }
+            }
+
+            &.active {
+                &:after, &:before {
+                    border: solid transparent;
+                    content: " ";
+                    height: 0;
+                    margin-right: -9px;
+                    pointer-events: none;
+                    position: absolute;
+                    right: -23px;
+                    top: 50%;
+                    width: 0;
+                    z-index: 1;
+                }
+
+                &:after {
+                    border-right-color: $fti_modal_bg_color;
+                    border-width: 10px;
+                    margin-top: -10px;
+                }
+
+                &:before {
+                    border-right-color: #999;
+                    border-width: 12px;
+                    margin-top: -12px;
+                }
+            }
+        }
+    }
+
+    .option-overview {
+        display: table-cell;
+        padding: 0 0 0 10px;
+        position: relative;
+        vertical-align: top;
+        width: 50%;
+
+        .option-text {
+            border-left: 1px solid #999;
+            position: relative;
+            height: 100%;
+            padding: 0 20px;
+            position: absolute;
+            top: 0px;
+
+            li {
+              line-height: 22px;
+              color: $ardana-black-light;
+            }
+        }
+    }
+}

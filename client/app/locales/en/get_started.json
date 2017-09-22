@@ -1,0 +1,17 @@
+{
+  "get_started": {
+    "p1": "You are about to install a new Ardana OpenStack cloud.",
+    "p2": "You will need to supply information about the servers, networks and storage that will make up your cloud. The Ardana lifecycle management services will then take care of deploying and configuring your new cloud for you.",
+    "p3": "Ardana OpenStack allows you great flexibility in how you install and configure your cloud. You express this in a set of configuration files that together make up the 'cloud configuration model'. You will create your first cloud configuration model in the following screens.",
+    "p4": "To help you get started Ardana OpenStack provides you with a number of examples that you can choose to base your own configuration on. On the next page you will be able to review these examples and choose which one best aligns with your needs.",
+    "p5": "A previous configuration model has been found and loaded. You can continue to use this or alternatively select a different example on the next page.",
+    "p8": "The steps you will complete to install your cloud are:",
+    "demoMode": "NOTE: Running in Demo Mode - some features have been disabled (such as deployment and auto-saving of the model). OS Installation will be simulated, if selected.",
+    "help": {
+      "p1": "Before you begin, be sure that you have read the minimum requirements document to be sure you have sufficient hardware. The requirements can be found on the <a href=\"http://www.docslinkgoeshere.com/version/hardware\" target=\"_blank\">Minimum Hardware Requirements</a> page on the Ardana OpenStack documentation site.",
+      "p1.1": "Before you begin, be sure that you have read the minimum requirements document to be sure you have sufficient hardware.",
+      "p2": "In addition to your hardware, you will need your networks set up, including required VLANs. See the <a href=\"http://www.docslinkgoeshere.com/version/supportedconfigs\" target=\"_blank\">Supported Configurations</a> page for more information.",
+      "p2.1": "In addition to your hardware, you will need your networks set up, including required VLANs."
+    }
+  }
+}

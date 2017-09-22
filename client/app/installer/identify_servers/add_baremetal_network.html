@@ -1,0 +1,103 @@
+<div class="control-section left-hand">
+  <div class="input-control">
+    <div class="control-label">{{'identify_servers.network.subnet' | translate}}</div>
+    <input name="subnet" class="control-input" type="text" ng-model="this_data.subnet" ardana-valid-ip-address required/>
+  </div>
+  <div class="input-control">
+    <div class="control-label">{{'identify_servers.network.netmask' | translate}}</div>
+    <input name="netmask" class="control-input" type="text" ng-model="this_data.netmask" ardana-valid-ip-address required/>
+  </div>
+
+  <div class="input-control" ng-if="config.metadata.requestPassword">
+    <span>
+      <div class="control-label required">
+        <span class="pointer" popover-trigger="mouseenter"
+          popover="{{'identify_servers.network.help.password' | translate}}">
+          {{'identify_servers.network.password' | translate}}
+        </span>
+      </div>
+      <password-box name="user_password" ng-model="this_data.user_password" ng-required="true" ></password-box>
+    </span>
+  </div>
+</div>
+
+<div class="clear-section section-margin"></div>
+
+<div class="control-section right-hand" ng-controller="NtpServersController as ntpCtrl">
+  <editable-placeholder label="identify_servers.ntp_server.title"
+    is-set="this_data.cloud['ntp-servers'].length > 0"
+    add-action="ntpCtrl.addNtpServer()"
+    add-action-label="identify_servers.ntp_server.btn.add">
+    <action-table
+      table-data="this_data.cloud['ntp-servers']"
+      table-headers="ntpCtrl.tableHeaders"
+      detail-template="ntpCtrl.ntpDetail"
+      config="ntpCtrl.config"
+      add-action="ntpCtrl.addNtpServer"
+      edit-action="ntpCtrl.editNtpServer"
+      actions-label="'installer.actions.header'">
+    </action-table>
+  </editable-placeholder>
+  <div class="row-form" ng-if="ntpCtrl.showNewForm">
+    <ng-form name="newNtpServerForm">
+      <div class="form-group">
+        <div class="input-control">
+          <label class="control-label" for="ntpServerName">{{'identify_servers.ntp_server.add' | translate}}</label>
+          <input class="control-input" type="text" ardana-valid-ip-address-or-hostname id="ntpServerName" ng-model="ntpCtrl.newNtpServer" required>
+        </div>
+      </div>
+      <div class="pull-right">
+        <button class="btn btn-secondary"
+          ng-click="ntpCtrl.cancelAdd()">
+          {{'installer.btn.cancel' | translate}}
+        </button>
+        <button class="btn btn-primary"
+          ng-disabled="newNtpServerForm.$invalid"
+          ng-click="ntpCtrl.saveNewNtpServer()">
+          {{'installer.btn.save' | translate}}
+        </button>
+      </div>
+    </ng-form>
+  </div>
+</div>
+
+
+
+<div class="control-section left-hand" ng-controller="NameServersController as nsCtrl">
+  <editable-placeholder label="identify_servers.name_server.title"
+                        is-set="this_data.cloud['dns-settings'] && this_data.cloud['dns-settings']['nameservers'] &&
+                        this_data.cloud['dns-settings']['nameservers'].length > 0"
+                        add-action="nsCtrl.addNameServer()"
+                        add-action-label="identify_servers.name_server.btn.add">
+    <action-table
+            table-data="this_data.cloud['dns-settings']['nameservers']"
+            table-headers="nsCtrl.tableHeaders"
+            detail-template="nsCtrl.nameServerDetail"
+            config="nsCtrl.config"
+            add-action="nsCtrl.addNameServer"
+            edit-action="nsCtrl.editNameServer"
+            actions-label="'installer.actions.header'">
+    </action-table>
+  </editable-placeholder>
+  <div class="row-form" ng-if="nsCtrl.showNewForm">
+    <ng-form name="newNameServerForm">
+      <div class="form-group">
+        <div class="input-control">
+            <label class="control-label" for="nameServerName">{{'identify_servers.name_server.add' | translate}}</label>
+            <input class="control-input" type="text" ardana-valid-ip-address-or-hostname id="nameServerName" ng-model="nsCtrl.newNameServer" required>
+          </div>
+      </div>
+      <div class="pull-right">
+        <button class="btn btn-secondary"
+                ng-click="nsCtrl.cancelAdd()">
+          {{'installer.btn.cancel' | translate}}
+        </button>
+        <button class="btn btn-primary"
+                ng-disabled="newNtpServerForm.$invalid"
+                ng-click="nsCtrl.saveNewNameServer()">
+          {{'installer.btn.save' | translate}}
+        </button>
+      </div>
+    </ng-form>
+  </div>
+</div>

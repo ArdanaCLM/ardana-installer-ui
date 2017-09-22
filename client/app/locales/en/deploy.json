@@ -1,0 +1,24 @@
+{
+  "deploy": {
+    "title": "Deploy",
+    "step": "Deploy your cloud",
+    "steps": {
+      "saveModel": "Saving Model",
+      "commit": "Preparing for deployment step 1 of 3 - Committing Model",
+      "validate": "Preparing for deployment step 2 of 3 - Validating Model",
+      "readyDeploy": "Preparing for deployment step 3 of 3 - Readying Deployment",
+      "deploy": "Deployment in progress"
+    },
+
+    "log-viewer": {
+      "fullLog": "Full Log",
+      "autoScroll": "Auto Scroll"
+    },
+
+    "demoMode": "In a non-demo system, proceeding to deploy would run through the deployment process, showing the deploy log streaming into the UI as it progresses.",
+
+    "help": {
+      "p1": "Here you may find a log of the tasks that have been completed while deploying your cloud."
+    }
+  }
+}

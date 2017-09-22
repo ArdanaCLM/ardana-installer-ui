@@ -1,0 +1,167 @@
+{
+  "server_assocs": {
+    "title": "Review and edit server roles",
+    "step": "Review and edit server roles",
+
+    "help": {
+      "p1": "In this step you will configure how the local disks on your servers are partitioned and formatted as well as how the network traffic is sent and received over the physical NICs.",
+      "p2": "This is defined by the server role. Each role maps to one \"disk model\" which describes the local disk configuration and one \"interface model\" which describes how network traffic maps to physical NICs.",
+      "p3": "You can use the interface model to set up NIC bonding."
+    },
+
+    "role": "Server role",
+    "disk_model": "Disk model",
+    "interface_model": "Interface model",
+
+    "disk_models": {
+      "add": "Add disk model",
+      "edit": "Edit disk model",
+      "placeholder": "Select disk model",
+      "already_exists": "This name is already used",
+
+      "name": "Disk model name",
+
+      "btn.add": "Add disk model",
+      "btn.commit": "Save disk model",
+
+      "drawer_help": {
+        "p1": "The disk model is used to specify how the directly attached disks on the server should be configured. It can also identify which service or service component consumes the disk, e.g. Swift object server, and provide service specific information associated with the disk.",
+        "p2": "Disks can be used as raw devices or as logical volumes and the disk model provides a configuration item for each. If the OS has been installed by the installer, then the root disk will already have been set up as a Volume Group with a single Logical Volume. This Logical volume will have been created on a partition identified, symbolically, in the configuration files as /dev/sda_root. This is due to the fact that different BIOS systems, (UEFI, Legacy) will result in different partition numbers on the root disk.",
+        "p3": "Disk models are identified by a name, which you will specify. The examples provide some typical configurations, although as this is an area that varies both on the services that are hosted on a server and the number of disks available. A disk model has device groups and volume groups.",
+        "p4": "Device groups are consumed by services. Volume groups are made up of logical volumes and logical volumes are mounted as file systems or consumed by services.",
+        "p5": "In the example configurations, we have assigned disk groups for Cinder and Swift storage, as well as for the compute node and controller nodes. However, you will specify your configurations on these screens."
+      },
+
+      "device_groups": {
+        "title": "Device groups",
+        "delete_msg": "Are you sure you want to delete this device group {{row.name}}?",
+        "delete_title": "Delete device group",
+        "add": "Add device group",
+        "edit": "Edit device group",
+
+        "name": "Device group name",
+        "consumer": "Consumer",
+        "consumer_usage": "Consumer Usage",
+        "consumer_attr": "Consumer Attributes",
+
+        "btn.add": "Add device group",
+        "btn.edit": "Edit device group",
+        "btn.del": "Delete device group",
+        "btn.update": "Save device group"
+      },
+
+      "devices": {
+        "title": "Devices",
+        "delete_msg": "Are you sure you want to delete this device?",
+        "delete_title": "Delete device",
+        "add": "New device",
+        "edit": "Edit device",
+
+        "btn.add": "Add device",
+        "btn.edit": "Edit device",
+        "btn.del": "Delete device"
+      },
+
+      "volume_groups": {
+        "title": "Volume groups",
+        "delete_msg": "Are you sure you want to delete this volume group {{row.name}}?",
+        "delete_title": "Delete volume group",
+        "add": "Add volume group",
+        "edit": "Edit volume group",
+
+        "name": "Volume group name",
+
+        "btn.add": "Add volume group",
+        "btn.edit": "Edit volume group",
+        "btn.del": "Delete volume group",
+        "btn.update": "Save volume group"
+      },
+
+      "physical_volumes": {
+        "title": "Physical Volumes",
+        "delete_msg": "Are you sure you want to delete this physical volume?",
+        "delete_title": "Delete physical volume",
+        "add": "New physical volume",
+        "edit": "Edit physical volume",
+
+        "name": "Physical volume name",
+
+        "btn.add": "Add physical volume",
+        "btn.edit": "Edit physical volume",
+        "btn.del": "Delete physical volume"
+      },
+
+      "logical_volumes": {
+        "title": "Logical Volumes",
+        "delete_msg": "Are you sure you want to delete this logical volume?",
+        "delete_title": "Delete logical volume",
+        "add": "New logical volume",
+        "edit": "Edit logical volume",
+
+        "name": "Logical volume name",
+        "size": "Size",
+        "mount": "Mount",
+        "fstype": "File system type",
+        "mkfs": "MKFS",
+
+        "btn.add": "Add logical volume",
+        "btn.edit": "Edit logical volume",
+        "btn.del": "Delete logical volume"
+      }
+    },
+
+    "interface_models": {
+      "add": "Add interface model",
+      "edit": "Edit interface model",
+      "create": "Create interface model",
+      "placeholder": "Select interface model",
+
+      "delete_confirmation": "Are you sure you want to delete?",
+      "invalid_yaml": "Must be valid YAML syntax",
+
+      "name": "Interface model name",
+      "device_name": "Alias",
+      "iface": "Bond devices",
+      "network_grp": "Network groups",
+      "bond_alias": "Device name",
+
+      "forced_grp": "Forced?",
+
+      "btn.add": "Add interface model",
+      "btn.commit": "Save interface model",
+
+      "drawer_help": {
+        "p1": "A server-role identifies an interface model which describes how its network interfaces are to be configured and used.",
+        "p2": "Networks are mapped onto specific network interfaces via an interface model, which describes the network devices that need to be created (bonds, ovs-bridges, etc) their properties, and the network groups that are associated with them.",
+        "p3": "An interface model acts like a template; it can define how some or all of the network-groups are to be mapped for a particular combination of physical NICs. However it is the service-elements on each server that determine which network_groups are required and hence which interfaces and networks will be configured.",
+        "p4": "Hence interface models can be shared between different server roles (say an API role and a database role which may still need different disk models) even though these will require a different subset of the network groups providing the servers have the same number of network interfaces.",
+        "p5": "Within an interface model, physical ports are identified either by their device name (eth0), or where there are multiple interfaces by a port name that is resolved via a NIC mapping. To allow different physical servers to share an interface model, the NIC mapping is defined as an (optional) property of each server.",
+        "p6": "Below is a snippet from net_interfaces.yml, where your configuration will be saved behind the scenes."
+      },
+
+      "interfaces": {
+        "title": "Interfaces and networks",
+        "delete_msg": "Are you sure you want delete this network setting?",
+        "delete_title": "Delete network setting",
+
+        "help": {
+          "devices": "Choose two interfaces to create a bond and give it a name."
+        },
+
+        "add": "Add interfaces and networks",
+        "edit": "Edit interfaces and networks",
+
+        "devices": "Devices",
+        "network_grp": "Network groups",
+        "device_name": "Bond device name",
+        "bond_options": "Bond options",
+        "name": "Alias",
+
+        "btn.add": "Add interfaces and networks",
+        "btn.edit": "Edit interfaces and networks",
+        "btn.del": "Delete interfaces and networks",
+        "btn.save": "Save"
+      }
+    }
+  }
+}

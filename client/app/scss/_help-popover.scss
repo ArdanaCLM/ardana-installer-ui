@@ -1,0 +1,50 @@
+help-popover {
+    .popover {
+        height: auto !important;
+        max-width: none !important;
+        width: 60% !important;
+        top: 55px;
+        border: 0;
+        box-shadow: 2px 2px rgba(0, 0, 0, 0.05);
+
+        &.bottom .arrow {
+          border-bottom-color: #FFFFFF;
+        }
+
+        .popover-inner .popover-content {
+            padding: 20px;
+
+            .help-popover {
+                .help-header {
+                    margin: 0 0 15px;
+                    padding-bottom: 20px;
+
+                    .title {
+                        font: 600 18px 'Metric';
+                        padding: 0;
+                        color: $ardana-black-light;
+                    }
+                }
+
+                .help-content {
+                    font: 17px 'Metric';
+                    line-height: 20px;
+                    max-height: 300px;
+                    overflow-y: auto;
+                    clear: both;
+
+                    P {
+                      color: $ardana-black-light;
+                        font-size: 17px;
+                        line-height: 20px;
+                    }
+                }
+            }
+        }
+    }
+    .popover-glyphicon {
+        &:focus {
+            outline: none;
+        }
+    }
+}

@@ -1,0 +1,19 @@
+<div class="control-section left-hand">
+    <div class="input-control">
+      <div class="control-label">{{'network_grps.name' | translate}}</div>
+      <input name="ngrp_name" class="control-input" type="text"
+        ng-model="this_data.name" readonly/>
+    </div>
+    <div class="input-control">
+      <div class="control-label">
+        {{'network_grps.tags' | translate}}
+        <span class="error-message" role="alert"
+          ng-show="drawerForm.ngrp_tags.$error.yaml">
+          {{'network_grps.error.valid_yaml' | translate}}
+        </span>
+      </div>
+      <textarea name="ngrp_tags" class="control-input" type="text"
+        rows="10" ng-model="this_data.tags" yamlize>
+      </textarea>
+    </div>
+</div>

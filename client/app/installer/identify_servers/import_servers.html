@@ -1,0 +1,83 @@
+<div class="csv-import" ng-controller="ImportServersController as ctrl">
+    <div class="container-fluid get-started section" ng-show="ctrl.wizard.step === -1">
+        <h2 ng-bind-html="'identify_servers.import.loading' | translate"></h2>
+    </div>
+    <div class="container-fluid get-started section" ng-show="ctrl.wizard.step === 0">
+    <div class="row">
+        <div class="col-sm-8 col-xs-12">
+            <p ng-bind-html="'identify_servers.import.introduction.p1' | translate"></p>
+            <p ng-bind-html="'identify_servers.import.introduction.p2' | translate"></p>
+            <p ng-bind-html="'identify_servers.import.introduction.p3' | translate"></p>
+            <p ng-bind-html="'identify_servers.import.introduction.p4' | translate"></p>
+            <!--<p ng-bind-html="'identify_servers.import.doc_link' | translate"></p>-->
+            <div class="file-upload">
+                <div class="input-control">
+                    <input fileread="csv_file" class="input-file invisible" type="file" id="csv_file" name="csv_file">
+                    <label class="control-label">{{'identify_servers.import.csv_field' | translate}}</label>
+                    <input class="control-input" ng-class="{'has-value' : csv_file.name}" placeholder="{{'identify_servers.import.no_file' | translate}}" required class="input-control input-file" type="text" disabled="true" ng-model="csv_file.name">
+                </div>
+                <label class="file-upload-btn btn btn-primary" for="csv_file">{{'identify_servers.import.choose' | translate}}</label>
+            </div>
+    </div>
+        <div class="col-sm-4 col-xs-12">
+            <p ng-if="required_fields && required_fields.length" ><b>{{'identify_servers.import.required_fields' | translate}}</b></p>
+            <ul ng-if="required_fields && required_fields.length" class="field_list">
+                <li ng-repeat="f in required_fields">{{f.label | translate}}</li>
+            </ul>
+            <p ng-if="optional_fields && optional_fields.length"><b>{{'identify_servers.import.optional_fields' | translate}}</b></p>
+            <ul ng-if="optional_fields && optional_fields.length" class="field_list">
+                <li ng-repeat="f in optional_fields">{{f.label | translate}}</li>
+            </ul>
+        </div>
+    </div>
+    </div>
+    <div class="container-fluid get-started section" ng-show="ctrl.wizard.step === 1">
+        <div class="section-header">{{'identify_servers.import.review.title' | translate}}</div>
+        <div class="section-body">
+            <p ng-bind-html="'identify_servers.import.review.p1' | translate"></p>
+        </div>
+        <div class="section-body import-summary">
+            <table>
+                <thead>
+                <tr>
+                    <td>{{'identify_servers.import.import_row' | translate}}</td>
+                    <td ng-repeat="col in table.header">{{col.field.label | translate}}</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="row in table.rows track by $index">
+                    <td class="import-row-status" ng-class="{'import-error': !row.valid}">
+                        <span class="glyphicon" ng-class="{'glyphicon-ok-circle' : row.valid, 'glyphicon-remove-circle' : !row.valid}"></span>
+                    </td>
+                    <td ng-repeat="col in row.data track by $index" ng-class="{'import-error': !col.error}">
+                        <div class="cell-value" ng-if="!col.error">{{col.value || '--'}}</div>
+                        <div class="cell-value pointer" ng-class="{'import-error': col.error, 'empty': !col.value}" ng-if="col.error"
+                              popover-trigger="mouseenter"
+                              popover="{{'identify_servers.import.errors.' + col.error | translate}}">{{col.value || '--'}}</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="container-fluid get-started section" ng-show="ctrl.wizard.step === 2">
+        <div class="section-header">{{'identify_servers.import.parse_error.title' | translate}}</div>
+        <div class="section-body">
+            <p ng-bind-html="'identify_servers.import.parse_error.p1' | translate"></p>
+            <p ng-bind-html="'identify_servers.import.parse_error.p2' | translate"></p>
+            <!--<p ng-bind-html="'identify_servers.import.doc_link' | translate"></p>-->
+        </div>
+    </div>
+    <div class="container-fluid get-started section" ng-show="ctrl.wizard.step === 3">
+        <div class="section-header">{{'identify_servers.import.fields_error.title' | translate}}</div>
+        <div class="section-body">
+            <p ng-bind-html="'identify_servers.import.fields_error.p1' | translate"></p>
+
+            <ul ng-if="missing_fields">
+                <li ng-repeat="field in missing_fields">{{field.label | translate}}</li>
+            </ul>
+            <p ng-bind-html="'identify_servers.import.fields_error.p2' | translate"></p>
+            <!--<p ng-bind-html="'identify_servers.import.doc_link' | translate"></p>-->
+        </div>
+    </div>
+</div>

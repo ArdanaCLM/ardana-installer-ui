@@ -1,0 +1,83 @@
+$icon-font-path: "../fonts/grommet-icons/";
+
+@font-face {
+    font-family: "GrommetIcons";
+    src: url("#{$icon-font-path}grommet-icons.woff") format("woff");
+}
+
+.ardana-icon {
+  height: 50px;
+  width: 50px;
+  color: $ardana-black;
+  overflow: hidden;
+  font-size: 24px;
+  font-family: "GrommetIcons";
+  font-weight: normal;
+  text-transform: none;
+
+  &.ardana-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  &.ardana-help-icon {
+    &::before {
+      content: "L";
+    }
+  }
+
+  &.ardana-more-icon {
+    &::before {
+      content: "c";
+    }
+  }
+
+  &.ardana-plus-icon {
+    &::before {
+      content: "a";
+    }
+  }
+
+  &.ardana-search-icon {
+    &::before {
+      content: "G";
+    }
+  }
+
+
+}
+
+.ardana-checkmark-icon {
+  background: url("data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 24 24'><g fill='%2301A982'><polygon points='8.6377001,20.0625 0.78906,12.1352997 2.2109399,10.7290001 8.6377001,17.2206993 21.7891006,3.93799 23.2108994,5.3442001 	'/></g></svg>") no-repeat;
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+
+  &.ardana-tick-green {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+  }
+}
+
+.ardana-status-icon {
+  width: 42px;
+  height: 42px;
+  display: block;
+
+  &.ardana-status-error {
+    background: url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 30 30'><path fill='%23FF454F' d='M15,27L3,15L15,3l12,12L15,27z M19.7,11.7l-1.4-1.4L15,13.6l-3.3-3.3l-1.4,1.4l3.3,3.3l-3.3,3.3l1.4,1.4 l3.3-3.3l3.3,3.3l1.4-1.4L16.4,15L19.7,11.7z'/></svg>") no-repeat;
+  }
+
+  &.ardana-status-warning {
+    background: url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 30 30'><path fill='%23FFD042' class='st4' d='M14.9,2l-12,22h24L14.9,2z M16,19c0,0.6-0.4,1-1,1l0,0c-0.6,0-1-0.4-1-1l0,0c0-0.6,0.4-1,1-1l0,0 C15.6,18,16,18.4,16,19L16,19z M16,17h-2v-7h2V17z'/></svg>") no-repeat;
+  }
+
+}
+
+.ardana-password-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  background: url("data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 24 24'><g id='Black_Icon'>  <path fill='%23333333' d='M11.9995003,21C7.0479002,21,3.2002001,18.2070007,0.2373,12.4624004L-0.00049,12l0.23779-0.4624004 C3.2002001,5.7930002,7.0479002,3,11.9995003,3c4.9517002,0,8.7992992,2.7930002,11.7621994,8.5375996L24,12l-0.2383003,0.4624004 C20.7987995,18.2070007,16.9512005,21,11.9995003,21z M2.23682,12c2.5502799,4.7089996,5.7475796,7,9.7626801,7 c4.0142002,0,7.2133999-2.2910004,9.7621994-7c-2.5487995-4.7090001-5.7479992-7-9.7621994-7 C7.9843998,5,4.7870998,7.2909999,2.23682,12z M11.9995003,17c-2.7280006,0-4.9477005-2.2432003-4.9477005-5 s2.2196999-5,4.9477005-5C14.7265997,7,16.9473,9.2432003,16.9473,12S14.7265997,17,11.9995003,17z M11.9995003,9 c-1.6367006,0-2.9687004,1.3457003-2.9687004,3s1.3319998,3,2.9687004,3c1.6371994,0,2.9692993-1.3457003,2.9692993-3 S13.6366997,9,11.9995003,9z'/></g></svg>") no-repeat;
+}

@@ -1,0 +1,94 @@
+@import 'custom/variables';
+
+selector {
+
+    .btn-group {
+        width: 100%;
+
+        &.open .btn.btn-select {
+            box-shadow: none;
+
+            &:active, &:focus, &:hover {
+                background: #fff;
+                box-shadow: none;
+                -moz-box-shadow: none;
+                -webkit-box-shadow: none;
+                color: #000;
+                outline: none;
+                border: 1px solid $ardana-turquoise;
+            }
+        }
+
+        .btn.btn-select {
+            background-color: #ffffff;
+            border: 1px solid #FFFFFF;
+            border-radius: 0;
+            color: $ardana-black-light;
+            font: 16px 'Metric';
+            height: 34px;
+            padding: 0 10px;
+            margin: 3px 0;
+            text-align: left;
+            width: 100%;
+
+            &:active, &:focus, &:hover, &:active:focus, &:active:hover {
+                // Ensure common button states don't override btn-select default state
+                background-color: #ffffff;
+                border: 1px solid #FFFFFF;
+                color: $ardana-black-light;
+                outline: none;
+            }
+
+            .down-arrow {
+                height: 16px;
+                width: 25px;
+                background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAOhJREFUSA3tksENgzAMRUmrrlApuTAAxxw6QvfojYmYKtw6QpUDI1Rq6o8MStsAMT1UlbAUcMB+33FcFJttHfifDlhrT7QO31YMBlgDZw8HH5RSF3JLY0zrvX8MAZI3F1gT66y17ohz2zGgDSFc6UdF+5oDJWwUidMDXoFFfgtAfwJUjMppX7KI6CQJeOOcu48CcNaKzMFfBNaILME/BCQiOfCkQI5ILhwshceUpUAcG0/LeKEpzqwAEhIiRTSKs3Dk92MKZ8rep4vgR57zRTiYiwIIikVo29HKgiNXZGgXt0yUtwX/tgNPQqatJ1aBLFMAAAAASUVORK5CYII=) no-repeat right 4px center;
+            }
+        }
+
+        .dropdown-menu {
+            border-radius: 0;
+            margin-top: -4px;
+            min-width: 100%;
+
+            li[role='menuitem'] a {
+                padding: 3px 10px;
+
+                &:hover {
+                    color: $ardana-white;
+                    background-color: $ardana-green;
+                }
+            }
+        }
+    }
+
+    .selector-placeholder {
+        color: #cccccc;
+    }
+}
+
+.control-section, .action-header {
+    selector {
+        .btn-group {
+            .btn.btn-select {
+                border: 1px solid #e5e8e8;
+                margin: 0;
+                padding-left: 20px;
+            }
+
+            .dropdown-menu {
+                margin-top: -1px;
+            }
+        }
+    }
+}
+
+.action-header {
+    selector {
+        .btn-group {
+            .btn.btn-select {
+                border: 1px solid #cccccc;
+            }
+        }
+    }
+}

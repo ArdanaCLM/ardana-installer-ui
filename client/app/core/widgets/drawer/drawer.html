@@ -1,0 +1,43 @@
+<div class="modal-drawer" ng-class="{active: active, 'no-tabbing': !active}">
+  <div class="header-drawer">
+    <div ng-if="!config.wizard" class="vertical-middle">{{config.title | translate}}</div>
+    <div ng-if="config.wizard" class="vertical-middle">{{config.wizard.title | translate}}</div>
+  </div>
+  <div class="body-drawer">
+    <form name="drawerForm" novalidate>
+      <div ng-if="config && config.template" ng-include="config.template"></div>
+    </form>
+  </div>
+  <div class="footer-drawer" ng-if="!config.wizard">
+    <div class="pull-right vertical-middle">
+      <button class="btn btn-secondary" ng-click="cancel()">
+        {{config.cancelLabel | translate}}
+      </button>
+      <button class="btn"
+        ng-class="{'btn-default' : !config.showContinue, 'btn-secondary' : config.showContinue}"
+        ng-click="commit()" ng-disabled="drawerForm.$invalid">
+        {{config.commitLabel | translate}}
+      </button>
+      <button class="btn btn-default"
+        ng-click="continue()" ng-disabled="drawerForm.$invalid" ng-if="config.showContinue">
+        {{config.continueLabel | translate}}
+      </button>
+    </div>
+  </div>
+  <div class="footer-drawer" ng-if="config.wizard">
+    <div class="pull-right vertical-middle">
+      <button class="btn btn-secondary" ng-click="cancel()">
+        {{config.cancelLabel | translate}}
+      </button>
+      <button class="btn"
+              ng-class="{'btn-default' : !config.wizard.buttons.next, 'btn-secondary' : config.wizard.buttons.next}"
+              ng-click="previous()" ng-if="config.wizard.buttons.previous">
+        {{config.wizard.buttons.previous | translate}}
+      </button>
+      <button class="btn btn-default"
+              ng-click="next()" ng-disabled="drawerForm.$invalid" ng-if="config.wizard.buttons.next">
+        {{config.wizard.buttons.next | translate}}
+      </button>
+    </div>
+  </div>
+</div>

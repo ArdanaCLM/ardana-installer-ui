@@ -1,0 +1,76 @@
+<table class="table action-table table-as-header">
+  <thead>
+    <tr ng-if="(config && config.title) || !noCrud || headerTemplate">
+      <th colspan="{{colSpan}}" class="action-header">
+        <span ng-if="config && config.title" class="title pull-left">
+          {{config.title | translate}}
+        </span>
+        <span class="pull-right">
+          <span ng-if="headerTemplate" ng-include="headerTemplate"></span>
+          <button ng-if="!noCrud" ng-click="addAction()"
+            class="btn btn-secondary btn-inline btn-with-sep">
+            {{btnLabels.add | translate}}
+          </button>
+        </span>
+      </th>
+    </tr>
+  </thead>
+</table>
+<table class="table action-table table-as-content">
+  <thead>
+    <tr>
+      <th ng-if="selectable"></th>
+      <th ng-if="showExpandIcon"></th>
+      <th ng-repeat="header in tableHeaders" class="{{header.size}}" ng-class="{'sorted' : header.sorted}">
+        {{header.label | translate}}
+      </th>
+      <th ng-if="(actions && actions.length) || !noCrud">
+        <span ng-if="actionsLabel">{{actionsLabel | translate}}</span>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat-start="(rowIndex, row) in tableData"
+      ng-class="{'warning': row._selected}">
+      <td ng-if="selectable" class="select">
+        <input id="action-table-row-selector-{{$index}}" type="checkbox" ng-model="row._selected">
+        <label for="action-table-row-selector-{{$index}}"></label>
+      </td>
+      <td ng-if="showExpandIcon" class="expand">
+        <a class="btn btn-sm btn-link expander" ng-click="tableCtrl.toggleDetails(row)">
+          <span class="glyphicon"
+            ng-class="{'glyphicon-chevron-right': !row._expanded, 'glyphicon-chevron-down': row._expanded }"></span>
+        </a>
+      </td>
+      <td ng-repeat="header in tableHeaders" ng-class="header.size">
+        <span ng-if="header.arrayKey">
+          <span ng-if="header.translate">
+            {{row | multiValue:header.arrayKey:header.key:header.sep | translate | blankPlaceholder}}
+          </span>
+          <span ng-if="!header.translate">
+            {{row | multiValue:header.arrayKey:header.key:header.sep | blankPlaceholder}}
+          </span>
+        </span>
+        <span ng-if="!header.arrayKey">
+          <span ng-if="header.translate">
+            {{row | multiKey:header.key:header.sep | translate | blankPlaceholder}}
+          </span>
+          <span ng-if="!header.translate">
+            {{row | multiKey:header.key:header.sep | blankPlaceholder}}
+          </span>
+        </span>
+      </td>
+      <td ng-if="(actions && actions.length) || !noCrud" action-col>
+        <action ng-repeat="action in actions"
+          callback="action.callback" data="row">
+          {{action.label | translate}}
+        </action>
+      </td>
+    </tr>
+    <tr ng-repeat-end ng-if="detailTemplate" class="detail-row" ng-class="{expanded: row._expanded}">
+      <td class="detail" colspan="{{colSpan}}">
+        <ng-include src="detailTemplate"></ng-include>
+      </td>
+    </tr>
+  </tbody>
+</table>

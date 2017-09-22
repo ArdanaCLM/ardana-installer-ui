@@ -1,0 +1,544 @@
+@import 'custom/variables';
+
+//
+// Containers
+//
+.static-container {
+    background-color: #FFFFFF;
+    padding: 10px 20px;
+
+    &.bordered-container {
+        border: 1px solid #CCCCCC;
+        padding: 15px;
+    }
+
+    .container-heading {
+        border-bottom: 1px solid #D9D9D9;
+        font: 600 18px 'Metric';
+        line-height: 24px;
+        margin-bottom: 6px;
+        padding-bottom: 4px;
+    }
+
+    .dl-horizontal {
+        margin-bottom: 0;
+        padding-left: 0;
+        font-size: 16px;
+        color: $ardana-black-light;
+        font-family: 'Metric';
+
+        dt {
+            font-family: 'Metric';
+            font-weight: 600;
+            line-height: 24px;
+            text-align: left;
+            text-transform: uppercase;
+
+            .required {
+              color: #D7410B;
+            }
+        }
+
+        dd {
+            font-family: 'Metric';
+            line-height: 24px;
+            font-weight: normal;
+        }
+    }
+}
+
+//
+// Controls/Inputs
+//
+$input-border-color: #e5e8e8;
+$input-border: 1px solid $input-border-color;
+$input-border-color-hover: $ardana-charcoal;
+$input-border-color-focus: $ardana-turquoise;
+$input-border-color-checked: $ardana-green;
+$invalid-msg-color: #d7410b !default;
+$invalid-msg-color-bg: #f7d7d7 !default;
+
+input[type=checkbox] {
+    display: none;
+
+    + label {
+        margin: 5px 5px 7px 1px;
+        height: 24px;
+        width: 24px;
+        vertical-align: middle;
+        display: inline-block;
+        outline: $input-border;
+        outline-width: 2px;
+
+        &:hover, &:hover:focus {
+            outline-color: $ardana-turquoise;
+        }
+
+        &:focus::before {
+            outline-color: $ardana-turquoise;
+        }
+    }
+
+    &[disabled] + label:hover, &[disabled] + label:hover:focus {
+      outline-color: $input-border-color;
+    }
+
+    &:checked + label, &:checked + label:focus {
+        outline-color: $input-border-color-checked;
+        background: url("data:image/svg+xml;utf8,<svg width='24' height='24' style='background-color: white;' xmlns='http://www.w3.org/2000/svg'><g><rect x='7' y='7' width='10' height='10' fill='%2301A982'/></g></svg>") no-repeat;
+    }
+
+    &:focus {
+        border: none;
+        outline: none;
+    }
+}
+
+input {
+    &[type='text'], &[type='number'], &[type='password'] {
+        border: $input-border;
+        font: 17px 'Metric';
+        height: 34px;
+        outline: none;
+        padding-left: 20px;
+        width: 100%;
+
+        &:hover {
+            border-color: $input-border-color-hover;
+        }
+
+        &:focus, &:hover:focus {
+            border-color: $input-border-color-focus;
+        }
+
+        &:disabled, &[readonly] {
+            opacity: 0.5;
+            border: $input-border;
+        }
+
+        &.ng-dirty.ng-invalid {
+            border-color: $ardana-red !important;
+        }
+    }
+
+    // TODO: Fix me!
+    &::-webkit-input-placeholder, &:-moz-placeholder,
+    &:-ms-input-placeholder {
+        padding-left: 20px;
+    }
+}
+
+input[type='file'].input-file, input[type='text'].input-file {
+    border: 1px solid $ardana-charcoal;
+    background-color: $ardana-white;
+    color: $ardana-charcoal;
+    padding: 4px;
+    width: 65%;
+    opacity: 1;
+
+    &.invisible {
+        visibility: hidden;
+    }
+
+    &.has-value {
+        color: $ardana-black;
+    }
+
+    + label {
+        margin-right: 10px;
+        vertical-align: inherit;
+    }
+}
+
+textarea {
+    border: $input-border;
+    outline: none;
+    min-height: 100px;
+    padding: 5px 20px;
+    width: 100%;
+    resize: vertical;
+
+    &:disabled, &[readonly] {
+        opacity: 0.5;
+    }
+
+    &:hover {
+        border-color: $input-border-color-hover;
+    }
+
+    &:focus, &:hover:focus {
+        border-color: $input-border-color-focus;
+    }
+
+    &:disabled, &[readonly] {
+        opacity: 0.5;
+        border: $input-border;
+    }
+
+    &.ng-dirty.ng-invalid {
+        background-color: #f7d7d7;
+        border-color: $ardana-red !important;
+    }
+}
+
+label,
+.control-label {
+    font: 600 18px 'Metric';
+    margin: 10px 0 5px;
+
+    &.disabled {
+        color: #d9d9d9;
+    }
+
+    &.required:after {
+        content: ' *';
+        color: #D7410B;
+    }
+
+    .error-message {
+        font: 14px 'Metric';
+        font-style: italic;
+        margin-left: 20px;
+    }
+}
+
+.control-range {
+    display: table;
+
+    .control-range-label {
+        display: table-cell;
+        width: 1%;
+        text-align: center;
+        padding: 0 10px;
+    }
+
+    input {
+        display: table-cell;
+    }
+}
+
+.clear-section {
+    clear: both;
+
+    &.section-margin {
+        margin-bottom: 30px;
+    }
+}
+
+.control-section {
+    width: 48%;
+    display: inline-block;
+    vertical-align: top;
+
+    &.right-hand {
+        float: right;
+    }
+
+    &.left-hand {
+        float: left;
+    }
+
+    &.full-width {
+        width: 100%;
+    }
+}
+
+.error-message {
+    color: $invalid-msg-color;
+}
+
+//
+// Buttons
+//
+$btn-primary-bg-color: $ardana-green;
+$btn-primary-color: $ardana-white;
+$btn-primary-bd-color: $ardana-green;
+$btn-secondary-bg-color: $ardana-white;
+$btn-secondary-color: $ardana-charcoal;
+$btn-secondary-bd-color: $ardana-charcoal;
+$btn-default-bg-color: $ardana-white;
+$btn-default-color: #666666;
+$btn-default-bd-color: $ardana-green;
+$btn-disabled-bg-color: $ardana-green;
+$btn-disabled-color: $ardana-white;
+
+button.btn, label.btn {
+    border-radius: 0px;
+    font: 600 17px 'Metric';
+    height: 32px;
+    line-height: 28px;
+    padding: 0 25px;
+    background-color: #DDDDDD;
+    border: 2px solid $ardana-charcoal;
+    margin: 2px;
+    text-transform: uppercase;
+
+    white-space: normal; // overriding nowrap that comes from bootstrap, breaks text alignment for dropdowns
+
+    &:hover {
+        outline: 1px solid $ardana-charcoal;
+        color: $ardana-black;
+        outline-offset: 0;
+    }
+
+    .glyphicon {
+        font-size: 13px;
+        padding-right: 2px;
+        top: 0;
+    }
+
+    &.btn-inline {
+        .glyphicon {
+            font-size: 10px;
+        }
+
+        &.btn-with-sep {
+          margin-left: 18px;
+        }
+    }
+
+    &.btn-primary, &.btn-primary[disabled], &.btn-primary:active:focus, &.btn-primary:active:hover {
+        background-color: $btn-primary-bg-color;
+        color: $btn-primary-color;
+        border-color: transparent;
+        &:hover, &:focus {
+            outline: 1px solid $btn-primary-bd-color;
+        }
+    }
+
+    &.btn-secondary, &.btn-secondary[disabled], &.btn-secondary:active:focus, &.btn-secondary:active:hover {
+        border-color: $btn-secondary-bd-color;
+        background-color: $btn-secondary-bg-color;
+        color: $btn-secondary-color;
+        &:hover, &:focus {
+            outline: 1px solid $btn-secondary-bd-color;
+        }
+    }
+
+    &.btn-default, &.btn-default[disabled], &.btn-default:active:focus, &.btn-default:active:hover {
+        border-color: $btn-default-bd-color;
+        background-color: $btn-default-bg-color;
+        color: $btn-default-color;
+        &:hover, &:focus {
+            outline: 1px solid $btn-default-bd-color;
+        }
+    }
+
+    &.btn-narrow {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    &:active {
+        box-shadow: none;
+        outline: none;
+    }
+
+    &[disabled] {
+        opacity: 0.25;
+        &[disabled]:hover {
+            outline: none;
+        }
+    }
+
+    &:not(:last-child) {
+        margin-right: 20px;
+    }
+}
+
+// Remove white button background when used in an inline form edit box
+.row-form, .embedded-form {
+  button.btn.btn-secondary {
+    background-color: transparent;
+  }
+}
+
+//
+// Modal
+//
+$modal-body-bg-color: white !default;
+$modal-lg-body-bg-color: #F2F2F2;
+$modal-body-hindent: 40px !default;
+$modal-body-vindent: 20px !default;
+$modal-header-bg-color: white !default;
+$modal-header-color: #666666 !default;
+$modal-header-height: 40px !default;
+$modal-header-hindent: 20px !default;
+$modal-footer-height: 60px !default;
+.modal {
+    .modal-dialog.modal-lg, .modal-dialog.modal-sm {
+        .modal-content {
+            border-radius: 0;
+            box-shadow: 6px 6px rgba(0, 0, 0, 0.05);
+
+            .modal-header {
+                padding: 0 $modal-header-hindent;
+                background-color: $modal-header-bg-color !important;
+                color: $modal-header-color !important;
+                border: none;
+                font: 600 14pt 'Metric';
+                height: $modal-header-height;
+            }
+            .modal-body {
+                background-color: $modal-body-bg-color !important;
+                border-top: 1px solid #CCCCCC;
+                overflow-y: auto;
+                padding: $modal-body-vindent $modal-body-hindent;
+                font-size: 17px;
+            }
+            .modal-footer {
+                border-top: 1px solid #CCCCCC;
+                margin: 0;
+                padding: 10px 18px;
+                & > div {
+                    float: none !important;
+                    top: 0;
+                    button:first-of-type {
+                        float: left !important;
+                    }
+                    button:nth-of-type(2) {
+                        float: right !important;
+                    }
+                }
+            }
+        }
+    }
+
+    .modal-dialog.modal-lg {
+        height: calc(100% - 60px);
+        width: calc(100% - 60px);
+        max-width: calc(#{$max-width} - 60px);
+        max-height: calc(#{$max-height} - 60px);
+
+        .modal-content {
+            height: 100%;
+
+            .modal-body {
+                height: calc(100% - #{$modal-header-height} - #{$modal-footer-height});
+                background-color: $modal-lg-body-bg-color !important;
+            }
+
+            .modal-footer {
+                height: $modal-footer-height;
+            }
+        }
+    }
+}
+
+//
+// Notifications
+//
+.notification {
+    background-color: #ffffff;
+    display: table;
+    width: 100%;
+    box-shadow: 2px 2px rgba(0, 0, 0, 0.05);
+
+    .notification-icon {
+        display: table-cell;
+        height: 100%;
+        width: 1%;
+        padding: 0 15px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .notification-text {
+        display: table-cell;
+        padding: 15px;
+        vertical-align: middle;
+        line-height: 22px;
+    }
+
+    .notification-actions {
+        display: table-cell;
+        padding: 15px;
+        text-align: right;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .notification-wait {
+        display: table-cell;
+        padding: 15px;
+        text-align: right;
+        vertical-align: middle;
+    }
+}
+
+//
+// Utils
+//
+.example-code {
+    padding-left: 20px;
+}
+
+.margin-bottom {
+    margin-bottom: 10px;
+}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+.section-body {
+  .row.row-plain {
+    border: 0;
+    margin-bottom: 20px;
+    margin-left: 0;
+    margin-right: 0;
+
+    .static-container {
+      padding: 15px;
+      box-shadow: 2px 2px rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.popover {
+    border-radius: 0px;
+    font-size: 15px;
+    box-shadow: 6px 6px rgba(0, 0, 0, 0.05);
+
+    &.popover-sm {
+        max-width: 175px;
+    }
+}
+
+.vertical-middle {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.dropdown-menu {
+    border: 2px solid rgba(0, 0, 0, .05);
+    box-shadow: 2px 2px rgba(0, 0, 0, 0.05);
+}
+
+b {
+    font-weight: 600;
+}
+
+dt {
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .dl-horizontal dt {
+    width: 200px;
+    }
+  .dl-horizontal dd {
+    margin-left: 220px;
+  }
+}
+
+.required-field {
+  color: #D7410B;
+}

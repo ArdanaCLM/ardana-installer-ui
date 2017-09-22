@@ -1,0 +1,64 @@
+<div ng-controller="InstallOsProgressController as osCtrl">
+  <div ng-if="ic.installingOs" class="notification">
+    <div class="notification-icon warning">
+      <span class="ardana-status-icon ardana-status-warning"></span>
+    </div>
+    <div class="notification-text">
+      {{'install_os_progress.wait1' | translate}}<br/>
+      {{'install_os_progress.wait2' | translate}}
+    </div>
+    <div class="notification-wait">
+      <img ng-src="images/loading.gif">
+    </div>
+  </div>
+  <div ng-if="ic.installOsError && !ic.installingOs" class="notification">
+    <div class="notification-icon error">
+      <span class="ardana-status-icon ardana-status-error"></span>
+    </div>
+    <div class="notification-text">
+      {{'installer.error.title' | translate}}:<br/>
+      {{'install_os_progress.error' | translate}}
+    </div>
+    <div class="notification-actions">
+      <button class="btn btn-primary btn-no-text-wrap" ng-click="ic.installOs()">
+        {{'install_os_progress.btn.try_again' | translate}}
+      </button>
+    </div>
+  </div>
+  <table class="table action-table">
+    <thead>
+      <tr>
+        <th ng-repeat="header in osCtrl.tableHeaders" ng-class="{'sorted' : header.sorted}">
+          {{header.label | translate}}
+        </th>
+        <th>{{'installer.actions.header' | translate}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="(rowIndex, row) in osCtrl.data.servers">
+        <td>
+          {{row.id || '--'}}
+        </td>
+        <td>
+          {{row['ip-addr'] || '--'}}
+        </td>
+        <td>
+          <span ng-if="row['is-deployer']">
+            {{'identify_servers.servers.no_install' | translate}}
+          </span>
+          <span ng-if="!row['is-deployer']">{{(row._status || '--') | translate}}</span>
+        </td>
+        <td action-col>
+          <action callback="osCtrl.editServer" data="row"
+            action-disabled="row._status !== 'status.error' && row._status !== 'status.pwr_error'">
+            {{'identify_servers.servers.btn.edit' | translate}}
+          </action>
+          <action callback="osCtrl.removeServer" data="row"
+            action-disabled="row._status !== 'status.error' && row._status !== 'status.pwr_error'">
+            {{'identify_servers.servers.btn.delete' | translate}}
+          </action>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

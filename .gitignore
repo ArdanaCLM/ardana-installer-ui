@@ -1,0 +1,16 @@
+/config.yml
+.DS_Store
+.idea
+npm-debug.log
+ardana-input-model
+node_modules
+*.css
+lib
+.coverage-karma/
+client/index.html
+logs/
+user_model/
+*.iml
+*.tar.gz
+tmp/
+reports/

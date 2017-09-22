@@ -1,0 +1,12 @@
+$confirm-modal-body-height: 150px !default;
+$confirm-modal-footer-height: 60px !default;
+.modal {
+    .modal-dialog.modal-sm {
+        min-width: 400px;
+        top: 100px;
+
+        .modal-content .confirm-modal .modal-footer {
+            height: $confirm-modal-footer-height;
+        }
+    }
+}

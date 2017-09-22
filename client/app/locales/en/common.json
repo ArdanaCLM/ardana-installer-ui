@@ -1,0 +1,37 @@
+{
+  "installer.deploy.title": "Deploy",
+  "installer.error.title": "Error",
+  "installer.help.title": "Help",
+  "installer.setup.title": "Setup",
+
+  "installer.actions.header": "Actions",
+
+  "installer.btn.cancel": "Cancel",
+  "installer.btn.delete": "Delete",
+  "installer.btn.deploy": "Deploy",
+  "installer.btn.next": "Next",
+  "installer.btn.no": "No",
+  "installer.btn.previous": "Previous",
+  "installer.btn.remove": "Remove",
+  "installer.btn.save": "Save",
+  "installer.btn.update": "Update",
+  "installer.btn.yes": "Yes",
+
+  "status": {
+    "installing": "Installing SLES for Ardana OpenStack",
+    "complete": "Installation completed successfully",
+    "error": "Error installing operating system on nodes: check your deployment or server configurations",
+    "pwr_error": "Error connecting to the nodes: check your server configurations",
+    "ready": "Checking connectivity and configuring for install",
+    "remove": "Removing failed node"
+  },
+
+  "error": {
+    "unique_name": "This name already exists",
+    "unique_mac_address": "This MAC address is already used",
+    "unique_ip_address": "This IP address is already used"
+  },
+
+  "network_grps_add": "Add network to ",
+  "network_grps_edit": "Edit network in "
+}

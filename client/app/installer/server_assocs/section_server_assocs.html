@@ -1,0 +1,47 @@
+<div ng-controller="ServerAssociationController as serverAssociationCtrl">
+  <table class="table action-table">
+    <thead>
+      <tr>
+        <th class="sorted">{{'server_assocs.role' | translate}}</th>
+        <th>{{'server_assocs.disk_model' | translate}}</th>
+        <th>{{'server_assocs.interface_model' | translate}}</th>
+        <th>{{'installer.actions.header' | translate}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="serverRole in serverAssociationCtrl.data['server-roles']">
+        <td>{{serverRole.name}}</td>
+        <td>
+          <selector items="serverAssociationCtrl.data['disk-models']"
+            key="'name'" label="'name'" value="serverRole['disk-model']"
+            placeholder="'server_assocs.disk_models.placeholder'">
+          </selector>
+        </td>
+        <td>
+          <selector items="serverAssociationCtrl.data['interface-models']"
+            key="'name'" label="'name'" value="serverRole['interface-model']"
+            placeholder="'server_assocs.interface_models.placeholder'" menu-right>
+          </selector>
+        </td>
+        <td action-col>
+          <action ng-repeat="action in serverAssociationCtrl.serverAssociationTableActions"
+            callback="action.callback" data="serverRole">
+            {{action.label | translate}}
+          </action>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+
+  <button class="btn btn-secondary"
+    ng-click="serverAssociationCtrl.createDiskModel()">
+    {{'server_assocs.disk_models.btn.add' | translate}}
+  </button>
+
+  <button class="btn btn-secondary"
+    ng-click="serverAssociationCtrl.createInterface()">
+    {{'server_assocs.interface_models.btn.add' | translate}}
+  </button>
+</div>

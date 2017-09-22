@@ -1,0 +1,304 @@
+@import "custom/variables";
+
+.container-fluid {
+    padding: 0;
+}
+
+hr {
+    border-bottom: 2px solid $separator_color;
+}
+
+.modal-drawer.active {
+    z-index: 2;
+
+    .body-drawer {
+        .help-icon-header {
+            display: inline-block;
+            margin-bottom: 10px;
+            position: relative;
+            width: 100%;
+
+            @include help-popover;
+
+            help-popover {
+                .popover {
+                    top: 30px;
+                }
+            }
+        }
+    }
+}
+
+.glyphicon.glyphicon-success {
+    color: $ardana-green;
+    margin-right: 10px;
+}
+
+ul.list-unstyled {
+    &.list-med {
+        font: 19px 'Metric';
+    }
+
+    li {
+        line-height: 1.5em;
+        font-size: 16px;
+        color: $ardana-black-light;
+
+        .ardana-tick-green {
+          margin-right: 10px;
+        }
+    }
+}
+
+.installer-body, drawer {
+
+    .log-viewer-wrapper {
+
+        display: flex;
+        flex-flow: column nowrap;
+        height: 75%;
+
+        .log-viewer-controls {
+            display: flex;
+            height: 40px;
+            flex-flow: row nowrap;
+            align-items: center;
+            margin-bottom: 12px;
+
+            .control-label.log-viewer-checkbox-label {
+                font-size: 14px;
+                color: $ardana-black-light;
+                margin-left: 12px;
+                font-weight: normal;
+
+                &:not(:last-child) {
+                    margin-right: 24px;
+                }
+            }
+
+            .log-viewer-checkbox-label {
+                margin: 0 10px 0 0;
+            }
+            .log-viewer-checkbox {
+                margin: 0 20px 0 0;
+            }
+        }
+
+        .log-viewer {
+            flex: 1 1 0px;
+        }
+
+    }
+
+    .notification {
+        margin-bottom: 20px;
+    }
+
+    .section {
+        font: 16px 'Metric';
+        min-height: 100%;
+        padding-top: 30px;
+        position: relative;
+
+        .section-body {
+            clear: both;
+            padding: 20px 0;
+            position: relative;
+
+            P {
+              font-size: 16px;
+              margin-bottom: 20px;
+              line-height: 22px;
+              color: $ardana-black-light;
+            }
+
+            ol.steps {
+              li {
+                font-size: 16px;
+                line-height: 22px;
+                color: $ardana-black-light;
+              }
+            }
+        }
+
+        .section-header {
+            border-bottom: 1px solid $ardana-divider;
+            clear: both;
+            display: inline-block;
+            float: left;
+            font: 600 36px 'Metric';
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            width: 100%;
+
+            @include help-popover;
+            help-popover {
+                margin-top: 5px;
+                .popover {
+                    top: 55px;
+                }
+            }
+        }
+
+        .section-intro {
+            clear: both;
+            color: $ardana-black-light;
+        }
+    }
+}
+
+.get-started {
+    .previous-config {
+        margin-top: 20px;
+        font-weight: 600;
+    }
+
+    b.steps {
+      font-size: 18px;
+    }
+}
+
+.row-form {
+    background-color: $table-detail-bg-color;
+    display: table;
+    border: 2px solid $table-border-color;
+    padding: 10px;
+    width: 100%;
+
+    form {
+        display: table-cell;
+        padding: 10px;
+
+        label {
+            margin-bottom: 0;
+            margin-top: 5px;
+        }
+    }
+}
+
+.select-all {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-right: none;
+    display: inline-block;
+    float: left;
+    height: 34px;
+    padding: 0 15px;
+
+    input[type='checkbox'] {
+        margin: 0;
+    }
+
+    + button.btn.btn-default {
+        color: #000000;
+        outline: none;
+        padding: 0 15px;
+
+        &:active, &:focus, &:hover {
+            background: #ffffff;
+            border-color: #cccccc;
+            color: #000000;
+        }
+    }
+}
+
+selector {
+    .glyphicon {
+        font-size: 12px;
+        margin-right: 2px;
+        top: 0;
+    }
+}
+
+.csv-import {
+
+    ul.field_list > li {
+        padding: 2px 0px;
+    }
+
+    td {
+        div.cell-value {
+            padding: 2px 4px;
+            margin: 4px;
+
+            &.import-error {
+                background-color: $status-error-color;
+                color: white;
+
+                &.empty {
+                    text-align: center;
+                }
+            }
+        }
+
+        &.import-row-status {
+            color: $new-green-1;
+            text-align: center;
+            font-size: 18px;
+
+            &.import-error {
+                color: $status-error-color;
+            }
+        }
+
+        .popover {
+            color: $ardana-black;
+        }
+    }
+
+    table {
+        border: 0;
+        border-collapse: collapse;
+        background-color: $tbody-bg-color;
+
+        thead {
+            td {
+                padding: 10px 8px;
+                border-bottom: 3px solid $accordion-bg-color;
+                background-color: $thead-bg-color;
+                text-transform: uppercase;
+                height: 48px;
+            }
+        }
+
+        tbody {
+            td {
+                padding: 6px 4px;
+                border-bottom: 2px solid $accordion-bg-color;
+            }
+
+            tr:last-child {
+                td {
+                    border-bottom: 0px;
+                }
+            }
+        }
+    }
+}
+
+.import-summary {
+    overflow: auto;
+
+    table td {
+        white-space: nowrap;
+    }
+}
+
+div.net-group-forced {
+    display: inline-block;
+    float: right;
+}
+
+label.control-label.net-group-forced {
+    width: 100%;
+    padding-right: 20px;
+
+    > span {
+        float: right;
+        display: inline-block;
+    }
+}
+
+button.btn-no-text-wrap {
+    white-space: nowrap;
+}

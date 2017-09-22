@@ -1,0 +1,41 @@
+{
+  "install_os": {
+    "title": "Would you like us to install SLES for Ardana on all your servers?",
+    "step": "Install SLES for Ardana",
+    "btn.install": "Install operating system",
+
+    "help": {
+      "p1": "You have the option of installing SLES for Ardana on your servers yourself using your own tools (using the image provided) or having the lifecycle manager do it for you.",
+      "p2": "If you choose to install SLES for Ardana yourself, you must do so before proceeding. In this case you will have to ensure that the operating system is installed on all of your servers and that you can SSH to it from this lifecycle management server. You are responsible for distributing SSH keys as necessary.",
+      "p3": "If you choose to have the lifecycle manager install the base operating system for you then the installation and SSH key distribution is taken care of for you.",
+      "p4": "In the next step, you will provide specific server information based on whether or not you have already installed the OS yourself."
+    },
+
+    "yes_option": {
+      "label": "Yes",
+      "desc": "Install SLES for Ardana for me",
+      "p1": "When you choose \"Yes\" we will install SLES for Ardana for you.",
+      "p2": {
+        "intro": "In the following screens you will provide:",
+        "list": "<li>Unique server IDs</li><li>IP addresses</li><li>MAC addresses</li><li>IPMI/iLO IP addresses, usernames, passwords</li><li>Server roles</li><li>Server NIC maps</li>"
+      }
+    },
+
+    "no_option": {
+      "label": "No",
+      "desc": "SLES for Ardana is already installed",
+      "p1": "To choose \"No\" you will have had to install SLES for Ardana on your servers yourself.",
+      "p2": {
+        "intro": "In the next steps you will supply your:",
+        "list": "<li>Unique server IDs</li><li>IP addresses</li><li>The role to which each server will belong</li><li>Server NIC maps</li>"
+      }
+    }
+  },
+
+  "install_os_info": {
+    "title": "SLES for Ardana install",
+    "intro": "SLES for Ardana is currently installing on all your servers.",
+    "p1": "Please continue with the next steps while the install is being completed.",
+    "demoMode": "NOTE: Demo Mode is enabled - OS Installation will be simulated."
+  }
+}

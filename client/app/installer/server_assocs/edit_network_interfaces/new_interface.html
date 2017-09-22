@@ -1,0 +1,105 @@
+<div class='modal-header'>
+  <div class="modal-title vertical-middle">
+    {{title | translate}}
+  </div>
+  <span class="close-modal" ng-click="newInterfaceCtrl.cancel()"></span>
+</div>
+
+<div class="modal-body">
+  <form name="interfacesAndNetworksForm">
+    <div class="col-md-6 col-lg-6">
+      <div class="input-control">
+        <label class="control-label" for="interfaceModelName">
+          {{'server_assocs.interface_models.name' | translate}}
+        </label>
+        <input class="control-input" name="interfaceModelName" type="text" ng-model="interfaceModelName" readonly>
+      </div>
+      <div class="input-control">
+        <div class="input-control">
+          <label class="control-label required">
+            <span class="pointer" popover-trigger="mouseenter" popover-class="popover-sm"
+              popover="{{'server_assocs.interface_models.interfaces.help.devices' | translate}}">
+              {{'server_assocs.interface_models.interfaces.devices' | translate}}
+            </span>
+          </label>
+          <div class="input-block" name="interfaces"
+               ardana-checkbox-group="{{ newInterfaceCtrl.interface.interfaces }}"
+               ng-model="_interfaces_value"
+               required>
+            <div ng-repeat="(name, value) in newInterfaceCtrl.interface.interfaces">
+              <div class="disable-label" ng-disabled="{{newInterfaceCtrl.isInterfaceUnavailable(name)}}">
+                  <input id="device-checkbox-{{$index}}" type="checkbox"
+                       ng-model="newInterfaceCtrl.interface.interfaces[name]"
+                       ng-disabled="{{newInterfaceCtrl.isInterfaceUnavailable(name)}}"
+                       ng-change="newInterfaceCtrl.checkIfBondRequired()">
+                 <label for="device-checkbox-{{$index}}"></label>
+                 {{name}}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="input-control">
+          <label class="control-label required net-group-forced">
+            {{'server_assocs.interface_models.interfaces.network_grp' | translate}}
+            <span ng-if="newInterfaceCtrl.hasAtLeastOneNetworkGroupSelected()">{{'server_assocs.interface_models.forced_grp' | translate}}</span>
+          </label>
+          <div class="input-block" name="networkGroups"
+               ardana-checkbox-group="{{ newInterfaceCtrl.interface.networkGroups }}"
+               ng-model="_networkGroups_value"
+               required>
+            <div ng-repeat="(name, value) in newInterfaceCtrl.interface.networkGroups">
+              <div class="disable-label" ng-disabled="{{newInterfaceCtrl.isNetworkGroupUnavailable(name)}}">
+                  <input id="netgrp-checkbox-{{$index}}" type="checkbox"
+                      ng-model="newInterfaceCtrl.interface.networkGroups[name]"
+                      ng-disabled="{{newInterfaceCtrl.isNetworkGroupUnavailable(name)}}">
+                  <label for="netgrp-checkbox-{{$index}}"></label>
+                {{name}}
+                <div class="net-group-forced" ng-if="newInterfaceCtrl.interface.networkGroups[name]">
+                  <input id="netgrp-forced-checkbox-{{$index}}" type="checkbox"
+                         ng-model="newInterfaceCtrl.interface.forcedNetworkGroups[name]">
+                  <label for="netgrp-forced-checkbox-{{$index}}"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-6">
+      <div class="input-control">
+        <label for="interfaceName" class="required control-label">
+          {{'server_assocs.interface_models.interfaces.name' | translate}}
+        </label>
+        <input class="control-input" name="interfaceName" type="text"
+          ng-model="newInterfaceCtrl.interface.interfaceName" required>
+      </div>
+      <div class="input-control">
+        <label class="control-label" for="bondAlias" ng-class="{required: bondRequired}">{{'server_assocs.interface_models.interfaces.device_name' | translate}}</label>
+        <input class="control-input" name="bondAlias" type="text" ng-model="newInterfaceCtrl.interface.bondAlias"
+          ng-required="bondRequired" ng-disabled="!bondRequired">
+      </div>
+      <div class="input-control">
+        <label class="control-label" for="bondOptions" ng-class="{required: bondRequired}">{{'server_assocs.interface_models.interfaces.bond_options' | translate}}</label>
+        <span class="new-interface_error_message" ng-show="newInterfaceCtrl.isInvalid">{{'server_assocs.interface_models.invalid_yaml' | translate}}</span>
+        <textarea rows="8" class="control-input" name="bondOptions" ng-model="newInterfaceCtrl.interface.bondOptions"
+          yamlize ng-required="bondRequired" ng-disabled="!bondRequired">
+        </textarea>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <div class="pull-right vertical-middle">
+
+    <button class='btn btn-secondary'
+            ng-click="newInterfaceCtrl.cancel()">
+      {{'installer.btn.cancel' | translate}}
+    </button>
+    <button class='btn btn-primary'
+            ng-click="newInterfaceCtrl.save()"
+            ng-disabled="newInterfaceCtrl.isInvalid || interfacesAndNetworksForm.$invalid">
+      {{'server_assocs.interface_models.interfaces.btn.save' | translate}}
+  </button>
+</div>
