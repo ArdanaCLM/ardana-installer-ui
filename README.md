@@ -4,15 +4,11 @@
 The cloud installer that will reside with SUSE Manager
 
 ## How to run
-Move to the root of the project and run `npm install` which will install most dependencies
-
-Install `json-server` globally with `sudo npm install json-server -g`
-
-Install tox via pip:  `pip install tox`
+Move to the root of the project and run `npm install` which will install any dependencies
 
 After that, run `npm start` which will bundle the react app and start the express server
 
-You will get the express server (UI) running on `localhost:3000` and the json-server (API Mock) on `localhost:8080`
+You will get the express server (UI) running on `localhost:3000`.
 
 To run the selenium tests:
 1. perform initial setup `npm run protractor-setup` (once, does not need to be done each time)
@@ -34,15 +30,9 @@ Build the entire app and create tarball out of the output:
 `build_dist.sh -t`
 
 `build_dist.sh -t` will create a cloudinstaller-{SHA}.tar file that can be untarred in another location.  
-To run the application from that location, run the venv copy of "python" on lib/python2.7/site-packages/cloudinstaller/main.py
 
-For example:  
-`cd /tmp`  
-`mkdir cloudinstaller`  
-`cd cloudinstaller`  
-`cp <repo_location>/cloudinstaller-934A34.tgz .`  
-`tar -xvf cloudinstaller-934A34.tgz`  
-`bin/python lib/python2.7/site-packages/cloudinstaller/main.py`  
+To run the application from that location, together with a local copy of the ardana-installer-server:
+`run_dist.sh`
 
 Note!  
 You will need an appropriate ardana-service backend to provide data model information. A link to that repo will be put here if/when it becomes public  
