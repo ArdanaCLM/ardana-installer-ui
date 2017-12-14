@@ -90,7 +90,7 @@ export function getServerRoles (model) {
           .sort((a,b) => byServerNameOrId(a,b))   // sort servers by name or id within each role
       };
       if (group === 'clusters')
-        role['memberCount'] = res['member-count'] || 0;
+        role['memberCount'] = res['member-count'] || res['min-count'] || 0;
       else
         role['minCount'] = res['min-count'] || 0;
       return role;
