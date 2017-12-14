@@ -184,6 +184,7 @@ class ValidateConfigFiles extends Component {
   editFile(file) {
     this.setState({editingFile: file});
     this.props.showNavButtons(false);
+    this.props.disableTab(true);
   }
 
   validateModel = () => {
@@ -238,6 +239,7 @@ class ValidateConfigFiles extends Component {
   doneEditingFile() {
     this.setState({editingFile: ''});
     this.props.showNavButtons(true);
+    this.props.disableTab(false);
   }
 
   setChanged() {
@@ -346,7 +348,8 @@ class ConfigPage extends BaseWizardPage {
     this.state = {
       key: TAB.MODEL_FILES,
       isNextable: false,
-      showNavButtons: true
+      showNavButtons: true,
+      disableTab: false
     };
   }
 
@@ -382,6 +385,10 @@ class ConfigPage extends BaseWizardPage {
     this.setState({isNextable: enable});
   };
 
+  disableTab = (disable) => {
+    this.setState({disableTab : disable});
+  }
+
   render() {
     return (
       <div className='wizard-page'>
@@ -390,15 +397,19 @@ class ConfigPage extends BaseWizardPage {
         </div>
         <div className='wizard-content'>
           <Tabs id='configTabs' activeKey={this.state.key} onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-            <Tab eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
-              <ValidateConfigFiles enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
+            <Tab disabled={this.state.disableTab && this.state.key !== TAB.MODEL_FILES}
+              eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
+              <ValidateConfigFiles disableTab={this.disableTab}
+                enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
                 loadModel={this.props.loadModel} />
             </Tab>
-            <Tab eventKey={TAB.TEMPLATE_FILES} title={translate('validate.tab.templates')}>
-              <ServiceTemplatesTab
+            <Tab disabled={this.state.disableTab && this.state.key !== TAB.TEMPLATE_FILES}
+              eventKey={TAB.TEMPLATE_FILES} title={translate('validate.tab.templates')}>
+              <ServiceTemplatesTab disableTab={this.disableTab}
                 updateGlobalState={this.props.updateGlobalState} showNavButtons={this.showNavButtons}/>
             </Tab>
-            <Tab eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
+            <Tab disabled={this.state.disableTab && this.state.key !== TAB.CONFIG_FORM}
+              eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
               <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig} />
             </Tab>
           </Tabs>
