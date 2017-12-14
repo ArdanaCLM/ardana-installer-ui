@@ -1,5 +1,0 @@
-id,ip,mac,role,nic_mapping,group
-test1,1.2.3.4,12-13-14-15-16,CONTROLLER-ROLE,HP-DL360-4PORT
-test2,1.2.3.4,12-13-14-15-16,controller-ROLE, hp-DL360-4PORT
-test3,192.168.10.4,12-13-14-15-16,controller-ROLE ,
-controller1,1.2.3.4,,role1,nics

@@ -1,0 +1,104 @@
+// (c) Copyright 2017 SUSE LLC
+/**
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+.validate-config-files {
+  font-size: 1.1em;
+  ul {
+    list-style-type: none;
+    line-height: 1.5em;
+    min-height: 35em;
+  }
+  .body {
+    display: inline-block;
+    width: 100%;
+  }
+  .log {
+    height: 36em;
+    background-color: white;
+    margin-top: 1em;
+  }
+  .button-with-icon {
+    margin-top: 1.2em;
+  }
+  .validate-result-icon {
+    position: relative;
+    top: 0.4em;
+    margin-left: 0.3em;
+    &.valid {
+      color: @selectedcolor;
+    }
+    &.invalid {
+      color: @errorcolor;
+    }
+  }
+}
+
+.config-form {
+  max-width: 40em;
+  margin-top: 2em;
+  margin-left: 2em;
+  .detail-line {
+    width: 100%;
+    margin-bottom: 1em;
+    display: inline-block;
+    .label-container {
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+      top: 5px;
+    }
+    .checkbox-line {
+      position: relative;
+      top: 4px;
+    }
+  }
+
+  .server-input > input {
+    width: 90%;
+  }
+  .server-detail-select select {
+    padding: 4px;
+    width: 90%;
+  }
+}
+
+#configTabs ul.nav.nav-tabs li.active a {
+  background: transparent;
+}
+
+.all-service-list {
+
+  list-style-type: none;
+  font-size: 1.1em;
+  min-height: 35em;
+  max-height: 40em;
+  overflow: auto;
+
+  ul {
+    list-style-type: none;
+    line-height: 1.5em;
+  }
+
+  .material-icons {
+    cursor: pointer;
+    font-size: 1.5em;
+    line-height: inherit;
+  }
+
+  .service-heading {
+    display: inline-flex;
+    line-height: 1.5em;
+  }
+}
+
