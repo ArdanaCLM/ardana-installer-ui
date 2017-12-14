@@ -1,0 +1,87 @@
+// (c) Copyright 2017 SUSE LLC
+/**
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+@import "./../palette.less";
+
+.picker-container {
+  display: inline-block;
+  width: 50%;
+  border-right: 1px solid @inactivecolor;
+  vertical-align: top;
+  min-height: 40em;
+  .section {
+    margin-bottom: 2em;
+    width: 100%;
+    display: inline-block;
+  }
+}
+
+.details-container {
+  display: inline-block;
+  width: 50%;
+  padding: 0 2em 0 3em;
+  min-height: 40em;
+  max-height: 40em;
+  overflow: auto;
+  vertical-align: top;
+}
+
+.filter-bar-container {
+  display: flex;
+  margin-left: 10px;
+  margin-bottom: 3em;
+  .filter-line-header {
+    margin-right: 2em;
+  }
+  .filter-box {
+    margin-right: 2em;
+    margin-top: 3px;
+  }
+  .filter-box > .server-detail-select > .rounded-corner {
+    width: 17em;
+    height: 30px;
+  }
+}
+
+.model-details > ul, ol {
+  margin-top: 0;
+  margin-bottom: 11px;
+}
+
+.model-details > dl {
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+.model-details > dt, dd {
+  line-height: 2;
+}
+
+.model-details > dt {
+  font-weight: bold;
+}
+
+.model-details > dd {
+  margin-left: 0;
+}
+
+.model-details > .dl-horizontal dd:before, .dl-horizontal dd:after {
+  content: " ";
+  display: table;
+}
+
+.model-details > .dl-horizontal dd:after {
+  clear: both;
+}
+

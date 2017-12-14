@@ -1,34 +1,48 @@
-# Ardana Installer - Day Zero Experience
+(c) Copyright 2017 SUSE LLC
 
-This web application uses Node.js + Express as the web server and AngularJS as the front-end framework. This application provides a simple user interface to configure and deploy a cloud.
+# SUSE OpenStack Cloud Deployer
+The cloud installer that will reside with SUSE Manager
 
-## Installation
+## How to run
+Move to the root of the project and run `npm install` which will install most dependencies
 
-#### Prerequisites
+Install `json-server` globally with `sudo npm install json-server -g`
 
-This application assumes you have the ardana-input-model project checkout in the parent folder. The folder structure should look like this:
+Install tox via pip:  `pip install tox`
 
-```
-.
-..
-ardana-input-model
-ardana-installer-ui
-```
+After that, run `npm start` which will bundle the react app and start the express server
 
-#### OS X
- - Download Node.js at https://nodejs.org/download/
- - Clone the **master** branch of the repository
- - Run `npm install`
+You will get the express server (UI) running on `localhost:3000` and the json-server (API Mock) on `localhost:8080`
 
-#### Linux
-```
-sudo apt-get update
-sudo apt-get install -y git nodejs npm
-sudo update-alternatives --install /usr/bin/node node /usr/bin/nodejs 10
-git clone -b master git://git.suse.provo.cloud/ardana/ardana-installer-ui
-cd ardana-installer-ui
-npm install
-```
+To run the selenium tests:
+1. perform initial setup `npm run protractor-setup` (once, does not need to be done each time)
+2. start the app in another terminal `npm start`
+3. run the tests `npm run protractor`
+For more information on protractor/selenium locators see http://www.protractortest.org/#/locators
 
-## Testing
-Unit tests with Karma can be run with `npm run test`. End-to-end tests with Protractor can be run with `npm run e2e`. You will first need to start the application with `npm run devstart` in a different terminal window.
+# Building and running the production version of the installer
+Build just the ui components (output to "dist" folder):  
+`build_ui.sh`
+
+Build just the ui components and package them into a tarball:  
+`build_ui.sh -t`
+
+Build the entire app (output to manager_cloud_installer_server_venv):  
+`build_dist.sh`
+
+Build the entire app and create tarball out of the output:  
+`build_dist.sh -t`
+
+`build_dist.sh -t` will create a cloudinstaller-{SHA}.tar file that can be untarred in another location.  
+To run the application from that location, run the venv copy of "python" on lib/python2.7/site-packages/cloudinstaller/main.py
+
+For example:  
+`cd /tmp`  
+`mkdir cloudinstaller`  
+`cd cloudinstaller`  
+`cp <repo_location>/cloudinstaller-934A34.tgz .`  
+`tar -xvf cloudinstaller-934A34.tgz`  
+`bin/python lib/python2.7/site-packages/cloudinstaller/main.py`  
+
+Note!  
+You will need an appropriate ardana-service backend to provide data model information. A link to that repo will be put here if/when it becomes public  

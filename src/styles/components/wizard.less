@@ -1,0 +1,147 @@
+// (c) Copyright 2017 SUSE LLC
+/**
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+@import "./../palette.less";
+
+.wizard-progress-container {
+  height: 2em;
+  margin: 3.5em 0 2.5em;
+  background-image: url(./images/dot.png);
+  display: flex;
+  justify-content: space-between;
+
+  > span:before {
+    font-weight: bold;
+    color: white;
+    vertical-align: middle;
+  }
+
+  .progress {
+    border-radius: 26px;
+    display: inline-block;
+    height: 26px;
+    width: 26px;
+    border: 2px solid @progress-icon-border;
+    box-shadow: 0px 0px 1px 0px @page-font-color;
+
+    &.done {
+      background-color: @preferredcolor;
+    }
+    &.done:before {
+      font-family: Material Icons;
+      content: "\e86c";
+      padding-left: 4px;
+    }
+
+    &.not-done {
+      background-color: @progress-icon-not-done;
+    }
+    &.not-done:before {
+      content: attr(value);
+      padding-left: 7px;
+    }
+
+    &.in-progress {
+      background-color: @selectedcolor;
+    }
+    &.in-progress:before {
+      content: attr(value);
+      padding-left: 7px;
+    }
+
+    &.error {
+      background-color: @errorcolor;
+    }
+    &.error:before {
+      font-family: FontAwesome;
+      content: "\f12a";
+      padding-left: 8px;
+    }
+  }
+}
+
+.wizard-header {
+  margin: 0px;
+  padding: 0px 20px;
+}
+
+@button-height: 34px;   // the height of all buttons is 34px
+.wizard-page{
+  height: 100%;
+
+  .content-header{
+    height: @button-height;
+    margin: 10px 20px;
+ 
+    .titleBox {
+      vertical-align: middle;
+      display: inline-block;
+      width: 50%;
+      height: @button-height;
+      line-height: @button-height;
+      h3 {
+        margin: 0px;   // cancel bootstrap's extra margin when working inside of a title box
+        line-height: @button-height;
+      }
+    }
+
+    .buttonBox {
+      width: 50%;
+      .button-box
+    }
+
+    // if page omits the titleBox/buttonbox, ensure the same spacing
+    h3 {
+      vertical-align: middle;
+      display: inline-block;
+      width: 100%;
+      height: @button-height;
+
+      margin: 0px;   // cancel bootstrap's extra margin when working inside of a title box
+      line-height: @button-height;
+    }
+  }
+}
+
+.footer-container {
+  margin: 10px;
+  margin-right: 0px;
+  height: 35px;
+  float: right;
+}
+
+.wizard-content-container {
+  .footer-container {
+    margin-right: 20px;
+  }
+}
+
+.wizard-content-container .wizard-content {
+  margin: 20px;
+  .heading {
+    margin: 0 0 1.5em;
+    margin-bottom: 10px;
+  }
+
+  // 291px is calculated as:
+  //   20px for top margin for h1 header (controlled by bootstrap)
+  //   28px for h1 header
+  //   104px for wizard-progress-container
+  //   44px for content-header and top margin
+  //   40px for wizard-content top and bottom margins
+  //   55px for footer-container
+  height: calc(~"100vh - 291px");
+
+  overflow-y: auto;
+}
