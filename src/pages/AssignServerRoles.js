@@ -1280,7 +1280,7 @@ class AssignServerRoles extends BaseWizardPage {
     return (
       <div className='wizard-page'>
         <div className='content-header'>
-          {this.renderHeading(translate('add.server.heading', this.props.model.get('name')))}
+          {this.renderHeading(translate('add.server.heading'))}
         </div>
         <div id='AssignServerRoleId' className='wizard-content'>
           {this.renderServerRoleContent()}

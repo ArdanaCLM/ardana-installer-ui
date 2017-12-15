@@ -70,7 +70,7 @@
     "model.picker.filter.network-type.option.flat": "Flat Network",
     "model.picker.filter.network-type.option.multi-tenant": "Multi-tenant Network",
 
-    "model.summary.heading": "Cloud Model to Deploy: {0}",
+    "model.summary.heading": "Cloud Model to Deploy",
     "model.summary.mandatory": "Mandatory Components",
     "model.summary.additional": "Additional Components",
     "model.summary.edit.nodes": "Edit number of nodes",
@@ -100,7 +100,7 @@
 
     "edit.config.files.heading": "Update Configuration File: {0} ({1})",
 
-    "add.server.heading": "Add Servers and Assign Server Roles: {0}",
+    "add.server.heading": "Add Servers and Assign Server Roles",
     "add.server.auto.discover": "Auto Discover",
     "add.server.manual.add": "Manual Discover",
     "add.server.add": "Add Server",

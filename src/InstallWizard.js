@@ -320,10 +320,16 @@ class InstallWizard extends Component {
    * boilerplate ReactJS render function
    */
   render() {
+    const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
+      <h3 className='right-corner'>{translate('model.picker.' + this.state.model.get('name'))}</h3> : '';
+
     return (
       <div>
         <div className='wizard-header'>
-          <h1>{translate('openstack.cloud.deployer.title')}</h1>
+          <div className='top-line'>
+            <h1>{translate('openstack.cloud.deployer.title')}</h1>
+            {selectedModelLine}
+          </div>
           <WizardProgress steps={this.state.steps} />
         </div>
         <div className='wizard-content-container'>
