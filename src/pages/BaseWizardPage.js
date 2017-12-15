@@ -29,7 +29,7 @@ import {
 class BaseWizardPage extends Component {
 
   /**
-   * function to determine whether the page is in an error state.  Subclasses 
+   * function to determine whether the page is in an error state.  Subclasses
    * should override this and return true to prevent navigation
    */
   isError() {
