@@ -89,10 +89,15 @@ export function getServerRoles (model) {
           .map(s => getCleanedServer(s))          // filter out any extra fields
           .sort((a,b) => byServerNameOrId(a,b))   // sort servers by name or id within each role
       };
-      if (group === 'clusters')
-        role['memberCount'] = res['member-count'] || res['min-count'] || 0;
-      else
+      if (group === 'clusters') {
+        if (res['member-count'] || res['member-count'] === 0) {
+          role['memberCount'] = res['member-count'];
+        } else if (res['min-count'] || res['min-count'] === 0) {
+          role['minCount'] = res['min-count'];
+        }
+      } else {
         role['minCount'] = res['min-count'] || 0;
+      }
       return role;
     }));
   }
