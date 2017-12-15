@@ -1033,7 +1033,10 @@ class AssignServerRoles extends BaseWizardPage {
     //apply name and assignment filter here
     let filteredAvailableServers =
       servers.filter((server) => {
-        if(server.name.indexOf(this.state.searchFilterText) === -1) {
+        // search text applied to name , ip-addr and mac-addr
+        if(!(server.name.indexOf(this.state.searchFilterText) !== -1 ||
+          (server['ip-addr'] && server['ip-addr'].indexOf(this.state.searchFilterText) !== -1) ||
+          (server['mac-addr'] && server['mac-addr'].indexOf(this.state.searchFilterText) !== -1))) {
           return false;
         }
 
