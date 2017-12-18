@@ -113,11 +113,13 @@ class ServiceTemplatesTab extends Component {
   handleEditFile = (seviceName, file) => {
     this.setState ({editServiceName: seviceName, editFile: file});
     this.props.showNavButtons(false);
+    this.props.disableTab(true);
   }
 
   handleCloseEdit = () => {
     this.setState ({editFile: undefined, editServiceName: undefined});
     this.props.showNavButtons(true);
+    this.props.disableTab(false);
   }
 
   handleToggleService = (item) => {
