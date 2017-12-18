@@ -308,6 +308,14 @@ class PlaybookProgress extends Component {
         this.logsReceived = List(message);
         this.setState((prevState) => {
           return {displayedLogs: prevState.displayedLogs.concat(this.logsReceived)}; });
+      })
+      .catch((error) => {
+        this.setState((prevState) => {
+          let msg = translate('deploy.get.log.error', playbook.name + '.yml', playbook.playId, error.toString());
+          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+        });
+
+        this.props.updatePageStatus(STATUS.FAILED);
       });
 
     // update the UI status
@@ -321,6 +329,14 @@ class PlaybookProgress extends Component {
           else if (evt.event === 'playbook-error')
             this.playbookError(evt.playbook);
         }
+      })
+      .catch((error) => {
+        this.setState((prevState) => {
+          let msg = translate('deploy.get.event.error', playbook.name + '.yml', playbook.playId, error.toString());
+          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+        });
+
+        this.props.updatePageStatus(STATUS.FAILED);
       });
   }
 
@@ -375,7 +391,11 @@ class PlaybookProgress extends Component {
           }
         })
         .catch((error) => {
-          this.setState({errorMsg: error.message});
+          this.setState((prevState) => {
+            let msg = translate('deploy.fail.check.playbook', progressPlay.name + '.yml', progressPlay.playId, error.message);
+            return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+          });
+
           this.props.updatePageStatus(STATUS.FAILED);
         });
     }
@@ -461,7 +481,10 @@ class PlaybookProgress extends Component {
         this.props.updatePageStatus(STATUS.FAILED);
         // update local this.globalPlaybookStatus and also update global state playbookSatus
         this.updateGlobalPlaybookStatus(playbookName, '', STATUS.FAILED);
-        this.setState({errorMsg: List(error.message)});
+        this.setState((prevState) => {
+          let msg = translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message);
+          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+        });
       });
   }
 
