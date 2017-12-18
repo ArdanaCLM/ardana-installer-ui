@@ -29,6 +29,7 @@
     "logviewer.autoscroll": "Automatically scroll to the bottom",
     "no.options.available": "No options available",
     "no.component.select": "No Component Selected",
+    "no.model.select": "No Model Selected",
     "common.details": "Details",
 
     "install.intro.message.body1": "You are about to install a new cloud.",

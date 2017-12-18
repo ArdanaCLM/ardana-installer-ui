@@ -357,7 +357,7 @@ class CloudModelPicker extends BaseWizardPage {
     }
     else {
       detailContent =
-        (<div className='no-component-centered'>{translate('no.component.select')}</div>);
+        (<div className='no-component-centered'>{translate('no.model.select')}</div>);
     }
     return (<div className='details-container'>{detailContent}</div>);
   }
