@@ -91,7 +91,7 @@
 
 .card-text-unit {
   font-size: 1.4em;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .model-elements div {
@@ -104,6 +104,12 @@
   float: left;
   min-height: 1px;
   cursor: pointer;
+  position: relative;
+  .element-check {
+    position: absolute;
+    left: 40%;
+    top: 75%;
+  }
 }
 
 .model-element-selected div {
@@ -122,10 +128,22 @@
   margin: 10px;
   cursor: pointer;
   text-align: center;
+  position: relative;
   &.selected {
     background-color: @preferredcolor;
     color: white;
   }
+  .model-check {
+    position: absolute;
+    left: 40%;
+    top: 70%;
+  }
+}
+
+.model-check-icon {
+  font-size: 28px;
+  background-color: @preferredcolor;
+  color: white;
 }
 
 .assignment-button {

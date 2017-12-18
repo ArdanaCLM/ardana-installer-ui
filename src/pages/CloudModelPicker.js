@@ -341,21 +341,38 @@ class CloudModelPicker extends BaseWizardPage {
     }
   }
 
+  renderDetails = () => {
+    let detailContent = '';
+    if(this.state.selectedModelName) {
+      let details = '';
+      const template = this.displayTemplates.find(template => template.name === this.state.selectedModelName);
+      if (template) {
+        // details is the html help content read from model template fetched from the backend server.
+        // It should be safe to be rendered as the raw html content in the details view.
+        details = template['overview'];
+      }
+      detailContent =
+        (<div><h3>{translate('model.picker.' + this.state.selectedModelName) + ' ' + translate('common.details')}</h3>
+          <div className='model-details' dangerouslySetInnerHTML={{__html: details}}/></div>);
+    }
+    else {
+      detailContent =
+        (<div className='no-component-centered'>{translate('no.model.select')}</div>);
+    }
+    return (<div className='details-container'>{detailContent}</div>);
+  }
+
   render() {
     this.displayTemplates = this.getDisplayTemplates();
-    const selectedTemplate = this.displayTemplates.find((template) => {
-      return template.name === this.state.selectedModelName;});
 
-    // details is the html help content read from model template fetched from the backend server.
-    // It should be safe to be rendered as the raw html content in the details view.
-    let details = selectedTemplate ? selectedTemplate.overview : '';
     const btns = this.displayTemplates.map((template, idx) =>
       <PickerButton
         key={idx}
         keyName={template.name}
         isSelected={template.name === this.state.selectedModelName}
         displayLabel={translate('model.picker.' + template.name)}
-        clickAction={this.handlePickModel}/>);
+        clickAction={this.handlePickModel}/>
+    );
 
     return (
       <div className='wizard-page'>
@@ -365,12 +382,8 @@ class CloudModelPicker extends BaseWizardPage {
         <div className='wizard-content'>
           {this.renderLoadingMask()}
           {this.renderFilterBar(this.displayTemplates)}
-          <div className='picker-container'>
-            {btns}
-          </div>
-          <div className='details-container'>
-            <div className='model-details' dangerouslySetInnerHTML={{__html: details}}/>
-          </div>
+          <div className='picker-container'>{btns}</div>
+          {this.renderDetails()}
           {this.renderErrorMessage()}
         </div>
         {this.renderNavButtons()}

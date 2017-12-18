@@ -38,7 +38,7 @@ function NextButton(props) {
 
 class ActionButton extends Component {
   render() {
-    let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type : 'btn-primary ') +
+    let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
       (this.props.isDisabled ? ' disabled' : '');
     buttonClass += (this.props.lastButton) ? 'last-button' : '';
     return (
@@ -99,7 +99,7 @@ class LoadFileButton extends Component {
     const hidden = { display: 'none' };
     return (
       <span>
-        <ActionButton
+        <ActionButton type='link'
           clickAction={this.onClickShownButton}
           displayLabel={this.props.displayLabel}
           isDisabled={this.props.isDisabled || false}
@@ -125,9 +125,16 @@ class PickerButton extends Component {
   render() {
     let classN = 'picker-card rounded-corner shadowed-border' +
       (this.props.isSelected ? ' selected' : '');
+    let check = '';
+    if(this.props.isSelected) {
+      check = (<i className="material-icons model-check-icon">check_circle</i>);
+    }
     return (
       <div className={classN} name={this.props.keyName}
-        onClick={this.props.clickAction}>{this.props.displayLabel}</div>
+        onClick={this.props.clickAction}>
+        <p onClick={this.props.clickAction} name={this.props.keyName}>{this.props.displayLabel}</p>
+        <p className='model-check'>{check}</p>
+      </div>
     );
   }
 }
@@ -146,6 +153,10 @@ class ActivePickerButton extends Component {
 
   render() {
     let buttonClass = 'model-elements' + (this.props.isSelected ? ' model-element-selected' : '');
+    let check = '';
+    if(this.props.isSelected) {
+      check = (<i className="material-icons model-check-icon">check_circle</i>);
+    }
     return (
       <div className={buttonClass}>
         <div
@@ -153,12 +164,13 @@ class ActivePickerButton extends Component {
           className='card rounded-corner shadowed-border'
           onClick={this.handleClick}
           value={this.props.value} >
-          <p className='card-text-unit' id={this.props.id}>
+          <p className='card-text-unit' id={this.props.id} >
             {this.props.value}
           </p>
           <h4 id={this.props.id}>
             {this.props.description}
           </h4>
+          <p className='element-check'>{check}</p>
         </div>
       </div>
     );
