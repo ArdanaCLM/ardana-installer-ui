@@ -397,18 +397,18 @@ class ConfigPage extends BaseWizardPage {
         </div>
         <div className='wizard-content'>
           <Tabs id='configTabs' activeKey={this.state.key} onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-            <Tab disabled={this.state.disableTab && this.state.key !== TAB.MODEL_FILES}
+            <Tab disabled={this.state.disableTab}
               eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
               <ValidateConfigFiles disableTab={this.disableTab}
                 enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
                 loadModel={this.props.loadModel} />
             </Tab>
-            <Tab disabled={this.state.disableTab && this.state.key !== TAB.TEMPLATE_FILES}
+            <Tab disabled={this.state.disableTab}
               eventKey={TAB.TEMPLATE_FILES} title={translate('validate.tab.templates')}>
               <ServiceTemplatesTab disableTab={this.disableTab}
                 updateGlobalState={this.props.updateGlobalState} showNavButtons={this.showNavButtons}/>
             </Tab>
-            <Tab disabled={this.state.disableTab && this.state.key !== TAB.CONFIG_FORM}
+            <Tab disabled={this.state.disableTab}
               eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
               <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig} />
             </Tab>
