@@ -351,7 +351,7 @@ class PlaybookProgress extends Component {
       // if have completes, process completed logs first
       if(completePlaybooks.length > 0) {
         completePlaybooks.forEach((book) => {
-          this.processAlreadyDonePlaybook(book, STATUS.COMPLETE);
+          this.processAlreadyDonePlaybook(book);
         });
       }
 
@@ -367,7 +367,7 @@ class PlaybookProgress extends Component {
           if ('endTime' in response) {
             let status = (response['code'] == 0 ? STATUS.COMPLETE : STATUS.FAILED);
             // update logs
-            this.processAlreadyDonePlaybook(progressPlay, status);
+            this.processAlreadyDonePlaybook(progressPlay);
             // update global playbookStatus
             this.updateGlobalPlaybookStatus(progressPlay.name, progressPlay.playId, status);
 
@@ -392,7 +392,8 @@ class PlaybookProgress extends Component {
         })
         .catch((error) => {
           this.setState((prevState) => {
-            let msg = translate('deploy.fail.check.playbook', progressPlay.name + '.yml', progressPlay.playId, error.message);
+            let msg =
+              translate('deploy.fail.check.playbook', progressPlay.name + '.yml', progressPlay.playId, error.message);
             return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
           });
 
@@ -406,13 +407,13 @@ class PlaybookProgress extends Component {
           // go for the logs for completed if have any first
           if (completePlaybooks.length > 0) {
             completePlaybooks.forEach((book) => {
-              this.processAlreadyDonePlaybook(book, STATUS.COMPLETE);
+              this.processAlreadyDonePlaybook(book);
             });
           }
           // for failed, don't continue running playbook at all
           // only go for logs
           failedPlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book, STATUS.FAILED);
+            this.processAlreadyDonePlaybook(book);
           });
 
           this.props.updatePageStatus(STATUS.FAILED);
@@ -421,7 +422,7 @@ class PlaybookProgress extends Component {
           // go for logs for completed
           let bookNames = [];
           completePlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book, STATUS.COMPLETE);
+            this.processAlreadyDonePlaybook(book);
             bookNames.push(book.name); //saved the names for checking next playbook
           });
           let nextPlaybookName = this.findNextPlaybook(bookNames);
