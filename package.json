@@ -1,5 +1,5 @@
 {
-  "name": "suse-cloud-deployer",
+  "name": "ardana-installer-ui",
   "version": "0.1.0",
   "dependencies": {
     "babel-cli": "^6.24.1",
@@ -66,12 +66,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sidthe/manager-cloud-installer.git"
+    "url": "git+https://github.com/ArdanaCLM/ardana-installer-ui.git"
   },
-  "author": "SUSE",
-  "license": "MIT",
+  "author": "SUSE LLC",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/sidthe/manager-cloud-installer/issues"
+    "url": "https://github.com/ArdanaCLM/ardana-installer-ui/issues"
   },
-  "homepage": "https://github.com/sidthe/manager-cloud-installer#readme"
+  "homepage": "https://github.com/ArdanaCLM/ardana-installer-ui"
 }
