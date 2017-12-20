@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 var appConfigs = {
-  'shimurl': window.location.protocol + '//' + window.location.hostname + ':' + 8081,
+  'shimurl': '',
 };
 
 // check for a config file, if present, overwrite the defaults
