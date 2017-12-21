@@ -132,8 +132,9 @@ class PickerButton extends Component {
     return (
       <div className={classN} name={this.props.keyName}
         onClick={this.props.clickAction}>
-        <p onClick={this.props.clickAction} name={this.props.keyName}>{this.props.displayLabel}</p>
-        <p className='model-check'>{check}</p>
+        <p className='model-name' onClick={this.props.clickAction} name={this.props.keyName}>
+          {this.props.displayLabel}</p>
+        <p>{check}</p>
       </div>
     );
   }
@@ -170,7 +171,7 @@ class ActivePickerButton extends Component {
           <h4 id={this.props.id}>
             {this.props.description}
           </h4>
-          <p className='element-check'>{check}</p>
+          <p>{check}</p>
         </div>
       </div>
     );

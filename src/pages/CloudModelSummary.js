@@ -40,24 +40,9 @@ class CloudModelSummary extends BaseWizardPage {
   }
 
   getDisplayName(role) {
-    //TODO: Localize all of these strings
-    var displayNames = {
-      'CONTROLLER-ROLE': translate('model.summary.role.displayname.CONTROLLER-ROLE'),
-      'COMPUTE-ROLE': translate('model.summary.role.displayname.COMPUTE-ROLE'),
-      'VSA-ROLE': translate('model.summary.role.displayname.VSA-ROLE'),
-      'RGW-ROLE': translate('model.summary.role.displayname.RGW-ROLE'),
-      'OSD-ROLE': translate('model.summary.role.displayname.OSD-ROLE'),
-      'MTRMON-ROLE': translate('model.summary.role.displayname.MTRMON-ROLE'),
-      'DBMQ-ROLE': translate('model.summary.role.displayname.DBMQ-ROLE'),
-      'SWOBJ-ROLE': translate('model.summary.role.displayname.SWOBJ-ROLE'),
-      'CORE-ROLE': translate('model.summary.role.displayname.CORE-ROLE'),
-      'SWPAC-ROLE': translate('model.summary.role.displayname.SWPAC-ROLE'),
-      'NEUTRON-ROLE': translate('model.summary.role.displayname.NEUTRON-ROLE'),
-      'IRONIC-COMPUTE-ROLE': translate('model.summary.role.displayname.IRONIC-COMPUTE-ROLE')
-    };
-    var NOT_FOUND = translate('model.summary.role.component.NOT_FOUND');
-
-    return displayNames[role] || NOT_FOUND;
+    const NOT_FOUND = translate('model.summary.role.component.NOT_FOUND');
+    const displayName = translate('model.summary.role.displayname.' + role);
+    return (displayName.startsWith('model.summary.role.displayname.')) ? NOT_FOUND : displayName;
   }
 
   getDescription() {
@@ -65,27 +50,11 @@ class CloudModelSummary extends BaseWizardPage {
       return (<div className='no-component-centered'>{translate('no.component.select')}</div>);
     }
 
-    //TODO: Improve these descriptions
-    //TODO: Localize all of these strings
-    var descriptions = {
-      'CONTROLLER-ROLE': translate('model.summary.role.description.CONTROLLER-ROLE'),
-      'COMPUTE-ROLE': translate('model.summary.role.description.COMPUTE-ROLE'),
-      'VSA-ROLE': translate('model.summary.role.description.VSA-ROLE'),
-      'RGW-ROLE': translate('model.summary.role.description.RGW-ROLE'),
-      'OSD-ROLE': translate('model.summary.role.description.OSD-ROLE'),
-      'MTRMON-ROLE': translate('model.summary.role.description.MTRMON-ROLE'),
-      'DBMQ-ROLE': translate('model.summary.role.description.DBMQ-ROLE'),
-      'SWOBJ-ROLE': translate('model.summary.role.description.SWOBJ-ROLE'),
-      'CORE-ROLE': translate('model.summary.role.description.CORE-ROLE'),
-      'SWPAC-ROLE': translate('model.summary.role.description.SWPAC-ROLE'),
-      'NEUTRON-ROLE': translate('model.summary.role.description.NEUTRON-ROLE'),
-      'IRONIC-COMPUTE-ROLE': translate('model.summary.role.description.IRONIC-COMPUTE-ROLE')
-    };
-    var NOT_FOUND = translate('model.summary.role.description.NOT_FOUND');
-    var role = this.state.controlPlane.getIn(this.getKey(this.state.activeItem, 1)).get('server-role');
-    let desc = descriptions[role] || NOT_FOUND;
-
-    return <InfoBanner message={desc} />;
+    const NOT_FOUND = translate('model.summary.role.description.NOT_FOUND');
+    const role = this.state.controlPlane.getIn(this.getKey(this.state.activeItem, 1)).get('server-role');
+    const description = translate('model.summary.role.description.' + role);
+    return <InfoBanner message={description.startsWith('model.summary.role.description.') ?
+      NOT_FOUND : description}/>;
   }
 
   // convert a delimited string (normally the state.activeItem) into a list.  Optionally

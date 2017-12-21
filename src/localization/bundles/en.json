@@ -375,6 +375,8 @@
     "model.summary.role.displayname.SWPAC-ROLE" : "SWPAC Nodes",
     "model.summary.role.displayname.NEUTRON-ROLE" : "Neutron Nodes",
     "model.summary.role.displayname.IRONIC-COMPUTE-ROLE" : "Ironic Compute Nodes",
+    "model.summary.role.displayname.ESX-COMPUTE-ROLE" : "ESX Compute Nodes",
+    "model.summary.role.displayname.OVSVAPP-ROLE" : "OVSVAPP Nodes",
 
     "model.summary.role.description.CONTROLLER-ROLE" : "Controllers are an essential component of an OpenStack Cloud. We will deploy services such as Keystone, Horizon, Glance here.",
     "model.summary.role.description.COMPUTE-ROLE" : "Compute nodes is where your workload will eventually run. We will host services such as Nova on those machines. Make sure those machines have enough capacity.",
@@ -387,7 +389,9 @@
     "model.summary.role.description.CORE-ROLE" : "Describe Core Nodes",
     "model.summary.role.description.SWPAC-ROLE" : "Describe SWPAC Nodes",
     "model.summary.role.description.NEUTRON-ROLE" : "Describe Neutron Nodes",
+    "model.summary.role.description.ESX-COMPUTE-ROLE" : "Describe ESX Compute Nodes",
+    "model.summary.role.description.OVSVAPP-ROLE" : "Describe OVSVAPP Nodes",
     "model.summary.role.description.IRONIC-COMPUTE-ROLE" : "Describe Ironic Compute Nodes",
     "model.summary.role.description.NOT_FOUND" : "Describe the fact that the customer must have created this role",
-    "model.summary.role.component.NOT_FOUND": "Custom component type"
+    "model.summary.role.component.NOT_FOUND": "Custom Component Nodes"
 }
