@@ -100,8 +100,22 @@ class NicMappingTab extends Component {
     });
   }
 
-  isFormValid = () => this.state.isNameValid && this.state.detailRows.every(e =>
-    e.get('isBusAddressValid') && e.get('isLogicalNameValid'))
+  isSaveAllowed = () => {
+    // The save button is allowed if the values are all valid and there is
+    // some change compared to the initial values
+
+    const isValid = this.state.isNameValid && this.state.detailRows.every(e =>
+      e.get('isBusAddressValid') && e.get('isLogicalNameValid'));
+    if (!isValid)
+      return false;
+
+    // If we are in add mode, then something has changed, so return true
+    if (this.state.mode === MODE.ADD)
+      return true;
+
+    return this.getSortedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow])
+      !== this.getUpdatedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow]);
+  }
 
   newDetailRow = () => Map({
     'logical-name':'',
@@ -144,7 +158,9 @@ class NicMappingTab extends Component {
     });
   }
 
-  saveDetails = () => {
+
+  // return a new Immutable model with the values updated from the form
+  getUpdatedModel = () => {
     let nicMap = Map({
       'name': this.state.nicMappingName,
       'physical-ports': this.state.detailRows.map(e => e.set('type','simple-port')
@@ -156,10 +172,17 @@ class NicMappingTab extends Component {
     if (this.state.mode === MODE.ADD) {
       model = this.props.model.updateIn(['inputModel', 'nic-mappings'], list => list.push(nicMap));
     } else {
-      model = this.getSortedModel().setIn(['inputModel', 'nic-mappings', this.state.activeRow], nicMap);
+      // Merge in the new entries from the form
+      model = this.getSortedModel().mergeDeepIn(['inputModel', 'nic-mappings', this.state.activeRow], nicMap)
+        // Remove any entries that no longer exist
+        .updateIn(['inputModel', 'nic-mappings', this.state.activeRow, 'physical-ports'],
+          list => list.setSize(this.state.detailRows.size));
     }
+    return model;
+  }
 
-    this.props.updateGlobalState('model', model);
+  saveDetails = () => {
+    this.props.updateGlobalState('model', this.getUpdatedModel());
     this.setState({mode: MODE.NONE});
   }
 
@@ -238,7 +261,7 @@ class NicMappingTab extends Component {
                     displayLabel={translate('cancel')}/>
 
                   <ActionButton key='save' clickAction={this.saveDetails}
-                    displayLabel={translate('save')} isDisabled={!this.isFormValid()}/>
+                    displayLabel={translate('save')} isDisabled={!this.isSaveAllowed()}/>
                 </div>
               </div>
             </div>
