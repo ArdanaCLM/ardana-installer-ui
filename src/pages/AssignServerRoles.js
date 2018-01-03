@@ -28,6 +28,7 @@ import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import ServerTable from '../components/ServerTable.js';
 import ViewServerDetails from './AssignServerRoles/ViewServerDetails';
+import BaremetalSettings from './AssignServerRoles/BaremetalSettings';
 import EditServerDetails from '../components/EditServerDetails.js';
 import { importCSV } from '../utils/CsvImporter.js';
 import { fromJS } from 'immutable';
@@ -105,7 +106,10 @@ class AssignServerRoles extends BaseWizardPage {
       showEditServerModal: false,
 
       // active row data to pass into details modal
-      activeRowData: undefined
+      activeRowData: undefined,
+
+      // show baremetal settings modal
+      showBaremetalSettings: false
     };
   }
 
@@ -1100,6 +1104,18 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
+  closeBaremetalSettings = () => {
+    this.setState({showBaremetalSettings: false});
+  }
+
+  renderBaremetalSettings = () => {
+    return (
+      <BaremetalSettings show={this.state.showBaremetalSettings}
+        model={this.props.model} cancelAction={this.closeBaremetalSettings}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
+  }
+
   renderAvailableServersTabs() {
     return (
       <Tabs
@@ -1285,7 +1301,15 @@ class AssignServerRoles extends BaseWizardPage {
     return (
       <div className='wizard-page'>
         <div className='content-header'>
-          {this.renderHeading(translate('add.server.heading'))}
+          <div className='titleBox'>
+            {this.renderHeading(translate('add.server.heading'))}
+          </div>
+          <div className='buttonBox'>
+            <div className='btn-row'>
+              <ActionButton displayLabel={translate('add.server.set.network')}
+                clickAction={() => this.setState({showBaremetalSettings: true})}/>
+            </div>
+          </div>
         </div>
         <div id='AssignServerRoleId' className='wizard-content'>
           {this.renderServerRoleContent()}
@@ -1295,6 +1319,7 @@ class AssignServerRoles extends BaseWizardPage {
           {this.renderEditServerDetailsModal()}
           {this.renderLoadingMask()}
           {this.renderErrorMessage()}
+          {this.renderBaremetalSettings()}
         </div>
         {this.renderNavButtons()}
       </div>
