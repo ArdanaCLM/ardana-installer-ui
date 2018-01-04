@@ -17,11 +17,12 @@ import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
 import { ServerInput, getModelIndexByName } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
-import { UniqueNameValidator } from '../../utils/InputValidators.js';
+import { UniqueNameValidator, YamlValidator } from '../../utils/InputValidators.js';
 import { InlineAddRemoveInput } from '../../components/InlineAddRemoveFields.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
 import { YesNoModal } from '../../components/Modals.js';
+import { dump,  safeLoad } from 'js-yaml';
 
 class DiskModelDetails extends Component {
   constructor(props) {
@@ -43,7 +44,8 @@ class DiskModelDetails extends Component {
         showRemoveVGConfirmation: false,
         showRemoveDGConfirmation: false,
         showRemoveLVConfirmation: false,
-        selectedRow: undefined
+        selectedRow: undefined,
+        consumerAttrsValid: true
       };
       this.dmMode = MODE.ADD;
     } else {
@@ -63,7 +65,8 @@ class DiskModelDetails extends Component {
         showRemoveVGConfirmation: false,
         showRemoveDGConfirmation: false,
         showRemoveLVConfirmation: false,
-        selectedRow: undefined
+        selectedRow: undefined,
+        consumerAttrsValid: true
       };
       this.dmMode = MODE.EDIT;
       this.origDKName = props.diskModel.name;
@@ -72,6 +75,7 @@ class DiskModelDetails extends Component {
       this.origDGs = JSON.parse(JSON.stringify(props.diskModel.deviceGroups.sort(
         (a,b) => alphabetically(a.name, b.name))));
     }
+    this.consumerAttrs = undefined;
     this.secondDetails = '';
   }
 
@@ -123,12 +127,6 @@ class DiskModelDetails extends Component {
       this.setState(prevState => {
         let newDGConsumer = prevState.deviceGroupConsumer;
         newDGConsumer.usage = value;
-        return {deviceGroupConsumer: newDGConsumer};
-      });
-    } else if (e.target.name === 'dgConsumerAttrs') {
-      this.setState(prevState => {
-        let newDGConsumer = prevState.deviceGroupConsumer;
-        newDGConsumer.attrs = value;
         return {deviceGroupConsumer: newDGConsumer};
       });
     }
@@ -332,6 +330,11 @@ class DiskModelDetails extends Component {
     }
   }
 
+  handleDeviceGroupConsumerAttrs = (value, valid) => {
+    this.consumerAttrs = value;
+    this.setState({consumerAttrsValid: valid});
+  }
+
   addDeviceGroup = () => {
     if (this.secondDetails === '' && !this.state.showThirdDetails) {
       this.props.extendAction(2);
@@ -353,10 +356,24 @@ class DiskModelDetails extends Component {
       this.origDGName = selected.name;
       this.origDGDevices = selected.devices.map((device) => {return device.name;}).sort();
       this.origDGConsumer = selected.consumer;
+      if (this.origDGConsumer.attrs) {
+        try {
+          this.origConsumerAttrs = dump(this.origDGConsumer.attrs);
+        } catch (e) {
+          console.log('Unable to dump original consumer attrs as yaml :', e); // eslint-disable-line no-console
+        }
+      }
     }
   }
 
   renderDeviceGroup = () => {
+    if (this.state.deviceGroupConsumer.attrs && this.consumerAttrs === undefined) {
+      try {
+        this.consumerAttrs = dump(this.state.deviceGroupConsumer.attrs);
+      } catch (e) {
+        console.log('Unable to dump consumer attrs as yaml :', e); // eslint-disable-line no-console
+      }
+    }
     return (
       <div>
         <div className='details-group-title'>{translate('device.group.devices') + ':'}</div>
@@ -372,8 +389,9 @@ class DiskModelDetails extends Component {
           inputType='text' inputAction={this.handleInputLine}/>
         <div className='details-group-title'>{translate('device.group.consumer.attrs') + ':'}</div>
         <ServerInput placeholder={translate('device.group.consumer.attrs')}
-          inputValue={this.state.deviceGroupConsumer.attrs || ''} inputName='dgConsumerAttrs'
-          inputType='text' inputAction={this.handleInputLine}/>
+          inputValue={this.consumerAttrs} inputName='dgConsumerAttrs'
+          inputType='textarea' inputValidate={YamlValidator}
+          inputAction={(e, valid) => this.handleDeviceGroupConsumerAttrs(e.target.value, valid)}/>
       </div>
     );
   }
@@ -404,7 +422,8 @@ class DiskModelDetails extends Component {
           this.state.deviceGroupConsumer.name && this.state.deviceGroupConsumer.name !== '' &&
           this.state.deviceGroupDevices.length > 0 &&
           ((this.state.deviceGroupConsumer.usage && this.state.deviceGroupConsumer.usage !== '') ||
-           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== ''));
+           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== '' &&
+            this.state.consumerAttrsValid));
       } else {
         // in edit mode - check if value in each field has changed
         const devices = this.state.deviceGroupDevices.slice().sort();
@@ -412,12 +431,13 @@ class DiskModelDetails extends Component {
           this.state.deviceGroupConsumer.name && this.state.deviceGroupConsumer.name !== '' &&
           this.state.deviceGroupDevices.length > 0 &&
           ((this.state.deviceGroupConsumer.usage && this.state.deviceGroupConsumer.usage !== '') ||
-           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== ''))) &&
+           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== '' &&
+            this.state.consumerAttrsValid))) &&
           (this.state.deviceGroup.name !== this.origDGName ||
            JSON.stringify(devices) !== JSON.stringify(this.origDGDevices) ||
            this.state.deviceGroupConsumer.name !== this.origDGConsumer.name ||
            this.state.deviceGroupConsumer.usage !== this.origDGConsumer.usage ||
-           this.state.deviceGroupConsumer.attrs !== this.origDGConsumer.attrs);
+           this.consumerAttrs !== this.origConsumerAttrs);
       }
     }
   }
@@ -448,6 +468,11 @@ class DiskModelDetails extends Component {
       this.setState(prevState => {
         let newDG = prevState.deviceGroup;
         newDG.consumer = prevState.deviceGroupConsumer;
+        try {
+          newDG.consumer.attrs = safeLoad(this.consumerAttrs);
+        } catch (e) {
+          console.log('Unable to load consumer attrs from yaml :', e); // eslint-disable-line no-console
+        }
         newDG.devices = prevState.deviceGroupDevices.map((device) => {return {name: device};});
         let newDGs = prevState.deviceGroups;
         if (this.dgMode === MODE.ADD) {
@@ -459,6 +484,7 @@ class DiskModelDetails extends Component {
             this.origDGName = '';
             this.origDGDevices = [];
             this.origDGConsumer = {};
+            this.origConsumerAttrs = undefined;
           }
         }
         return {
