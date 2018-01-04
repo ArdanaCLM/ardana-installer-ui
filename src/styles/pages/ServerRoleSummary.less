@@ -122,6 +122,13 @@
         }
       }
 
+      .network-section, .detail-line, .server-input {
+         width: 100%;
+        input {
+          width: 100%;
+        }
+      }
+
       .field-container {
         width: 85%;
         display: flex;
@@ -152,6 +159,7 @@
     }
     &.network-section {
       width: 100%;
+      min-height: 48em;
     }
   }
 
@@ -215,11 +223,16 @@
     }
     .server-detail-select select {
       padding: 4px;
-      width: 90%;
+      width: 85%;
     }
     .details-section .details-body .server-input input {
       padding: 4px;
-      width: 90%;
+      width: 85%;
+    }
+
+    .details-section .details-body .dropdown-plus-minus .server-input input {
+      padding: 4px;
+      width: 100%;
     }
   }
 

@@ -30,6 +30,8 @@ const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
 const STRING_WITH_NO_SPACES = /^\S+$/;
+const IPV4ADDRESS_RANGE =
+  /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
 export function IpV4AddressValidator(ipAddress) {
   let retValue = {
@@ -170,6 +172,44 @@ export function CidrValidator(cidr) {
   };
 }
 
+export function AddressesValidator(addresses) {
+  let retValue = {
+    isValid: true,
+    errorMsg: ''
+  };
+
+  // just one IPV4 address
+  if(addresses && addresses.indexOf('-') === -1) {
+    if(IPV4ADDRESS.exec(addresses.trim()) === null) {
+      retValue.isValid = false;
+      retValue.errorMsg = translate('input.validator.addresses.error');
+      return retValue;
+    }
+  }
+
+  if(addresses && addresses.indexOf('-') !== -1) { // just one range
+    if (IPV4ADDRESS_RANGE.exec(addresses.trim()) === null) {
+      retValue.isValid = false;
+      retValue.errorMsg = translate('input.validator.addresses.error');
+      return retValue;
+    }
+
+    var ips = addresses.replace(/\s/g, '').split('-');
+    var s_ip = ips[0];
+    var e_ip = ips[1];
+    var s_ip_num = ipAddrToInt(s_ip);
+    var e_ip_num = ipAddrToInt(e_ip);
+
+    if (s_ip_num >= e_ip_num) {
+      retValue.isValid = false;
+      retValue.errorMsg = translate('input.validator.addresses.error');
+      return retValue;
+    }
+  }
+
+  return retValue;
+}
+
 export function UniqueNameValidator(name, props) {
   let retValue = {
     isValid: true,
@@ -198,3 +238,4 @@ export function YamlValidator(text) {
     return { isValid: false, errorMsg: translate('input.validator.yaml.error')};
   }
 }
+
