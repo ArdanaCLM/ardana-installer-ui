@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IpV4AddressValidator } from '../../utils/InputValidators.js';
+import { IpV4AddressValidator, NetmaskValidator } from '../../utils/InputValidators.js';
 import { ServerInputLine } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 
@@ -26,13 +26,15 @@ class BaremetalSettings extends Component {
     const baremetal = this.props.model.getIn(['inputModel', 'baremetal']).toJS()
     this.state = {
       subnet: baremetal.subnet,
-      netmask: baremetal.netmask
+      netmask: baremetal.netmask,
+      valid: true
     }
     this.origBaremetal = JSON.parse(JSON.stringify(baremetal));
   }
 
   handleInputChange = (e, valid, props) => {
     let value = e.target.value;
+    this.setState({valid: valid});
     if (valid) {
       let key = props.inputName;
       if (key === 'netmask') {
@@ -44,8 +46,8 @@ class BaremetalSettings extends Component {
   }
 
   checkSettingsChanged = () => {
-    return (this.origBaremetal.netmask !== this.state.netmask) ||
-      (this.origBaremetal.subnet !== this.state.subnet);
+    return this.state.valid && ((this.origBaremetal.netmask !== this.state.netmask) ||
+      (this.origBaremetal.subnet !== this.state.subnet));
   }
 
   cancelBaremetalSettings = () => {
@@ -78,11 +80,11 @@ class BaremetalSettings extends Component {
         title={translate('add.server.set.network')} onHide={this.props.cancelAction} footer={footer}>
         <div className='description-line'>{translate('add.server.set.network.description')}</div>
         <div className='server-details-container'>
-          <ServerInputLine label={'add.server.set.network.subnet'}
+          <ServerInputLine isRequired={true} label={'add.server.set.network.subnet'}
             inputName={'subnet'} inputType={'text'} inputValidate={IpV4AddressValidator}
             inputAction={this.handleInputChange} inputValue={this.state.subnet}/>
-          <ServerInputLine label={'add.server.set.network.netmask'}
-            inputName={'netmask'} inputType={'text'} inputValidate={IpV4AddressValidator}
+          <ServerInputLine isRequired={true} label={'add.server.set.network.netmask'}
+            inputName={'netmask'} inputType={'text'} inputValidate={NetmaskValidator}
             inputAction={this.handleInputChange} inputValue={this.state.netmask}/>
         </div>
       </ConfirmModal>

@@ -30,6 +30,8 @@ const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:3[0-2]|[1-2]?[0-9])$/;
 const STRING_WITH_NO_SPACES = /^\S+$/;
+const NETMASK =
+  /^(((255\.){3}(255|254|252|248|240|224|192|128|0+))|((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\.0+){3}))$/;
 
 export function IpV4AddressValidator(ipAddress) {
   let retValue = {
@@ -168,4 +170,17 @@ export function YamlValidator(text) {
   } catch (e) {
     return { isValid: false, errorMsg: translate('input.validator.yaml.error')};
   }
+}
+
+export function NetmaskValidator(netmask) {
+  let retValue = {
+    isValid: true,
+    errorMsg: ''
+  };
+
+  if(NETMASK.exec(netmask) === null) {
+    retValue.isValid = false;
+    retValue.errorMsg = translate('input.validator.netmask.error');
+  }
+  return retValue;
 }
