@@ -28,7 +28,7 @@ const PORT = /^0*(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5]
 const PCI_ADDRESS = /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$/;
 const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
-  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:3[0-2]|[1-2]?[0-9])$/;
+  /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
 const STRING_WITH_NO_SPACES = /^\S+$/;
 
 export function IpV4AddressValidator(ipAddress) {
@@ -128,17 +128,46 @@ export function VLANIDValidator(vlanid) {
   return retValue;
 }
 
+
+// Convert an IP address (e.g. 10.1.0.24) into its equivalent integer (167837720)
+function ipAddrToInt(ip) {
+  // Split string into array of octets, converted to integers
+  const octets = ip.split('.').map(n => parseInt(n, 10));
+
+  // Convert to an integer.  The trailing >>> 0 converts the number to unsigned so we
+  // don't get huge negative values
+  return ((octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3]) >>> 0;
+}
+
 export function CidrValidator(cidr) {
-  let retValue = {
+
+  const match = CIDR.exec(cidr);
+  if(match === null) {
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.cidr.error')
+    };
+  }
+
+  // match[1] is the ip address, match[2] is number of leading bits (the part after the slash)
+  const ip = ipAddrToInt(match[1]);
+  const bits = parseInt(match[2]);
+
+  // Verify that all of the values in the IP address portion after the leading
+  // bits are zeros.  For example, the CIDR 192.168.1.0/24 would be an integer address
+  // value of 0xC0A80100, and the last 8 bits (32-24) are required to be zeros.
+  if ((ip & (0xffffffff >>> bits)) !== 0)
+  {
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.cidr.error')
+    };
+  }
+
+  return {
     isValid: true,
     errorMsg: ''
   };
-
-  if(CIDR.exec(cidr) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.cidr.error');
-  }
-  return retValue;
 }
 
 export function UniqueNameValidator(name, props) {
