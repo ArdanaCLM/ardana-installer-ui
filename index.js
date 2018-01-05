@@ -32,7 +32,5 @@ render(Deployer);
 
 
 if (module.hot) {
-  module.hot.accept('./src/Deployer', () => {
-    const Deployer = require('./src/Deployer.js').default;
-    render(Deployer); });
+  module.hot.accept('./src/Deployer', () => { render(Deployer); });
 }
