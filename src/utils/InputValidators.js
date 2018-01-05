@@ -30,8 +30,12 @@ const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
 const STRING_WITH_NO_SPACES = /^\S+$/;
-const NETMASK =
-  /^(((255\.){3}(255|254|252|248|240|224|192|128|0+))|((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\.0+){3}))$/;
+const NETMASK = new RegExp('' +
+  /^((255\.){3}(255|254|252|248|240|224|192|128|0+))|/.source +
+  /((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|/.source +
+  /((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|/.source +
+  /((255|254|252|248|240|224|192|128|0+)(\.0+){3})$/.source
+);
 
 export function IpV4AddressValidator(ipAddress) {
   let retValue = {
@@ -207,9 +211,16 @@ export function NetmaskValidator(netmask) {
     errorMsg: ''
   };
 
-  if(NETMASK.exec(netmask) === null) {
+  if (NETMASK.exec(netmask) === null) {
     retValue.isValid = false;
     retValue.errorMsg = translate('input.validator.netmask.error');
   }
   return retValue;
+}
+
+// Validate that the ip address belongs to the netmask
+export function IpInNetmaskValidator(ip, netmask) {
+  const ipInt = ipAddrToInt(ip);
+  const netmaskInt = ipAddrToInt(netmask);
+  return (ipInt & netmaskInt) >>> 0 === ipInt;
 }

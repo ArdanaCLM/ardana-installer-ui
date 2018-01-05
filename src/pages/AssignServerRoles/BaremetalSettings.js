@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IpV4AddressValidator, NetmaskValidator } from '../../utils/InputValidators.js';
+import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator } from '../../utils/InputValidators.js';
 import { ServerInputLine } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 
@@ -23,26 +23,32 @@ class BaremetalSettings extends Component {
 
   constructor(props) {
     super(props);
-    const baremetal = this.props.model.getIn(['inputModel', 'baremetal']).toJS()
+    const baremetal = this.props.model.getIn(['inputModel', 'baremetal']).toJS();
     this.state = {
       subnet: baremetal.subnet,
       netmask: baremetal.netmask,
-      valid: true
-    }
+      valid: true,
+      maskingError: ''
+    };
     this.origBaremetal = JSON.parse(JSON.stringify(baremetal));
   }
 
   handleInputChange = (e, valid, props) => {
     let value = e.target.value;
-    this.setState({valid: valid});
+    let checkMaskingMsg = '';
     if (valid) {
       let key = props.inputName;
       if (key === 'netmask') {
         this.setState({netmask: value});
+        checkMaskingMsg = IpInNetmaskValidator(this.state.subnet, value) ? '' :
+          translate('input.validator.netmask.ipinvalid.error');
       } else {
         this.setState({subnet: value});
+        checkMaskingMsg = IpInNetmaskValidator(value, this.state.netmask) ? '' :
+          translate('input.validator.netmask.ipinvalid.error');
       }
     }
+    this.setState({maskingError: checkMaskingMsg, valid: valid && checkMaskingMsg === ''});
   }
 
   checkSettingsChanged = () => {
@@ -63,6 +69,8 @@ class BaremetalSettings extends Component {
     let model = this.props.model;
     model = model.updateIn(['inputModel', 'baremetal'], settings => newSettings);
     this.props.updateGlobalState('model', model);
+    this.origBaremetal.subnet = this.state.subnet;
+    this.origBaremetal.netmask = this.state.netmask;
     this.props.cancelAction();
   }
 
@@ -86,6 +94,14 @@ class BaremetalSettings extends Component {
           <ServerInputLine isRequired={true} label={'add.server.set.network.netmask'}
             inputName={'netmask'} inputType={'text'} inputValidate={NetmaskValidator}
             inputAction={this.handleInputChange} inputValue={this.state.netmask}/>
+          <div className='detail-line'>
+            <div className='detail-heading'></div>
+            <div className='input-body'>
+              <div className='server-input'>
+                <div className='error-message'>{this.state.maskingError}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </ConfirmModal>
     );

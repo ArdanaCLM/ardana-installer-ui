@@ -356,6 +356,7 @@
     "input.validator.name.spaces.error": "Name should not contain spaces",
     "input.validator.yaml.error": "Invalid YAML",
     "input.validator.netmask.error": "Please enter a valid netmask",
+    "input.validator.netmask.ipinvalid.error": "Netmask is valid but does not contain the specified subnet",
 
     "clouddeploy.installsteps.ConfigPage": "Deployment Configuration",
     "clouddeploy.installsteps.InstallIntro": "Introduction",
