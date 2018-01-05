@@ -334,9 +334,27 @@ class InterfaceModelsTab extends Component {
   }
 
 
-  isInterfaceModelValid = () => this.state.isInterfaceModelNameValid &&
-    this.state.detailMode === MODE.NONE &&
-    this.state.interfaceModel.get('network-interfaces').size > 0
+  isInterfaceModelSaveAllowed = () => {
+    // The save button is allowed if the values are all valid and there is
+    // some change compared to the initial values
+    const isValid =
+      this.state.isInterfaceModelNameValid &&
+      this.state.detailMode === MODE.NONE &&
+      this.state.interfaceModel.get('network-interfaces').size > 0;
+
+    if (!isValid)
+      return false;
+
+    // If we are in add mode, then something has changed, so return true
+    if (this.state.overallMode === MODE.ADD)
+      return true;
+
+    const originalModel = this.getSortedModel().getIn(['inputModel', 'interface-models', this.state.activeOverallRow]);
+
+    // Note simply comparing the overall object (originalModel === this.state.interfaceModel) will incorrectly return
+    // false if the user changes the name and changes it back (e.g. oldname -> newname -> oldname)
+    return ! this.state.interfaceModel.equals(originalModel);
+  }
 
   // Render the first detail box, which is for editing interface model details
   renderModelDetails = () => {
@@ -409,7 +427,7 @@ class InterfaceModelsTab extends Component {
                     isDisabled={this.state.detailMode !== MODE.NONE} />
 
                   <ActionButton key='save' clickAction={this.saveModel}
-                    displayLabel={translate('save')} isDisabled={!this.isInterfaceModelValid()}/>
+                    displayLabel={translate('save')} isDisabled={!this.isInterfaceModelSaveAllowed()}/>
                 </div>
               </div>
             </div>
@@ -451,47 +469,66 @@ class InterfaceModelsTab extends Component {
 
   saveNetworkInterface = () => {
     this.setState(prev => {
-      let networkInterface = prev.networkInterface;
-      if (networkInterface.has('bond-data')) {
-
-        networkInterface = networkInterface
-          .setIn(['bond-data', 'devices'], prev.deviceList)
-          .setIn(['device', 'name'], prev.bondDeviceName);
-
-        try {
-          networkInterface = networkInterface.setIn(['bond-data', 'options'], safeLoad(prev.bondOptions));
-        } catch (e) {
-          console.log('Unable to load bond-data from yaml :', e); // eslint-disable-line no-console
-        }
-      } else {
-        networkInterface = networkInterface.set('device', prev.deviceList.get(0));
-      }
-
-      let interfaceModel;
-      if (prev.detailMode === MODE.ADD) {
-        interfaceModel = prev.interfaceModel.updateIn(['network-interfaces'], list =>
-          list.push(networkInterface));
-      } else {
-        interfaceModel = prev.interfaceModel.setIn(['network-interfaces', prev.activeDetailRow], networkInterface);
-      }
-
 
       return {
         detailMode: MODE.NONE,
-        interfaceModel: interfaceModel,
+        interfaceModel: this.getUpdatedInterfaceModel(prev),
         networkInterface: undefined,
       };
     });
   }
 
-  isNetworkInterfaceValid = () =>
-    this.state.isInterfaceNameValid &&
-    this.state.deviceList.last().get('name') !== undefined &&
-    this.state.networkInterface.get('network-groups').last() !== undefined &&
-    (! this.state.networkInterface.has('bond-data') || (
-      this.state.isBondOptionsValid  &&
-      this.state.isBondDeviceNameValid
-    ))
+  getUpdatedInterfaceModel = (prevState) => {
+
+    let networkInterface = prevState.networkInterface;
+    if (networkInterface.has('bond-data')) {
+
+      networkInterface = networkInterface
+        .setIn(['bond-data', 'devices'], prevState.deviceList)
+        .setIn(['device', 'name'], prevState.bondDeviceName);
+
+      try {
+        networkInterface = networkInterface.setIn(['bond-data', 'options'], fromJS(safeLoad(prevState.bondOptions)));
+      } catch (e) {
+        console.log('Unable to load bond-data from yaml :', e); // eslint-disable-line no-console
+      }
+    } else {
+      networkInterface = networkInterface.set('device', prevState.deviceList.get(0));
+    }
+
+    let interfaceModel;
+    if (prevState.detailMode === MODE.ADD) {
+      interfaceModel = prevState.interfaceModel.updateIn(['network-interfaces'], list =>
+        list.push(networkInterface));
+    } else {
+      interfaceModel = prevState.interfaceModel.setIn(['network-interfaces', prevState.activeDetailRow],
+        networkInterface);
+    }
+
+    return interfaceModel;
+  }
+
+  isNetworkInterfaceSaveAllowed = () => {
+    // The save button is allowed if the values are all valid and there is
+    // some change compared to the initial values
+    const isValid =
+      this.state.isInterfaceNameValid &&
+      this.state.deviceList.last().get('name') !== undefined &&
+      this.state.networkInterface.get('network-groups').last() !== undefined &&
+      (! this.state.networkInterface.has('bond-data') || (
+        this.state.isBondOptionsValid  &&
+        this.state.isBondDeviceNameValid
+      ));
+
+    if (!isValid)
+      return false;
+
+    // If we are in add mode, then something has changed, so return true
+    if (this.state.detailMode === MODE.ADD)
+      return true;
+
+    return ! this.getUpdatedInterfaceModel(this.state).equals(this.state.interfaceModel);
+  }
 
   // Render the second detail box, which is for editing interface details
   renderInterfaceDetails = () => {
@@ -548,7 +585,7 @@ class InterfaceModelsTab extends Component {
                     displayLabel={translate('cancel')}/>
 
                   <ActionButton key='save' clickAction={this.saveNetworkInterface}
-                    displayLabel={translate('save')} isDisabled={!this.isNetworkInterfaceValid()}/>
+                    displayLabel={translate('save')} isDisabled={!this.isNetworkInterfaceSaveAllowed()}/>
                 </div>
               </div>
             </div>
