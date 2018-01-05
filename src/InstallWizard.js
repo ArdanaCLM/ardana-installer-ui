@@ -201,11 +201,15 @@ class InstallWizard extends Component {
     } else {
       steps[this.state.currentStep].stepProgress = STATUS.COMPLETE;
 
-
       //verify that there is a next page
       if (steps[(this.state.currentStep + 1)]) {
-        //update the next step to inprogress
-        steps[(this.state.currentStep + 1)].stepProgress = STATUS.IN_PROGRESS;
+        //set the last step to complete if there's no error at the step before last
+        if (this.state.currentStep === steps.length - 2) {
+          steps[this.state.currentStep + 1].stepProgress = STATUS.COMPLETE;
+        } else {
+          //update the next step to in-progress
+          steps[(this.state.currentStep + 1)].stepProgress = STATUS.IN_PROGRESS;
+        }
 
         //prepared to advance to the next page
         stateUpdates.currentStep = this.state.currentStep + 1;

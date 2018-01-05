@@ -137,10 +137,10 @@ class CloudDeployProgress extends BaseWizardPage {
       payload['extraVars']['automate'] = 'true';
       if (this.props.deployConfig['encryptKey']) {
         payload['extraVars']['encrypt'] = this.props.deployConfig['encryptKey'];
-        payload['extraVars']['rekey'] = "";
+        payload['extraVars']['rekey'] = '';
       } else {
-        payload['extraVars']['encrypt'] = "";
-        payload['extraVars']['rekey'] = "";
+        payload['extraVars']['encrypt'] = '';
+        payload['extraVars']['rekey'] = '';
       }
     }
 
