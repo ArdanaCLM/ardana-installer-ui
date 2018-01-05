@@ -15,13 +15,14 @@
 import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
-import { ServerInputLine, ServerDropdownLine } from '../../components/ServerUtils.js';
+import { ServerInputLine, ServerDropdownLine, ServerInput } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator
+  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator
 } from '../../utils/InputValidators.js';
 import { MODE, INPUT_STATUS } from '../../utils/constants.js';
+import HelpText from '../../components/HelpText.js';
 
 class UpdateNetworks extends Component {
   constructor(props) {
@@ -35,12 +36,26 @@ class UpdateNetworks extends Component {
       'gateway-ip': INPUT_STATUS.UNKNOWN
     };
 
+    this.allAddressesStatus = [];
+
     this.state = {
       isFormValid: false,
       isFormChanged: false,
+      addresses: this.initAddresses(),
       isTaggedChecked:
         this.data['tagged-vlan'] !== '' && this.data['tagged-vlan'] !== undefined ?  this.data['tagged-vlan'] : false,
     };
+  }
+
+  initAddresses() {
+    // for UI state addresses
+    let retAddresses = this.data['addresses'] ? this.data['addresses'] : [];
+
+    // init validation status
+    this.allAddressesStatus = retAddresses.map((addr) => {
+      return INPUT_STATUS.VALID;
+    });
+    return retAddresses;
   }
 
   getNetworkData(name) {
@@ -55,7 +70,11 @@ class UpdateNetworks extends Component {
     isAllValid =
       (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;})) &&
       this.allInputsStatus['name'] !== INPUT_STATUS.UNKNOWN &&
-      this.allInputsStatus['vlanid'] !== INPUT_STATUS.UNKNOWN;
+      this.allInputsStatus['vlanid'] !== INPUT_STATUS.UNKNOWN && (
+        this.allAddressesStatus.length === 0 || this.allAddressesStatus.every((val) => {
+          return val === INPUT_STATUS.VALID;
+        })
+      );
 
     return isAllValid;
   }
@@ -91,8 +110,35 @@ class UpdateNetworks extends Component {
       if(props.inputName === 'vlanid') {
         value = parseInt(value);
       }
+
       this.data[props.inputName] = value;
     }
+  }
+
+  handleAddressChange = (e, isValid, props, idx) => {
+    let value = e.target.value;
+    if (isValid) {
+      if(!this.state.isFormChanged) {
+        this.setState({isFormChanged: true});
+      }
+      this.allAddressesStatus[idx] = INPUT_STATUS.VALID;
+
+      // this.data is the final result to be saved into model, init if we don't have any
+      // addresses will be processed when save later
+      if(!this.data['addresses']) {
+        this.data['addresses'] = [];
+      }
+    }
+    else {
+      this.allAddressesStatus[idx] = INPUT_STATUS.INVALID;
+    }
+
+    this.setState(prev => {
+      let addresses = prev.addresses.slice();
+      addresses[idx] = value;
+      return {addresses: addresses};
+    });
+    this.updateFormValidity(props, isValid);
   }
 
   handleUpdateNetwork = () => {
@@ -100,6 +146,16 @@ class UpdateNetworks extends Component {
     for (let key in this.data) {
       if(this.data[key] === undefined || this.data[key] === '') {
         delete this.data[key];
+      }
+
+      if (key === 'addresses') {
+        let cleanAddrs = this.state.addresses.filter(addr => addr !== '');
+        if (cleanAddrs.length === 0) {
+          delete this.data[key];
+        }
+        else {
+          this.data[key] = cleanAddrs;
+        }
       }
     }
 
@@ -130,6 +186,68 @@ class UpdateNetworks extends Component {
     return this.props.model.getIn(['inputModel','network-groups']).map(e => e.get('name'))
       .toJS()
       .sort(alphabetically);
+  }
+
+  removeAddress = (idx) => {
+    this.setState(prev => {
+      let addresses = prev.addresses.slice();
+      addresses.splice(idx, 1);
+      return {addresses: addresses, isFormChanged: true};
+    });
+    // remove status
+    this.allAddressesStatus.splice(idx, 1);
+  }
+
+  addAddress = () => {
+    this.setState(prev => {
+      let addresses = prev.addresses.slice();
+      addresses.push(''); //empty input
+      return {addresses: addresses};
+    });
+  }
+
+  renderNewAddressInput () {
+    return (
+      <div key={0} className='dropdown-plus-minus'>
+        <div className="field-container">
+          <ServerInput
+            inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, 0)}
+            inputType='text' inputValue={''} inputValidate={AddressesValidator}
+            isRequired='false' placeholder={translate('network.addresses')}/>
+        </div>
+      </div>
+    );
+  }
+
+  renderNetworkAddresses () {
+    if(this.state.addresses.length === 0) {
+      return this.renderNewAddressInput();
+    }
+    let addressRows = this.state.addresses.map((addr, idx) => {
+      const lastRow = (idx === this.state.addresses.length -1);
+      return (
+        <div key={idx} className='dropdown-plus-minus'>
+          <div className="field-container">
+            <ServerInput
+              inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, idx)}
+              inputType='text' inputValue={addr} inputValidate={AddressesValidator}
+              isRequired='false' placeholder={translate('network.addresses')}/>
+          </div>
+          <div className='plus-minus-container'>
+            { idx > 0 || (addr !== '') ?
+              <span key={'address_minus'} className={'fa fa-minus left-sign'}
+                onClick={() => this.removeAddress(idx)}/>
+              : ''}
+            { lastRow && (this.allAddressesStatus[idx] !== INPUT_STATUS.INVALID && addr !== '') ?
+              <span key={'address_plus'} className={'fa fa-plus right-sign'}
+                onClick={this.addAddress}/>
+              : ''}
+          </div>
+        </div>
+      );
+    });
+
+    return addressRows;
   }
 
   renderNetworkInput(name, type, isRequired, placeholderText, validate) {
@@ -198,13 +316,18 @@ class UpdateNetworks extends Component {
         <div className='details-header'>{title}</div>
         <div className='details-body'>
           {this.renderNetworkInput('name', 'text', true, translate('network.name') + '*', UniqueNameValidator)}
-          <div className='details-group-title'>{translate('vlanid') + '* :'}</div>
+          <div className='details-group-title'>{translate('vlanid') + '*:'}
+            <HelpText tooltipText={translate('tooltip.network.vlanid')}/></div>
           {this.renderNetworkInput('vlanid', 'number', true, translate('vlanid'), VLANIDValidator)}
-          <div className='details-group-title'>{translate('cidr') + ':'}</div>
+          <div className='details-group-title'>{translate('cidr') + ':'}
+            <HelpText tooltipText={translate('tooltip.network.cidr')}/></div>
           {this.renderNetworkInput('cidr', 'text', false, translate('cidr'), CidrValidator)}
+          <div className='details-group-title'>{translate('network.addresses') + ':'}
+            <HelpText tooltipText={translate('tooltip.network.addresses')}/></div>
+          {this.renderNetworkAddresses()}
           <div className='details-group-title'>{translate('network.gateway') + ':'}</div>
           {this.renderNetworkInput('gateway-ip', 'text', false, translate('network.gateway'), IpV4AddressValidator)}
-          <div className='details-group-title'>{translate('network.group') + ':'}</div>
+          <div className='details-group-title'>{translate('network.group') + '*:'}</div>
           {this.renderNetworkGroup()}
           {this.renderTaggedVLAN()}
           <div className='btn-row details-btn network-more-width'>

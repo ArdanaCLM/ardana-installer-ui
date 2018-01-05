@@ -233,6 +233,8 @@
     "network.add": "Add Network",
     "network.gateway": "Gateway IP",
     "network": "Network",
+    "network.addresses": "Addresses",
+
     "vlanid": "VLAN ID",
     "cidr": "CIDR",
     "gateway": "Gateway",
@@ -352,6 +354,7 @@
     "input.validator.networkinterface.error": "Please enter a valid network interface",
     "input.validator.vlanid.error": "Please enter a valid VLAN id (1-4094)",
     "input.validator.cidr.error": "Please enter a valid CIDR",
+    "input.validator.addresses.error": "Please enter a valid IP address or IP address range",
     "input.validator.uniquename.error": "Name exists, please specify a different name",
     "input.validator.name.spaces.error": "Name should not contain spaces",
     "input.validator.yaml.error": "Invalid YAML",
@@ -399,5 +402,9 @@
     "model.summary.role.description.OVSVAPP-ROLE" : "Describe OVSVAPP Nodes",
     "model.summary.role.description.IRONIC-COMPUTE-ROLE" : "Describe Ironic Compute Nodes",
     "model.summary.role.description.NOT_FOUND" : "Describe the fact that the customer must have created this role",
-    "model.summary.role.component.NOT_FOUND": "Custom Component Nodes"
+    "model.summary.role.component.NOT_FOUND": "Custom Component Nodes",
+
+    "tooltip.network.addresses": "IP addresses used to limit the network access. Addresses could be an IP range or an IP address. For example, 10.0.1.1-10.0.1.10 or 10.0.1.23",
+    "tooltip.network.cidr": "Network address in Classless Inter-Domain Routing notation, such as 10.0.1.0/24",
+    "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094."
 }

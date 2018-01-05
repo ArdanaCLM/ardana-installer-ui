@@ -24,21 +24,40 @@ module.exports = {
   output: {
     filename: 'dist/index.js'
   },
+  devtool: 'cheap-module-source-map',
   module: {
     loaders: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'react-hot-loader/webpack'
+      },
       {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /(node_modules|server.js)/,
         query: {
           cacheDirectory: true,
-          presets: ['react', 'es2015', 'stage-2']
+          presets: [['env', {
+            // Using https://www.npmjs.com/package/babel-preset-env, determine
+            // which features need to be transpiled based on the browsers we
+            // need to support.
+            'targets': {
+              'browsers': [
+                'last 2 Chrome versions',
+                'last 2 Firefox versions',
+                'last 2 Edge versions',
+                'IE 11'
+              ]}}],
+
+          // Handle React, especially JSX
+          'react',
+
+          // Permit using arrow functions as class properties.
+          // See https://babeljs.io/docs/plugins/preset-stage-2 for more
+          'stage-2'
+          ]
         }
-      },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'react-hot-loader/webpack'
       },
       {
         test: /\.css$/,
