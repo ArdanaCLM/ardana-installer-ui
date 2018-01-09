@@ -96,10 +96,10 @@ class NetworksTab extends Component {
         <UpdateNetworks ref={'updateNetwork' + this.state.mode}
           model={this.props.model} mode={this.state.mode} {...extraProps}
           updateGlobalState={this.props.updateGlobalState}
+          setDataChanged={this.props.setDataChanged}
           closeAction={this.handleCancelUpdateNetwork}/>
       </div>
     );
-
   }
 
   renderNetworkTable() {

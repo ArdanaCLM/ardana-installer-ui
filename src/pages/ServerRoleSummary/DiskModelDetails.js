@@ -77,6 +77,9 @@ class DiskModelDetails extends Component {
     }
     this.consumerAttrs = undefined;
     this.secondDetails = '';
+    this.diskModelChanged = false;
+    this.secondDetailsChanged = false;
+    this.thirdDetailsChanged = false;
   }
 
   handleInputLine = (e, valid, props) => {
@@ -276,22 +279,41 @@ class DiskModelDetails extends Component {
   }
 
   checkLVDataToSave = () => {
+    let dataValid = false;
     if (this.lvMode === MODE.ADD) {
-      return this.state.logicalVolume.name !== undefined && this.state.logicalVolume.name !== '' &&
+      dataValid =
+        this.state.logicalVolume.name !== undefined && this.state.logicalVolume.name !== '' &&
         this.state.logicalVolume.size !== undefined && this.state.logicalVolume.size !== '' &&
         this.state.logicalVolume.size !== '0';
+      this.thirdDetailsChanged =
+        (this.state.logicalVolume.name !== undefined && this.state.logicalVolume.name !== '') ||
+        (this.state.logicalVolume.size !== undefined && this.state.logicalVolume.size !== '' &&
+         this.state.logicalVolume.size !== '0') ||
+        (this.state.logicalVolume.mount !== undefined && this.state.logicalVolume.mount !== '') ||
+        (this.state.logicalVolume.fstype !== undefined && this.state.logicalVolume.fstype !== '') ||
+        (this.state.logicalVolume['mkfs-opts'] !== undefined && this.state.logicalVolume['mkfs-opts'] !== '');
     } else {
-      return this.state.logicalVolume.name !== '' &&
+      dataValid = this.state.logicalVolume.name !== '' &&
         this.state.logicalVolume.size !== '' && this.state.logicalVolume.size !== '0' &&
         (this.state.logicalVolume.name !== this.origLV.name ||
          this.state.logicalVolume.size !== this.origLV.size ||
          this.state.logicalVolume.mount !== this.origLV.mount ||
          this.state.logicalVolume.fstype !== this.origLV.fstype ||
          this.state.logicalVolume['mkfs-opts'] !== this.origLV['mkfs-opts']);
+      this.thirdDetailsChanged =
+        (this.state.logicalVolume.name !== '' && this.state.logicalVolume.name !== this.origLV.name) ||
+        (this.state.logicalVolume.size !== '' && this.state.logicalVolume.size !== '0' &&
+         this.state.logicalVolume.size !== this.origLV.size) ||
+        this.state.logicalVolume.mount !== this.origLV.mount ||
+        this.state.logicalVolume.fstype !== this.origLV.fstype ||
+        this.state.logicalVolume['mkfs-opts'] !== this.origLV['mkfs-opts'];
     }
+    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    return dataValid;
   }
 
   closeThirdDetails = () => {
+    this.thirdDetailsChanged = false;
     this.props.extendAction(2);
     this.setState({showThirdDetails: false, logicalVolume: {}});
   }
@@ -401,45 +423,76 @@ class DiskModelDetails extends Component {
   }
 
   checkSecondDetailsDataToSave = () => {
+    let dataValid = false;
     if (this.secondDetails === 'vg') {
       if (this.vgMode === MODE.ADD) {
         // in add mode - check if all fields have values
-        return this.state.volumeGroup.name && this.state.volumeGroup.name !== '' &&
+        dataValid =
+          this.state.volumeGroup.name !== undefined && this.state.volumeGroup.name !== '' &&
           this.state.physicalVolumes.length > 0 && this.state.logicalVolumes.length > 0;
+        this.secondDetailsChanged =
+          (this.state.volumeGroup.name !== undefined && this.state.volumeGroup.name !== '') ||
+          this.state.physicalVolumes.length > 0 || this.state.logicalVolumes.length > 0;
       } else {
         // in edit mode - check if value in each field has changed
         const pvs = this.state.physicalVolumes.slice().sort();
-        return (this.state.volumeGroup.name && this.state.volumeGroup.name !== '' &&
+        dataValid =
+          (this.state.volumeGroup.name !== undefined && this.state.volumeGroup.name !== '' &&
           this.state.physicalVolumes.length > 0 && this.state.logicalVolumes.length > 0) &&
           (this.state.volumeGroup.name !== this.origVGName ||
           JSON.stringify(pvs) !== JSON.stringify(this.origVGPhysicalVolumes) ||
           JSON.stringify(this.state.logicalVolumes) !== JSON.stringify(this.origVGLogicalVolumes));
+        this.secondDetailsChanged =
+          (this.state.volumeGroup.name !== undefined && this.state.volumeGroup.name !== '' &&
+           this.state.volumeGroup.name !== this.origVGName) ||
+          JSON.stringify(pvs) !== JSON.stringify(this.origVGPhysicalVolumes) ||
+          JSON.stringify(this.state.logicalVolumes) !== JSON.stringify(this.origVGLogicalVolumes);
       }
     } else {
       if (this.dgMode === MODE.ADD) {
         // in add mode - check if name and one of consumer usage or attributes is provided
-        return this.state.deviceGroup.name && this.state.deviceGroup.name !== '' &&
-          this.state.deviceGroupConsumer.name && this.state.deviceGroupConsumer.name !== '' &&
+        dataValid =
+          this.state.deviceGroup.name !== undefined && this.state.deviceGroup.name !== '' &&
+          this.state.deviceGroupConsumer.name !== undefined && this.state.deviceGroupConsumer.name !== '' &&
           this.state.deviceGroupDevices.length > 0 &&
-          ((this.state.deviceGroupConsumer.usage && this.state.deviceGroupConsumer.usage !== '') ||
-           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== '' &&
-            this.state.consumerAttrsValid));
+          ((this.state.deviceGroupConsumer.usage !== undefined && this.state.deviceGroupConsumer.usage !== '') ||
+           (this.state.deviceGroupConsumer.attrs !== undefined && this.state.deviceGroupConsumer.attrs !== ''));
+        this.secondDetailsChanged =
+          (this.state.deviceGroup.name !== undefined && this.state.deviceGroup.name !== '') ||
+          (this.state.deviceGroupConsumer.name !== undefined && this.state.deviceGroupConsumer.name !== '') ||
+          this.state.deviceGroupDevices.length > 0 &&
+          (this.state.deviceGroupConsumer.usage !== undefined && this.state.deviceGroupConsumer.usage !== '') ||
+          (this.state.deviceGroupConsumer.attrs !== undefined && this.state.deviceGroupConsumer.attrs !== '' &&
+            this.state.consumerAttrsValid);
       } else {
         // in edit mode - check if value in each field has changed
         const devices = this.state.deviceGroupDevices.slice().sort();
-        return (this.state.deviceGroup.name && this.state.deviceGroup.name !== '' &&
-          this.state.deviceGroupConsumer.name && this.state.deviceGroupConsumer.name !== '' &&
+        dataValid =
+          (this.state.deviceGroup.name !== undefined && this.state.deviceGroup.name !== '' &&
+          this.state.deviceGroupConsumer.name !== undefined && this.state.deviceGroupConsumer.name !== '' &&
           this.state.deviceGroupDevices.length > 0 &&
-          ((this.state.deviceGroupConsumer.usage && this.state.deviceGroupConsumer.usage !== '') ||
-           (this.state.deviceGroupConsumer.attrs && this.state.deviceGroupConsumer.attrs !== '' &&
+          ((this.state.deviceGroupConsumer.usage !== undefined && this.state.deviceGroupConsumer.usage !== '') ||
+           (this.state.deviceGroupConsumer.attrs !== undefined && this.state.deviceGroupConsumer.attrs !== '' &&
             this.state.consumerAttrsValid))) &&
           (this.state.deviceGroup.name !== this.origDGName ||
            JSON.stringify(devices) !== JSON.stringify(this.origDGDevices) ||
            this.state.deviceGroupConsumer.name !== this.origDGConsumer.name ||
            this.state.deviceGroupConsumer.usage !== this.origDGConsumer.usage ||
            this.consumerAttrs !== this.origConsumerAttrs);
+        this.secondDetailsChanged =
+          (this.state.deviceGroup.name !== undefined && this.state.deviceGroup.name !== '' &&
+           this.state.deviceGroup.name !== this.origDGName) ||
+          (this.state.deviceGroupConsumer.name !== undefined && this.state.deviceGroupConsumer.name !== '' &&
+           this.state.deviceGroupConsumer.name !== this.origDGConsumer.name) ||
+          (this.state.deviceGroupConsumer.usage !== undefined && this.state.deviceGroupConsumer.usage !== '' &&
+           this.state.deviceGroupConsumer.usage !== this.origDGConsumer.usage) ||
+          (this.state.deviceGroupConsumer.attrs !== undefined && this.state.deviceGroupConsumer.attrs !== '' &&
+           this.state.deviceGroupConsumer.attrs !== this.origDGConsumer.attrs) ||
+          JSON.stringify(devices) !== JSON.stringify(this.origDGDevices);
       }
     }
+    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    return dataValid;
   }
 
   saveSecondDetails = () => {
@@ -504,6 +557,7 @@ class DiskModelDetails extends Component {
       deviceGroupDevices: [],
       deviceGroupConsumer: {}
     });
+    this.secondDetailsChanged = false;
     this.props.extendAction(1);
     this.secondDetails = '';
   }
@@ -611,18 +665,36 @@ class DiskModelDetails extends Component {
   }
 
   checkDiskModelDataToSave = () => {
+    let dataValid = false;
     if (this.dmMode === MODE.ADD) {
-      return this.state.diskModelName && this.state.diskModelName !== '' &&
+      dataValid = this.state.diskModelName !== undefined && this.state.diskModelName !== '' &&
         this.state.volumeGroups.length > 0;
+      this.diskModelChanged = this.state.diskModelName !== undefined && this.state.diskModelName !== '' ||
+        this.state.volumeGroups.length > 0 || this.state.deviceGroups.length > 0;
     } else {
       const vgs = this.state.volumeGroups.sort((a,b) => alphabetically(a.name, b.name));
       const dgs = this.state.deviceGroups.sort((a,b) => alphabetically(a.name, b.name));
-      return this.state.diskModelName && this.state.diskModelName !== '' &&
+      dataValid = this.state.diskModelName !== undefined && this.state.diskModelName !== '' &&
         this.state.volumeGroups.length > 0 &&
         (this.state.diskModelName !== this.origDKName ||
          JSON.stringify(vgs) !== JSON.stringify(this.origVGs) ||
          JSON.stringify(dgs) !== JSON.stringify(this.origDGs));
+      this.diskModelChanged = this.state.diskModelName !== this.origDKName ||
+        this.state.volumeGroups.length !== this.origVGs.length ||
+        this.state.deviceGroups.length !== this.origDGs.length ||
+        JSON.stringify(vgs) !== JSON.stringify(this.origVGs) ||
+        JSON.stringify(dgs) !== JSON.stringify(this.origDGs);
     }
+    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    return dataValid;
+  }
+
+  closeAction = () => {
+    this.diskModelChanged = false;
+    this.secondDetailsChanged = false;
+    this.thirdDetailsChanged = false;
+    this.props.setDataChanged(3, false);
+    this.props.closeAction();
   }
 
   render() {
@@ -744,7 +816,7 @@ class DiskModelDetails extends Component {
             {firstDetailsLines}
             <div className='btn-row details-btn'>
               <div className={buttonClass}>
-                <ActionButton key='cancel' type='default' clickAction={this.props.closeAction}
+                <ActionButton key='cancel' type='default' clickAction={this.closeAction}
                   isDisabled={this.secondDetails !== ''}
                   displayLabel={translate('cancel')}/>
                 <ActionButton key='save' clickAction={this.saveDiskModel}

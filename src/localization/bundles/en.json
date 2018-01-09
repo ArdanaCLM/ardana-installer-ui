@@ -215,6 +215,7 @@
     "server.secure": "Secured",
 
     "edit.cloud.settings": "Manage Cloud Settings",
+    "edit.cloud.settings.close.confirm": "You've selected to leave Manage Cloud Settings but you have unsaved changes. \n\n Are you sure you want to proceed?",
     "edit.nic.mappings": "NIC Mappings",
     "edit.server.groups": "Server Groups",
     "edit.networks": "Networks",

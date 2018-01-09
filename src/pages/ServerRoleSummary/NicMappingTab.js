@@ -101,20 +101,26 @@ class NicMappingTab extends Component {
   }
 
   isSaveAllowed = () => {
+    let isChanged = undefined;
+
     // The save button is allowed if the values are all valid and there is
     // some change compared to the initial values
 
     const isValid = this.state.isNameValid && this.state.detailRows.every(e =>
       e.get('isBusAddressValid') && e.get('isLogicalNameValid'));
-    if (!isValid)
-      return false;
-
-    // If we are in add mode, then something has changed, so return true
-    if (this.state.mode === MODE.ADD)
-      return true;
-
-    return this.getSortedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow])
-      !== this.getUpdatedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow]);
+    if (!isValid) {
+      isChanged = false;
+    } else {
+      // If we are in add mode, then something has changed, so return true
+      if (this.state.mode === MODE.ADD) {
+        isChanged = true;
+      } else {
+        isChanged = this.getSortedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow])
+          !== this.getUpdatedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow]);
+      }
+    }
+    this.props.setDataChanged(0, isChanged);
+    return isChanged;
   }
 
   newDetailRow = () => Map({
@@ -225,6 +231,11 @@ class NicMappingTab extends Component {
     });
   }
 
+  closeDetails = () => {
+    this.props.setDataChanged(0, false);
+    this.setState({mode: MODE.NONE});
+  }
+
   renderDetails = () => {
 
     if (this.state.mode !== MODE.NONE) {
@@ -257,7 +268,7 @@ class NicMappingTab extends Component {
                 <div className='btn-container'>
 
                   <ActionButton key='cancel' type='default'
-                    clickAction={(e) => this.setState({mode: MODE.NONE})}
+                    clickAction={this.closeDetails}
                     displayLabel={translate('cancel')}/>
 
                   <ActionButton key='save' clickAction={this.saveDetails}

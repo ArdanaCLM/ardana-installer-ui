@@ -342,18 +342,31 @@ class InterfaceModelsTab extends Component {
       this.state.detailMode === MODE.NONE &&
       this.state.interfaceModel.get('network-interfaces').size > 0;
 
-    if (!isValid)
-      return false;
+    if (!isValid) {
+      this.modelChanged = false;
+    } else {
+      // If we are in add mode, then something has changed, so return true
+      if (this.state.overallMode === MODE.ADD) {
+        this.modelChanged = true;
+      } else {
+        const originalModel = this.getSortedModel().getIn(['inputModel', 'interface-models',
+          this.state.activeOverallRow]);
 
-    // If we are in add mode, then something has changed, so return true
-    if (this.state.overallMode === MODE.ADD)
-      return true;
+        // Note simply comparing the overall object (originalModel === this.state.interfaceModel)
+        // will incorrectly return false if the user changes the name and changes it back
+        // (e.g. oldname -> newname -> oldname)
+        this.modelChanged = ! this.state.interfaceModel.equals(originalModel);
+      }
+    }
+    this.props.setDataChanged(4, this.modelChanged || this.detailsChanged);
+    return this.modelChanged;
+  }
 
-    const originalModel = this.getSortedModel().getIn(['inputModel', 'interface-models', this.state.activeOverallRow]);
-
-    // Note simply comparing the overall object (originalModel === this.state.interfaceModel) will incorrectly return
-    // false if the user changes the name and changes it back (e.g. oldname -> newname -> oldname)
-    return ! this.state.interfaceModel.equals(originalModel);
+  closeModelDetails = () => {
+    this.modelChanged = false;
+    this.detailsChanged = false;
+    this.props.setDataChanged(4, false);
+    this.setState({overallMode: MODE.NONE});
   }
 
   // Render the first detail box, which is for editing interface model details
@@ -422,7 +435,7 @@ class InterfaceModelsTab extends Component {
               <div className='btn-row details-btn'>
                 <div className={buttonClass}>
                   <ActionButton key='cancel' type='default'
-                    clickAction={(e) => this.setState({overallMode: MODE.NONE})}
+                    clickAction={this.closeModelDetails}
                     displayLabel={translate('cancel')}
                     isDisabled={this.state.detailMode !== MODE.NONE} />
 
@@ -520,14 +533,23 @@ class InterfaceModelsTab extends Component {
         this.state.isBondDeviceNameValid
       ));
 
-    if (!isValid)
-      return false;
+    if (!isValid) {
+      this.detailsChanged = false;
+    } else {
+      // If we are in add mode, then something has changed, so return true
+      if (this.state.detailMode === MODE.ADD) {
+        this.detailsChanged = true;
+      } else {
+        this.detailsChanged = ! this.getUpdatedInterfaceModel(this.state).equals(this.state.interfaceModel);
+      }
+    }
+    this.props.setDataChanged(4, this.modelChanged || this.detailsChanged);
+    return this.detailsChanged;
+  }
 
-    // If we are in add mode, then something has changed, so return true
-    if (this.state.detailMode === MODE.ADD)
-      return true;
-
-    return ! this.getUpdatedInterfaceModel(this.state).equals(this.state.interfaceModel);
+  closeNetworkInterfaceDetails = () => {
+    this.detailsChanged = false;
+    this.setState({detailMode: MODE.NONE});
   }
 
   // Render the second detail box, which is for editing interface details
@@ -541,7 +563,7 @@ class InterfaceModelsTab extends Component {
       }
 
       return (
-        <div className='col-xs-6'>
+        <div className='col-xs-6 second-details'>
           <div className='details-section'>
             <div className='details-header'>{title}</div>
             <div className='details-body'>
@@ -581,7 +603,7 @@ class InterfaceModelsTab extends Component {
                 <div className='btn-container'>
 
                   <ActionButton key='cancel' type='default'
-                    clickAction={(e) => this.setState({detailMode: MODE.NONE})}
+                    clickAction={this.closeNetworkInterfaceDetails}
                     displayLabel={translate('cancel')}/>
 
                   <ActionButton key='save' clickAction={this.saveNetworkInterface}

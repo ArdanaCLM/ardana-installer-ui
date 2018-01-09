@@ -85,19 +85,27 @@ class ServerGroupDetails extends Component {
   }
 
   checkDataToSave = () => {
+    let dataChanged = undefined;
     if (this.props.value === '') {
-      return this.state.name !== '';
+      dataChanged = this.state.name !== '';
     } else {
       let newNetworks = this.state.networks.slice().sort();
       let newServerGroups = this.state.serverGroups.slice().sort();
       if ((this.state.name !== '' && this.state.name !== this.origName) ||
         ((JSON.stringify(newNetworks) !== JSON.stringify(this.origNetworks)) ||
          (JSON.stringify(newServerGroups) !== JSON.stringify(this.origServerGroups)))) {
-        return true;
+        dataChanged = true;
       } else {
-        return false;
+        dataChanged = false;
       }
     }
+    this.props.setDataChanged(1, dataChanged);
+    return dataChanged;
+  }
+
+  closeAction = () => {
+    this.props.setDataChanged(1, false);
+    this.props.closeAction();
   }
 
   render() {
@@ -145,7 +153,7 @@ class ServerGroupDetails extends Component {
               sendSelectedList={this.getSelectedServerGroups} exceptions={exceptions}/>
             <div className='btn-row details-btn'>
               <div className='btn-container'>
-                <ActionButton key='cancel' type='default' clickAction={this.props.closeAction}
+                <ActionButton key='cancel' type='default' clickAction={this.closeAction}
                   displayLabel={translate('cancel')}/>
                 <ActionButton key='save' clickAction={this.saveServerGroup}
                   displayLabel={translate('save')} isDisabled={!this.checkDataToSave()}/>

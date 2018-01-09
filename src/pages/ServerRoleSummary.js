@@ -27,9 +27,14 @@ class ServerRoleSummary extends BaseWizardPage {
     super(props);
 
     this.checkInputs = ['nic-mapping', 'server-group'];
-    this.state = {
-      expandedGroup: ['COMPUTE-ROLE'],
-    };
+
+    // expand COMPUTE-ROLE if available, otherwise expand the first group
+    const allGroups = this.props.model.getIn(['inputModel','server-roles']).map(e => e.get('name')).toJS();
+    if (allGroups.includes('COMPUTE-ROLE')) {
+      this.state = {expandedGroup: ['COMPUTE-ROLE']};
+    } else {
+      this.state = {expandedGroup: [allGroups[0]]};
+    }
   }
 
   expandAll() {
