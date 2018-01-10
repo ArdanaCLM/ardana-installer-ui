@@ -19,7 +19,6 @@
     "immutable": "^3.8.1",
     "js-yaml": "^3.10.0",
     "json-loader": "^0.5.7",
-    "json-server": "^0.11.2",
     "lodash": "^4.17.4",
     "material-design-icons": "^3.0.1",
     "papaparse": "^4.3.6",
@@ -51,13 +50,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "npm run less | webpack",
-    "start": "npm run jsonserv | npm run webdev | npm run watchless",
+    "start": "npm run webdev | npm run watchless",
     "lints": "eslint .",
     "protractor-setup": "./node_modules/protractor/bin/webdriver-manager update",
     "protractor": "./node_modules/protractor/bin/protractor protractor.conf.js",
     "less": "./node_modules/.bin/lessc ./src/styles/deployer.less ./src/Deployer.css",
     "webdev": " webpack-dev-server --port 3000 --hot --host 0.0.0.0",
-    "jsonserv": "json-server --port 8080 api/api.json --watch",
     "watchless": "watch-run -p '**/*.less' npm run less",
     "dist": "webpack -p"
   },
