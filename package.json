@@ -40,7 +40,6 @@
     "eslint": "^4.3.0",
     "eslint-plugin-react": "^7.1.0",
     "less": "^2.7.2",
-    "pre-commit": "^1.2.2",
     "protractor": "^5.1.2",
     "react-hot-loader": "^3.0.0-beta.7",
     "url-loader": "^0.5.9",
@@ -61,9 +60,6 @@
   },
   "description": "The cloud installer that will reside with SUSE Manager",
   "main": "index.js",
-  "pre-commit-disabled": [
-    "lints"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ArdanaCLM/ardana-installer-ui.git"
