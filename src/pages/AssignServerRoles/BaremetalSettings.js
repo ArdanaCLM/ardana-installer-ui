@@ -18,6 +18,7 @@ import { ConfirmModal } from '../../components/Modals.js';
 import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator } from '../../utils/InputValidators.js';
 import { ServerInputLine } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { fromJS } from 'immutable';
 
 class BaremetalSettings extends Component {
 
@@ -67,7 +68,7 @@ class BaremetalSettings extends Component {
       netmask: this.state.netmask
     };
     let model = this.props.model;
-    model = model.updateIn(['inputModel', 'baremetal'], settings => newSettings);
+    model = model.updateIn(['inputModel', 'baremetal'], settings => fromJS(newSettings));
     this.props.updateGlobalState('model', model);
     this.origBaremetal.subnet = this.state.subnet;
     this.origBaremetal.netmask = this.state.netmask;
