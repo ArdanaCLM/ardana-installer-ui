@@ -15,14 +15,21 @@
 import LocalizedStrings from 'react-localization';
 
 var supportedLangs = ['en', 'ja'];
-var translationData, bundlename, catalog = {};
+var translationData, bundlename, brandingData, bundlebrandingname, allTranslatedData, catalog = {};
 
 for (var i = 0; i < supportedLangs.length; i++) {
   bundlename = './bundles/' + supportedLangs[i] + '.json';
   //require doesn't interpret this as a string correctly unless its converted
   //easiest conversion is to use + ''
   translationData = require(bundlename + '');
-  catalog[supportedLangs[i]] = translationData;
+
+  // for branding
+  bundlebrandingname = './bundles/' + supportedLangs[i] + '_branding.json';
+  brandingData = require(bundlebrandingname + '');
+
+  // combine branding bundle
+  allTranslatedData = Object.assign(translationData, brandingData);
+  catalog[supportedLangs[i]] = allTranslatedData;
 }
 
 //TODO - determine what to do with annotated langs... like en-US

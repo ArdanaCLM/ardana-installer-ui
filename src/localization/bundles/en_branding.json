@@ -1,0 +1,4 @@
+{
+    "openstack.cloud.deployer.title": "SUSE OpenStack Cloud Deployer",
+    "model.summary.role.description.MTRMON-ROLE" : "SUSE OpenStack Cloud is an enterprise class solution, this is why we ship monitoring capabilities with our system to allow for Day 2 operations out of the box."
+}
