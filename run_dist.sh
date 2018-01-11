@@ -30,7 +30,7 @@ cd run
 main_dir=$(dirname $(git ls-files | grep main.py))
 
 # Create a link named web to point to the ui build dir
-ln -sf $SCRIPTDIR/dist $main_dir/web
+ln -nsf $SCRIPTDIR/dist $main_dir/web
 
 # Start the server
 tox -e runserver
