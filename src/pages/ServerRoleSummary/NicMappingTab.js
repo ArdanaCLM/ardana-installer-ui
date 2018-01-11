@@ -189,7 +189,7 @@ class NicMappingTab extends Component {
 
   saveDetails = () => {
     this.props.updateGlobalState('model', this.getUpdatedModel());
-    this.setState({mode: MODE.NONE});
+    this.closeDetails();
   }
 
   renderDetailRows() {

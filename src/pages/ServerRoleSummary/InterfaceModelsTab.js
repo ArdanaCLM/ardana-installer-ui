@@ -330,7 +330,7 @@ class InterfaceModelsTab extends Component {
         this.state.interfaceModel);
     }
     this.props.updateGlobalState('model', model);
-    this.setState({overallMode: MODE.NONE});
+    this.closeModelDetails();
   }
 
 

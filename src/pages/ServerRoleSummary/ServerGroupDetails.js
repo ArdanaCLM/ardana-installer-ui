@@ -81,7 +81,7 @@ class ServerGroupDetails extends Component {
       }
     }
     this.props.updateGlobalState('model', model);
-    this.props.closeAction();
+    this.closeAction();
   }
 
   checkDataToSave = () => {

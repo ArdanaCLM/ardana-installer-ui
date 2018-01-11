@@ -169,7 +169,7 @@ class UpdateNetworks extends Component {
         net => net.splice(idx, 1, fromJS(this.state.data)));
       this.props.updateGlobalState('model', model);
     }
-    this.props.closeAction();
+    this.closeAction();
   }
 
   handleTaggedVLANChange = () => {
@@ -310,18 +310,9 @@ class UpdateNetworks extends Component {
   }
 
   checkDataToSave = () => {
-    let dataChanged = undefined;
-    if (!this.state.isFormValid) {
-      dataChanged = false;
-    } else {
-      if (JSON.stringify(this.origData) !== JSON.stringify(this.state.data)) {
-        dataChanged = true;
-      } else {
-        dataChanged = false;
-      }
-    }
+    const dataChanged = JSON.stringify(this.origData) !== JSON.stringify(this.state.data);
     this.props.setDataChanged(2, dataChanged);
-    return dataChanged;
+    return this.state.isFormValid && dataChanged;
   }
 
   closeAction = () => {
