@@ -59,11 +59,9 @@ mkdir dist/images
 cp src/images/* dist/images
 mv dist/images/favicon.ico dist/favicon.ico
 
-mkdir -p dist/node_modules/material-design-icons/iconfont
-cp node_modules/material-design-icons/iconfont/* dist/node_modules/material-design-icons/iconfont
-
 mkdir -p dist/lib/fonts
 cp third_party/fonts/* dist/lib/fonts
+cp node_modules/material-design-icons-iconfont/dist/fonts/* dist/lib/fonts
 
 #create a version variable using the commit hash
 SHA=$(git rev-parse HEAD | cut -c1-6)
