@@ -59,35 +59,59 @@ class EditCloudSettings extends Component {
   }
 
   render() {
-    let cloudSettings;
+    let tabs;
     if (this.props.oneTab) {
       if (this.props.oneTab === 'server-group') {
-        cloudSettings = (
-          <ConfirmModal show={this.props.show} title={translate('edit.cloud.settings')}
-            className={'cloud-settings'} hideFooter='true' onHide={this.props.onHide}>
-            <Tabs id='editCloudSettings' activeKey={TAB.SERVER_GROUPS}
-              onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-              <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
-                <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}/>
-              </Tab>
-            </Tabs>
-          </ConfirmModal>
+        tabs = (
+          <Tabs id='editCloudSettings' activeKey={TAB.SERVER_GROUPS}
+            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+            <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+              <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+                setDataChanged={this.setDataChanged}/>
+            </Tab>
+          </Tabs>
         );
       } else {
-        cloudSettings = (
-          <ConfirmModal show={this.props.show} title={translate('edit.cloud.settings')}
-            className={'cloud-settings'} hideFooter='true' onHide={this.props.onHide}>
-            <Tabs id='editCloudSettings' activeKey={TAB.NIC_MAPPINGS}
-              onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-              <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
-                <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}/>
-              </Tab>
-            </Tabs>
-          </ConfirmModal>
+        tabs = (
+          <Tabs id='editCloudSettings' activeKey={TAB.NIC_MAPPINGS}
+            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+            <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
+              <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+                setDataChanged={this.setDataChanged}/>
+            </Tab>
+          </Tabs>
         );
       }
     } else {
-      cloudSettings = (
+      tabs = (
+        <Tabs id='editCloudSettings' activeKey={this.state.key}
+          onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+          <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
+            <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+            <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.NETWORKS} title={translate('edit.networks')}>
+            <NetworksTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
+            <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
+            <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+        </Tabs>
+      );
+    }
+
+    return (
+      <div>
         <ConfirmModal
           show={this.props.show}
           title={translate('edit.cloud.settings')}
@@ -95,37 +119,9 @@ class EditCloudSettings extends Component {
           hideFooter='true'
           onHide={this.showConfirmCloseModal}>
 
-          <Tabs id='editCloudSettings' activeKey={this.state.key}
-            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-            <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
-              <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
-              <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.NETWORKS} title={translate('edit.networks')}>
-              <NetworksTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
-              <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
-              <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-          </Tabs>
+          {tabs}
 
         </ConfirmModal>
-      );
-    }
-
-    return (
-      <div>
-        {cloudSettings}
 
         <YesNoModal show={this.state.showCloseConfirmation} title={translate('warning')}
           yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>
