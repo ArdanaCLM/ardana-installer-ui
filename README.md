@@ -36,3 +36,23 @@ To run the application from that location, together with a local copy of the ard
 
 Note!  
 You will need an appropriate ardana-service backend to provide data model information. A link to that repo will be put here if/when it becomes public  
+
+# Open Build Service (OBS)
+In order to build with OBS, a tarball containing the contents of the node_modules must be created
+and added to the package.  Create a clean node_modules directory with either:
+```
+yarn install --link-duplicates
+```
+
+or:
+
+```
+rm -rf node_modules
+npm install
+```
+
+and then create the tarball with:
+
+```
+tar cjf node_modules.tar.bz2 node_modules
+```
