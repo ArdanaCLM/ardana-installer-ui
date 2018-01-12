@@ -123,7 +123,8 @@ class DiskModelsTab extends Component {
     if (this.state.showDiskModelDetails) {
       detailsSection = (<DiskModelDetails model={this.props.model}
         diskModel={this.state.diskModel} updateGlobalState={this.props.updateGlobalState}
-        closeAction={this.hideDiskModelDetails} extendAction={this.setExtendedDetails}/>);
+        closeAction={this.hideDiskModelDetails} extendAction={this.setExtendedDetails}
+        setDataChanged={this.props.setDataChanged}/>);
     }
 
     let confirmRemoveSection = '';

@@ -28,7 +28,6 @@ class UpdateNetworks extends Component {
   constructor(props) {
     super(props);
     this.networkGroups = this.getNetworkGroups();
-    this.data = this.props.mode === MODE.EDIT ? this.getNetworkData(this.props.networkName) : {};
     this.allInputsStatus = {
       'name': INPUT_STATUS.UNKNOWN,
       'vlanid': INPUT_STATUS.UNKNOWN,
@@ -38,18 +37,21 @@ class UpdateNetworks extends Component {
 
     this.allAddressesStatus = [];
 
+    let networks = this.props.mode === MODE.EDIT ? this.getNetworkData(this.props.networkName) : {};
+    networks.addresses = this.initAddresses(networks);
     this.state = {
       isFormValid: false,
-      isFormChanged: false,
-      addresses: this.initAddresses(),
-      isTaggedChecked:
-        this.data['tagged-vlan'] !== '' && this.data['tagged-vlan'] !== undefined ?  this.data['tagged-vlan'] : false,
+      data: networks,
     };
+
+    if (this.props.mode === MODE.EDIT) {
+      this.origData = networks;
+    }
   }
 
-  initAddresses() {
+  initAddresses(networks) {
     // for UI state addresses
-    let retAddresses = this.data['addresses'] ? this.data['addresses'] : [];
+    let retAddresses = networks['addresses'] ? networks['addresses'] : [];
 
     // init validation status
     this.allAddressesStatus = retAddresses.map((addr) => {
@@ -81,7 +83,7 @@ class UpdateNetworks extends Component {
 
   isFormDropdownValid() {
     let isValid = true;
-    if(this.data['network-group'] === '' || this.data['network-group'] === undefined) {
+    if(this.state.data['network-group'] === '' || this.state.data['network-group'] === undefined) {
       isValid = false;
     }
     return isValid;
@@ -93,93 +95,89 @@ class UpdateNetworks extends Component {
   }
 
   handleSelectNetworkGroup = (groupName) => {
-    this.data['network-group'] = groupName;
-    if(!this.state.isFormChanged) {
-      this.setState({isFormChanged: true});
-    }
-    this.setState({isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()});
+    this.setState(prevState => {
+      const newData = JSON.parse(JSON.stringify(prevState.data));
+      newData['network-group'] = groupName;
+      return {
+        data: newData,
+        isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()
+      };
+    });
   }
 
   handleInputChange = (e, isValid, props) => {
     let value = e.target.value;
     this.updateFormValidity(props, isValid);
     if (isValid) {
-      if(!this.state.isFormChanged) {
-        this.setState({isFormChanged: true});
-      }
       if(props.inputName === 'vlanid') {
         value = parseInt(value);
       }
 
-      this.data[props.inputName] = value;
+      this.setState(prevState => {
+        const newData = JSON.parse(JSON.stringify(prevState.data));
+        newData[props.inputName] = value;
+        return {data: newData};
+      });
     }
   }
 
   handleAddressChange = (e, isValid, props, idx) => {
     let value = e.target.value;
     if (isValid) {
-      if(!this.state.isFormChanged) {
-        this.setState({isFormChanged: true});
-      }
       this.allAddressesStatus[idx] = INPUT_STATUS.VALID;
 
-      // this.data is the final result to be saved into model, init if we don't have any
-      // addresses will be processed when save later
-      if(!this.data['addresses']) {
-        this.data['addresses'] = [];
-      }
+      this.setState(prevState => {
+        const newData = JSON.parse(JSON.stringify(prevState.data));
+        newData.addresses[idx] = value;
+        return {data: newData};
+      });
     }
     else {
       this.allAddressesStatus[idx] = INPUT_STATUS.INVALID;
     }
 
-    this.setState(prev => {
-      let addresses = prev.addresses.slice();
-      addresses[idx] = value;
-      return {addresses: addresses};
-    });
     this.updateFormValidity(props, isValid);
   }
 
   handleUpdateNetwork = () => {
     let model = this.props.model;
-    for (let key in this.data) {
-      if(this.data[key] === undefined || this.data[key] === '') {
-        delete this.data[key];
+    for (let key in this.state.data) {
+      if(this.state.data[key] === undefined || this.state.data[key] === '') {
+        delete this.state.data[key];
       }
 
       if (key === 'addresses') {
-        let cleanAddrs = this.state.addresses.filter(addr => addr !== '');
+        let cleanAddrs = this.state.data.addresses.filter(addr => addr !== '');
         if (cleanAddrs.length === 0) {
-          delete this.data[key];
+          delete this.state.data[key];
         }
         else {
-          this.data[key] = cleanAddrs;
+          this.state.data[key] = cleanAddrs;
         }
       }
     }
 
     if(this.props.mode === MODE.ADD) {
       model = model.updateIn(
-        ['inputModel', 'networks'], net => net.push(fromJS(this.data)));
+        ['inputModel', 'networks'], net => net.push(fromJS(this.state.data)));
       this.props.updateGlobalState('model', model);
     }
     else {
       let idx = model.getIn(['inputModel','networks']).findIndex(
         net => net.get('name') === this.props.networkName);
       model = model.updateIn(['inputModel', 'networks'],
-        net => net.splice(idx, 1, fromJS(this.data)));
+        net => net.splice(idx, 1, fromJS(this.state.data)));
       this.props.updateGlobalState('model', model);
     }
-    this.props.closeAction();
+    this.closeAction();
   }
 
   handleTaggedVLANChange = () => {
-    this.data['tagged-vlan'] = !this.state.isTaggedChecked;
-    if(!this.state.isFormChanged) {
-      this.setState({isFormChanged: true});
-    }
-    this.setState({isTaggedChecked: !this.state.isTaggedChecked});
+    this.setState(prevState => {
+      const newData = JSON.parse(JSON.stringify(prevState.data));
+      newData['tagged-vlan'] = !prevState.data['tagged-vlan'];
+      return {data: newData};
+    });
   }
 
   getNetworkGroups = () => {
@@ -189,20 +187,20 @@ class UpdateNetworks extends Component {
   }
 
   removeAddress = (idx) => {
-    this.setState(prev => {
-      let addresses = prev.addresses.slice();
-      addresses.splice(idx, 1);
-      return {addresses: addresses, isFormChanged: true};
+    this.setState(prevState => {
+      const newData = JSON.parse(JSON.stringify(prevState.data));
+      newData.addresses.splice(idx, 1);
+      return {data: newData};
     });
     // remove status
     this.allAddressesStatus.splice(idx, 1);
   }
 
   addAddress = () => {
-    this.setState(prev => {
-      let addresses = prev.addresses.slice();
-      addresses.push(''); //empty input
-      return {addresses: addresses};
+    this.setState(prevState => {
+      const newData = JSON.parse(JSON.stringify(prevState.data));
+      newData.addresses.push('');
+      return {data: newData};
     });
   }
 
@@ -220,11 +218,11 @@ class UpdateNetworks extends Component {
   }
 
   renderNetworkAddresses () {
-    if(this.state.addresses.length === 0) {
+    if(this.state.data.addresses.length === 0) {
       return this.renderNewAddressInput();
     }
-    let addressRows = this.state.addresses.map((addr, idx) => {
-      const lastRow = (idx === this.state.addresses.length -1);
+    let addressRows = this.state.data.addresses.map((addr, idx) => {
+      const lastRow = (idx === this.state.data.addresses.length -1);
       return (
         <div key={idx} className='dropdown-plus-minus'>
           <div className="field-container">
@@ -279,35 +277,49 @@ class UpdateNetworks extends Component {
       <ServerInputLine
         isRequired={isRequired} inputName={name} inputType={type}
         placeholder={placeholderText} inputValidate={validate}
-        inputValue={this.props.mode === MODE.EDIT ? this.data[name] : ''} {...extraProps}
+        inputValue={this.props.mode === MODE.EDIT ? this.state.data[name] : ''} {...extraProps}
         inputAction={this.handleInputChange}/>
     );
   }
 
   renderNetworkGroup() {
     let emptyOptProps = '';
-    if(this.data['network-group'] === '' || this.data['network-group'] === undefined) {
+    if(this.state.data['network-group'] === '' || this.state.data['network-group'] === undefined) {
       emptyOptProps = {
         label: translate('network.group.please.select'),
         value: 'noopt'
       };
     }
     return (
-      <ServerDropdownLine value={this.data['network-group']}
+      <ServerDropdownLine value={this.state.data['network-group']}
         optionList={this.networkGroups} isRequired={true}
         emptyOption={emptyOptProps} selectAction={this.handleSelectNetworkGroup}/>
     );
   }
 
   renderTaggedVLAN() {
+    const checked = this.state.data['tagged-vlan'] !== '' && this.state.data['tagged-vlan'] !== undefined ?
+      this.state.data['tagged-vlan'] : false;
     return (
       <div className='tagged-vlan'>
         <input className='tagged' type='checkbox' value='taggedvlan'
-          checked={this.state.isTaggedChecked} onChange={this.handleTaggedVLANChange}/>
+          checked={checked} onChange={this.handleTaggedVLANChange}/>
         {translate('tagged-vlan')}
       </div>
     );
   }
+
+  checkDataToSave = () => {
+    const dataChanged = JSON.stringify(this.origData) !== JSON.stringify(this.state.data);
+    this.props.setDataChanged(2, dataChanged);
+    return this.state.isFormValid && dataChanged;
+  }
+
+  closeAction = () => {
+    this.props.setDataChanged(2, false);
+    this.props.closeAction();
+  }
+
   render() {
     let title =
       this.props.mode === MODE.EDIT ? translate('network.update') : translate('network.add');
@@ -332,10 +344,10 @@ class UpdateNetworks extends Component {
           {this.renderTaggedVLAN()}
           <div className='btn-row details-btn network-more-width'>
             <div className='btn-container'>
-              <ActionButton key='networkCancel' type='default' clickAction={this.props.closeAction}
+              <ActionButton key='networkCancel' type='default' clickAction={this.closeAction}
                 displayLabel={translate('cancel')}/>
               <ActionButton key='networkSave' clickAction={this.handleUpdateNetwork}
-                displayLabel={translate('save')} isDisabled={!this.state.isFormValid || !this.state.isFormChanged}/>
+                displayLabel={translate('save')} isDisabled={!this.checkDataToSave()}/>
             </div>
           </div>
         </div>

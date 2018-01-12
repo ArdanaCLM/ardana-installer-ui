@@ -120,7 +120,7 @@ class ServerGroupsTab extends Component {
     if (this.state.showServerGroupDetails) {
       detailsSection = (<ServerGroupDetails model={this.props.model}
         value={this.state.value} updateGlobalState={this.props.updateGlobalState}
-        closeAction={this.hideServerGroupDetails}/>);
+        setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}/>);
     }
 
     let confirmRemoveSection = '';
