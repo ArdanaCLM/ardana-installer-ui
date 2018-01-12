@@ -18,6 +18,9 @@ die() {
    exit 1
 }
 
+# install npm dependencies to run the build
+npm install
+
 # build the neccessary UI files
 ./build_ui.sh || die "building UI files failed, exiting"
 

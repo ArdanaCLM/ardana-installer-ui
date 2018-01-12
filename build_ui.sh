@@ -18,9 +18,6 @@ die() {
    exit 1
 }
 
-# install npm dependencies to run the build
-npm install
-
 TARBALL=false
 
 # if -t is specified, build a tarball of the UI bits
@@ -63,11 +60,11 @@ mkdir -p dist/lib/fonts
 cp third_party/fonts/* dist/lib/fonts
 cp node_modules/material-design-icons-iconfont/dist/fonts/* dist/lib/fonts
 
-#create a version variable using the commit hash
-SHA=$(git rev-parse HEAD | cut -c1-6)
-
 if $TARBALL
 then
+  #create a version variable using the commit hash
+  SHA=$(git rev-parse HEAD | cut -c1-6)
+
   #create a tarball of the UI dist
   cd dist
   tar -czvf ../cloudinstaller-webonly-${SHA}.tgz .
