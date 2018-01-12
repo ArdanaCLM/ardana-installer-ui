@@ -59,8 +59,35 @@ class EditCloudSettings extends Component {
   }
 
   render() {
-    return (
-      <div>
+    let cloudSettings;
+    if (this.props.oneTab) {
+      if (this.props.oneTab === 'server-group') {
+        cloudSettings = (
+          <ConfirmModal show={this.props.show} title={translate('edit.cloud.settings')}
+            className={'cloud-settings'} hideFooter='true' onHide={this.props.onHide}>
+            <Tabs id='editCloudSettings' activeKey={TAB.SERVER_GROUPS}
+              onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+              <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+                <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}/>
+              </Tab>
+            </Tabs>
+          </ConfirmModal>
+        );
+      } else {
+        cloudSettings = (
+          <ConfirmModal show={this.props.show} title={translate('edit.cloud.settings')}
+            className={'cloud-settings'} hideFooter='true' onHide={this.props.onHide}>
+            <Tabs id='editCloudSettings' activeKey={TAB.NIC_MAPPINGS}
+              onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+              <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
+                <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}/>
+              </Tab>
+            </Tabs>
+          </ConfirmModal>
+        );
+      }
+    } else {
+      cloudSettings = (
         <ConfirmModal
           show={this.props.show}
           title={translate('edit.cloud.settings')}
@@ -93,6 +120,12 @@ class EditCloudSettings extends Component {
           </Tabs>
 
         </ConfirmModal>
+      );
+    }
+
+    return (
+      <div>
+        {cloudSettings}
 
         <YesNoModal show={this.state.showCloseConfirmation} title={translate('warning')}
           yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>

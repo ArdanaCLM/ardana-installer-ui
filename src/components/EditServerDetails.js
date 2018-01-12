@@ -15,16 +15,16 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
-import { ServerInputLine, ServerDropdownLine} from '../components/ServerUtils.js';
+import { ServerInputLine, ServerDropdown} from '../components/ServerUtils.js';
 import { IpV4AddressValidator, MacAddressValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
+import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
+import { getNicMappings, getServerGroups } from '../utils/ModelUtils.js';
 
 class EditServerDetails extends Component {
   constructor(props) {
     super(props);
 
-    this.nicMappings = this.props.nicMappings;
-    this.serverGroups = this.props.serverGroups;
     this.allInputsStatus = {
       'ip-addr': INPUT_STATUS.UNKNOWN,
       'ilo-user': INPUT_STATUS.UNKNOWN,
@@ -34,7 +34,13 @@ class EditServerDetails extends Component {
     };
 
     this.data = this.makeDeepCopy(this.props.data);
-    this.state = {isFormValid: false};
+    this.state = {
+      isFormValid: false,
+      showAddServerGroup: false,
+      showAddNicMapping: false,
+      nicMappings: getNicMappings(this.props.model),
+      serverGroups: getServerGroups(this.props.model)
+    };
   }
 
   makeDeepCopy(srcData) {
@@ -103,12 +109,44 @@ class EditServerDetails extends Component {
     return (
       <ServerInputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title}
-        inputValidate={validate} inputValue={this.data[name]}
+        inputValidate={validate} inputValue={this.data[name]} moreClass={'has-button'}
         inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
     );
   }
 
-  renderDropDown(name, list, handler, isRequired, title) {
+  addServerGroup = () => {
+    this.setState({showAddServerGroup: true});
+  }
+
+  addNicMapping = () => {
+    this.setState({showAddNicMapping: true});
+  }
+
+  closeAddServerGroup = () => {
+    this.setState({showAddServerGroup: false, serverGroups: getServerGroups(this.props.model)});
+  }
+
+  closeAddNicMapping = () => {
+    this.setState({showAddNicMapping: false, nicMappings: getNicMappings(this.props.model)});
+  }
+
+  renderAddServerGroup() {
+    return (
+      <EditCloudSettings show={this.state.showAddServerGroup} model={this.props.model}
+        oneTab='server-group' onHide={this.closeAddServerGroup}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
+  }
+
+  renderAddNicMapping() {
+    return (
+      <EditCloudSettings show={this.state.showAddNicMapping} model={this.props.model}
+        oneTab='nic-mapping' onHide={this.closeAddNicMapping}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
+  }
+
+  renderDropDown(name, list, handler, isRequired, title, buttonLabel, addAction) {
     let emptyOptProps = '';
     if(this.data[name] === '' || this.data[name] === undefined) {
       emptyOptProps = {
@@ -117,8 +155,17 @@ class EditServerDetails extends Component {
       };
     }
     return (
-      <ServerDropdownLine label={title} value={this.data[name]} optionList={list}
-        isRequired={isRequired} emptyOption={emptyOptProps} selectAction={handler}/>
+      <div className='detail-line'>
+        <div className='detail-heading'>{translate(title) + '*'}</div>
+        <div className='input-body'>
+          <div className='input-with-button'>
+            <ServerDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
+              optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
+            <ActionButton type={'default'} clickAction={addAction} moreClass={'inline-button'}
+              displayLabel={translate(buttonLabel) + ' ...'}/>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -139,10 +186,10 @@ class EditServerDetails extends Component {
           {this.renderTextLine('server.name.prompt', this.data.name)}
           {this.renderTextLine('server.role.prompt', this.data.role)}
           {this.renderInput('ip-addr', 'text', true, 'server.ip.prompt', IpV4AddressValidator)}
-          {this.renderDropDown('server-group', this.serverGroups, this.handleSelectGroup, true,
-            'server.group.prompt')}
-          {this.renderDropDown('nic-mapping', this.nicMappings, this.handleSelectNicMapping, true,
-            'server.nicmapping.prompt')}
+          {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,
+            'server.group.prompt', 'server.group.prompt', this.addServerGroup)}
+          {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping, true,
+            'server.nicmapping.prompt', 'server.nicmapping.prompt', this.addNicMapping)}
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
@@ -172,6 +219,8 @@ class EditServerDetails extends Component {
       <div className='edit-server-details'>
         {this.renderServerContent()}
         {this.renderFooter()}
+        {this.renderAddServerGroup()}
+        {this.renderAddNicMapping()}
       </div>
     );
   }

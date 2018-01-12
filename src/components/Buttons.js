@@ -41,6 +41,7 @@ class ActionButton extends Component {
     let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
       (this.props.isDisabled ? ' disabled' : '');
     buttonClass += (this.props.lastButton) ? 'last-button' : '';
+    buttonClass += (this.props.moreClass) ? 'inline-button' : '';
     return (
       <button
         className={buttonClass}

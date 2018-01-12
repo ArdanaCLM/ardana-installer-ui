@@ -91,7 +91,8 @@ class ServerRoleSummary extends BaseWizardPage {
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
-        saveEditServer={this.saveEditServer} checkInputs={this.checkInputs}/>
+        saveEditServer={this.saveEditServer} checkInputs={this.checkInputs}
+        updateGlobalState={this.props.updateGlobalState}/>
     );
   }
 
@@ -109,7 +110,7 @@ class ServerRoleSummary extends BaseWizardPage {
           </div>
           <div className='buttonBox'>
             <div className='btn-row'>
-              <ActionButton displayLabel={translate('edit.cloud.settings')}
+              <ActionButton displayLabel={translate('edit.cloud.settings')} type='default'
                 clickAction={() => this.setState({showCloudSettings: true})} />
               <ActionButton type='default'
                 displayLabel={translate('collapse.all')} clickAction={() => this.collapseAll()} />

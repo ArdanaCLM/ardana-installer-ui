@@ -16,7 +16,6 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import EditServerDetails from '../../components/EditServerDetails.js';
 import ViewServerDetails from '../AssignServerRoles/ViewServerDetails.js';
-import { getNicMappings, getServerGroups } from '../../utils/ModelUtils.js';
 import { BaseInputModal } from '../../components/Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../../utils/Sort.js';
@@ -187,7 +186,7 @@ class CollapsibleTable extends Component {
         onHide={this.handleCancelEditServer} title={translate('edit.server.details.heading')}>
         <EditServerDetails
           cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
-          serverGroups={getServerGroups(this.state.model)} nicMappings={getNicMappings(this.state.model)}
+          model={this.props.model} updateGlobalState={this.props.updateGlobalState}
           data={this.state.activeRowData}>
         </EditServerDetails>
       </BaseInputModal>

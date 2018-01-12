@@ -265,9 +265,14 @@ export class ServerInput extends Component {
       }
     }
 
+    let classname = 'server-input';
+    if (this.props.moreClass) {
+      classname += ' ' + this.props.moreClass;
+    }
+
     if (this.props.inputType === 'textarea') {
       return (
-        <div className='server-input'>
+        <div className={classname}>
           <textarea
             id={this.props.id}
             className='rounded-corner'
@@ -284,7 +289,7 @@ export class ServerInput extends Component {
       );
     } else {
       return (
-        <div className='server-input'>
+        <div className={classname}>
           <input
             id={this.props.id}
             className='rounded-corner'
@@ -316,7 +321,8 @@ export class ServerInputLine extends Component {
           <ServerInput isRequired={this.props.isRequired} inputName={this.props.inputName}
             inputType={this.props.inputType} inputValidate={this.props.inputValidate} {... this.props}
             inputAction={this.props.inputAction} inputValue={this.props.inputValue}
-            updateFormValidity={this.props.updateFormValidity} category={this.props.category}/>
+            updateFormValidity={this.props.updateFormValidity} category={this.props.category}
+            moreClass={this.props.moreClass}/>
         </div>
       </div>
     );
@@ -366,8 +372,12 @@ export class ServerDropdown extends Component {
   }
 
   render() {
+    let classname = 'server-detail-select';
+    if (this.props.moreClass) {
+      classname += ' ' + this.props.moreClass;
+    }
     return (
-      <div className="server-detail-select">
+      <div className={classname}>
         <select className='rounded-corner' value={this.state.value} name={this.props.name}
           onChange={this.handleSelect}>{this.renderOptions()}</select>
       </div>
@@ -385,7 +395,8 @@ export class ServerDropdownLine extends Component {
         <div className='input-body'>
           <ServerDropdown name={this.props.name} value={this.props.value}
             optionList={this.props.optionList} emptyOption={this.props.emptyOption}
-            selectAction={this.props.selectAction} defaultOption={this.props.defaultOption}/>
+            selectAction={this.props.selectAction} defaultOption={this.props.defaultOption}
+            moreClass={this.props.moreClass}/>
         </div>
       </div>
     );
