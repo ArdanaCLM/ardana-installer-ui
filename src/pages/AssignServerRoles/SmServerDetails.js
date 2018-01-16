@@ -36,8 +36,11 @@ class SmServerDetails extends BaseServerDetails {
         data.netmask = network.netmask;
       }
       else { //TODO can have multiple ipv6 for one network device?
-        if(!network.ipv6) {
-          return undefined;
+        if(!network.ipv6 || network.ipv6.length === 0) {
+          data.ipv6 = '';
+          data.netmask = '';
+          data.scope = '';
+          return data;
         }
         data.ipv6 = network.ipv6[0].address;
         data.netmask = network.ipv6[0].netmask;
@@ -59,7 +62,7 @@ class SmServerDetails extends BaseServerDetails {
       ip: nkdevice.ip
     },{
       id: details.id,
-      ipv6: nkdevice.ipv6 ? nkdevice.ipv6[0].address : ''
+      ipv6: nkdevice.ipv6 && nkdevice.ipv6[0] ? nkdevice.ipv6[0].address : ''
       //kernel: '' //TODO ???
     }];
     retData.general = [{
