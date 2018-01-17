@@ -1290,7 +1290,8 @@ class AssignServerRoles extends BaseWizardPage {
         <EditServerDetails
           cancelAction={this.handleCancelEditServer}
           doneAction={this.handleDoneEditServer}
-          serverGroups={getServerGroups(this.props.model)} nicMappings={getNicMappings(this.props.model)}
+          model={this.props.model}
+          updateGlobalState={this.props.updateGlobalState}
           data={this.state.activeRowData}>
         </EditServerDetails>
       </BaseInputModal>
@@ -1306,7 +1307,7 @@ class AssignServerRoles extends BaseWizardPage {
           </div>
           <div className='buttonBox'>
             <div className='btn-row'>
-              <ActionButton displayLabel={translate('add.server.set.network')}
+              <ActionButton displayLabel={translate('add.server.set.network')} type='default'
                 clickAction={() => this.setState({showBaremetalSettings: true})}/>
             </div>
           </div>

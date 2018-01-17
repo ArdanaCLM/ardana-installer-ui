@@ -59,6 +59,57 @@ class EditCloudSettings extends Component {
   }
 
   render() {
+    let tabs;
+    if (this.props.oneTab) {
+      if (this.props.oneTab === 'server-group') {
+        tabs = (
+          <Tabs id='editCloudSettings' activeKey={TAB.SERVER_GROUPS}
+            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+            <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+              <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+                setDataChanged={this.setDataChanged}/>
+            </Tab>
+          </Tabs>
+        );
+      } else {
+        tabs = (
+          <Tabs id='editCloudSettings' activeKey={TAB.NIC_MAPPINGS}
+            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+            <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
+              <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+                setDataChanged={this.setDataChanged}/>
+            </Tab>
+          </Tabs>
+        );
+      }
+    } else {
+      tabs = (
+        <Tabs id='editCloudSettings' activeKey={this.state.key}
+          onSelect={(tabKey) => {this.setState({key: tabKey});}}>
+          <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
+            <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+            <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.NETWORKS} title={translate('edit.networks')}>
+            <NetworksTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
+            <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+          <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
+            <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+              setDataChanged={this.setDataChanged}/>
+          </Tab>
+        </Tabs>
+      );
+    }
+
     return (
       <div>
         <ConfirmModal
@@ -68,29 +119,7 @@ class EditCloudSettings extends Component {
           hideFooter='true'
           onHide={this.showConfirmCloseModal}>
 
-          <Tabs id='editCloudSettings' activeKey={this.state.key}
-            onSelect={(tabKey) => {this.setState({key: tabKey});}}>
-            <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
-              <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
-              <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.NETWORKS} title={translate('edit.networks')}>
-              <NetworksTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
-              <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-            <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
-              <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-                setDataChanged={this.setDataChanged}/>
-            </Tab>
-          </Tabs>
+          {tabs}
 
         </ConfirmModal>
 
