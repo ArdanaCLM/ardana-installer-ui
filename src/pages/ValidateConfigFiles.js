@@ -25,6 +25,7 @@ import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import Dropdown from '../components/Dropdown.js';
 import HelpText from '../components/HelpText.js';
 import { InfoBanner } from '../components/Messages.js';
+import { STATUS } from '../utils/constants.js';
 
 const INVALID = 0;
 const VALID = 1;
@@ -177,7 +178,8 @@ class ValidateConfigFiles extends Component {
       configFiles: [],
       valid: UNKNOWN,
       editingFile: '',
-      invalidMsg: ''
+      invalidMsg: '',
+      commit: STATUS.NOT_STARTED
     };
 
     // retrieve a list of yml files
@@ -195,13 +197,30 @@ class ValidateConfigFiles extends Component {
     this.props.disableTab(true);
   }
 
+  commitChanges = () => {
+    const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
+    return postJson('/api/v1/clm/model/commit', commitMessage)
+      .then((response) => {
+        this.setState({commit: STATUS.COMPLETE});
+      })
+      .catch((error) => {
+        this.setState({
+          valid: INVALID, invalidMsg: translate('deploy.commit.failure', error.toString())});
+        this.setState({commit: STATUS.FAILED});
+      });
+  }
+
   validateModel = () => {
     this.setState({valid: VALIDATING, invalidMsg: ''});
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
         this.setState({valid: VALID}, () => {
-          this.props.enableNextButton(true);
+          this.commitChanges().then(() => {
+            if (this.state.commit === STATUS.COMPLETE) {
+              this.props.enableNextButton(true);
+            }
+          });
         });
         this.clearAllChangeMarkers();
       })

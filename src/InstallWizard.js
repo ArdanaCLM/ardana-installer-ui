@@ -60,7 +60,6 @@ class InstallWizard extends Component {
       // }]
       //
       playbookStatus: undefined,
-      commitStatus: undefined, // to make it simple, we only have one to commit
       model: Map(),           // immutable model
       connectionInfo: undefined, // config info for external discovery services
       deployConfig: undefined, // cloud deployment configuration
@@ -68,12 +67,12 @@ class InstallWizard extends Component {
 
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
-    this.globalStateVars = ['commitStatus', 'playbookStatus', 'model', 'connectionInfo', 'deployConfig'];
+    this.globalStateVars = ['playbookStatus', 'model', 'connectionInfo', 'deployConfig'];
 
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
     this.persistedStateVars = [
-      'currentStep', 'steps', 'commitStatus', 'playbookStatus', 'connectionInfo', 'deployConfig'
+      'currentStep', 'steps', 'playbookStatus', 'connectionInfo', 'deployConfig'
     ];
 
     // Note: if no progress data can be found, responseData is an empty string

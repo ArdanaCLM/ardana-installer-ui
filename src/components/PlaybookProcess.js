@@ -89,8 +89,7 @@ class PlaybookProgress extends Component {
       playbooksStarted: [],          // list of playbooks that have started
       playbooksComplete: [],         // list of playbooks that have completed
       playbooksError: [],            // list of playbooks that have errored
-      displayedLogs: List(),         // log messages to display in the log viewer,
-      commit: this.props.commitStatus // status to keep track of committing model
+      displayedLogs: List()          // log messages to display in the log viewer
     };
   }
 
@@ -117,13 +116,6 @@ class PlaybookProgress extends Component {
       break;
     }
     return retClass;
-  }
-
-  getCommitStatus() {
-    if(this.state.commit !== undefined) {
-      const stClass = this.getStatusCSSClass(this.state.commit);
-      return (<li key='commit' className={stClass}>{translate('deploy.progress.commit')}</li>);
-    }
   }
 
   getProgress() {
@@ -281,25 +273,6 @@ class PlaybookProgress extends Component {
     return retStatus;
   }
 
-  commitChanges = () => {
-    const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
-    return postJson('/api/v1/clm/model/commit', commitMessage)
-      .then((response) => {
-        // update commit step status
-        this.setState({commit: STATUS.COMPLETE});
-        // update global commitStatus state
-        this.props.updateGlobalState('commitStatus', STATUS.COMPLETE);
-      })
-      .catch((error) => {
-        this.setState({errorMsg: translate('deploy.commit.failure', error.toString())});
-        // update commit step status
-        this.setState({commit: STATUS.FAILED});
-        // update global commitStatus state
-        this.props.updateGlobalState('commitStatus', STATUS.FAILED);
-        this.props.updatePageStatus(STATUS.FAILED);
-      });
-  }
-
   processAlreadyDonePlaybook = (playbook) => {
     // go get logs
     fetchJson('/api/v1/clm/plays/' + playbook.playId + '/log')
@@ -436,32 +409,7 @@ class PlaybookProgress extends Component {
         }
       }
       else {//don't have any recorded in progress, failed or complete books
-        // commit model if need to
-        if(this.state.commit !== undefined) {
-          if(this.state.commit === STATUS.NOT_STARTED) {
-            this.commitChanges().then(() => {
-              //do not launch playbook if we can not commit
-              if (this.state.commit === STATUS.COMPLETE) {
-                this.launchPlaybook(this.props.playbooks[0]);
-              }
-            });
-          }
-          else if (this.state.commit === STATUS.COMPLETE) {
-            // recorded commit succeeded, but haven't start anything yet
-            this.launchPlaybook(this.props.playbooks[0]);
-          }
-          else { //recorded commit failed, try to recommit
-            this.commitChanges().then(() => {
-              //do not launch playbook if we can not commit
-              if (this.state.commit === STATUS.COMPLETE) {
-                this.launchPlaybook(this.props.playbooks[0]);
-              }
-            });
-          }
-        }
-        else { //don't need to commit change, just launch first playbook, for example install
-          this.launchPlaybook(this.props.playbooks[0]);
-        }
+        this.launchPlaybook(this.props.playbooks[0]);
       }
     }
   }
@@ -515,7 +463,7 @@ class PlaybookProgress extends Component {
       <div className='playbook-progress'>
         <div className='progress-body'>
           <div className='col-xs-4'>
-            <ul>{this.getCommitStatus()}{this.getProgress()}</ul>
+            <ul>{this.getProgress()}</ul>
             <div>
               {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
             </div>
