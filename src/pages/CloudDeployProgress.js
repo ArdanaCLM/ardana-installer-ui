@@ -89,11 +89,10 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   // Clear out the global playbookStatus entry for PRE_DEPLOYMENT_PLAYBOOK,
-  // DAYZERO_SITE_PLAYBOOK or SITE_PLAYBOOK and commitStatus
+  // DAYZERO_SITE_PLAYBOOK or SITE_PLAYBOOK
   // which permits running the deploy multiple times when have errors and
   // need to go back
   resetPlaybookStatus = () => {
-    this.props.updateGlobalState('commitStatus', '');
     if (this.props.playbookStatus) {
       let playStatus = this.props.playbookStatus.slice();
       playStatus.forEach((play, idx) => {
@@ -144,11 +143,6 @@ class CloudDeployProgress extends BaseWizardPage {
       }
     }
 
-    let commit = this.props.commitStatus; //global saved state
-    if(commit === undefined || commit === '') {
-      commit = STATUS.NOT_STARTED;
-    }
-
     return (
       <div className='wizard-page'>
         <div className='content-header'>
@@ -157,7 +151,7 @@ class CloudDeployProgress extends BaseWizardPage {
         <div className='wizard-content'>
           <PlaybookProgress
             updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-            playbookStatus = {this.props.playbookStatus} commitStatus = {commit}
+            playbookStatus = {this.props.playbookStatus}
             steps = {PLAYBOOK_STEPS} deployConfig = {this.props.deployConfig}
             playbooks = {[PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook]} payload = {payload}/>
         </div>
