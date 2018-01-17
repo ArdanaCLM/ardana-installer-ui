@@ -488,7 +488,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getSmUrl(host, port) {
-    let url = 'https://' + host + ':' + (port <= 0 ? '8443' : port) + '/rpc/api';
+    let url = 'https://' + host + ':' + (port <= 0 ? '443' : port) + '/rpc/api';
     return url;
   }
 
