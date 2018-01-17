@@ -237,7 +237,8 @@ class InterfaceModelsTab extends Component {
       detailMode: MODE.ADD,
       isInterfaceNameValid: false,
 
-      networkInterface: fromJS({name: '', 'network-groups': [undefined]}),
+      networkInterface: fromJS({name: '', 'network-groups': List([undefined]),
+        'forced-network-groups': List([undefined])}),
       deviceList: List().push(Map({'name': undefined})),
       bondOptions: '',
       bondDeviceName: '',
@@ -261,7 +262,13 @@ class InterfaceModelsTab extends Component {
         activeDetailRow: idx
       };
 
-      const networkInterface = prev.interfaceModel.getIn(['network-interfaces', idx]);
+      let networkInterface = prev.interfaceModel.getIn(['network-interfaces', idx]);
+      if (!networkInterface.get('forced-network-groups')) {
+        networkInterface = networkInterface.set('forced-network-groups', List([undefined]));
+      }
+      if (!networkInterface.get('network-groups')) {
+        networkInterface = networkInterface.set('network-groups', List([undefined]));
+      }
       newState.networkInterface = networkInterface;
 
       if (networkInterface.has('bond-data')) {
@@ -507,6 +514,12 @@ class InterfaceModelsTab extends Component {
       }
     } else {
       networkInterface = networkInterface.set('device', prevState.deviceList.get(0));
+      if (networkInterface.get('forced-network-groups').last() === undefined) {
+        networkInterface = networkInterface.delete('forced-network-groups');
+      }
+      if (networkInterface.get('network-groups').last() === undefined) {
+        networkInterface = networkInterface.delete('network-groups');
+      }
     }
 
     let interfaceModel;
@@ -527,7 +540,8 @@ class InterfaceModelsTab extends Component {
     const isValid =
       this.state.isInterfaceNameValid &&
       this.state.deviceList.last().get('name') !== undefined &&
-      this.state.networkInterface.get('network-groups').last() !== undefined &&
+      (this.state.networkInterface.get('forced-network-groups').last() !== undefined ||
+        this.state.networkInterface.get('network-groups').last() !== undefined) &&
       (! this.state.networkInterface.has('bond-data') || (
         this.state.isBondOptionsValid  &&
         this.state.isBondDeviceNameValid
@@ -572,9 +586,8 @@ class InterfaceModelsTab extends Component {
                 inputValue={this.state.networkInterface.get('name')} inputName='interfacename'
                 inputAction={this.handleInterfaceNameChange}
                 autoFocus="true" />
-              <div className='details-group-title'>{translate('network.device') + ':'}</div>
+              <div className='details-group-title'>{translate('network.devices') + ':'}</div>
               {this.renderDevices()}
-              <div className='details-group-title'>{translate('network.group') + ':'}</div>
               {this.renderNetworkGroups()}
 
               {this.state.networkInterface.has('bond-data') ?
@@ -713,18 +726,18 @@ class InterfaceModelsTab extends Component {
    * details section.  Note that multiple such dropdowns may exist for a given Network Interface
    */
 
-  addNetworkGroup = () => {
+  addNetworkGroup = (groupKey) => {
     // add a new row if the last row has a selection
     this.setState(prev => {
-      return {networkInterface: prev.networkInterface.updateIn(['network-groups'], list => list.push(undefined))};
+      return {networkInterface: prev.networkInterface.updateIn([groupKey], list => list.push(undefined))};
     });
   }
 
-  removeNetworkGroup = (idx) => {
+  removeNetworkGroup = (groupKey, idx) => {
     // Remove the row. If it was the last row, add a new empty one
     this.setState(prev => {
 
-      let newInterface = prev.networkInterface.deleteIn(['network-groups', idx]);
+      let newInterface = prev.networkInterface.deleteIn([groupKey, idx]);
 
       if (newInterface.get('network-groups').size === 0) {
         newInterface = newInterface.updateIn(['network-groups'], list => list.push(undefined));
@@ -734,10 +747,10 @@ class InterfaceModelsTab extends Component {
     });
   }
 
-  updateNetworkGroup = (val, idx) => {
+  updateNetworkGroup = (val, groupKey, idx) => {
     // Update the selected model with the value the user has chosen
     this.setState(prev => {
-      return {networkInterface: prev.networkInterface.setIn(['network-groups', idx], val)};
+      return {networkInterface: prev.networkInterface.setIn([groupKey, idx], val)};
     });
   }
 
@@ -750,27 +763,36 @@ class InterfaceModelsTab extends Component {
       .sort()
       .map(opt => <option key={opt} value={opt}>{opt}</option>);
 
+    return (
+      <div>
+        {this.renderComboBox('forced-network-groups', options)}
+        {this.renderComboBox('network-groups', options)}
+      </div>
+    );
+  }
 
+
+  renderComboBox = (groupKey, options) => {
     // Render a combo box for each network group
-    return this.state.networkInterface.get('network-groups').map((row,idx, arr) => {
+    const comboLines = this.state.networkInterface.get(groupKey).map((row,idx, arr) => {
 
       let minus, plus;
       // Render a plus only on the last row, and only if a valid value has been selected
-      if (idx === arr.size-1 && this.state.networkInterface.getIn(['network-groups', idx])) {
+      if (idx === arr.size-1 && this.state.networkInterface.getIn([groupKey, idx])) {
         plus = (<span key={this.props.name + 'plus'} className={'fa fa-plus right-sign'}
-          onClick={this.addNetworkGroup}/>);
+          onClick={() => this.addNetworkGroup(groupKey)}/>);
       }
       // Render a minus on every row except the first for when no valid value has been selected
-      if (idx > 0 || this.state.networkInterface.getIn(['network-groups', idx])) {
+      if (idx > 0 || this.state.networkInterface.getIn([groupKey, idx])) {
         minus = (<span key={this.props.name + 'minus'} className={'fa fa-minus left-sign'}
-          onClick={() => this.removeNetworkGroup(idx)}/>);
+          onClick={() => this.removeNetworkGroup(groupKey, idx)}/>);
       }
 
       return (
         <div key={idx} className='dropdown-plus-minus'>
           <Dropdown
-            value={this.state.networkInterface.getIn(['network-groups', idx])}
-            onChange={(e) => this.updateNetworkGroup(e.target.value, idx)}
+            value={this.state.networkInterface.getIn([groupKey, idx])}
+            onChange={(e) => this.updateNetworkGroup(e.target.value, groupKey, idx)}
             emptyOption={translate('none')}>
 
             {options}
@@ -780,6 +802,13 @@ class InterfaceModelsTab extends Component {
         </div>
       );
     });
+
+    return (
+      <div>
+        <div className='details-group-title'>{translate(groupKey.replace(/-/g, '.')) + ':'}</div>
+        {comboLines}
+      </div>
+    );
   }
 
   confirmModal = () => {

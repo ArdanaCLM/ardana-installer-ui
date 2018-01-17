@@ -294,8 +294,9 @@
     "details.nicmapping.confirm.remove": "You've selected to remove the NIC mapping: {0}.\n\n Are you sure you want to proceed?",
     "network.group.please.select": "Please Select Network Group...",
     "network.confirm.remove": "You've selected to remove the network: {0}.\n\n Are you sure you want to proceed?",
-    "network.device": "Network Device",
-    "network.group": "Network Group",
+    "network.devices": "Network Devices",
+    "network.groups": "Network Groups",
+    "forced.network.groups": "Forced Network Groups",
 
     "complete.heading": "Cloud Deployment Successful",
     "complete.message.body1": "Congratulations! You've successfully deploy your cloud.",
