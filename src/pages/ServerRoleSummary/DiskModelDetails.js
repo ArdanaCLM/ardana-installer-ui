@@ -400,7 +400,8 @@ class DiskModelDetails extends Component {
       <div>
         <div className='details-group-title'>{translate('device.group.devices') + ':'}</div>
         <InlineAddRemoveInput name='dgdevices' placeholder={translate('device.group.device') + '*'}
-          values={this.state.deviceGroupDevices} sendSelectedList={this.getSelectedDGDevices}/>
+          values={this.state.deviceGroupDevices} sendSelectedList={this.getSelectedDGDevices}
+          editable='true'/>
         <div className='details-group-title'>{translate('device.group.consumer') + ':'}</div>
         <ServerInput isRequired={true} placeholder={translate('device.group.consumer.name') + '*'}
           inputValue={this.state.deviceGroupConsumer.name || ''} inputName='dgConsumerName'
