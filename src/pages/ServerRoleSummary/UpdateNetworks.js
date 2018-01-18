@@ -206,7 +206,7 @@ class UpdateNetworks extends Component {
 
   renderNewAddressInput () {
     return (
-      <div key={0} className='dropdown-plus-minus'>
+      <div key={0} className='dropdown-plus-minus network-plus-minus'>
         <div className="field-container">
           <ServerInput
             inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, 0)}
@@ -224,7 +224,7 @@ class UpdateNetworks extends Component {
     let addressRows = this.state.data.addresses.map((addr, idx) => {
       const lastRow = (idx === this.state.data.addresses.length -1);
       return (
-        <div key={idx} className='dropdown-plus-minus'>
+        <div key={idx} className='dropdown-plus-minus network-plus-minus'>
           <div className="field-container">
             <ServerInput
               inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, idx)}
