@@ -75,7 +75,7 @@ class ConnectionCredsInfo extends Component {
         'host': '',
         'username': '',
         'password': '',
-        'port': 8443,
+        'port': 443,
         'secured': true
       };
     }

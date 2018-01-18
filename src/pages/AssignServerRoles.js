@@ -113,35 +113,36 @@ class AssignServerRoles extends BaseWizardPage {
     };
   }
 
-  getSmServersData(tokenKey, smUrl) {
+  getSmServersData(tokenKey, smUrl, secured) {
     return fetchJson('/api/v1/sm/servers', {
       headers: {
         'Auth-Token': tokenKey,
-        'Suse-Manager-Url': smUrl
+        'Suse-Manager-Url': smUrl,
+        'Secured': secured
       }
     });
   }
 
-  getOvServersData(tokenKey, ovUrl) {
+  getOvServersData(tokenKey, ovUrl, secured) {
     return fetchJson('/api/v1/ov/servers', {
       headers: {
         'Auth-Token': tokenKey,
         'Ov-Url': ovUrl,
-        'Secured': this.connections.ov.secured
+        'Secured': secured
       }
     });
   }
 
-  discoverSmServers(tokenKey, smUrl) {
+  discoverSmServers(tokenKey, smUrl, secured) {
     let promise = new Promise((resolve, reject) => {
-      this.getSmServersData(tokenKey, smUrl)
+      this.getSmServersData(tokenKey, smUrl, secured)
         .then((rawServerData) => {
           if (rawServerData && rawServerData.length > 0) {
             let ids = rawServerData.map((srv) => {
               return srv.id;
             });
 
-            this.getSmAllServerDetailsData(ids, tokenKey, smUrl)
+            this.getSmAllServerDetailsData(ids, tokenKey, smUrl, secured)
               .then((details) => {
                 rawServerData =
                   this.updateSmServerDataWithDetails(details, rawServerData);
@@ -163,9 +164,9 @@ class AssignServerRoles extends BaseWizardPage {
     return promise;
   }
 
-  discoverOvServers(tokenKey, ovUrl) {
+  discoverOvServers(tokenKey, ovUrl, secured) {
     let promise = new Promise((resolve, reject) => {
-      this.getOvServersData(tokenKey, ovUrl)
+      this.getOvServersData(tokenKey, ovUrl, secured)
         .then((rawServerData) => {
           if (rawServerData && rawServerData.members && rawServerData.members.length > 0) {
             let servers = this.updateOvServerData(rawServerData.members);
@@ -192,14 +193,16 @@ class AssignServerRoles extends BaseWizardPage {
   discoverAllServers = () => {
     let tasks = [];
     if(this.connections.sm.checked && this.smSessionKey) {
-      tasks.push(this.discoverSmServers(this.smSessionKey, this.connections.sm.apiUrl));
+      tasks.push(this.discoverSmServers(
+        this.smSessionKey, this.connections.sm.apiUrl, this.connections.sm.secured));
     }
     else if(this.smApiToken) {
-      tasks.push(this.discoverSmServers(this.smApiToken, this.getSmUrlEmbedded()));
+      tasks.push(this.discoverSmServers(this.smApiToken, this.getSmUrlEmbedded(), true));
     }
 
     if(this.connections.ov.checked && this.ovSessionKey) {
-      tasks.push(this.discoverOvServers(this.ovSessionKey, this.connections.ov.apiUrl));
+      tasks.push(this.discoverOvServers(
+        this.ovSessionKey, this.connections.ov.apiUrl, this.connections.ov.secured));
     }
 
     return Promise.all(tasks);
@@ -485,7 +488,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getSmUrl(host, port) {
-    let url = 'https://' + host + ':' + (port <= 0 ? '8443' : port) + '/rpc/api';
+    let url = 'https://' + host + ':' + (port <= 0 ? '443' : port) + '/rpc/api';
     return url;
   }
 
@@ -647,18 +650,23 @@ class AssignServerRoles extends BaseWizardPage {
       // only pick up non empty detail.
       if(srvDetail && srvDetail.id) {
         let nkdevice = srvDetail.network_devices.find((device) => {
-          return device.interface === 'eth0';
+          return device.interface && device.interface.startsWith('eth') && device.ip !== '';
         });
+        // still can not find ip address, try one more time
+        if (!nkdevice) {
+          nkdevice = srvDetail.network_devices.find((device) => {
+            return device.interface && device.ip !== '';
+          });
+        }
+
         //at this point only these are useful
         let id = srvDetail.name ? srvDetail.name : srvDetail.id + '';
         let serverData = {
           'id': id, //use name if it is there or use id string
           'name': srvDetail.name,
           'serverId': srvDetail.id,
-          'ip-addr': nkdevice.ip,
-          'mac-addr': nkdevice.hardware_address,
-          'cpu': srvDetail.cpu_info.count,
-          'ram': srvDetail.ram,
+          'ip-addr': nkdevice ? nkdevice.ip : '',
+          'mac-addr': nkdevice ? nkdevice.hardware_address : '',
           'ilo-ip': '',
           'ilo-user': '',
           'ilo-password': '',
@@ -763,12 +771,13 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   //prototype query suse manager for details
-  getSmOneServerDetailData = (shimUrlPath, smTokenKey, smUrl) => {
+  getSmOneServerDetailData = (shimUrlPath, smTokenKey, smUrl, secured) => {
     let promise = new Promise((resolve, reject) => {
       fetchJson(shimUrlPath, {
         headers: {
           'Auth-Token': smTokenKey,
-          'Suse-Manager-Url': smUrl
+          'Suse-Manager-Url': smUrl,
+          'Secured': secured
         }
       })
         .then((responseData) => {
@@ -781,11 +790,11 @@ class AssignServerRoles extends BaseWizardPage {
     return promise;
   }
 
-  getSmAllServerDetailsData = (serverIds, smTokenKey, smUrl) => {
+  getSmAllServerDetailsData = (serverIds, smTokenKey, smUrl, secured) => {
     let tasks = [];
     serverIds.forEach((id) => {
       let shimUrlPath = '/api/v1/sm/servers/' + id;
-      tasks.push(this.getSmOneServerDetailData(shimUrlPath, smTokenKey, smUrl));
+      tasks.push(this.getSmOneServerDetailData(shimUrlPath, smTokenKey, smUrl, secured));
     });
 
     return Promise.all(tasks);
