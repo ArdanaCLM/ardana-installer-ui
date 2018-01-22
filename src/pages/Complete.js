@@ -14,7 +14,7 @@
 **/
 import React from 'react';
 import '../Deployer.css';
-import { translate } from '../localization/localize.js';
+import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage';
 import { fetchJson } from '../utils/RestUtils.js';
 
@@ -52,7 +52,7 @@ class Complete extends BaseWizardPage {
   }
 
   render() {
-    const modelName = translate('model.picker.' + this.props.model.get('name'));
+    const modelName = translateModelName(this.props.model.get('name'));
 
     let commandLines = [];
     if (this.state.userName) {

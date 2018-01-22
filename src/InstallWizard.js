@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import './Deployer.css';
-import { translate } from './localization/localize.js';
+import { translate, translateModelName } from './localization/localize.js';
 import { STATUS } from './utils/constants.js';
 import WizardProgress from './components/WizardProgress';
 import { LoadingMask } from './components/LoadingMask.js';
@@ -324,7 +324,7 @@ class InstallWizard extends Component {
    */
   render() {
     const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
-      <h3 className='right-corner'>{translate('model.picker.' + this.state.model.get('name'))}</h3> : '';
+      <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3> : '';
 
     return (
       <div>

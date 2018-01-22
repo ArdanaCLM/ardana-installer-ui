@@ -15,7 +15,7 @@
 import React from 'react';
 import { fromJS } from 'immutable';
 import '../Deployer.css';
-import { translate } from '../localization/localize.js';
+import { translate, translateModelName } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { ErrorMessage } from '../components/Messages.js';
@@ -352,7 +352,7 @@ class CloudModelPicker extends BaseWizardPage {
         details = template['overview'];
       }
       detailContent =
-        (<div><h3>{translate('model.picker.' + this.state.selectedModelName) + ' ' + translate('common.details')}</h3>
+        (<div><h3>{translateModelName(this.state.selectedModelName) + ' ' + translate('common.details')}</h3>
           <div className='model-details' dangerouslySetInnerHTML={{__html: details}}/></div>);
     }
     else {
@@ -370,7 +370,7 @@ class CloudModelPicker extends BaseWizardPage {
         key={idx}
         keyName={template.name}
         isSelected={template.name === this.state.selectedModelName}
-        displayLabel={translate('model.picker.' + template.name)}
+        displayLabel={translateModelName(template.name)}
         clickAction={this.handlePickModel}/>
     );
 
