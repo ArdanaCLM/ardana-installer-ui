@@ -44,11 +44,29 @@ for (i = 0; i < window.navigator.languages.length; i++) {
 export function translate(key, ...args) {
   // Note!
   // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
-  // The join() corrects this by joining the elements into a signle string.
+  // The join() corrects this by joining the elements into a single string.
   try {
     return strings.formatString(strings[key], ...args).join('');
   } catch (e) {
     console.error('Unable to translate '+key); // eslint-disable-line no-console
     return key;
+  }
+}
+
+export function translateModelName(key) {
+  // Since it is possible for new model names to be introduced or even modified by the customer,
+  // the translation of these names needs to have some human readable fallbacks the situations where
+  // there is no pre-existing translation
+  try {
+    // Note!
+    // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
+    // The join() corrects this by joining the elements into a signle string.
+    return strings.formatString(strings['model.name.' + key]).join('');
+  } catch (e) {
+    return key
+      .replace(/[_-.]/g, ' ')                            // change _, - and . to space
+      .split(' ')                                        // split into words
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1))  // capitalize the first letter of each word
+      .join(' ');                                        // join elements back together into a single string
   }
 }
