@@ -64,7 +64,7 @@ export function translateModelName(key) {
     return strings.formatString(strings['model.name.' + key]).join('');
   } catch (e) {
     return key
-      .replace(/[_-.]/g, ' ')                            // change _, - and . to space
+      .replace(/[-_.]/g, ' ')                            // change _, - and . to space
       .split(' ')                                        // split into words
       .map(s => s.charAt(0).toUpperCase() + s.slice(1))  // capitalize the first letter of each word
       .join(' ');                                        // join elements back together into a single string
