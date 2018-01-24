@@ -40,6 +40,16 @@ class NicMappingTab extends Component {
     };
   }
 
+  resetData = () => {
+    this.setState({
+      mode: MODE.NONE,
+      activeRow: undefined,
+      nicMappingName: '',
+      isNameValid: true,
+      detailRows: undefined,
+    });
+  }
+
   // Returns a new model with the nic mappings in sorted order
   getSortedModel = () => {
     return this.props.model.updateIn(['inputModel','nic-mappings'],
@@ -119,7 +129,7 @@ class NicMappingTab extends Component {
           !== this.getUpdatedModel().getIn(['inputModel', 'nic-mappings', this.state.activeRow]);
       }
     }
-    this.props.setDataChanged(0, isChanged);
+    this.props.setDataChanged(this.props.tabIndex, isChanged);
     return isChanged;
   }
 
@@ -232,7 +242,7 @@ class NicMappingTab extends Component {
   }
 
   closeDetails = () => {
-    this.props.setDataChanged(0, false);
+    this.props.setDataChanged(this.props.tabIndex, false);
     this.setState({mode: MODE.NONE});
   }
 

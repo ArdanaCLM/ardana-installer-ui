@@ -44,9 +44,14 @@ class UpdateNetworks extends Component {
       data: networks,
     };
 
-    if (this.props.mode === MODE.EDIT) {
-      this.origData = networks;
-    }
+    this.origData = networks;
+  }
+
+  resetData = () => {
+    this.setState({
+      isFormValid: false,
+      data: {addresses: []},
+    });
   }
 
   initAddresses(networks) {
@@ -311,12 +316,12 @@ class UpdateNetworks extends Component {
 
   checkDataToSave = () => {
     const dataChanged = JSON.stringify(this.origData) !== JSON.stringify(this.state.data);
-    this.props.setDataChanged(2, dataChanged);
+    this.props.setDataChanged(this.props.tabIndex, dataChanged);
     return this.state.isFormValid && dataChanged;
   }
 
   closeAction = () => {
-    this.props.setDataChanged(2, false);
+    this.props.setDataChanged(this.props.tabIndex, false);
     this.props.closeAction();
   }
 
@@ -339,7 +344,7 @@ class UpdateNetworks extends Component {
           {this.renderNetworkAddresses()}
           <div className='details-group-title'>{translate('network.gateway') + ':'}</div>
           {this.renderNetworkInput('gateway-ip', 'text', false, translate('network.gateway'), IpV4AddressValidator)}
-          <div className='details-group-title'>{translate('network.group') + '*:'}</div>
+          <div className='details-group-title'>{translate('network.groups') + '*:'}</div>
           {this.renderNetworkGroup()}
           {this.renderTaggedVLAN()}
           <div className='btn-row details-btn network-more-width'>

@@ -82,6 +82,27 @@ class DiskModelDetails extends Component {
     this.thirdDetailsChanged = false;
   }
 
+  resetData = () => {
+    this.setState({
+      diskModelName: '',
+      volumeGroups: [],
+      deviceGroups: [],
+      volumeGroup: {},
+      logicalVolume: {},
+      physicalVolumes: [],
+      logicalVolumes: [],
+      deviceGroup: {},
+      deviceGroupDevices: [],
+      deviceGroupConsumer: {},
+      showThirdDetails: false,
+      showRemoveVGConfirmation: false,
+      showRemoveDGConfirmation: false,
+      showRemoveLVConfirmation: false,
+      selectedRow: undefined,
+      consumerAttrsValid: true
+    });
+  }
+
   handleInputLine = (e, valid, props) => {
     const value = e.target.value;
     if (e.target.name === 'dmName') {
@@ -308,7 +329,8 @@ class DiskModelDetails extends Component {
         this.state.logicalVolume.fstype !== this.origLV.fstype ||
         this.state.logicalVolume['mkfs-opts'] !== this.origLV['mkfs-opts'];
     }
-    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    this.props.setDataChanged(this.props.tabIndex,
+      this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
     return dataValid;
   }
 
@@ -492,7 +514,8 @@ class DiskModelDetails extends Component {
           JSON.stringify(devices) !== JSON.stringify(this.origDGDevices);
       }
     }
-    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    this.props.setDataChanged(this.props.tabIndex,
+      this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
     return dataValid;
   }
 
@@ -686,7 +709,8 @@ class DiskModelDetails extends Component {
         JSON.stringify(vgs) !== JSON.stringify(this.origVGs) ||
         JSON.stringify(dgs) !== JSON.stringify(this.origDGs);
     }
-    this.props.setDataChanged(3, this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
+    this.props.setDataChanged(this.props.tabIndex,
+      this.diskModelChanged || this.secondDetailsChanged || this.thirdDetailsChanged);
     return dataValid;
   }
 
@@ -694,7 +718,7 @@ class DiskModelDetails extends Component {
     this.diskModelChanged = false;
     this.secondDetailsChanged = false;
     this.thirdDetailsChanged = false;
-    this.props.setDataChanged(3, false);
+    this.props.setDataChanged(this.props.tabIndex, false);
     this.props.closeAction();
   }
 

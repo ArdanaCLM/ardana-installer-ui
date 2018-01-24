@@ -32,6 +32,19 @@ class DiskModelsTab extends Component {
     };
   }
 
+  resetData = () => {
+    this.setState({
+      diskModel: '',
+      showDiskModelDetails: false,
+      showRemoveConfirmation: false,
+      diskModelToRemove: '',
+      extendedDetails: 0
+    });
+    if (this.diskModelDetails) {
+      this.diskModelDetails.resetData();
+    }
+  }
+
   setExtendedDetails = (value) => {
     this.setState({extendedDetails: value});
   }
@@ -124,7 +137,8 @@ class DiskModelsTab extends Component {
       detailsSection = (<DiskModelDetails model={this.props.model}
         diskModel={this.state.diskModel} updateGlobalState={this.props.updateGlobalState}
         closeAction={this.hideDiskModelDetails} extendAction={this.setExtendedDetails}
-        setDataChanged={this.props.setDataChanged}/>);
+        setDataChanged={this.props.setDataChanged} tabIndex={this.props.tabIndex}
+        ref={instance => {this.diskModelDetails = instance;}}/>);
     }
 
     let confirmRemoveSection = '';

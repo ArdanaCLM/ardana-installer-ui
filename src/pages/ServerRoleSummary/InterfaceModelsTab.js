@@ -70,6 +70,28 @@ class InterfaceModelsTab extends Component {
       showRemoveInterfaceConfirmation: false,
       interfaceToRemoveIndex: undefined
     };
+
+    this.detailsChanged = false;
+  }
+
+  resetData = () => {
+    this.setState({
+      overallMode: MODE.NONE,
+      detailMode: MODE.NONE,
+      activeOverallRow: undefined,
+      activeDetailRow: undefined,
+      interfaceModel: undefined,
+      networkInterface: undefined,
+      deviceList: undefined,
+      bondDeviceName: undefined,
+      bondOptions: undefined,
+      isInterfaceModelNameValid: undefined,
+      isInterfaceNameValid: undefined,
+      isBondDeviceNameValid: undefined,
+      isBondOptionsValid: undefined,
+      showRemoveInterfaceConfirmation: false,
+      interfaceToRemoveIndex: undefined
+    });
   }
 
   /*
@@ -365,14 +387,14 @@ class InterfaceModelsTab extends Component {
         this.modelChanged = ! this.state.interfaceModel.equals(originalModel);
       }
     }
-    this.props.setDataChanged(4, this.modelChanged || this.detailsChanged);
+    this.props.setDataChanged(this.props.tabIndex, this.modelChanged || this.detailsChanged);
     return this.modelChanged;
   }
 
   closeModelDetails = () => {
     this.modelChanged = false;
     this.detailsChanged = false;
-    this.props.setDataChanged(4, false);
+    this.props.setDataChanged(this.props.tabIndex, false);
     this.setState({overallMode: MODE.NONE});
   }
 
@@ -557,7 +579,7 @@ class InterfaceModelsTab extends Component {
         this.detailsChanged = ! this.getUpdatedInterfaceModel(this.state).equals(this.state.interfaceModel);
       }
     }
-    this.props.setDataChanged(4, this.modelChanged || this.detailsChanged);
+    this.props.setDataChanged(this.props.tabIndex, this.modelChanged || this.detailsChanged);
     return this.detailsChanged;
   }
 
