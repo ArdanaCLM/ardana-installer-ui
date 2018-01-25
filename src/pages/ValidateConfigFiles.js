@@ -197,32 +197,26 @@ class ValidateConfigFiles extends Component {
     this.props.disableTab(true);
   }
 
-  commitChanges = () => {
-    const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
-    return postJson('/api/v1/clm/model/commit', commitMessage)
-      .then((response) => {
-        this.setState({commit: STATUS.COMPLETE});
-      })
-      .catch((error) => {
-        this.setState({
-          valid: INVALID, invalidMsg: translate('deploy.commit.failure', error.toString())});
-        this.setState({commit: STATUS.FAILED});
-      });
-  }
-
   validateModel = () => {
     this.setState({valid: VALIDATING, invalidMsg: ''});
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
-        this.setState({valid: VALID}, () => {
-          this.commitChanges().then(() => {
-            if (this.state.commit === STATUS.COMPLETE) {
-              this.props.enableNextButton(true);
-            }
+        //go commit model changes
+        const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
+        postJson('/api/v1/clm/model/commit', commitMessage)
+          .then((response) => {
+            this.setState({valid: VALID, commit: STATUS.COMPLETE});
+            this.props.enableNextButton(true);
+            this.clearAllChangeMarkers();
+          })
+          .catch((error) => {
+            this.setState({
+              valid: INVALID,
+              invalidMsg: translate('deploy.commit.failure', error.toString()),
+              commit: STATUS.FAILED});
+            this.props.enableNextButton(false);
           });
-        });
-        this.clearAllChangeMarkers();
       })
       .catch(error => {
         this.props.enableNextButton(false);
