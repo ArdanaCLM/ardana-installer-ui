@@ -30,6 +30,17 @@ class NetworksTab extends Component {
     };
   }
 
+  resetData = () => {
+    this.setState({
+      showRemoveConfirmation: false,
+      mode: MODE.NONE,
+      networkName: ''
+    });
+    if (this.updateNetworks) {
+      this.updateNetworks.resetData();
+    }
+  }
+
   handleAddNetwork = () => {
     if(this.state.mode === MODE.NONE) {
       this.setState({mode: MODE.ADD});
@@ -97,7 +108,9 @@ class NetworksTab extends Component {
           model={this.props.model} mode={this.state.mode} {...extraProps}
           updateGlobalState={this.props.updateGlobalState}
           setDataChanged={this.props.setDataChanged}
-          closeAction={this.handleCancelUpdateNetwork}/>
+          closeAction={this.handleCancelUpdateNetwork}
+          tabIndex={this.props.tabIndex}
+          ref={instance => {this.updateNetworks = instance;}}/>
       </div>
     );
   }

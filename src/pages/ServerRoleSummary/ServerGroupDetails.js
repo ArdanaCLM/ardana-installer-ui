@@ -45,6 +45,14 @@ class ServerGroupDetails extends Component {
     }
   }
 
+  resetData = () => {
+    this.setState({
+      name: '',
+      networks: [],
+      serverGroups: []
+    });
+  }
+
   handleInputLine = (e, valid, props) => {
     let value = e.target.value;
     this.setState({name: value});
@@ -99,12 +107,12 @@ class ServerGroupDetails extends Component {
         dataChanged = false;
       }
     }
-    this.props.setDataChanged(1, dataChanged);
+    this.props.setDataChanged(this.props.tabIndex, dataChanged);
     return dataChanged;
   }
 
   closeAction = () => {
-    this.props.setDataChanged(1, false);
+    this.props.setDataChanged(this.props.tabIndex, false);
     this.props.closeAction();
   }
 

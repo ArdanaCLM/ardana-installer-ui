@@ -198,6 +198,7 @@ class InlineAddRemoveInput extends Component {
       if (nextState.selectedItem !== this.state.selectedItem) {
         let sentItems = nextState.items.slice();
         sentItems.splice(nextState.items.length - 1, 1, nextState.selectedItem);
+        this.setState({items: sentItems});
         this.props.sendSelectedList(sentItems);
       }
     } else {
@@ -227,11 +228,9 @@ class InlineAddRemoveInput extends Component {
   addItem = () => {
     if (!this.props.disabled) {
       this.setState(prevState => {
-        if (prevState.selectedItem !== '') {
-          let newItems = prevState.items.slice();
-          newItems.splice(newItems.length - 1, 0, prevState.selectedItem);
-          return {items: newItems, selectedItem: ''};
-        }
+        let newItems = prevState.items.slice();
+        newItems.splice(newItems.length, 0, '');
+        return {items: newItems, selectedItem: ''};
       });
     }
   }
@@ -283,6 +282,7 @@ class InlineAddRemoveInput extends Component {
         </div>
       );
     });
+    const required = this.props.isRequired ? this.props.isRequired : 'true';
 
     return (
       <div>
@@ -290,7 +290,7 @@ class InlineAddRemoveInput extends Component {
         <div className='dropdown-plus-minus'>
           <ServerInput key={this.props.name + 'start'} inputValue={this.state.selectedItem}
             inputType='text' inputAction={this.handleInputLine} placeholder={this.props.placeholder}
-            isRequired='true' disabled={this.props.disabled}/>
+            isRequired={required} disabled={this.props.disabled}/>
           <div className='plus-minus-container'>
             <span key={this.props.name + 'minus'} className={selectedRemoveClass}
               onClick={() => this.removeItem(-1)}/>

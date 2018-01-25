@@ -31,6 +31,18 @@ class ServerGroupsTab extends Component {
     };
   }
 
+  resetData = () => {
+    this.setState({
+      value: '',
+      showServerGroupDetails: false,
+      showRemoveConfirmation: false,
+      serverGroupToRemove: ''
+    });
+    if (this.serverGroupDetails) {
+      this.serverGroupDetails.resetData();
+    }
+  }
+
   addServerGroup = () => {
     if (!this.state.showServerGroupDetails) {
       this.setState({showServerGroupDetails: true, value: ''});
@@ -120,7 +132,8 @@ class ServerGroupsTab extends Component {
     if (this.state.showServerGroupDetails) {
       detailsSection = (<ServerGroupDetails model={this.props.model}
         value={this.state.value} updateGlobalState={this.props.updateGlobalState}
-        setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}/>);
+        setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}
+        tabIndex={this.props.tabIndex} ref={instance => {this.serverGroupDetails = instance;}}/>);
     }
 
     let confirmRemoveSection = '';
