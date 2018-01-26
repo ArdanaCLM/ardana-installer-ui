@@ -62,8 +62,15 @@ class SmServerDetails extends BaseServerDetails {
       ip: nkdevice.ip
     },{
       id: details.id,
-      ipv6: nkdevice.ipv6 && nkdevice.ipv6[0] ? nkdevice.ipv6[0].address : ''
-      //kernel: '' //TODO ???
+      ipv6: nkdevice.ipv6 && nkdevice.ipv6[0] ? nkdevice.ipv6[0].address : '',
+    },
+    {
+      os: details.release,
+      kernel: details.running_kernel
+    },
+    {
+      last_checkin: new Date(details.last_checkin).toISOString().substring(0, 10),
+      last_boot: new Date(details.last_boot).toISOString().substring(0, 10)
     }];
     retData.general = [{
       model: details.cpu_info.model,
