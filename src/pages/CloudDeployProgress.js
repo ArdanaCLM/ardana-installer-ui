@@ -63,12 +63,12 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.step5'),
-    playbooks: ['hlm-status.yml']
-    //playbooks: ['ops-console-status.yml']//swap these to test-run using a short running playbook
+    playbooks: ['ardana-status.yml']
   },
   {
     label: translate('deploy.progress.step6'),
-    playbooks: ['site.yml', 'dayzero-site.yml'] //either site.yml or dayzero-site.yml
+    playbooks: ['site.yml', 'dayzero-site.yml'], //either site.yml or dayzero-site.yml
+    orCondition: true
   }
 ];
 

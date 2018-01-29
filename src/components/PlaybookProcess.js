@@ -118,6 +118,13 @@ class PlaybookProgress extends Component {
     return retClass;
   }
 
+  getStepCompletedPlaybooks = (step) => {
+    let retPlaybooks = step.playbooks.filter((playbook) => {
+      return this.state.playbooksComplete.indexOf(playbook) !== -1;
+    });
+    return retPlaybooks;
+  }
+
   getProgress() {
     let progresses =  this.props.steps.map((step, index) => {
       let status = STATUS.NOT_STARTED, i = 0;
@@ -129,19 +136,34 @@ class PlaybookProgress extends Component {
         }
       }
 
-      //check if all playbooks have finished
+      // Check if all started playbooks have finished, if a playbook is in the step but
+      // never gets started, ignore it. We might include a playbook in the step which
+      // is not relevant to the deployment anymore.
       if (status === STATUS.NOT_STARTED) {
-        let complete = true;
-        for (i = 0; i < step.playbooks.length; i++) {
-          if(this.state.playbooksComplete.indexOf(step.playbooks[i]) === -1) {
-            //at least one playbook is *not* complete
-            complete = false;
-          }
-        }
+        let stepCompletedPlaybooks = this.getStepCompletedPlaybooks(step);
 
-        //if all playbooks were complete, set the status to succeed
-        if (complete) {
+        // if there is an or condition, it means one of the playbooks completes, the
+        // step completes. For example site.yml or dayzero-site.yml
+        if (step.orCondition && stepCompletedPlaybooks.length > 0) {
           status = STATUS.COMPLETE;
+        }
+        // check the ideal case where all the playbooks in the step ran and completed
+        else if (stepCompletedPlaybooks.length === step.playbooks.length) {
+          status = STATUS.COMPLETE;
+        }
+        // have some playbooks completed, need to check if this step completed
+        else if (stepCompletedPlaybooks.length > 0) {
+          // we could include playbooks which might not be relevant to the step
+          // check the last step completed...if last step completed, make this step completed
+          let lastStepIndex = this.props.steps.length - 1;
+          let lastStepCompleted =
+            this.getStepCompletedPlaybooks(this.props.steps[lastStepIndex]);
+          if (lastStepCompleted.length > 0) {
+            status = STATUS.COMPLETE;
+          }
+          else {
+            status = STATUS.IN_PROGRESS;
+          }
         }
       }
 
@@ -153,7 +175,7 @@ class PlaybookProgress extends Component {
         for (i = 0; i < step.playbooks.length; i++) {
           if (this.state.playbooksStarted.indexOf(step.playbooks[i]) !== -1) {
             status = STATUS.IN_PROGRESS;
-            break;//theres at least 1 started playbook
+            break;//there is at least 1 started playbook
           }
         }
       }
