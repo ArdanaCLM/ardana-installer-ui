@@ -336,6 +336,7 @@
     "deploy.fail.launch.playbook": "Failed to launch playbook {0}. {1}",
     "deploy.get.event.error": "Failed to get the event for playbook {0} - {1}. {2}",
     "deploy.get.log.error": "Failed to get the log for playbook {0} - {1}. {2}",
+    "deploy.progress.failure": "Cloud provisioning has failed. Please review the errors in the log, hit Back, address the issue by editing any necessary files, re-run Validate, and Deploy again.",
 
     "install.progress.heading": "SLES Installation In Progress",
     "install.progress.step1": "Verify IPMI Connectivity",
@@ -352,7 +353,7 @@
     "provision.server.right.table": "Selected Servers",
     "provision.server.install": "Install",
     "provision.server.progress.heading": "Server Installation In Progress",
-    "provision.server.failure": "Server Installation Failure : {0}",
+    "provision.server.failure": "OS provisioning has failed. Please review the errors in the log, address the issue, and rerun the OS install on the hosts that have failed.",
     "provision.server.confirm.body": "You've selected to have SLES installed on {0} server(s).\n All existing data on the servers will be overwritten, including any OSes that are already installed.\n\n Are you sure you want to proceed?",
 
     "server.role.summary.heading": "Server and Server Role Summary",

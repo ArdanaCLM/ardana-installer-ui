@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import { STATUS } from '../utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import { YesNoModal } from '../components/Modals.js';
+import { ErrorBanner } from '../components/Messages.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import TransferTable from '../components/TransferTable.js';
 import { ServerInputLine } from '../components/ServerUtils.js';
@@ -210,9 +211,13 @@ class SelectServersToProvision extends BaseWizardPage {
           </div>
           <div className='wizard-content'>
             <PlaybookProgress
-              updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-              playbookStatus = {this.props.playbookStatus} steps={OS_INSTALL_STEPS}
+              updatePageStatus={this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
+              playbookStatus={this.props.playbookStatus} steps={OS_INSTALL_STEPS}
               playbooks={[INSTALL_PLAYBOOK]} payload={payload} />
+            <div className='banner-container'>
+              <ErrorBanner message={translate('provision.server.failure')}
+                show={this.state.overallStatus === STATUS.FAILED}/>
+            </div>
           </div>
         </div>);
     } else {

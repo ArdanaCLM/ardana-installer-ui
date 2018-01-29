@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import { STATUS } from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { ErrorBanner } from '../components/Messages.js';
 
 /*
   Navigation rules:
@@ -154,6 +155,10 @@ class CloudDeployProgress extends BaseWizardPage {
             playbookStatus = {this.props.playbookStatus}
             steps = {PLAYBOOK_STEPS} deployConfig = {this.props.deployConfig}
             playbooks = {[PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook]} payload = {payload}/>
+          <div className='banner-container'>
+            <ErrorBanner message={translate('deploy.progress.failure')}
+              show={this.state.overallStatus === STATUS.FAILED}/>
+          </div>
         </div>
         {this.renderNavButtons()}
       </div>
