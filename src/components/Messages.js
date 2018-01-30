@@ -71,8 +71,18 @@ function InfoBanner(props) {
   );
 }
 
-module.exports = {
-  ErrorMessage: ErrorMessage,
-  SuccessMessage: SuccessMessage,
-  InfoBanner: InfoBanner
-};
+function ErrorBanner(props) {
+  let banner = null;
+  if (props.show) {
+    banner = (
+      <Alert bsStyle="danger">
+        <span className='error-banner'>
+          <i className='material-icons error-icon'>error</i>{props.message}
+        </span>
+      </Alert>
+    );
+  }
+  return banner;
+}
+
+export {ErrorMessage, SuccessMessage, InfoBanner, ErrorBanner}
