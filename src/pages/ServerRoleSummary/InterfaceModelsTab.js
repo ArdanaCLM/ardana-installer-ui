@@ -695,10 +695,10 @@ class InterfaceModelsTab extends Component {
     });
   }
 
-  updateDevice = (val) => {
+  updateDevice = (val, idx) => {
     this.setState(prev => {
-      // replace the last item in the device list with a new one containing val
-      return {deviceList: prev.deviceList.pop().push(Map({'name': val}))};
+      // Update the device with the value the user has chosen
+      return {deviceList: prev.deviceList.setIn([idx, 'name'], val)};
     });
   }
 
