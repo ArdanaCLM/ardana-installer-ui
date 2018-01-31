@@ -323,6 +323,9 @@ class InstallWizard extends Component {
    * boilerplate ReactJS render function
    */
   render() {
+    // overwrite default tab title to use branding title
+    document.title = translate('openstack.cloud.deployer.title');
+
     const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
       <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3> : '';
 
