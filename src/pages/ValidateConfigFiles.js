@@ -76,18 +76,30 @@ class EditFile extends Component {
   }
 
   render() {
+    let errorMsgPanel = '';
+    let editPanelCssClass = 'file-editor col-md-12';
+    if (this.props.valid === INVALID) {//TODO - need a max height on the errorMsgPanel
+      errorMsgPanel = <div className="col-md-6 errorMsgPanel">{translate('validate.config.files.msg.invalid')}<br/>
+                        <pre className="log">{this.props.invalidMsg}</pre>
+                      </div>;
+      editPanelCssClass = 'file-editor col-md-6';
+    }
+
     return (
 
       <div>
         <h3>{this.props.file.name}</h3>
-        <div className="file-editor">
-          <ServerInput
-            inputValue={this.state.contents}
-            inputName='fileContents'
-            inputType='textarea'
-            inputValidate={YamlValidator}
-            inputAction={this.handleChange}
-          />
+        <div className='col-md-12'>
+          <div className={editPanelCssClass}>
+            <ServerInput
+              inputValue={this.state.contents}
+              inputName='fileContents'
+              inputType='textarea'
+              inputValidate={YamlValidator}
+              inputAction={this.handleChange}
+            />
+          </div>
+          {errorMsgPanel}
         </div>
         <div className='btn-row'>
           <ActionButton type='default'
@@ -244,6 +256,8 @@ class ValidateConfigFiles extends Component {
           valid={this.state.valid}
           setChanged={() => this.setChanged()}
           loadModel={this.props.loadModel}
+          valid={this.state.valid}
+          invalidMsg={this.state.invalidMsg}
         />
       );
     }
