@@ -152,6 +152,11 @@ class DisplayFileList extends Component {
       return (descA < descB) ? -1 : (descA > descB) ? 1 : 0;});
 
     var list = fileList.map((file, index) => {
+      if (this.props.valid === VALIDATING){
+        return (<li key={index}>
+          {file.description + (file.changed ? ' *' : '')}
+        </li>);
+      }
       return (<li key={index}>
         <a href="#" onClick={() => this.props.onEditClick(file)}>
           {file.description + (file.changed ? ' *' : '')}
