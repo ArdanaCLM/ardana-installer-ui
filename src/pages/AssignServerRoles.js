@@ -574,6 +574,10 @@ class AssignServerRoles extends BaseWizardPage {
     this.activeTableId = tableId;
   }
 
+  handleDeleteServer = (server) => {
+    this.deleteServer(server)
+  }
+
   handleCloseServerDetails = () => {
     this.setState({showServerDetailsModal: false, activeRowData: undefined});
     this.activeTableId = undefined;
@@ -957,6 +961,34 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
+  /**
+   * When a server is remove it from the applicable lists  (discovered or manual).
+   */
+  deleteServer = (server) => {
+    for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
+      let idx = this.state[list].findIndex(s => server.id === s.id);
+      if (idx >= 0) {
+        let deleted_server;
+        this.setState(prev => {
+          prev[list].splice(idx, 1);
+          return {[list]: prev[list]};
+    }, () => {
+      deleteJson('/api/v1/server?source=' + server.source +'&id=' + server.id,
+                 JSON.stringify(deleted_server))
+          .catch((error) => {
+            let msg = translate('server.discover.delete.server.error', deleted_server.name);
+            this.setState(prev => { return {
+              messages: prev.messages.concat([{msg: [msg, error.toString()]}])
+            };});
+          });
+        });
+        break;
+      }
+    }
+  }
+
+
+
   updateModelObjectForEditServer = (server) => {
 
     let model = updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL);
@@ -1063,7 +1095,8 @@ class AssignServerRoles extends BaseWizardPage {
         id={tableId}
         tableConfig={tableConfig}
         tableData={filteredAvailableServers}
-        viewAction={this.handleShowServerDetails}>
+        viewAction={this.handleShowServerDetails}
+        deleteAction={this.handleDeleteServer}>
       </ServerTable>
     );
   }
@@ -1216,7 +1249,8 @@ class AssignServerRoles extends BaseWizardPage {
         serverRoles={getServerRoles(this.props.model)}
         tableId='rightTableId'
         editAction={this.handleShowEditServer}
-        viewAction={this.handleShowServerDetails}>
+        viewAction={this.handleShowServerDetails}
+        deleteAction={this.handleDeleteServer}>
       </ServerRolesAccordion>
     );
   }

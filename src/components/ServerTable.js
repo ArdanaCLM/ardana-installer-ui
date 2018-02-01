@@ -30,6 +30,7 @@ class ServerTable extends Component {
             dataDef={this.props.tableConfig.columns}
             editAction={this.props.editAction}
             viewAction={this.props.viewAction}
+            deleteAction={this.props.deleteAction}
             tableId={this.props.id}
             checkInputs={this.props.checkInputs}
             key={index}>
@@ -51,6 +52,8 @@ class ServerTable extends Component {
       });
 
     // push an empty header to hold show detail icon
+    headers.push(<th key={keyCount++}></th>);
+    // push another empty header to hold delete icon
     headers.push(<th key={keyCount++}></th>);
     return (
       <tr>{headers}</tr>

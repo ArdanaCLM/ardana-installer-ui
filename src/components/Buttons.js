@@ -256,6 +256,20 @@ class InfoForTableRow extends Component {
   }
 }
 
+class DeleteForTableRow extends Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return (
+        <td className='actions'>
+          <p onClick={this.props.clickAction}>
+            <span className='glyphicon glyphicon-trash delete'></span>
+          </p>
+        </td>
+        );
+  }
+}
 
 module.exports = {
   BackButton: BackButton,
@@ -268,5 +282,6 @@ module.exports = {
   AssignmentButton: AssignmentButton,
   ItemMenuButton: ItemMenuButton,
   EditPencilForTableRow: EditPencilForTableRow,
-  InfoForTableRow: InfoForTableRow
+  InfoForTableRow: InfoForTableRow,
+  DeleteForTableRow: DeleteForTableRow
 };

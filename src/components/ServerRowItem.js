@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { EditPencilForTableRow , InfoForTableRow} from './Buttons.js';
+import { EditPencilForTableRow , InfoForTableRow, DeleteForTableRow } from './Buttons.js';
 
 class ServerRowItem extends Component {
   constructor(props) {
@@ -41,6 +41,12 @@ class ServerRowItem extends Component {
   handleViewAction = (data, tableId) => {
     if(this.props.viewAction) {
       this.props.viewAction(data, tableId);
+    }
+  }
+
+  handleDeleteAction = (data) => {
+    if(this.props.deleteAction) {
+      this.props.deleteAction(data);
     }
   }
 
@@ -82,6 +88,13 @@ class ServerRowItem extends Component {
     );
   }
 
+  renderDeleteRow() {
+    return (
+      <DeleteForTableRow
+        clickAction={(e) => this.handleDeleteAction(this.props.data)}/>
+    );
+  }
+
   render() {
     let cName = 'draggable';
     let requiredUpdate = false;
@@ -101,6 +114,7 @@ class ServerRowItem extends Component {
         {this.renderServerColumns()}
         {this.props.viewAction && this.renderInfoRow()}
         {this.props.editAction && this.renderEditRow()}
+        {this.props.deleteAction && this.renderDeleteRow()}
       </tr>
     );
   }
