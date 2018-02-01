@@ -53,8 +53,12 @@ class CloudModelSummary extends BaseWizardPage {
     const NOT_FOUND = translate('model.summary.role.description.NOT_FOUND');
     const role = this.state.controlPlane.getIn(this.getKey(this.state.activeItem, 1)).get('server-role');
     const description = translate('model.summary.role.description.' + role);
-    return <InfoBanner message={description.startsWith('model.summary.role.description.') ?
-      NOT_FOUND : description}/>;
+    return (
+      <div className='details-banner'>
+        <InfoBanner message={description.startsWith('model.summary.role.description.') ?
+          NOT_FOUND : description}/>
+      </div>
+    );
   }
 
   // convert a delimited string (normally the state.activeItem) into a list.  Optionally
@@ -153,7 +157,7 @@ class CloudModelSummary extends BaseWizardPage {
               {additionalItems}
             </div>
           </div>
-          <div className='details-container'>
+          <div className='details-container top-spacing'>
             {this.getDescription()}
             <p />
             {this.state.activeItem
