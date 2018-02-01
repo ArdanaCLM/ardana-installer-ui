@@ -216,6 +216,7 @@ class ValidateConfigFiles extends Component {
 
   validateModel = () => {
     this.setState({valid: VALIDATING, invalidMsg: ''});
+    this.props.disableTab(true);
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
@@ -224,6 +225,7 @@ class ValidateConfigFiles extends Component {
         postJson('/api/v1/clm/model/commit', commitMessage)
           .then((response) => {
             this.setState({valid: VALID, commit: STATUS.COMPLETE});
+            this.props.disableTab(false);
             this.props.enableNextButton(true);
             this.clearAllChangeMarkers();
           })
@@ -232,12 +234,14 @@ class ValidateConfigFiles extends Component {
               valid: INVALID,
               invalidMsg: translate('deploy.commit.failure', error.toString()),
               commit: STATUS.FAILED});
+            this.props.disableTab(false);
             this.props.enableNextButton(false);
           });
       })
       .catch(error => {
         this.props.enableNextButton(false);
         this.setState({valid: INVALID, invalidMsg: error.value.log});
+        this.props.disableTab(false);
       });
   }
 
