@@ -14,7 +14,7 @@
 **/
 import React from 'react';
 import '../Deployer.css';
-import { translate } from '../localization/localize.js';
+import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { ActivePickerButton } from '../components/Buttons.js';
 import { InfoBanner } from '../components/Messages.js';
@@ -40,9 +40,9 @@ class CloudModelSummary extends BaseWizardPage {
   }
 
   getDisplayName(role) {
-    const NOT_FOUND = translate('model.summary.role.component.NOT_FOUND');
+    const realName = translateModelName(role.toLowerCase().replace('role', 'nodes'));
     const displayName = translate('model.summary.role.displayname.' + role);
-    return (displayName.startsWith('model.summary.role.displayname.')) ? NOT_FOUND : displayName;
+    return (displayName.startsWith('model.summary.role.displayname.')) ? realName : displayName;
   }
 
   getDescription() {
@@ -157,7 +157,7 @@ class CloudModelSummary extends BaseWizardPage {
             {this.getDescription()}
             <p />
             {this.state.activeItem
-              ? <div className='margin-top-80'>
+              ? <div className='margin-top-30'>
                 <h4>{editNodesLabel}</h4>
                 <form className='form-inline'>
                   <div className='form-group'>

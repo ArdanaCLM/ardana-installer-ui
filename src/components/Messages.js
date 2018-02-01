@@ -85,4 +85,4 @@ function ErrorBanner(props) {
   return banner;
 }
 
-export {ErrorMessage, SuccessMessage, InfoBanner, ErrorBanner}
+export {ErrorMessage, SuccessMessage, InfoBanner, ErrorBanner};
