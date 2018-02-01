@@ -218,6 +218,7 @@ class ValidateConfigFiles extends Component {
     this.setState({valid: VALIDATING, invalidMsg: ''});
     this.props.disableTab(true);
     this.props.enableBackButton(false);
+    this.props.enableNextButton(false);
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
