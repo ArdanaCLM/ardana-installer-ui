@@ -217,6 +217,7 @@ class ValidateConfigFiles extends Component {
   validateModel = () => {
     this.setState({valid: VALIDATING, invalidMsg: ''});
     this.props.disableTab(true);
+    this.props.enableBackButton(false);
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
@@ -226,6 +227,7 @@ class ValidateConfigFiles extends Component {
           .then((response) => {
             this.setState({valid: VALID, commit: STATUS.COMPLETE});
             this.props.disableTab(false);
+            this.props.enableBackButton(true);
             this.props.enableNextButton(true);
             this.clearAllChangeMarkers();
           })
@@ -235,6 +237,7 @@ class ValidateConfigFiles extends Component {
               invalidMsg: translate('deploy.commit.failure', error.toString()),
               commit: STATUS.FAILED});
             this.props.disableTab(false);
+            this.props.enableBackButton(true);
             this.props.enableNextButton(false);
           });
       })
@@ -242,6 +245,7 @@ class ValidateConfigFiles extends Component {
         this.props.enableNextButton(false);
         this.setState({valid: INVALID, invalidMsg: error.value.log});
         this.props.disableTab(false);
+        this.props.enableBackButton(true);
       });
   }
 
@@ -405,6 +409,10 @@ class ConfigPage extends BaseWizardPage {
     return !this.state.isNextable;
   }
 
+  setBackButtonDisabled() {
+    return !this.state.isBackable;
+  }
+
   isError() {
     return !this.state.isNextable;
   }
@@ -429,6 +437,10 @@ class ConfigPage extends BaseWizardPage {
     this.setState({isNextable: enable});
   };
 
+  enableBackButton = (enable) => {
+    this.setState({isBackable : enable});
+  }
+
   disableTab = (disable) => {
     this.setState({disableTab : disable});
   }
@@ -443,7 +455,7 @@ class ConfigPage extends BaseWizardPage {
           <Tabs id='configTabs' activeKey={this.state.key} onSelect={(tabKey) => {this.setState({key: tabKey});}}>
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
-              <ValidateConfigFiles disableTab={this.disableTab}
+              <ValidateConfigFiles disableTab={this.disableTab} enableBackButton={this.enableBackButton}
                 enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
                 loadModel={this.props.loadModel} />
             </Tab>
