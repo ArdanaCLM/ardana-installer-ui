@@ -76,18 +76,30 @@ class EditFile extends Component {
   }
 
   render() {
+    let errorMsgPanel = '';
+    let editPanelCssClass = 'file-editor col-md-12';
+    if (this.props.valid === INVALID) {//TODO - need a max height on the errorMsgPanel
+      errorMsgPanel = <div className="col-md-6 errorMsgPanel">{translate('validate.config.files.msg.invalid')}<br/>
+                        <pre className="log">{this.props.invalidMsg}</pre>
+                      </div>;
+      editPanelCssClass = 'file-editor col-md-6';
+    }
+
     return (
 
       <div>
         <h3>{this.props.file.name}</h3>
-        <div className="file-editor">
-          <ServerInput
-            inputValue={this.state.contents}
-            inputName='fileContents'
-            inputType='textarea'
-            inputValidate={YamlValidator}
-            inputAction={this.handleChange}
-          />
+        <div className='col-md-12'>
+          <div className={editPanelCssClass}>
+            <ServerInput
+              inputValue={this.state.contents}
+              inputName='fileContents'
+              inputType='textarea'
+              inputValidate={YamlValidator}
+              inputAction={this.handleChange}
+            />
+          </div>
+          {errorMsgPanel}
         </div>
         <div className='btn-row'>
           <ActionButton type='default'
@@ -140,6 +152,11 @@ class DisplayFileList extends Component {
       return (descA < descB) ? -1 : (descA > descB) ? 1 : 0;});
 
     var list = fileList.map((file, index) => {
+      if (this.props.valid === VALIDATING){
+        return (<li key={index}>
+          {file.description + (file.changed ? ' *' : '')}
+        </li>);
+      }
       return (<li key={index}>
         <a href="#" onClick={() => this.props.onEditClick(file)}>
           {file.description + (file.changed ? ' *' : '')}
@@ -199,6 +216,9 @@ class ValidateConfigFiles extends Component {
 
   validateModel = () => {
     this.setState({valid: VALIDATING, invalidMsg: ''});
+    this.props.disableTab(true);
+    this.props.enableBackButton(false);
+    this.props.enableNextButton(false);
 
     postJson('/api/v1/clm/config_processor')
       .then(() => {
@@ -207,6 +227,8 @@ class ValidateConfigFiles extends Component {
         postJson('/api/v1/clm/model/commit', commitMessage)
           .then((response) => {
             this.setState({valid: VALID, commit: STATUS.COMPLETE});
+            this.props.disableTab(false);
+            this.props.enableBackButton(true);
             this.props.enableNextButton(true);
             this.clearAllChangeMarkers();
           })
@@ -215,12 +237,16 @@ class ValidateConfigFiles extends Component {
               valid: INVALID,
               invalidMsg: translate('deploy.commit.failure', error.toString()),
               commit: STATUS.FAILED});
+            this.props.disableTab(false);
+            this.props.enableBackButton(true);
             this.props.enableNextButton(false);
           });
       })
       .catch(error => {
         this.props.enableNextButton(false);
         this.setState({valid: INVALID, invalidMsg: error.value.log});
+        this.props.disableTab(false);
+        this.props.enableBackButton(true);
       });
   }
 
@@ -244,6 +270,8 @@ class ValidateConfigFiles extends Component {
           valid={this.state.valid}
           setChanged={() => this.setChanged()}
           loadModel={this.props.loadModel}
+          valid={this.state.valid}
+          invalidMsg={this.state.invalidMsg}
         />
       );
     }
@@ -382,6 +410,10 @@ class ConfigPage extends BaseWizardPage {
     return !this.state.isNextable;
   }
 
+  setBackButtonDisabled() {
+    return !this.state.isBackable;
+  }
+
   isError() {
     return !this.state.isNextable;
   }
@@ -406,6 +438,10 @@ class ConfigPage extends BaseWizardPage {
     this.setState({isNextable: enable});
   };
 
+  enableBackButton = (enable) => {
+    this.setState({isBackable : enable});
+  }
+
   disableTab = (disable) => {
     this.setState({disableTab : disable});
   }
@@ -420,7 +456,7 @@ class ConfigPage extends BaseWizardPage {
           <Tabs id='configTabs' activeKey={this.state.key} onSelect={(tabKey) => {this.setState({key: tabKey});}}>
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
-              <ValidateConfigFiles disableTab={this.disableTab}
+              <ValidateConfigFiles disableTab={this.disableTab} enableBackButton={this.enableBackButton}
                 enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
                 loadModel={this.props.loadModel} />
             </Tab>
