@@ -1,5 +1,6 @@
 public/*
 dist/*
+run/*
 third_party/*
 protractor.conf.js
 server/web/*
