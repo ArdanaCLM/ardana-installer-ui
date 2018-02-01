@@ -74,30 +74,30 @@ class CloudConfigTab extends Component {
     // as no property at all, so we need to consider these cases when updating the nameservers
     // property to make sure not to override the existing properties
     if (JSON.stringify(this.state.dns) !== JSON.stringify(this.origDNS)) {
-        const modelDNS = model.getIn(['inputModel','cloud', 'dns-settings']);
-        // add nameservers when no property exists before
-        if (modelDNS === null) {
-            model = model.updateIn(['inputModel','cloud', 'dns-settings'],
-              dns => fromJS({nameservers: this.state.dns}));
-        } else {
-          let modelDNSObj = modelDNS.toJS();
-          if (this.state.dns.length === 0) {
-            // remove only nameservers key when there are other properties in dns-settings
-            if (Object.keys(modelDNSObj).length > 1) {
-              delete modelDNSObj.nameservers;
-              model = model.updateIn(['inputModel','cloud', 'dns-settings'],
-                dns => fromJS(modelDNSObj));
-            // set dns-settings to null to remove nameservers when no other properties exist
-            } else {
-              model = model.updateIn(['inputModel','cloud', 'dns-settings'], dns => null);
-            }
-          } else {
-            // update or add nameservers to existing dns-setttings
-            modelDNSObj.nameservers = this.state.dns;
+      const modelDNS = model.getIn(['inputModel','cloud', 'dns-settings']);
+      // add nameservers when no property exists before
+      if (modelDNS === null) {
+        model = model.updateIn(['inputModel','cloud', 'dns-settings'],
+          dns => fromJS({nameservers: this.state.dns}));
+      } else {
+        let modelDNSObj = modelDNS.toJS();
+        if (this.state.dns.length === 0) {
+          // remove only nameservers key when there are other properties in dns-settings
+          if (Object.keys(modelDNSObj).length > 1) {
+            delete modelDNSObj.nameservers;
             model = model.updateIn(['inputModel','cloud', 'dns-settings'],
               dns => fromJS(modelDNSObj));
+          // set dns-settings to null to remove nameservers when no other properties exist
+          } else {
+            model = model.updateIn(['inputModel','cloud', 'dns-settings'], dns => null);
           }
+        } else {
+          // update or add nameservers to existing dns-setttings
+          modelDNSObj.nameservers = this.state.dns;
+          model = model.updateIn(['inputModel','cloud', 'dns-settings'],
+            dns => fromJS(modelDNSObj));
         }
+      }
       this.origDNS = this.state.dns;
     }
 
