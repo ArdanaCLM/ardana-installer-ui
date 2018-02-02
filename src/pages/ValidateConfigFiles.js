@@ -79,9 +79,9 @@ class EditFile extends Component {
     let errorMsgPanel = '';
     let editPanelCssClass = 'file-editor col-md-12';
     if (this.props.valid === INVALID) {//TODO - need a max height on the errorMsgPanel
-      errorMsgPanel = <div className="col-md-6 errorMsgPanel">{translate('validate.config.files.msg.invalid')}<br/>
-                        <pre className="log">{this.props.invalidMsg}</pre>
-                      </div>;
+      errorMsgPanel =
+        <div className="col-md-6 errorMsgPanel">{translate('validate.config.files.msg.invalid')}<br/>
+          <pre className="log">{this.props.invalidMsg}</pre></div>;
       editPanelCssClass = 'file-editor col-md-6';
     }
 
@@ -152,7 +152,7 @@ class DisplayFileList extends Component {
       return (descA < descB) ? -1 : (descA > descB) ? 1 : 0;});
 
     var list = fileList.map((file, index) => {
-      if (this.props.valid === VALIDATING){
+      if (this.props.valid === VALIDATING) {
         return (<li key={index}>
           {file.description + (file.changed ? ' *' : '')}
         </li>);
@@ -397,6 +397,7 @@ class ConfigPage extends BaseWizardPage {
     this.state = {
       key: TAB.MODEL_FILES,
       isNextable: false,
+      isBackable: true,
       showNavButtons: true,
       disableTab: false
     };
