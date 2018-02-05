@@ -22,6 +22,7 @@ import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { PickerButton } from '../components/Buttons.js';
 import Dropdown from '../components/Dropdown.js';
+import { YesNoModal } from '../components/Modals.js';
 
 const NODE_COUNT_THRESHOLD = 30;
 const NODE_COUNT_OPT1 = '1';
@@ -46,7 +47,9 @@ class CloudModelPicker extends BaseWizardPage {
       filterHypervisorType: 'none',
       filterStorageType: 'none',
       filterNetworkType: 'none',
-      currentFilter: 'none'
+      currentFilter: 'none',
+
+      showChangeModelConfirmation: false,
     };
 
     this.saveRequired = false;
@@ -93,10 +96,13 @@ class CloudModelPicker extends BaseWizardPage {
     this.saveRequired = true;
   }
 
-  goForward = (e) => {
-    e.preventDefault();
+  closeChangeModelConfirmation = () => {
+    this.setState({showChangeModelConfirmation: false});
+    this.saveModel();
+  }
 
-    if(this.saveRequired) {
+  saveModel = () => {
+    if (this.saveRequired) {
       this.setState({loading: true});
       // Load the full template, update the global model, and save it
       fetchJson('/api/v1/clm/templates/' + this.state.selectedModelName)
@@ -115,6 +121,20 @@ class CloudModelPicker extends BaseWizardPage {
       this.saveRequired = false;
     } else {
       this.props.next();
+    }
+  }
+
+  goForward = (e) => {
+    e.preventDefault();
+    const propsModelName = this.props.model.get('name');
+    if (propsModelName === undefined) {
+      this.saveModel();
+    } else {
+      if (this.state.selectedModelName !== propsModelName) {
+        this.setState({showChangeModelConfirmation: true});
+      } else {
+        this.props.next();
+      }
     }
   }
 
@@ -387,6 +407,11 @@ class CloudModelPicker extends BaseWizardPage {
           {this.renderErrorMessage()}
         </div>
         {this.renderNavButtons()}
+        <YesNoModal show={this.state.showChangeModelConfirmation} title={translate('warning')}
+          yesAction={this.closeChangeModelConfirmation}
+          noAction={() => this.setState({showChangeModelConfirmation: false})}>
+          {translate('model.picker.change.model.confirm')}
+        </YesNoModal>
       </div>
     );
   }
