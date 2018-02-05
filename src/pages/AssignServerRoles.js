@@ -1163,12 +1163,12 @@ class AssignServerRoles extends BaseWizardPage {
           </div>
           <div>
             <div className='btn-row action-item-right'>
-              <ActionButton
+              <ActionButton type='default'
                 clickAction={this.handleAddServerManually}
                 displayLabel={translate('add.server.add')}/>
-              <LoadFileButton
+              <LoadFileButton type='default'
                 clickAction={this.handleAddServerFromCSV}
-                displayLabel={translate('add.server.add.csv')}/>
+                displayLabel={translate('add.server.add.csv.alt')}/>
             </div>
           </div>
         </div>
@@ -1186,7 +1186,7 @@ class AssignServerRoles extends BaseWizardPage {
           <div>
             <div className='btn-row action-item-right'>
               {!this.smApiToken && this.renderConfigDiscoveryButton()}
-              <ActionButton
+              <ActionButton type='default'
                 clickAction={this.handleDiscovery}
                 displayLabel={translate('add.server.discover')}/>
             </div>

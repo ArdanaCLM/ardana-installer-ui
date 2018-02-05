@@ -114,6 +114,7 @@
     "add.server.manual.add": "Manual Entry",
     "add.server.add": "Add Server",
     "add.server.add.csv": "Or import servers from CSV",
+    "add.server.add.csv.alt": "Import servers from CSV",
     "csv.import.error": "CSV import error",
     "add.server.discover": "Discover",
     "add.server.conf.discover": "Configure",

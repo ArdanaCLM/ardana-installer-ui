@@ -98,9 +98,10 @@ class LoadFileButton extends Component {
 
   render() {
     const hidden = { display: 'none' };
+    const type = this.props.type ? this.props.type : 'link';
     return (
       <span>
-        <ActionButton type='link'
+        <ActionButton type={type}
           clickAction={this.onClickShownButton}
           displayLabel={this.props.displayLabel}
           isDisabled={this.props.isDisabled || false}
