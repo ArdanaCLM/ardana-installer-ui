@@ -236,6 +236,27 @@ export function UniqueNameValidator(name, props) {
   return retValue;
 }
 
+export function UniqueIdValidator(id, props) {
+  let retValue = {
+    isValid: true,
+    errorMsg: ''
+  };
+
+  if(props && props.ids && props.ids.length > 0 &&
+    id && props.ids.indexOf(id) !== -1) {
+    retValue.isValid = false;
+    retValue.errorMsg = translate('input.validator.uniqueid.error');
+    return retValue;
+  }
+
+  // make sure no space in the id
+  if(STRING_WITH_NO_SPACES.exec(id) === null) {
+    retValue.isValid = false;
+    retValue.errorMsg = translate('input.validator.id.spaces.error');
+  }
+  return retValue;
+}
+
 export function YamlValidator(text) {
   try {
     safeLoad(text);

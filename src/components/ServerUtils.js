@@ -63,8 +63,8 @@ export class ServerRolesAccordion extends Component {
     //displayed columns
     let tableConfig = {
       columns: [
-        {name: 'id', hidden: true},
-        {name: 'name'},
+        {name: 'id'},
+        {name: 'uid', hidden: true},
         {name: 'ip-addr'},
         {name: 'mac-addr'},
         {name: 'role', hidden: true},
@@ -85,6 +85,7 @@ export class ServerRolesAccordion extends Component {
         noHeader
         tableConfig={tableConfig}
         checkInputs={this.props.checkInputs}
+        checkDupIds={this.props.checkDupIds}f
         tableData={serverList}
         editAction={this.props.editAction}
         viewAction={this.props.viewAction}/>
@@ -406,3 +407,4 @@ export class ServerDropdownLine extends Component {
 export function getModelIndexByName(model, key, name) {
   return model.getIn(['inputModel', key]).findIndex(e => e.get('name') === name);
 }
+

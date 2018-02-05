@@ -25,6 +25,13 @@ export function isRoleAssignmentValid (role, checkInputs) {
   if(minCount && svrSize < minCount) {
     return false;
   }
+  //check ids duplicates
+  let ids = role.servers.map(svr => svr.id);
+  let idSet = new Set(ids);
+  if(ids.length > idSet.size) {
+    return false;
+  }
+
   if(checkInputs) {
     return role.servers.every((server) =>
       checkInputs.every(key => (server[key] ? true : false))
@@ -46,11 +53,17 @@ export function getNicMappings(model) {
     .map(nic => nic.get('name')).toJS();
 }
 
+export function getServerIds(model) {
+  let ids = model.getIn(['inputModel','servers'])
+    .map(server => server.get('id')).toJS();
+  return ids;
+}
+
 function getCleanedServer(srv) {
   const strId = srv['id'].toString();
   return {
     'id': strId,
-    'name': srv.name || strId,
+    'uid': srv['uid'] || genUID(),
     'ip-addr': srv['ip-addr'],
     'mac-addr': srv['mac-addr'] || '',
     'role': srv['role'] || '',
@@ -125,7 +138,7 @@ function getMergedServerMap (src, dest, props) {
 
 export function updateServersInModel(server, model, props) {
   let retModel = model.updateIn(['inputModel','servers'], list => list.map(svr => {
-    if (svr.get('id') === server.id) {
+    if (server.uid && svr.get('uid') === server.uid) {
       let update_server = getMergedServerMap(svr, server, props);
       // clean up unwanted entries before save to the model so it
       // can pass model validator
@@ -142,4 +155,10 @@ export function updateServersInModel(server, model, props) {
   return retModel;
 }
 
+export function genUID() {
+  function getHexStr() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1).toUpperCase();
+  }
+  return getHexStr() + getHexStr() + getHexStr() + getHexStr() + getHexStr() + getHexStr() + getHexStr() + getHexStr();
+}
 

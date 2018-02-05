@@ -29,14 +29,10 @@ export function importCSV(file, restrictedValues, callback) {
 
   // Required fields/columns for Server in CSV file
   const field_defs  = {
-    'name': {
-      unique: true,
-      aliases: [ 'server_name' ],
-      required: true
-    },
     'id': {
       unique: true,
-      aliases: [ 'server_id', 'id' ]
+      aliases: [ 'server_id', 'id' ],
+      required: true
     },
     'ip-addr': {
       unique: true,

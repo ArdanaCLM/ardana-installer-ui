@@ -19,6 +19,7 @@ import ViewServerDetails from '../AssignServerRoles/ViewServerDetails.js';
 import { BaseInputModal } from '../../components/Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../../utils/Sort.js';
+import { getServerIds } from '../../utils/ModelUtils.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -70,12 +71,7 @@ class CollapsibleTable extends Component {
   getSeverData = (server) => {
     let retData = {};
     this.props.tableConfig.columns.forEach((colDef) => {
-      if(colDef.name === 'name') {
-        retData[colDef.name] = server.get('name') || server.get('id');
-      }
-      else {
-        retData[colDef.name] = server.get(colDef.name);
-      }
+      retData[colDef.name] = server.get(colDef.name);
     });
 
     return retData;
@@ -132,7 +128,7 @@ class CollapsibleTable extends Component {
     let cols = [];
     this.props.tableConfig.columns.forEach((colDef) => {
       if(!colDef.hidden) {
-        cols.push(<td key={server['name'] + count++}><div>{server[colDef.name]}</div></td>);
+        cols.push(<td key={server['id'] + count++}><div>{server[colDef.name]}</div></td>);
       }
     });
 
@@ -180,6 +176,15 @@ class CollapsibleTable extends Component {
   }
 
   renderEditServerModal() {
+    let theProps = {};
+    if(this.state.activeRowData) {
+      let ids = getServerIds(this.props.model);
+      //remove current id so won't check against it
+      let idx = this.props.model.getIn(['inputModel', 'servers']).findIndex(
+        server => server.get('id') === this.state.activeRowData.id);
+      ids.splice(idx, 1);
+      theProps.ids = ids;
+    }
     return (
       <BaseInputModal
         show={this.state.showEditServerModal} className='edit-details-dialog'
@@ -187,7 +192,7 @@ class CollapsibleTable extends Component {
         <EditServerDetails
           cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
           model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-          data={this.state.activeRowData}>
+          data={this.state.activeRowData} {...theProps}>
         </EditServerDetails>
       </BaseInputModal>
     );
