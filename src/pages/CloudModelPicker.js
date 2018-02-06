@@ -409,7 +409,8 @@ class CloudModelPicker extends BaseWizardPage {
         {this.renderNavButtons()}
         <YesNoModal show={this.state.showChangeModelConfirmation} title={translate('warning')}
           yesAction={this.closeChangeModelConfirmation}
-          noAction={() => this.setState({showChangeModelConfirmation: false})}>
+          noAction={() => this.setState({showChangeModelConfirmation: false,
+            selectedModelName: this.props.model.get('name')})}>
           {translate('model.picker.change.model.confirm')}
         </YesNoModal>
       </div>
