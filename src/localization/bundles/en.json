@@ -52,7 +52,7 @@
 
     "model.picker.save.model.error": "Failed to save model {0}.",
     "model.picker.save.model.error.title": "Save Model Failure",
-    "model.picker.change.model.confirm": "You are about to select a different Cloud Model than what you selected before. You will lose changes that you may have set up. \n\n Are you sure you want to proceed?",
+    "model.picker.change.model.confirm": "You are about to select a different Cloud Model than what you selected before. You will lose changes that you may have set up. \n\n Are you sure you want to proceed? Select Yes to proceed, select No to revert to the previously selected model.",
     "model.picker.get.model.error": "Failed to get model {0}.",
     "model.picker.get.model.error.title": "Get Model Failure",
     "model.picker.get.template.error": "Failed to get templates. Won't be able to show details of each model.",
