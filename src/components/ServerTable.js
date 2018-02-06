@@ -32,6 +32,7 @@ class ServerTable extends Component {
             viewAction={this.props.viewAction}
             tableId={this.props.id}
             checkInputs={this.props.checkInputs}
+            checkDupIds={this.props.checkDupIds}
             key={index}>
           </ServerRowItem>
         );

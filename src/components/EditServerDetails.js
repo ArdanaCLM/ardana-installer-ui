@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { ServerInputLine, ServerDropdown} from '../components/ServerUtils.js';
-import { IpV4AddressValidator, MacAddressValidator } from '../utils/InputValidators.js';
+import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups } from '../utils/ModelUtils.js';
@@ -26,6 +26,7 @@ class EditServerDetails extends Component {
     super(props);
 
     this.allInputsStatus = {
+      'id': INPUT_STATUS.UNKNOWN,
       'ip-addr': INPUT_STATUS.UNKNOWN,
       'ilo-user': INPUT_STATUS.UNKNOWN,
       'ilo-password': INPUT_STATUS.UNKNOWN,
@@ -106,9 +107,13 @@ class EditServerDetails extends Component {
   }
 
   renderInput(name, type, isRequired, title, validate) {
+    let theProps = {};
+    if(name === 'id') {
+      theProps.ids = this.props.ids;
+    }
     return (
       <ServerInputLine
-        isRequired={isRequired} inputName={name} inputType={type} label={title}
+        isRequired={isRequired} inputName={name} inputType={type} label={title} {...theProps}
         inputValidate={validate} inputValue={this.data[name]} moreClass={'has-button'}
         inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
     );
@@ -182,8 +187,7 @@ class EditServerDetails extends Component {
     return (
       <div>
         <div className='server-details-container'>
-          {this.renderTextLine('server.id.prompt', this.data.id)}
-          {this.renderTextLine('server.name.prompt', this.data.name)}
+          {this.renderInput('id', 'text', true, 'server.id.prompt', UniqueIdValidator)}
           {this.renderTextLine('server.role.prompt', this.data.role)}
           {this.renderInput('ip-addr', 'text', true, 'server.ip.prompt', IpV4AddressValidator)}
           {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,

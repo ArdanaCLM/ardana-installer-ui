@@ -75,12 +75,12 @@ class ServerRoleSummary extends BaseWizardPage {
   renderCollapsibleTable() {
     let tableConfig = {
       columns: [
-        {name: 'name'},
+        {name: 'id'},
         {name: 'ip-addr',},
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
-        {name: 'id', hidden: true},
+        {name: 'uid', hidden: true},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},

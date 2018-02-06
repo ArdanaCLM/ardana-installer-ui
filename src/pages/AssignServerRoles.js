@@ -34,7 +34,8 @@ import { importCSV } from '../utils/CsvImporter.js';
 import { fromJS } from 'immutable';
 import { isEmpty } from 'lodash';
 import {
-  getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer, updateServersInModel
+  getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
+  updateServersInModel, getServerIds, genUID
 } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL } from '../utils/constants.js';
 
@@ -52,7 +53,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.newServer = {
       'source': 'manual',
       'id': '',
-      'name': '',
+      'uid': genUID(),
       'ip-addr': '',
       'server-group': '',
       'nic-mapping': '',
@@ -253,7 +254,7 @@ class AssignServerRoles extends BaseWizardPage {
           allServerData.forEach((oneSet, idx) => {
             resultServers = resultServers.concat(oneSet);
           });
-          resultServers = this.sortServersByName(resultServers);
+          resultServers = this.sortServersById(resultServers);
           this.saveAllDiscoveredServers(resultServers);
           this.setState({loading: false, rawDiscoveredServers: resultServers});
         })
@@ -288,14 +289,9 @@ class AssignServerRoles extends BaseWizardPage {
     let value = e.target.value;
     if (valid) {
       let key = props.inputName;
-      if (key === 'name') {
-        this.newServer.name = value;
-        this.newServer.id = value;
-      } else {
-        this.newServer[key] = value;
-      }
+      this.newServer[key] = value;
 
-      if (this.newServer.name && this.newServer['ip-addr']) {
+      if (this.newServer.id && this.newServer['ip-addr']) {
         this.setState({validAddServerManuallyForm: true});
       }
     } else {
@@ -355,7 +351,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.newServer = {
       'source': 'manual',
       'id': '',
-      'name': '',
+      'uid': genUID(),
       'ip-addr': '',
       'server-group': '',
       'nic-mapping': '',
@@ -410,7 +406,7 @@ class AssignServerRoles extends BaseWizardPage {
         className={'manual-discover-modal'} onHide={this.cancelAddServerManuallyModal} footer={footer}>
 
         <div className='server-details-container'>
-          {this.renderInputLine(true, 'server.name.prompt', 'name', 'text')}
+          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text')}
           {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
           {this.renderDropdownLine(true, 'server.group.prompt', 'server-group',
             serverGroups, this.handleSelectGroup)}
@@ -431,10 +427,10 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
-  sortServersByName(servers) {
+  sortServersById(servers) {
     return servers.sort((a, b) => {
-      let x = a.name;
-      let y = b.name;
+      let x = a.id;
+      let y = b.id;
       return ((x < y) ? -1 : (x > y) ? 1 : 0);
     });
   }
@@ -451,7 +447,8 @@ class AssignServerRoles extends BaseWizardPage {
       // TODO: Display errors that may exists in results.errors
       for (let server of results.data) {
         server['source'] = 'manual';
-        server['id'] = server['id'] || server['name'];
+        server['id'] = server['id'];
+        server['uid'] = genUID();
       }
 
       if (results.errors.length > 0) {
@@ -663,8 +660,7 @@ class AssignServerRoles extends BaseWizardPage {
         let id = srvDetail.name ? srvDetail.name : srvDetail.id + '';
         let serverData = {
           'id': id, //use name if it is there or use id string
-          'name': srvDetail.name,
-          'serverId': srvDetail.id,
+          'uid': srvDetail.id, //keep this for server reference
           'ip-addr': nkdevice ? nkdevice.ip : '',
           'mac-addr': nkdevice ? nkdevice.hardware_address : '',
           'ilo-ip': '',
@@ -688,7 +684,7 @@ class AssignServerRoles extends BaseWizardPage {
       }
       else { //some have details, some don't
         let ids = retData.map((srv) => {
-          return srv.serverId;
+          return srv.id;
         });
         list = servers.filter((srv) => {
           return ids.indexOf(srv.id) === -1;
@@ -699,12 +695,9 @@ class AssignServerRoles extends BaseWizardPage {
         let id = server.name ? server.name : server.id + '';
         let serverData = {
           'id': id, //use name if it is there or use id string
-          'name': server.name,
-          'serverId': server.id,
+          'uid': server.id, //keep this for server reference
           'ip-addr': '',
           'mac-addr': '',
-          'cpu': '',
-          'ram': '',
           'ilo-ip': '',
           'ilo-user': '',
           'ilo-password': '',
@@ -734,12 +727,9 @@ class AssignServerRoles extends BaseWizardPage {
 
       let serverData = {
         'id': id, //use name if it is there or use id string
-        'name': srv.name,
-        'serverId': srv.uuid || '',
+        'uid': srv.uuid,
         'ip-addr': '',
         'mac-addr': '',
-        'cpu': srv.processorCoreCount,
-        'ram': srv.memoryMb,
         'ilo-ip': ipmi ? ipmi.address : '',
         'ilo-user': '',
         'ilo-password': '',
@@ -758,7 +748,7 @@ class AssignServerRoles extends BaseWizardPage {
     const strId = srv['id'].toString();
     return {
       'id': strId,
-      'name': srv.name || strId,
+      'uid': srv.uid || genUID(),
       'ip-addr': srv['ip-addr'],
       'mac-addr': srv['mac-addr'] || '',
       'role': srv['role'] || '',
@@ -811,7 +801,7 @@ class AssignServerRoles extends BaseWizardPage {
 
     let model = this.props.model;
 
-    const index = model.getIn(['inputModel', 'servers']).findIndex(e => e.get('id') === server.id);
+    const index = model.getIn(['inputModel', 'servers']).findIndex(e => e.get('uid') === server.uid);
     if (index < 0) {
       // The server was not in the model, so add it with the new role
       let new_server = this.getCleanedServer(server);
@@ -823,7 +813,7 @@ class AssignServerRoles extends BaseWizardPage {
 
       // Update the role in the existing input model entry
       model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
-        if (svr.get('id') === server.id)
+        if (svr.get('uid') === server.uid)
           return svr.set('role', role);
         else
           return svr;
@@ -869,10 +859,11 @@ class AssignServerRoles extends BaseWizardPage {
    *   (not the user-friendly translation)
    */
   removeServerFromRole = (server, role) => {
-
     // Remove the server from the model
     const model = this.props.model.updateIn(
-      ['inputModel', 'servers'], list => list.filter(svr => svr.get('id') != server.id));
+      ['inputModel', 'servers'], list => list.filter(svr => {
+        return svr.get('uid') ? svr.get('uid') !== server.uid : svr.get('id') !== server.id; })
+    );
     this.props.updateGlobalState('model', model);
   }
 
@@ -935,7 +926,7 @@ class AssignServerRoles extends BaseWizardPage {
    */
   updateServerForEditServer = (server) => {
     for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
-      let idx = this.state[list].findIndex(s => server.id === s.id);
+      let idx = this.state[list].findIndex(s => server.uid === s.uid);
       if (idx >= 0) {
         let updated_server;
         this.setState(prev => {
@@ -946,7 +937,7 @@ class AssignServerRoles extends BaseWizardPage {
         }, () => {
           putJson('/api/v1/server', JSON.stringify(updated_server))
             .catch((error) => {
-              let msg = translate('server.discover.update.error', updated_server.name);
+              let msg = translate('server.discover.update.error', updated_server.id);
               this.setState(prev => { return {
                 messages: prev.messages.concat([{msg: [msg, error.toString()]}])
               };});
@@ -980,14 +971,14 @@ class AssignServerRoles extends BaseWizardPage {
       return activeRowData; //left side table always has source
     }
     else {
-      let id = activeRowData.id; //should be a name or id
+      let uid = activeRowData.uid; //should be a name or id
       //go to the leftside list for find data
       sourceData = this.state.rawDiscoveredServers.find((server) => {
-        return id === server.id;
+        return uid === server.uid;
       });
       if(!sourceData) {
         sourceData = this.state.serversAddedManually.find((server) => {
-          return id === server.id;
+          return uid === server.uid;
         });
       }
     }
@@ -1024,12 +1015,10 @@ class AssignServerRoles extends BaseWizardPage {
     //displayed columns
     let tableConfig = {
       columns: [
-        {name: 'id', hidden: true},
-        {name: 'name'},
+        {name: 'id'},
+        {name: 'uid', hidden: true},
         {name: 'ip-addr',},
         {name: 'mac-addr'},
-        {name: 'cpu', hidden: true},
-        {name: 'ram', hidden: true},
         {name: 'server-group', hidden: true},
         {name: 'nic-mapping', hidden: true},
         {name: 'ilo-ip', hidden: true},
@@ -1037,24 +1026,26 @@ class AssignServerRoles extends BaseWizardPage {
         {name: 'ilo-password', hidden: true},
         {name: 'source', hidden: true}
       ]
-    };
+    }
 
     const assignedServerIds = this.props.model.getIn(['inputModel','servers'])
       .filter(svr => (svr.get('role') ? true : false))    // find servers with roles
-      .map(svr => svr.get('id')).toJS();                  // return just the id field
+      .map(svr => { return svr.get('uid') ? svr.get('uid') : svr.get('id');})
+      .toJS();              // return just the id field
 
     //apply name and assignment filter here
     let filteredAvailableServers =
       servers.filter((server) => {
         // search text applied to name , ip-addr and mac-addr
-        if(!(server.name.indexOf(this.state.searchFilterText) !== -1 ||
+        if(!(server.id.indexOf(this.state.searchFilterText) !== -1 ||
           (server['ip-addr'] && server['ip-addr'].indexOf(this.state.searchFilterText) !== -1) ||
           (server['mac-addr'] && server['mac-addr'].indexOf(this.state.searchFilterText) !== -1))) {
           return false;
         }
 
-        //server name is acceptable per text filter, now need to filter out assigned servers
-        return (assignedServerIds.indexOf(server.id) === -1);
+        //server id is acceptable per text filter, now need to filter out assigned servers
+        let matchId = server.uid ? server.uid : server.id;
+        return (assignedServerIds.indexOf(matchId) === -1);
       });
 
     let tableId = 'leftTableId' + type;
@@ -1207,6 +1198,15 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderServerRolesAccordion(roles) {
+    let serverIds = getServerIds(this.props.model);
+    let tempDups = serverIds.filter((id, idx) => {
+      let firstIndex = serverIds.indexOf(id);
+      let lastIndex = serverIds.lastIndexOf(id);
+      if(firstIndex !== lastIndex) {
+        return true;
+      }
+    });
+    let dupIds = [...new Set(tempDups)];
     return (
       <ServerRolesAccordion
         ondropFunct={this.assignServerToRoleDnD}
@@ -1214,7 +1214,7 @@ class AssignServerRoles extends BaseWizardPage {
         ondragLeaveFunct={this.unHighlightDrop}
         allowDropFunct={this.allowDrop}
         serverRoles={getServerRoles(this.props.model)}
-        tableId='rightTableId'
+        tableId='rightTableId' checkDupIds={dupIds}
         editAction={this.handleShowEditServer}
         viewAction={this.handleShowServerDetails}>
       </ServerRolesAccordion>
@@ -1289,6 +1289,15 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderEditServerDetailsModal() {
+    let theProps = {};
+    if(this.state.activeRowData) {
+      let ids = getServerIds(this.props.model);
+      //remove current id so won't check against it
+      let idx = this.props.model.getIn(['inputModel', 'servers']).findIndex(
+        server => server.get('id') === this.state.activeRowData.id);
+      ids.splice(idx, 1);
+      theProps.ids = ids;
+    }
     return (
       <BaseInputModal
         show={this.state.showEditServerModal}
@@ -1299,7 +1308,7 @@ class AssignServerRoles extends BaseWizardPage {
         <EditServerDetails
           cancelAction={this.handleCancelEditServer}
           doneAction={this.handleDoneEditServer}
-          model={this.props.model}
+          model={this.props.model} {...theProps}
           updateGlobalState={this.props.updateGlobalState}
           data={this.state.activeRowData}>
         </EditServerDetails>
