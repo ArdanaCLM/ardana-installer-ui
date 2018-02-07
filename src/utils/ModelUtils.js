@@ -25,6 +25,7 @@ export function isRoleAssignmentValid (role, checkInputs) {
   if(minCount && svrSize < minCount) {
     return false;
   }
+
   if(checkInputs) {
     return role.servers.every((server) =>
       checkInputs.every(key => (server[key] ? true : false))
@@ -46,11 +47,54 @@ export function getNicMappings(model) {
     .map(nic => nic.get('name')).toJS();
 }
 
+export function getAllOtherServerIds (model, autoServers, manualServers, theId) {
+  let retIds = [];
+  let modelIds= model.getIn(['inputModel','servers'])
+    .map(server => server.get('id')).toJS();
+
+  if(theId) {
+    let idx = model.getIn(['inputModel', 'servers']).findIndex(
+      server => server.get('id') === theId
+    );
+    //if have current id, remove current id so won't check against it
+    if (idx !== -1) {
+      modelIds.splice(idx, 1);
+    }
+  }
+
+  let autoServerIds = [];
+  if (autoServers && autoServers.length > 0) {
+    autoServerIds = autoServers.map(server => server.id);
+    if(theId) {
+      let idx = autoServerIds.findIndex(id => id === theId);
+      // if have it in auto discovered servers, remove it.
+      if (idx !== -1) {
+        autoServerIds.splice(idx, 1);
+      }
+    }
+  }
+
+  let manualServerIds = [];
+  if(manualServers && manualServers.length > 0) {
+    manualServerIds = manualServers.map(server => server.id);
+    if(theId) {
+      let idx = manualServerIds.findIndex(id => id === theId);
+      // if have it in manual added servers, remove it.
+      if (idx !== -1) {
+        manualServerIds.splice(idx, 1);
+      }
+    }
+  }
+  retIds = modelIds.concat(autoServerIds);
+  retIds = retIds.concat(manualServerIds);
+
+  return retIds;
+}
+
 function getCleanedServer(srv) {
   const strId = srv['id'].toString();
   return {
     'id': strId,
-    'name': srv.name || strId,
     'ip-addr': srv['ip-addr'],
     'mac-addr': srv['mac-addr'] || '',
     'role': srv['role'] || '',
@@ -123,9 +167,10 @@ function getMergedServerMap (src, dest, props) {
   return Map(result);
 }
 
-export function updateServersInModel(server, model, props) {
+//TODO test
+export function updateServersInModel(server, originalId, model, props) {
   let retModel = model.updateIn(['inputModel','servers'], list => list.map(svr => {
-    if (svr.get('id') === server.id) {
+    if (svr.get('id') === originalId) {
       let update_server = getMergedServerMap(svr, server, props);
       // clean up unwanted entries before save to the model so it
       // can pass model validator
