@@ -19,6 +19,7 @@ import ViewServerDetails from '../AssignServerRoles/ViewServerDetails.js';
 import { BaseInputModal } from '../../components/Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../../utils/Sort.js';
+import { getAllOtherServerIds } from '../../utils/ModelUtils.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -38,8 +39,8 @@ class CollapsibleTable extends Component {
     }
   }
 
-  handleDoneEditServer = (server) => {
-    this.props.saveEditServer(server);
+  handleDoneEditServer = (server, originalId) => {
+    this.props.saveEditServer(server, originalId);
     this.setState({showEditServerModal: false, activeRowData: undefined});
   }
 
@@ -70,12 +71,7 @@ class CollapsibleTable extends Component {
   getSeverData = (server) => {
     let retData = {};
     this.props.tableConfig.columns.forEach((colDef) => {
-      if(colDef.name === 'name') {
-        retData[colDef.name] = server.get('name') || server.get('id');
-      }
-      else {
-        retData[colDef.name] = server.get(colDef.name);
-      }
+      retData[colDef.name] = server.get(colDef.name);
     });
 
     return retData;
@@ -132,7 +128,7 @@ class CollapsibleTable extends Component {
     let cols = [];
     this.props.tableConfig.columns.forEach((colDef) => {
       if(!colDef.hidden) {
-        cols.push(<td key={server['name'] + count++}><div>{server[colDef.name]}</div></td>);
+        cols.push(<td key={server['id'] + count++}><div>{server[colDef.name]}</div></td>);
       }
     });
 
@@ -153,7 +149,7 @@ class CollapsibleTable extends Component {
       'glyphicon glyphicon-menu-down';
 
     let fillerTds = [];
-    for (let i=0; i<Object.keys(group.members[0]).length - 7; i++) {
+    for (let i=0; i<Object.keys(group.members[0]).length - 6; i++) {
       fillerTds.push(<td key={i}></td>);
     }
 
@@ -180,6 +176,18 @@ class CollapsibleTable extends Component {
   }
 
   renderEditServerModal() {
+    let theProps = {};
+    if(this.state.activeRowData) {
+      // check against all the server ids to make sure
+      // whatever changes on id won't conflict with other
+      // ids.
+      let ids =
+        getAllOtherServerIds(
+          this.props.model, this.props.autoServers,
+          this.props.manualServers, this.state.activeRowData.id);
+      theProps.ids = ids;
+      theProps.ids = ids;
+    }
     return (
       <BaseInputModal
         show={this.state.showEditServerModal} className='edit-details-dialog'
@@ -187,7 +195,7 @@ class CollapsibleTable extends Component {
         <EditServerDetails
           cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
           model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-          data={this.state.activeRowData}>
+          data={this.state.activeRowData} {...theProps}>
         </EditServerDetails>
       </BaseInputModal>
     );
