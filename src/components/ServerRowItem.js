@@ -56,7 +56,7 @@ class ServerRowItem extends Component {
     this.props.dataDef.forEach((def) => {
       if(!def.hidden) {
         let badgeClass = '';
-        if(def.name === 'name') {
+        if(def.name === 'id') {
           if(this.props.data.source === 'sm') {
             badgeClass = 'sm-badge';
           }
