@@ -37,6 +37,7 @@ import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer, updateServersInModel
 } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL } from '../utils/constants.js';
+import { YesNoModal } from '../components/Modals.js';
 
 const AUTODISCOVER_TAB = 1;
 const MANUALADD_TAB = 2;
@@ -109,7 +110,10 @@ class AssignServerRoles extends BaseWizardPage {
       activeRowData: undefined,
 
       // show baremetal settings modal
-      showBaremetalSettings: false
+      showBaremetalSettings: false,
+
+      // delete server confirmation modal
+      showDeleteServerConfirmModal: false
     };
   }
 
@@ -574,6 +578,10 @@ class AssignServerRoles extends BaseWizardPage {
     this.activeTableId = tableId;
   }
 
+  handleDeleteServer = (server) => {
+    this.setState({showDeleteServerConfirmModal: true, activeRowData: server});
+  }
+
   handleCloseServerDetails = () => {
     this.setState({showServerDetailsModal: false, activeRowData: undefined});
     this.activeTableId = undefined;
@@ -957,6 +965,37 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
+  /**
+   * When a server is remove it from the applicable lists  (discovered or manual).
+   */
+  deleteServer = () => {
+    let server = this.state.activeRowData;
+    for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
+      let idx = this.state[list].findIndex(s => server.id === s.id);
+      if (idx >= 0) {
+        let deleted_server;
+        this.setState(prev => {
+          prev[list].splice(idx, 1);
+          return {[list]: prev[list]};
+        }, () => {
+      deleteJson('/api/v1/server?source=' + server.source +'&id=' + server.id,
+                 JSON.stringify(deleted_server))
+          .catch((error) => {
+            let msg = translate('server.discover.delete.server.error', deleted_server.name);
+            this.setState(prev => { return {
+              messages: prev.messages.concat([{msg: [msg, error.toString()]}]),
+              activeRowData: undefined,
+            };});
+          });
+        });
+        break;
+      }
+    }
+    this.setState({showDeleteServerConfirmModal: false});
+  }
+
+
+
   updateModelObjectForEditServer = (server) => {
 
     let model = updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL);
@@ -1063,7 +1102,8 @@ class AssignServerRoles extends BaseWizardPage {
         id={tableId}
         tableConfig={tableConfig}
         tableData={filteredAvailableServers}
-        viewAction={this.handleShowServerDetails}>
+        viewAction={this.handleShowServerDetails}
+        deleteAction={this.handleDeleteServer}>
       </ServerTable>
     );
   }
@@ -1216,7 +1256,8 @@ class AssignServerRoles extends BaseWizardPage {
         serverRoles={getServerRoles(this.props.model)}
         tableId='rightTableId'
         editAction={this.handleShowEditServer}
-        viewAction={this.handleShowServerDetails}>
+        viewAction={this.handleShowServerDetails}
+        deleteAction={this.handleDeleteServer}>
       </ServerRolesAccordion>
     );
   }
@@ -1308,12 +1349,18 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   render() {
+    let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
     return (
       <div className='wizard-page'>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('add.server.heading'))}
           </div>
+          <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
+            yesAction={this.deleteServer}
+            noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
+            {translate('server.delete.server.confirm', serverId)}
+          </YesNoModal>
           <div className='buttonBox'>
             <div className='btn-row'>
               <ActionButton displayLabel={translate('add.server.set.network')} type='default'

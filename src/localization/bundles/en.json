@@ -208,6 +208,8 @@
     "server.discover.delete.error": "Failed to delete discovered servers",
     "server.discover.get.error": "Failed to get discovered servers",
     "server.discover.update.error": "Failed to update discovered server {0}",
+    "server.discover.delete.server.error": "Failed to delete server {0}",
+    "server.delete.server.confirm": "Are you sure you want to delete server {0}?",
     "server.model.empty.error": "Failed to display assigned servers due to empty model object",
     "server.model.get.error": "Failed to get model object",
     "server.model.save.error": "Failed to save model object",
