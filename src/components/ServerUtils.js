@@ -63,8 +63,8 @@ export class ServerRolesAccordion extends Component {
     //displayed columns
     let tableConfig = {
       columns: [
-        {name: 'id', hidden: true},
-        {name: 'name'},
+        {name: 'id'},
+        {name: 'uid', hidden: true},
         {name: 'ip-addr'},
         {name: 'mac-addr'},
         {name: 'role', hidden: true},

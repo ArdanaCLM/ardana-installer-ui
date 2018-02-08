@@ -18,8 +18,9 @@ import BaseWizardPage from './BaseWizardPage.js';
 import CollapsibleTable from './ServerRoleSummary/CollapsibleTable.js';
 import { ActionButton } from '../components/Buttons.js';
 import { EditCloudSettings } from './ServerRoleSummary/EditCloudSettings.js';
-import { getServerRoles, isRoleAssignmentValid, updateServersInModel } from '../utils/ModelUtils.js';
-import { MODEL_SERVER_PROPS_ALL } from '../utils/constants.js';
+import { getServerRoles, isRoleAssignmentValid, updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
+import { MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS } from '../utils/constants.js';
+import { fetchJson, putJson } from '../utils/RestUtils.js';
 
 class ServerRoleSummary extends BaseWizardPage {
 
@@ -27,6 +28,10 @@ class ServerRoleSummary extends BaseWizardPage {
     super(props);
 
     this.checkInputs = ['nic-mapping', 'server-group'];
+    this.state = {
+      autoServers: undefined,
+      manualServers: undefined
+    };
 
     // expand COMPUTE-ROLE if available, otherwise expand the first group
     const allGroups = this.props.model.getIn(['inputModel','server-roles']).map(e => e.get('name')).toJS();
@@ -35,6 +40,23 @@ class ServerRoleSummary extends BaseWizardPage {
     } else {
       this.state = {expandedGroup: [allGroups[0]]};
     }
+  }
+
+  componentWillMount() {
+    fetchJson('/api/v1/server?source=sm,ov')
+      .then((rawServerData) => {
+        if(rawServerData) {
+          this.setState({autoServers : rawServerData});
+        }
+      });
+
+    // get manually added servers
+    fetchJson('/api/v1/server?source=manual')
+      .then((responseData) => {
+        if (responseData.length > 0) {
+          this.setState({manualServers : responseData});
+        }
+      });
   }
 
   expandAll() {
@@ -58,10 +80,27 @@ class ServerRoleSummary extends BaseWizardPage {
     });
   }
 
-  saveEditServer = (server) =>  {
+  updateServerForEditServer = (server) => {
+    for (let list of ['autoServers', 'manualServers']) {
+      let idx = this.state[list].findIndex(s => server.uid === s.uid);
+      if (idx >= 0) {
+        let updated_server;
+        let tempList = this.state[list].slice();
+        updated_server = getMergedServer(tempList[idx], server, MODEL_SERVER_PROPS);
+        putJson('/api/v1/server', JSON.stringify(updated_server));
+        break;
+      }
+    }
+  }
+
+  saveEditServer = (server, originId) =>  {
     let model =
-      updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL);
+      updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL, originId);
     this.props.updateGlobalState('model', model);
+
+    // update saved servers in case user goes back to assign
+    // server role page and drag the server back
+    this.updateServerForEditServer(server);
   }
 
   isPageValid = () => {
@@ -75,12 +114,12 @@ class ServerRoleSummary extends BaseWizardPage {
   renderCollapsibleTable() {
     let tableConfig = {
       columns: [
-        {name: 'name'},
+        {name: 'id'},
+        {name: 'uid', hidden: true},
         {name: 'ip-addr',},
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
-        {name: 'id', hidden: true},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
@@ -92,6 +131,7 @@ class ServerRoleSummary extends BaseWizardPage {
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         saveEditServer={this.saveEditServer} checkInputs={this.checkInputs}
+        autoServers={this.state.autoServers} manualServers={this.state.manualServers}
         updateGlobalState={this.props.updateGlobalState}/>
     );
   }
