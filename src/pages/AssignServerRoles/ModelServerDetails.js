@@ -42,7 +42,6 @@ class ModelServerDetails extends Component {
       return (
         <div className='server-details-container viewonly'>
           {this.renderTextLine('server.id.prompt', this.props.data.id)}
-          {this.renderTextLine('server.name.prompt', this.props.data.name)}
           {this.renderTextLine('server.role.prompt', this.props.data.role)}
           {this.renderTextLine('server.ip.prompt', this.props.data['ip-addr'])}
           {this.renderTextLine('server.group.prompt', this.props.data['server-group'])}
