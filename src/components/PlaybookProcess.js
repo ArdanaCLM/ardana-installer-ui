@@ -181,7 +181,12 @@ class PlaybookProgress extends Component {
       }
 
       const statusClass = this.getStatusCSSClass(status);
-      return (<li key={index} className={statusClass}>{step.label}</li>);
+      if (status === STATUS.COMPLETE) {
+        return (<li key={index} className={statusClass}>{step.label}
+          <i className='material-icons succeed-icon'>check_circle</i></li>);
+      } else {
+        return (<li key={index} className={statusClass}>{step.label}</li>);
+      }
     });
 
     return progresses;

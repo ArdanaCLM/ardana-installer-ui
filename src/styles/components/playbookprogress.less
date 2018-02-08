@@ -25,7 +25,13 @@
       color: black;
     }
     .succeed {
-      color: @selectedcolor;
+      color: @preferredcolor;
+      .succeed-icon {
+        color: @preferredcolor;
+        position: relative;
+        top: 0.2em;
+        margin-left: 0.3em;
+      }
     }
     .fail {
       color: @errorcolor;
