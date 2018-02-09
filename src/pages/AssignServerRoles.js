@@ -511,7 +511,6 @@ class AssignServerRoles extends BaseWizardPage {
           // Overwrite the existing imported server in input model
           model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
             if (svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id) {
-              server.uid = svr.get('uid'); //get the existing uuid so we can search backend to update
               return fromJS(server); //overwrite the exiting with imported one
             }
             else
@@ -780,7 +779,6 @@ class AssignServerRoles extends BaseWizardPage {
         let id = srvDetail.name ? srvDetail.name : srvDetail.id + '';
         let serverData = {
           'id': id, //use name if it is there or use id string
-          //'serverId': srvDetail.id, //keep this for server reference
           'uid': srvDetail.id + '',
           'ip-addr': nkdevice ? nkdevice.ip : '',
           'mac-addr': nkdevice ? nkdevice.hardware_address : '',
