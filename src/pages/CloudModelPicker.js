@@ -23,6 +23,7 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { PickerButton } from '../components/Buttons.js';
 import Dropdown from '../components/Dropdown.js';
 import { YesNoModal } from '../components/Modals.js';
+import { Converter } from 'showdown';
 
 const NODE_COUNT_THRESHOLD = 30;
 const NODE_COUNT_OPT1 = '1';
@@ -369,11 +370,11 @@ class CloudModelPicker extends BaseWizardPage {
       if (template) {
         // details is the html help content read from model template fetched from the backend server.
         // It should be safe to be rendered as the raw html content in the details view.
-        details = template['overview'];
+        const converter = new Converter();
+        details = converter.makeHtml(template['overview']);
       }
       detailContent =
-        (<div><h3>{translateModelName(this.state.selectedModelName) + ' ' + translate('common.details')}</h3>
-          <div className='model-details' dangerouslySetInnerHTML={{__html: details}}/></div>);
+        (<div className='model-details' dangerouslySetInnerHTML={{__html: details}}/>);
     }
     else {
       detailContent =
