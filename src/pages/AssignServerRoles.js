@@ -476,10 +476,11 @@ class AssignServerRoles extends BaseWizardPage {
     let newServers = [];
     servers.forEach(server => {
       if (server.role) {
-        // look for previously imported items
+        // look for previously imported server
         const index = model.getIn(['inputModel', 'servers']).findIndex(svr => {
           return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
         });
+        // it is not in the model
         if (index < 0) {
           // The server was not in the model, so add it with the new role
           let new_server = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
@@ -508,15 +509,18 @@ class AssignServerRoles extends BaseWizardPage {
         newServers.push(server);
       }
       else {
+        // use the existing imported server's uid
         server.uid = manualServers[index].uid;
         manualServers[index] = server;
         putJson('/api/v1/server', JSON.stringify(server))
           .catch((error) => {
             let msg = translate('server.import.update.error', server.id);
-            this.setState(prev => { return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
+            this.setState(prev => {
+              return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
           });
       }
     });
+    // have some imported server, need to add to backend
     if(newServers.length > 0) {
       manualServers = manualServers.concat(newServers);
       postJson('/api/v1/server', JSON.stringify(newServers))
@@ -529,7 +533,7 @@ class AssignServerRoles extends BaseWizardPage {
     }
     this.props.updateGlobalState('model', model);
 
-    // add or update server to the left table and the server API
+    // add or update servers to the left table and the server API
     this.setState({serversAddedManually: manualServers});
   }
 
@@ -1066,20 +1070,18 @@ class AssignServerRoles extends BaseWizardPage {
    * When a server is remove it from the applicable lists  (discovered or manual).
    */
   deleteServer = () => {
-    let server = this.state.activeRowData;
+    let deleted_server = this.state.activeRowData;
     for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
-      let idx = this.state[list].findIndex(s => server.uid === s.uid);
+      let idx = this.state[list].findIndex(s => deleted_server.uid === s.uid);
       if (idx >= 0) {
-        let deleted_server;
         this.setState(prev => {
           prev[list].splice(idx, 1);
           return {[list]: prev[list]};
         }, () => {
           deleteJson(
-            '/api/v1/server?source=' + server.source +'&uid=' + server.id,
-            JSON.stringify(deleted_server))
+            '/api/v1/server?source=' + deleted_server.source +'&uid=' + deleted_server.uid)
             .catch((error) => {
-              let msg = translate('server.discover.delete.server.error', deleted_server.name);
+              let msg = translate('server.discover.delete.server.error', deleted_server.id);
               this.setState(prev => { return {
                 messages: prev.messages.concat([{msg: [msg, error.toString()]}]),
                 activeRowData: undefined,
