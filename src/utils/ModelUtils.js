@@ -27,6 +27,13 @@ export function isRoleAssignmentValid (role, checkInputs) {
     return false;
   }
 
+  //check ids duplicates
+  let ids = role.servers.map(svr => svr.id);
+  let idSet = new Set(ids);
+  if(ids.length > idSet.size) {
+    return false;
+  }
+
   if(checkInputs) {
     return role.servers.every((server) =>
       checkInputs.every(key => (server[key] ? true : false))
@@ -46,6 +53,12 @@ export function getNicMappings(model) {
   return model.getIn(['inputModel','nic-mappings'])
     .sort((a,b) => alphabetically(a.get('name'), b.get('name')))
     .map(nic => nic.get('name')).toJS();
+}
+
+export function getModelServerIds(model) {
+  let ids = model.getIn(['inputModel','servers'])
+    .map(server => server.get('id')).toJS();
+  return ids;
 }
 
 export function getAllOtherServerIds (model, autoServers, manualServers, theId) {

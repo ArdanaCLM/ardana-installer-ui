@@ -104,6 +104,11 @@ class ServerRowItem extends Component {
         return (this.props.data[key] === undefined || this.props.data[key] === '');
       });
     }
+    if(!badInput && this.props.checkDupIds) {
+      badInput = this.props.checkDupIds.find(id => {
+        return id === this.props.data.id;
+      });
+    }
     if(badInput) {
       requiredUpdate = true;
     }

@@ -85,6 +85,7 @@ export class ServerRolesAccordion extends Component {
         noHeader
         tableConfig={tableConfig}
         checkInputs={this.props.checkInputs}
+        checkDupIds={this.props.checkDupIds}
         tableData={serverList}
         editAction={this.props.editAction}
         viewAction={this.props.viewAction}/>

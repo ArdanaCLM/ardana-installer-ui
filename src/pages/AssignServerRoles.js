@@ -35,7 +35,7 @@ import { fromJS } from 'immutable';
 import { isEmpty } from 'lodash';
 import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
-  updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer
+  updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds
 } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, INPUT_STATUS } from '../utils/constants.js';
 import { YesNoModal } from '../components/Modals.js';
@@ -475,6 +475,26 @@ class AssignServerRoles extends BaseWizardPage {
     let manualServers = this.state.serversAddedManually.slice();
     let newServers = [];
     servers.forEach(server => {
+      // update manually added servers list
+      // find previously imported server with same id and overwrite it
+      let index = manualServers.findIndex(svr => {
+        return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
+      });
+      if(index < 0) {
+        newServers.push(server);
+      }
+      else {
+        // use the existing imported server's uid
+        server.uid = manualServers[index].uid;
+        manualServers[index] = server;
+        putJson('/api/v1/server', JSON.stringify(server))
+          .catch((error) => {
+            let msg = translate('server.import.update.error', server.id);
+            this.setState(prev => {
+              return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
+          });
+      }
+
       if (server.role) {
         // look for previously imported server
         const index = model.getIn(['inputModel', 'servers']).findIndex(svr => {
@@ -498,26 +518,6 @@ class AssignServerRoles extends BaseWizardPage {
               return svr;
           }));
         }
-      }
-
-      // update manually added servers list
-      // find previously imported server with same id and overwrite it
-      let index = manualServers.findIndex(svr => {
-        return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
-      });
-      if(index < 0) {
-        newServers.push(server);
-      }
-      else {
-        // use the existing imported server's uid
-        server.uid = manualServers[index].uid;
-        manualServers[index] = server;
-        putJson('/api/v1/server', JSON.stringify(server))
-          .catch((error) => {
-            let msg = translate('server.import.update.error', server.id);
-            this.setState(prev => {
-              return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
-          });
       }
     });
     // have some imported server, need to add to backend
@@ -781,7 +781,7 @@ class AssignServerRoles extends BaseWizardPage {
         let serverData = {
           'id': id, //use name if it is there or use id string
           //'serverId': srvDetail.id, //keep this for server reference
-          'uid': srvDetail.id,
+          'uid': srvDetail.id + '',
           'ip-addr': nkdevice ? nkdevice.ip : '',
           'mac-addr': nkdevice ? nkdevice.hardware_address : '',
           'ilo-ip': '',
@@ -823,7 +823,7 @@ class AssignServerRoles extends BaseWizardPage {
         let serverData = {
           'id': id, //use name if it is there or use id string
           //'serverId': server.id, //keep this for server reference
-          'uid': server.id,
+          'uid': server.id + '',
           'ip-addr': '',
           'mac-addr': '',
           'ilo-ip': '',
@@ -857,7 +857,7 @@ class AssignServerRoles extends BaseWizardPage {
 
       let serverData = {
         'id': id, //use name if it is there or use id string
-        'uid': srv.uuid, //keep this for server reference
+        'uid': srv.uuid + '', //keep this for server reference
         'ip-addr': '',
         'mac-addr': '',
         'ilo-ip': ipmi ? ipmi.address : '',
@@ -1177,7 +1177,7 @@ class AssignServerRoles extends BaseWizardPage {
 
     const assignedServerIds = this.props.model.getIn(['inputModel','servers'])
       .filter(svr => (svr.get('role') ? true : false))   // find servers with roles
-      .map(svr => svr.get('id')).toJS();                 // return just the id field
+      .map(svr => svr.get('uid')).toJS();                // return just the uid field
 
     //apply name and assignment filter here
     let filteredAvailableServers =
@@ -1189,8 +1189,9 @@ class AssignServerRoles extends BaseWizardPage {
           return false;
         }
 
-        //server id is acceptable per text filter, now need to filter out assigned servers
-        return (assignedServerIds.indexOf(server.id) === -1);
+        // server id is acceptable per text filter, now need to filter
+        // out assigned servers using uid
+        return (assignedServerIds.indexOf(server.uid) === -1);
       });
 
     let tableId = 'leftTableId' + type;
@@ -1344,6 +1345,16 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderServerRolesAccordion(roles) {
+    let serverIds = getModelServerIds(this.props.model);
+    //let serverIds = find all serversIds from manual and auto
+    let tempDups = serverIds.filter((id, idx) => {
+      let firstIndex = serverIds.indexOf(id);
+      let lastIndex = serverIds.lastIndexOf(id);
+      if(firstIndex !== lastIndex) {
+        return true;
+      }
+    });
+    let dupIds = [...new Set(tempDups)];
     return (
       <ServerRolesAccordion
         ondropFunct={this.assignServerToRoleDnD}
@@ -1351,7 +1362,7 @@ class AssignServerRoles extends BaseWizardPage {
         ondragLeaveFunct={this.unHighlightDrop}
         allowDropFunct={this.allowDrop}
         serverRoles={getServerRoles(this.props.model)}
-        tableId='rightTableId'
+        tableId='rightTableId' checkDupIds={dupIds}
         editAction={this.handleShowEditServer}
         viewAction={this.handleShowServerDetails}
         deleteAction={this.handleDeleteServer}>
