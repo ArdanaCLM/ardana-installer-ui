@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import Papa from 'papaparse';
-import { IpV4AddressValidator, MacAddressValidator } from './InputValidators.js';
+import { IpV4AddressValidator, MacAddressValidator} from './InputValidators.js';
 
 /**
  * import CSV from the given file

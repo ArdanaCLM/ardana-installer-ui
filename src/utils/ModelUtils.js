@@ -184,12 +184,15 @@ export function updateServersInModel(server, model, props, originId) {
   return retModel;
 }
 
-export function genUID() {
+export function genUID(prefix) {
   function hex4() {
     return Math.floor((1 + Math.random()) * 0x10000)
       .toString(16)
       .substring(1).toUpperCase();
   }
-  return hex4() + hex4()  + hex4() +  hex4()  + hex4() + hex4() + hex4() + hex4();
+  let hexStr =
+    hex4() + hex4()  + hex4() +  hex4()  + hex4() + hex4() + hex4() + hex4();
+  let retID =  prefix ? prefix + '_'  + hexStr : hexStr;
+  return retID;
 }
 

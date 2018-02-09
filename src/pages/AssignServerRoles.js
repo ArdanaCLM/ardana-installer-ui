@@ -54,7 +54,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.newServer = {
       'source': 'manual',
       'id': '',
-      'uid': genUID(),
+      'uid': genUID('manual'),
       'ip-addr': '',
       'server-group': '',
       'nic-mapping': '',
@@ -367,7 +367,9 @@ class AssignServerRoles extends BaseWizardPage {
 
     serverList.forEach(server => {
       if (server.role) {
-        model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(server)));
+        // empty value can cause validation problem
+        let modelServer = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
+        model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(modelServer)));
       }
     });
     this.props.updateGlobalState('model', model);
@@ -384,7 +386,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.newServer = {
       'source': 'manual',
       'id': '',
-      'uid': genUID(),
+      'uid': genUID('manual'),
       'ip-addr': '',
       'server-group': '',
       'nic-mapping': '',
@@ -468,6 +470,69 @@ class AssignServerRoles extends BaseWizardPage {
     });
   }
 
+  saveImportedServers(servers) {
+    let model = this.props.model;
+    let manualServers = this.state.serversAddedManually.slice();
+    let newServers = [];
+    servers.forEach(server => {
+      if (server.role) {
+        // look for previously imported items
+        const index = model.getIn(['inputModel', 'servers']).findIndex(svr => {
+          return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
+        });
+        if (index < 0) {
+          // The server was not in the model, so add it with the new role
+          let new_server = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
+          // Append the server to the input model
+          model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(new_server)));
+        }
+        else {
+          // Overwrite the existing imported server in input model
+          model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
+            if (svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id) {
+              server.uid = svr.get('uid'); //get the existing uuid so we can search backend to update
+              return fromJS(server); //overwrite the exiting with imported one
+            }
+            else
+              return svr;
+          }));
+        }
+      }
+
+      // update manually added servers list
+      // find previously imported server with same id and overwrite it
+      let index = manualServers.findIndex(svr => {
+        return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
+      });
+      if(index < 0) {
+        newServers.push(server);
+      }
+      else {
+        server.uid = manualServers[index].uid;
+        manualServers[index] = server;
+        putJson('/api/v1/server', JSON.stringify(server))
+          .catch((error) => {
+            let msg = translate('server.import.update.error', server.id);
+            this.setState(prev => { return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
+          });
+      }
+    });
+    if(newServers.length > 0) {
+      manualServers = manualServers.concat(newServers);
+      postJson('/api/v1/server', JSON.stringify(newServers))
+        .catch((error) => {
+          let msg = translate('server.import.add.error');
+          this.setState(prev => { return {
+            messages: prev.messages.concat([{msg: [msg, error.toString()]}])};
+          });
+        });
+    }
+    this.props.updateGlobalState('model', model);
+
+    // add or update server to the left table and the server API
+    this.setState({serversAddedManually: manualServers});
+  }
+
   handleAddServerFromCSV = file => {
     const restrictions = {
       'server-role': getServerRoles(this.props.model).map(e => e['serverRole']),
@@ -480,8 +545,7 @@ class AssignServerRoles extends BaseWizardPage {
       // TODO: Display errors that may exists in results.errors
       for (let server of results.data) {
         server['source'] = 'manual';
-        server['id'] = server['id'];
-        server['uid'] = genUID();
+        server['uid'] = genUID('import');
       }
 
       if (results.errors.length > 0) {
@@ -497,8 +561,8 @@ class AssignServerRoles extends BaseWizardPage {
           messages: prev.messages.concat([{title: title, msg: details}])
         };});
       }
+      this.saveImportedServers(results.data);
 
-      this.saveServersAddedManually(results.data);
     });
   }
 
@@ -1004,7 +1068,7 @@ class AssignServerRoles extends BaseWizardPage {
   deleteServer = () => {
     let server = this.state.activeRowData;
     for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
-      let idx = this.state[list].findIndex(s => server.id === s.id);
+      let idx = this.state[list].findIndex(s => server.uid === s.uid);
       if (idx >= 0) {
         let deleted_server;
         this.setState(prev => {
@@ -1012,7 +1076,7 @@ class AssignServerRoles extends BaseWizardPage {
           return {[list]: prev[list]};
         }, () => {
           deleteJson(
-            '/api/v1/server?source=' + server.source +'&id=' + server.id,
+            '/api/v1/server?source=' + server.source +'&uid=' + server.id,
             JSON.stringify(deleted_server))
             .catch((error) => {
               let msg = translate('server.discover.delete.server.error', deleted_server.name);

@@ -34,8 +34,7 @@ class EditServerDetails extends Component {
       'mac-addr': INPUT_STATUS.UNKNOWN
     };
 
-    this.data = this.makeDeepCopy(this.props.data);
-    this.extraData();
+    this.initData();
 
     this.state = {
       isFormValid: false,
@@ -50,7 +49,10 @@ class EditServerDetails extends Component {
     return JSON.parse(JSON.stringify(srcData));
   }
 
-  extraData() {
+  initData() {
+    this.data = this.makeDeepCopy(this.props.data);
+    // the data is for the server which is in the example
+    // need to use the origin id to find the item in the model if id changed.
     if(!this.data.uid) {
       this.originId = this.data.id;
       this.data.uid = genUID();
@@ -122,7 +124,7 @@ class EditServerDetails extends Component {
     return (
       <ServerInputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title} {...theProps}
-        inputValidate={validate} inputValue={this.data[name]} moreClass={'has-button'}
+        inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
         inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
     );
   }

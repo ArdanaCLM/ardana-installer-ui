@@ -219,6 +219,8 @@
     "server.pass.prompt": "Password",
     "server.host1.prompt": "Host",
     "server.secure": "Verify SSL certificate",
+    "server.import.update.error": "Failed to save updated imported server {0}",
+    "server.import.add.error": "Failed to save new imported servers",
 
     "edit.cloud.settings": "Manage Cloud Settings",
     "edit.cloud.settings.close.confirm": "You've selected to leave Manage Cloud Settings but you have unsaved changes. \n\n Are you sure you want to proceed?",
