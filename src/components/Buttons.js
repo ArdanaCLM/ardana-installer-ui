@@ -263,12 +263,12 @@ class DeleteForTableRow extends Component {
   }
   render() {
     return (
-        <td className='actions'>
-          <p onClick={this.props.clickAction}>
-            <span className='glyphicon glyphicon-trash delete'></span>
-          </p>
-        </td>
-        );
+      <td className='actions'>
+        <p onClick={this.props.clickAction}>
+          <span className='glyphicon glyphicon-trash delete'></span>
+        </p>
+      </td>
+    );
   }
 }
 

@@ -978,15 +978,15 @@ class AssignServerRoles extends BaseWizardPage {
           prev[list].splice(idx, 1);
           return {[list]: prev[list]};
         }, () => {
-      deleteJson('/api/v1/server?source=' + server.source +'&id=' + server.id,
-                 JSON.stringify(deleted_server))
-          .catch((error) => {
-            let msg = translate('server.discover.delete.server.error', deleted_server.name);
-            this.setState(prev => { return {
-              messages: prev.messages.concat([{msg: [msg, error.toString()]}]),
-              activeRowData: undefined,
-            };});
-          });
+          deleteJson('/api/v1/server?source=' + server.source +'&id=' + server.id,
+            JSON.stringify(deleted_server))
+            .catch((error) => {
+              let msg = translate('server.discover.delete.server.error', deleted_server.name);
+              this.setState(prev => { return {
+                messages: prev.messages.concat([{msg: [msg, error.toString()]}]),
+                activeRowData: undefined,
+              };});
+            });
         });
         break;
       }
