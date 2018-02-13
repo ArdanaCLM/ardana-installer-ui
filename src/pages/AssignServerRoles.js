@@ -914,7 +914,7 @@ class AssignServerRoles extends BaseWizardPage {
     let model = this.props.model;
 
     const index = model.getIn(['inputModel', 'servers']).findIndex(e => {
-      return e.get('uid') === server.uid;
+      return e.get('uid') ? e.get('uid') === server.uid : e.get('id') === server.id;
     });
     if (index < 0) {
       // The server was not in the model, so add it with the new role
@@ -927,7 +927,9 @@ class AssignServerRoles extends BaseWizardPage {
 
       // Update the role in the existing input model entry
       model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
-        if (svr.get('uid') === server.uid)
+        // use uid if sever has uid, if it doesn't have uid like the example one, will use
+        // id.
+        if ((svr.get('uid') && svr.get('uid') === server.uid) || svr.get('id' === server.id))
           return svr.set('role', role);
         else
           return svr;

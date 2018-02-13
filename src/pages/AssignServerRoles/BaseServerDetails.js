@@ -129,25 +129,20 @@ class BaseServerDetails extends Component {
   }
 
   renderDetailsContent() {
-    if (this.props.tableId === 'rightTableId') {
-      return (
-        <Tabs
-          activeKey={this.state.selectedTabKey}
-          onSelect={this.handleSelectTab} id={this.props.tableId + this.props.source}>
-          <Tab
-            eventKey={DETAILS_FROM_SERVER_TAB} title={translate('server.details.from.server')}>
-            {this.state.selectedTabKey === DETAILS_FROM_SERVER_TAB && this.renderDetailsFromServer()}
-          </Tab>
-          <Tab
-            eventKey={DETAILS_FROM_MODEL_TAB} title={translate('server.details.from.model')}>
-            {this.state.selectedTabKey === DETAILS_FROM_MODEL_TAB && this.renderDetailsFromModel()}
-          </Tab>
-        </Tabs>
-      );
-    }
-    else {
-      return (this.renderDetailsFromServer());
-    }
+    return (
+      <Tabs
+        activeKey={this.state.selectedTabKey}
+        onSelect={this.handleSelectTab} id={this.props.tableId + this.props.source}>
+        <Tab
+          eventKey={DETAILS_FROM_SERVER_TAB} title={translate('server.details.from.server')}>
+          {this.state.selectedTabKey === DETAILS_FROM_SERVER_TAB && this.renderDetailsFromServer()}
+        </Tab>
+        <Tab
+          eventKey={DETAILS_FROM_MODEL_TAB} title={translate('server.details.from.model')}>
+          {this.state.selectedTabKey === DETAILS_FROM_MODEL_TAB && this.renderDetailsFromModel()}
+        </Tab>
+      </Tabs>
+    );
   }
 }
 
