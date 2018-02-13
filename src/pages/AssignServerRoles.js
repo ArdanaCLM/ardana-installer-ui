@@ -311,9 +311,13 @@ class AssignServerRoles extends BaseWizardPage {
   //TODO cleanup and move manual add servers stuff to its own file
   isManualFormTextInputValid = () => {
     let isAllValid = true;
-    let values = Object.values(this.allManualInputsStatus);
-    isAllValid =
-      (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;}));
+    let keys = Object.keys(this.allManualInputsStatus);
+    keys.forEach(key => {
+      let isValid = (this.allManualInputsStatus[key] === INPUT_STATUS.VALID) ||
+        // force id and ip-addr to be filled for new server
+        (key !== 'id' && key !== 'ip-addr' && this.allManualInputsStatus[key] === INPUT_STATUS.UNKNOWN);
+      isAllValid = isAllValid && isValid;
+    });
 
     return isAllValid;
   }
