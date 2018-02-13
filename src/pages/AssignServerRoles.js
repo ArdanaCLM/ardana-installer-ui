@@ -479,11 +479,11 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   saveImportedServers = () => {
-    let servers = this.state.importedResults ? this.state.importedResults.data : [];
+    let servers = this.state.importedResults.data ? this.state.importedResults.data : [];
     let model = this.props.model;
     let manualServers = this.state.serversAddedManually.slice();
     let newServers = [];
-    let importedErrors = this.state.importedResults ? this.state.importedResults.errors : [];
+    let importedErrors = this.state.importedResults.errors ? this.state.importedResults.errors : [];
 
     //show some errors when user confirms importing servers
     if (importedErrors.length > 0) {
