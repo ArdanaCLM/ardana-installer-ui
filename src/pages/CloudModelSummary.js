@@ -61,6 +61,17 @@ class CloudModelSummary extends BaseWizardPage {
     );
   }
 
+  getChangeNodeWarning(number) {
+    let warning = '';
+    if (this.state.activeItem && this.state.activeItem.indexOf('clusters') !== -1 && number === 3) {
+      warning = (
+      <div className='warning-banner'>
+        <InfoBanner message={translate('model.summary.change.node.warning')}/>
+      </div>);
+    }
+    return warning;
+  }
+
   // convert a delimited string (normally the state.activeItem) into a list.  Optionally
   // remove some number of trailing items from the list (to traverse higher in the structure)
   getKey(s, stripRight) {
@@ -175,6 +186,7 @@ class CloudModelSummary extends BaseWizardPage {
               </div>
               : <div />
             }
+            {this.getChangeNodeWarning(number)}
           </div>
         </div>
         {this.renderNavButtons()}
