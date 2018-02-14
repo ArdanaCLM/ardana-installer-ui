@@ -61,9 +61,10 @@ class CloudModelSummary extends BaseWizardPage {
     );
   }
 
-  getChangeNodeWarning(number) {
+  getChangeNodeWarning() {
     let warning = '';
-    if (this.state.activeItem && this.state.activeItem.indexOf('clusters') !== -1 && number === 3) {
+    if (this.state.activeItem && this.state.activeItem.indexOf('clusters') !== -1 &&
+      this.origActiveNodeCount === 3) {
       warning = (
       <div className='warning-banner'>
         <InfoBanner message={translate('model.summary.change.node.warning')}/>
@@ -84,6 +85,7 @@ class CloudModelSummary extends BaseWizardPage {
   // handle click on an item
   handleClick = (e) => {
     this.setState({activeItem: e.target.id});
+    this.origActiveNodeCount = this.state.controlPlane.getIn(this.getKey(e.target.id));
   }
 
   //update the state on field change
@@ -186,7 +188,7 @@ class CloudModelSummary extends BaseWizardPage {
               </div>
               : <div />
             }
-            {this.getChangeNodeWarning(number)}
+            {this.getChangeNodeWarning()}
           </div>
         </div>
         {this.renderNavButtons()}
