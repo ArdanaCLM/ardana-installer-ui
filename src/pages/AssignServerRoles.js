@@ -124,7 +124,11 @@ class AssignServerRoles extends BaseWizardPage {
       showBaremetalSettings: false,
 
       // delete server confirmation modal
-      showDeleteServerConfirmModal: false
+      showDeleteServerConfirmModal: false,
+
+      // import server confirmation modal
+      showImportServerConfirmModal: false,
+      importedResults: {}
     };
   }
 
@@ -474,10 +478,27 @@ class AssignServerRoles extends BaseWizardPage {
     });
   }
 
-  saveImportedServers(servers) {
+  saveImportedServers = () => {
+    let servers = this.state.importedResults.data ? this.state.importedResults.data : [];
     let model = this.props.model;
     let manualServers = this.state.serversAddedManually.slice();
     let newServers = [];
+    let importedErrors = this.state.importedResults.errors ? this.state.importedResults.errors : [];
+
+    //show some errors when user confirms importing servers
+    if (importedErrors.length > 0) {
+      const MAX_LINES = 5;
+
+      let details = importedErrors.slice(0, MAX_LINES);
+      if (importedErrors.length > MAX_LINES) {
+        details.push('...');
+      }
+
+      let title = translate('csv.import.error');
+      this.setState(prev => { return {
+        messages: prev.messages.concat([{title: title, msg: details}])
+      };});
+    }
     servers.forEach(server => {
       // update manually added servers list
       // find previously imported server with same id and overwrite it
@@ -537,7 +558,8 @@ class AssignServerRoles extends BaseWizardPage {
     this.props.updateGlobalState('model', model);
 
     // add or update servers to the left table and the server API
-    this.setState({serversAddedManually: manualServers});
+    this.setState(
+      {serversAddedManually: manualServers, importedResults: {}, showImportServerConfirmModal: false});
   }
 
   handleAddServerFromCSV = file => {
@@ -555,21 +577,7 @@ class AssignServerRoles extends BaseWizardPage {
         server['uid'] = genUID('import');
       }
 
-      if (results.errors.length > 0) {
-        const MAX_LINES = 5;
-
-        let details = results.errors.slice(0, MAX_LINES);
-        if (results.errors.length > MAX_LINES) {
-          details.push('...');
-        }
-
-        let title = translate('csv.import.error');
-        this.setState(prev => { return {
-          messages: prev.messages.concat([{title: title, msg: details}])
-        };});
-      }
-      this.saveImportedServers(results.data);
-
+      this.setState({showImportServerConfirmModal: true, importedResults: results});
     });
   }
 
@@ -1483,6 +1491,11 @@ class AssignServerRoles extends BaseWizardPage {
             yesAction={this.deleteServer}
             noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
             {translate('server.delete.server.confirm', serverId)}
+          </YesNoModal>
+          <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
+            yesAction={this.saveImportedServers}
+            noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
+            {translate('server.import.server.confirm')}
           </YesNoModal>
           <div className='buttonBox'>
             <div className='btn-row'>

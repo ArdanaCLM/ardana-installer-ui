@@ -221,7 +221,7 @@
     "server.secure": "Verify SSL certificate",
     "server.import.update.error": "Failed to save updated imported server {0}",
     "server.import.add.error": "Failed to save new imported servers",
-
+    "server.import.server.confirm": "The imported servers will overwrite previously imported servers if they have the same ID.\n If imported servers have the same ID as the manually added servers or discovered servers, servers with duplicate ID could show up. Servers that have been assigned a role and have duplicate ID will be highlighted in red. You can edit the server to update the ID.\n\n Do you still want to import servers? ",
     "edit.cloud.settings": "Manage Cloud Settings",
     "edit.cloud.settings.close.confirm": "You've selected to leave Manage Cloud Settings but you have unsaved changes. \n\n Are you sure you want to proceed?",
     "edit.cloud.config": "Cloud Configuration",
