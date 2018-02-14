@@ -14,6 +14,7 @@
 **/
 import { Map } from 'immutable';
 import { alphabetically, byServerNameOrId } from './Sort.js';
+import { MODEL_SERVER_PROPS_ALL } from './constants.js';
 
 export function isRoleAssignmentValid (role, checkInputs) {
   let minCount =  role.minCount;
@@ -25,6 +26,14 @@ export function isRoleAssignmentValid (role, checkInputs) {
   if(minCount && svrSize < minCount) {
     return false;
   }
+
+  //check ids duplicates
+  let ids = role.servers.map(svr => svr.id);
+  let idSet = new Set(ids);
+  if(ids.length > idSet.size) {
+    return false;
+  }
+
   if(checkInputs) {
     return role.servers.every((server) =>
       checkInputs.every(key => (server[key] ? true : false))
@@ -46,20 +55,64 @@ export function getNicMappings(model) {
     .map(nic => nic.get('name')).toJS();
 }
 
-function getCleanedServer(srv) {
-  const strId = srv['id'].toString();
-  return {
-    'id': strId,
-    'name': srv.name || strId,
-    'ip-addr': srv['ip-addr'],
-    'mac-addr': srv['mac-addr'] || '',
-    'role': srv['role'] || '',
-    'server-group': srv['server-group'] || '',
-    'ilo-ip': srv['ilo-ip'] || '',
-    'ilo-user': srv['ilo-user'] || '',
-    'ilo-password': srv['ilo-password'] || '',
-    'nic-mapping': srv['nic-mapping'] || ''
-  };
+export function getModelServerIds(model) {
+  let ids = model.getIn(['inputModel','servers'])
+    .map(server => server.get('id')).toJS();
+  return ids;
+}
+
+export function getAllOtherServerIds (model, autoServers, manualServers, theId) {
+  let retIds = [];
+  let modelIds= model.getIn(['inputModel','servers'])
+    .map(server => server.get('id')).toJS();
+
+  if(theId) {
+    let idx = model.getIn(['inputModel', 'servers']).findIndex(
+      server => server.get('id') === theId
+    );
+    //if have current id, remove current id so won't check against it
+    if (idx !== -1) {
+      modelIds.splice(idx, 1);
+    }
+  }
+
+  let autoServerIds = [];
+  if (autoServers && autoServers.length > 0) {
+    autoServerIds = autoServers.map(server => server.id);
+    if(theId) {
+      let idx = autoServerIds.findIndex(id => id === theId);
+      // if have it in auto discovered servers, remove it.
+      if (idx !== -1) {
+        autoServerIds.splice(idx, 1);
+      }
+    }
+  }
+
+  let manualServerIds = [];
+  if(manualServers && manualServers.length > 0) {
+    manualServerIds = manualServers.map(server => server.id);
+    if(theId) {
+      let idx = manualServerIds.findIndex(id => id === theId);
+      // if have it in manual added servers, remove it.
+      if (idx !== -1) {
+        manualServerIds.splice(idx, 1);
+      }
+    }
+  }
+  retIds = modelIds.concat(autoServerIds);
+  retIds = retIds.concat(manualServerIds);
+
+  return retIds;
+}
+
+export function getCleanedServer(srv, props) {
+  let retServer = {};
+  props.forEach(key => {
+    if(srv[key] !== undefined && srv[key] !== '') {
+      retServer[key] = srv[key];
+    }
+  });
+  return retServer;
 }
 
 // Retrieve summarized server role information from the model
@@ -86,7 +139,7 @@ export function getServerRoles (model) {
         'group': group,
         'servers': servers
           .filter(s => s.role === res['server-role'])
-          .map(s => getCleanedServer(s))          // filter out any extra fields
+          .map(s => getCleanedServer(s, MODEL_SERVER_PROPS_ALL))          // filter out any extra fields
           .sort((a,b) => byServerNameOrId(a,b))   // sort servers by name or id within each role
       };
       if (group === 'clusters') {
@@ -123,9 +176,11 @@ function getMergedServerMap (src, dest, props) {
   return Map(result);
 }
 
-export function updateServersInModel(server, model, props) {
+export function updateServersInModel(server, model, props, originId) {
   let retModel = model.updateIn(['inputModel','servers'], list => list.map(svr => {
-    if (svr.get('id') === server.id) {
+    // originId is used to deal with example model item where it has no uid to begin
+    // with
+    if ((originId && svr.get('id') === originId) || (svr.get('uid') === server.uid)) {
       let update_server = getMergedServerMap(svr, server, props);
       // clean up unwanted entries before save to the model so it
       // can pass model validator
@@ -142,4 +197,15 @@ export function updateServersInModel(server, model, props) {
   return retModel;
 }
 
+export function genUID(prefix) {
+  function hex4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1).toUpperCase();
+  }
+  let hexStr =
+    hex4() + hex4()  + hex4() +  hex4()  + hex4() + hex4() + hex4() + hex4();
+  let retID =  prefix ? prefix + '_'  + hexStr : hexStr;
+  return retID;
+}
 

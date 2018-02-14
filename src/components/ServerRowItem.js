@@ -56,7 +56,7 @@ class ServerRowItem extends Component {
     this.props.dataDef.forEach((def) => {
       if(!def.hidden) {
         let badgeClass = '';
-        if(def.name === 'name') {
+        if(def.name === 'id') {
           if(this.props.data.source === 'sm') {
             badgeClass = 'sm-badge';
           }
@@ -102,6 +102,11 @@ class ServerRowItem extends Component {
     if(this.props.checkInputs) {
       badInput = this.props.checkInputs.find((key) => {
         return (this.props.data[key] === undefined || this.props.data[key] === '');
+      });
+    }
+    if(!badInput && this.props.checkDupIds) {
+      badInput = this.props.checkDupIds.find(id => {
+        return id === this.props.data.id;
       });
     }
     if(badInput) {

@@ -33,6 +33,7 @@ class ServerTable extends Component {
             deleteAction={this.props.deleteAction}
             tableId={this.props.id}
             checkInputs={this.props.checkInputs}
+            checkDupIds={this.props.checkDupIds}
             key={index}>
           </ServerRowItem>
         );
