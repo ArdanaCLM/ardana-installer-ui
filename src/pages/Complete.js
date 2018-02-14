@@ -17,6 +17,7 @@ import '../Deployer.css';
 import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage';
 import { fetchJson } from '../utils/RestUtils.js';
+import { Modal } from 'react-bootstrap';
 
 class Complete extends BaseWizardPage {
 
@@ -56,11 +57,11 @@ class Complete extends BaseWizardPage {
 
     let commandLines = [];
     if (this.state.userName) {
-      commandLines.push(<div className='paragraph-start' key='commandLine1'>
+      commandLines.push(<div className='body-header' key='commandLine1'>
         {translate('complete.message.body4', this.state.userName)}</div>);
-      commandLines.push(<div className='indent' key='commandLine2'>
+      commandLines.push(<div className='body-line' key='commandLine2'>
         {translate('complete.message.body5')}</div>);
-      commandLines.push(<div className='indent' key='commandLine3'>
+      commandLines.push(<div className='body-line' key='commandLine3'>
         {translate('complete.message.body6')}</div>);
     }
 
@@ -68,14 +69,16 @@ class Complete extends BaseWizardPage {
     if (this.state.horizon !== '' || this.state.opsconsole !== '') {
       let links = [];
       if (this.state.horizon !== '') {
-        links.push(<li><a href={this.state.horizon}>{translate('complete.message.link1')}</a></li>);
+        links.push(<li className='body-link' key='horizon'>
+          <a href={this.state.horizon}>{translate('complete.message.link1')}</a></li>);
       }
       if (this.state.opsconsole !== '') {
-        links.push(<li><a href={this.state.opsconsole}>{translate('complete.message.link2')}</a></li>);
+        links.push(<li className='body-link' key='ops'>
+          <a href={this.state.opsconsole}>{translate('complete.message.link2')}</a></li>);
       }
       linkSection = (
-        <div className='col-xs-4'>
-          <h5>{translate('complete.message.link.heading')}</h5>
+        <div>
+          <div className='body-header'>{translate('complete.message.link.heading')}</div>
           <ul>
             {links}
           </ul>
@@ -84,23 +87,19 @@ class Complete extends BaseWizardPage {
     }
 
     return (
-      <div className='wizard-page'>
-        <div className='content-header'>
-          {this.renderHeading(translate('complete.heading'))}
-        </div>
-        <div className='wizard-content'>
-          <div className='installIntro'>
-            <div className='col-xs-7'>
-              <div>{translate('complete.message.body1')}</div>
-              <div className='paragraph-start'>{translate('complete.message.body2')}</div>
-              <div className='indent'>{translate('complete.message.body3', modelName)}</div>
-              {commandLines}
-            </div>
-            <div className='col-xs-1'></div>
-            {linkSection}
-          </div>
-        </div>
-      </div>
+      <Modal className='complete-step' show={true} backdrop={false}>
+        <Modal.Header>
+          <div className='icon-container'><i className='material-icons complete-icon'>done</i></div>
+          <div>{this.renderHeading(translate('complete.heading'))}</div>
+          <div className='sub-heading'>{translate('complete.message.body1')}</div>
+        </Modal.Header>
+        <Modal.Body>
+          <div className='body-header'>{translate('complete.message.body2')}</div>
+          <div className='body-line'>{translate('complete.message.body3', modelName)}</div>
+          {commandLines}
+          {linkSection}
+        </Modal.Body>
+      </Modal>
     );
   }
 }
