@@ -484,6 +484,7 @@ class AssignServerRoles extends BaseWizardPage {
     let manualServers = this.state.serversAddedManually.slice();
     let newServers = [];
     let importedErrors = this.state.importedResults.errors ? this.state.importedResults.errors : [];
+    let removeFromModelServers = [];
 
     //show some errors when user confirms importing servers
     if (importedErrors.length > 0) {
@@ -499,19 +500,20 @@ class AssignServerRoles extends BaseWizardPage {
         messages: prev.messages.concat([{title: title, msg: details}])
       };});
     }
+
     servers.forEach(server => {
       // update manually added servers list
       // find previously imported server with same id and overwrite it
-      let index = manualServers.findIndex(svr => {
+      let sIndex = manualServers.findIndex(svr => {
         return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
       });
-      if(index < 0) {
+      if(sIndex < 0) {
         newServers.push(server);
       }
       else {
         // use the existing imported server's uid
-        server.uid = manualServers[index].uid;
-        manualServers[index] = server;
+        server.uid = manualServers[sIndex].uid;
+        manualServers[sIndex] = server;
         putJson('/api/v1/server', JSON.stringify(server))
           .catch((error) => {
             let msg = translate('server.import.update.error', server.id);
@@ -519,20 +521,22 @@ class AssignServerRoles extends BaseWizardPage {
               return {messages: prev.messages.concat([{msg: [msg, error.toString()]}])};});
           });
       }
-
-      if (server.role) {
-        // look for previously imported server
-        const index = model.getIn(['inputModel', 'servers']).findIndex(svr => {
-          return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
-        });
-        // it is not in the model
-        if (index < 0) {
+      // look for previously imported server in the model
+      const mIndex = model.getIn(['inputModel', 'servers']).findIndex(svr => {
+        return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
+      });
+      // it is not in the model
+      if (mIndex < 0) {
+        // it has role, add it to the model
+        if(server.role) {
           // The server was not in the model, so add it with the new role
           let new_server = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
           // Append the server to the input model
           model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(new_server)));
         }
-        else {
+      }
+      else { // it is in the model, if the imported one still has role, just update
+        if(server.role) {
           // Overwrite the existing imported server in input model
           model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
             if (svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id) {
@@ -542,8 +546,19 @@ class AssignServerRoles extends BaseWizardPage {
               return svr;
           }));
         }
+        else { //newly imported one doesn't have role anymore, save it to remove together
+          removeFromModelServers.push(server.uid);
+        }
       }
     });
+
+    // remove servers with no role from model
+    if (removeFromModelServers.length > 0) {
+      model = model.updateIn(
+        ['inputModel', 'servers'], list => list.filter(
+          svr => {return removeFromModelServers.indexOf(svr.get('uid')) === -1;})
+      );
+    }
     // have some imported server, need to add to backend
     if(newServers.length > 0) {
       manualServers = manualServers.concat(newServers);

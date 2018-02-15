@@ -79,6 +79,7 @@
     "model.summary.additional": "Additional Components",
     "model.summary.edit.nodes": "Edit number of nodes",
     "model.summary.edit.min.nodes": "Edit minimum number of nodes",
+    "model.summary.change.node.warning": "In order to support high availability, it is recommended that this role have an odd number of nodes.",
 
     "validate.config.files.heading": "Review Configuration Files",
     "validate.config.files.validate": "Validate",
@@ -223,6 +224,10 @@
     "server.import.add.error": "Failed to save newly imported servers",
     "server.import.server.confirm": "The imported servers will overwrite previously imported servers if they have the same ID.\n If imported servers have the same ID as the manually added servers or discovered servers, servers with duplicate ID could show up. Servers that have been assigned a role and have duplicate ID will be highlighted in red. You can edit the server to update the ID.\n\n Do you still want to import servers? ",
     "server.save.error": "Failed to save server {0}",
+    "server.import.missing.required.value": "Imported row {0} is missing value for the required field {1}",
+    "server.import.value.invalid": "Imported row {0} has an invalid value {1} for field {2}. {3}",
+    "server.import.missing.required.fields": "Imported row {0} is missing required field(s): {1}",
+    "server.import.value.duplicate": "Imported row {0} has a duplicate value {1} for field {2}.",
 
     "edit.cloud.settings": "Manage Cloud Settings",
     "edit.cloud.settings.close.confirm": "You've selected to leave Manage Cloud Settings but you have unsaved changes. \n\n Are you sure you want to proceed?",
