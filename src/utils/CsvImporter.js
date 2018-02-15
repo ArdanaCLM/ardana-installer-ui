@@ -14,6 +14,7 @@
 **/
 import Papa from 'papaparse';
 import { IpV4AddressValidator, MacAddressValidator } from './InputValidators.js';
+import {translate} from "../localization/localize";
 
 /**
  * import CSV from the given file
@@ -113,6 +114,9 @@ export function importCSV(file, restrictedValues, callback) {
       let result = {};
       let validRow = true;
 
+      // id is used for error message purpose to identify row if error happens.
+      let id = row.data[0]['id'] ? row.data[0]['id'] : '';
+
       // convert to well-known keys
       for(let key in row.data[0]) {
         let field = normalizeName(key);
@@ -125,28 +129,37 @@ export function importCSV(file, restrictedValues, callback) {
         result[field] = val;
 
         if (field_defs[field]) {
+          // if value is missing for a required field
+          if(!val && required_keys.indexOf(field) !== -1) {
+            results.errors.push(translate('server.import.missing.required.value', id, field));
+            validRow = false;
+          }
 
+          // use id only for error message
           // If the field has a validator func, verify that it passes
-          if (field_defs[field].validator) {
+          if (val && field_defs[field].validator) {
             const retValue = field_defs[field].validator(val);
             if (!retValue.isValid) {
-              results.errors.push(val + ' is invalid: ' + retValue.errorMsg);
+              results.errors.push(
+                translate('server.import.value.invalid', id, val, field, retValue.errorMsg)
+              );
               validRow = false;
             }
           }
 
           // If the field must be unique, verify that we are not seeing a repeat
-          if (field_defs[field].unique) {
+          if (val && field_defs[field].unique) {
             if (seen[field][val]) {
-              results.errors.push(val + ' is a duplicate');
+              results.errors.push(translate('server.import.value.duplicate', id, val, field));
               validRow = false;
             }
             seen[field][val] = true;
           }
 
-          // If the field has a restricted set of values, verify against it
-          if (field_defs[field].restriction && ! (field_defs[field].restriction.includes(val))) {
-            results.errors.push(val + ' is invalid');
+          // If val is supplied and the field has a restricted set of values, verify against it
+          if (val && field_defs[field].restriction &&
+            ! (field_defs[field].restriction.includes(val))) {
+            results.errors.push(translate('server.import.value.invalid', id, val, field, ''));
             validRow = false;
           }
         }
@@ -156,7 +169,9 @@ export function importCSV(file, restrictedValues, callback) {
         // Verify that all required fields are present
         const missing = required_keys.filter(k => ! (k in result));
         if (missing.length > 0) {
-          results.errors.push('row missing required field(s): ', missing.join(','));
+          results.errors.push(
+            translate('server.import.missing.required.fields', id, missing.join(','))
+          );
           validRow = false;
         }
       }
