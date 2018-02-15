@@ -79,6 +79,7 @@
     "model.summary.additional": "Additional Components",
     "model.summary.edit.nodes": "Edit number of nodes",
     "model.summary.edit.min.nodes": "Edit minimum number of nodes",
+    "model.summary.change.node.warning": "In order to support high availability, it is recommended that this role have an odd number of nodes.",
 
     "validate.config.files.heading": "Review Configuration Files",
     "validate.config.files.validate": "Validate",
