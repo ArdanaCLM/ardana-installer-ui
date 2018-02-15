@@ -51,13 +51,14 @@ class EditServerDetails extends Component {
 
   initData() {
     this.data = this.makeDeepCopy(this.props.data);
-    // the data is for the server which is in the example
+    // the data is for the fake server which is in the example template
     // need to use the origin id to find the item in the model if id changed.
     if(!this.data.uid) {
       this.originId = this.data.id;
       this.data.uid = genUID();
     }
   }
+
   isFormTextInputValid() {
     let isAllValid = true;
     let values = Object.values(this.allInputsStatus);

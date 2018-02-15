@@ -995,6 +995,44 @@ class AssignServerRoles extends BaseWizardPage {
         })
     );
     this.props.updateGlobalState('model', model);
+
+    // this is for the fake server in the example template
+    // assign a uid if it is not there
+    if(!server.uid) {
+      server.uid = genUID();
+    }
+    // assign a source if it is not there
+    if(!server.source) {
+      server.source = 'manual';
+    }
+
+    //search the servers lists
+    let idx = this.state.serversAddedManually.findIndex(svr => {
+      return svr['uid'] === server.uid;
+    });
+    // can not find in manually added servers list
+    if(idx < 0) {
+      // try the discoverd server list
+      idx = this.state.rawDiscoveredServers.findIndex(svr => {
+        return svr['uid'] === server.uid;
+      });
+
+      // don't have the server, add it to the manual servers list
+      if(idx < 0) {
+        this.setState((prevState) => {
+          return {serversAddedManually: prevState.serversAddedManually.concat([server])};
+        });
+
+        // save to the backend
+        postJson('/api/v1/server', JSON.stringify([server]))
+          .catch((error) => {
+            let msg = translate('server.save.error', server.id);
+            this.setState(prev => { return {
+              messages: prev.messages.concat([{msg: [msg, error.toString()]}])};
+            });
+          });
+      }
+    }
   }
 
   /**
