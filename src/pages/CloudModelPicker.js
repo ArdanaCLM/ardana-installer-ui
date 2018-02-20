@@ -311,7 +311,7 @@ class CloudModelPicker extends BaseWizardPage {
     const uniqueStorages = [...new Set(storages)].sort();
     const sOptions = uniqueStorages.length > 0 ? ['none'].concat(uniqueStorages) : ['none'];
     const storageFilter = {name: 'storage-type', options: sOptions};
-    newFilters.push(storageFilter);
+    //newFilters.push(storageFilter);
 
     const nSource = this.state.currentFilter === 'network-type' ? this.filteredTemplates : templates;
     let networks = nSource.map((template) => {
