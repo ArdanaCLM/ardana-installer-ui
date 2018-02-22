@@ -13,8 +13,6 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { translate } from '../../localization/localize.js';
-import { ActionButton } from '../../components/Buttons.js';
 import SmServerDetails from './SmServerDetails.js';
 import OvServerDetails from './OvServerDetails.js';
 import ModelServerDetails from './ModelServerDetails.js';
@@ -23,10 +21,6 @@ class ViewServerDetails extends Component {
   constructor(props) {
     super(props);
     this.className = 'view-server-details ';
-  }
-
-  handleClose = () => {
-    this.props.cancelAction();
   }
 
   renderDetailsContent() {
@@ -42,20 +36,10 @@ class ViewServerDetails extends Component {
     }
   }
 
-  renderFooter() {
-    return (
-      <div className='btn-row button-container'>
-        <ActionButton
-          clickAction={this.handleClose} displayLabel={translate('common.close')}/>
-      </div>
-    );
-  }
-
   render() {
     return (
       <div className={this.className}>
         {this.renderDetailsContent()}
-        {this.renderFooter()}
       </div>
     );
   }

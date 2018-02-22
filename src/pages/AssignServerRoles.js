@@ -19,11 +19,11 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { translate } from '../localization/localize.js';
 import { fetchJson, postJson, putJson, deleteJson } from '../utils/RestUtils.js';
 import { ActionButton, LoadFileButton } from '../components/Buttons.js';
-import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../utils/InputValidators.js';
-import { SearchBar, ServerRolesAccordion, ServerInputLine, ServerDropdownLine } from '../components/ServerUtils.js';
+import { SearchBar, ServerRolesAccordion } from '../components/ServerUtils.js';
 import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import ConnectionCredsInfo from './AssignServerRoles/ConnectionCredsInfo';
+import ServersAddedManually from './AssignServerRoles/ServersAddedManually';
 import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import ServerTable from '../components/ServerTable.js';
@@ -37,7 +37,7 @@ import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
   updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds
 } from '../utils/ModelUtils.js';
-import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, INPUT_STATUS } from '../utils/constants.js';
+import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL } from '../utils/constants.js';
 import { YesNoModal } from '../components/Modals.js';
 
 const AUTODISCOVER_TAB = 1;
@@ -49,22 +49,6 @@ class AssignServerRoles extends BaseWizardPage {
   constructor(props) {
     super(props);
 
-    // TODO: Move the Add Server model into its own component and
-    // let it track its own state
-    this.newServer = {
-      'source': 'manual',
-      'id': '',
-      'uid': genUID('manual'),
-      'ip-addr': '',
-      'server-group': '',
-      'nic-mapping': '',
-      'role': '',
-      'ilo-ip': '',
-      'ilo-user': '',
-      'ilo-password': '',
-      'mac-addr': ''
-    };
-
     this.connections = this.props.connectionInfo ? this.props.connectionInfo : {
       sm: {checked: false, secured: true},
       ov: {checked: false, secured: true}
@@ -73,16 +57,6 @@ class AssignServerRoles extends BaseWizardPage {
     this.smSessionKey = undefined;
     this.ovSessionKey = undefined;
     this.forcePromtCreds = false;
-
-    //TODO move manual added related to its own file
-    this.allManualInputsStatus = {
-      'id': INPUT_STATUS.UNKNOWN,
-      'ip-addr': INPUT_STATUS.UNKNOWN,
-      'ilo-user': INPUT_STATUS.UNKNOWN,
-      'ilo-password': INPUT_STATUS.UNKNOWN,
-      'ilo-ip': INPUT_STATUS.UNKNOWN,
-      'mac-addr': INPUT_STATUS.UNKNOWN
-    };
 
     this.state = {
       //server list on the available servers side
@@ -99,11 +73,11 @@ class AssignServerRoles extends BaseWizardPage {
       //show or not credentials modal
       showCredsModal: false,
 
-      // Add Server Manually modal
+      // show modal for adding a server manually
       showAddServerManuallyModal: false,
 
-      // TODO: Separate the manual modal into its own component and track its validity internally
-      validAddServerManuallyForm: false,
+      // show modal for editing a server that was manually added
+      showEditServerAddedManuallyModal: false,
 
       //when loading data or saving data
       loading: false,
@@ -295,179 +269,47 @@ class AssignServerRoles extends BaseWizardPage {
     this.setState({showAddServerManuallyModal: true});
   }
 
-  renderInputLine = (required, title, name, type, validator) => {
-    let theProps = {};
-    if(name === 'id' && this.state.showAddServerManuallyModal) {
-      theProps.ids =
-        getAllOtherServerIds(
-          this.props.model, this.state.rawDiscoveredServers,
-          this.state.serversAddedManually, this.newServer['id']
-        );
-    }
-
+  renderAddServerManuallyModal = () => {
     return (
-      <ServerInputLine isRequired={required} label={title} inputName={name} {...theProps}
-        inputType={type} inputValidate={validator} inputAction={this.handleInputLine}
-        inputValue={this.newServer[name]}/>
+      <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
+        closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
+        addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
+        rawDiscoveredServers={this.state.rawDiscoveredServers}/>
     );
-  }
-
-  //TODO cleanup and move manual add servers stuff to its own file
-  isManualFormTextInputValid = () => {
-    let isAllValid = true;
-    let keys = Object.keys(this.allManualInputsStatus);
-    keys.forEach(key => {
-      let isValid = (this.allManualInputsStatus[key] === INPUT_STATUS.VALID) ||
-        // force id and ip-addr to be filled for new server
-        (key !== 'id' && key !== 'ip-addr' && this.allManualInputsStatus[key] === INPUT_STATUS.UNKNOWN);
-      isAllValid = isAllValid && isValid;
-    });
-
-    return isAllValid;
-  }
-
-  updateManualFormValidity = (props, isValid) => {
-    this.allManualInputsStatus[props.inputName] = isValid ? INPUT_STATUS.VALID : INPUT_STATUS.INVALID;
-    this.setState({validAddServerManuallyForm: this.isManualFormTextInputValid()});
-  }
-
-  handleInputLine = (e, valid, props) => {
-    let value = e.target.value;
-    this.updateManualFormValidity(props, valid);
-    if (valid) {
-      let key = props.inputName;
-      this.newServer[key] = value;
-    }
-  }
-
-  renderDropdownLine(required, title, name, list, handler, defaultOption) {
-    return (
-      <ServerDropdownLine label={title} name={name} value={this.newServer[name]} optionList={list}
-        isRequired={required} selectAction={handler} defaultOption={defaultOption}/>
-    );
-  }
-
-  handleSelectRole = (role) => {
-    this.newServer.role = role;
-  }
-
-  handleSelectGroup = (group) => {
-    this.newServer['server-group'] = group;
-  }
-
-  handleSelectNicMapping = (nicmapping) => {
-    this.newServer['nic-mapping'] = nicmapping;
   }
 
   closeAddServerManuallyModal = () => {
     this.setState({showAddServerManuallyModal: false});
   }
 
-  cancelAddServerManuallyModal = () => {
-    this.resetAddServerManuallyModal();
-    this.closeAddServerManuallyModal();
-  }
-
-  saveServersAddedManually = (serverList) => {
-
-    // if role is provided, add server to the model
-    let model = this.props.model;
-
-    serverList.forEach(server => {
-      if (server.role) {
-        // empty value can cause validation problem
-        let modelServer = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
-        model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(modelServer)));
-      }
-    });
-    this.props.updateGlobalState('model', model);
-
-    postJson('/api/v1/server', JSON.stringify(serverList));
-
-    // add server to the left table and the server API
+  addServersAddedManually = (serverList) => {
     this.setState((prevState) => {
-      return {serversAddedManually: prevState.serversAddedManually.concat(serverList)};
-    }, this.resetAddServerManuallyModal);
+      return {serversAddedManually: prevState.serversAddedManually.concat(serverList)};});
   }
 
-  resetAddServerManuallyModal = () => {
-    this.newServer = {
-      'source': 'manual',
-      'id': '',
-      'uid': genUID('manual'),
-      'ip-addr': '',
-      'server-group': '',
-      'nic-mapping': '',
-      'role': '',
-      'ilo-ip': '',
-      'ilo-user': '',
-      'ilo-password': '',
-      'mac-addr': ''
-    };
-    this.setState({validAddServerManuallyForm: false});
+  showEditServerAddedManuallyModal = (server) => {
+    this.setState({showEditServerAddedManuallyModal: true, activeRowData: server});
   }
 
-  addOneServer = () => {
-    this.saveServersAddedManually([this.newServer]);
-    this.closeAddServerManuallyModal();
-  }
-
-  addMoreServer = () => {
-    this.saveServersAddedManually([this.newServer]);
-  }
-
-  renderAddServerManuallyModal = () => {
-    const serverGroups = getServerGroups(this.props.model);
-    const nicMappings = getNicMappings(this.props.model);
-    let roles = getServerRoles(this.props.model).map(e => e['serverRole']);
-    roles.unshift('');
-    if (!this.newServer.role) {
-      this.newServer.role = '';
-    }
-    if (!this.newServer['server-group']) {
-      this.newServer['server-group'] = serverGroups[0];
-    }
-    if (!this.newServer['nic-mapping']) {
-      this.newServer['nic-mapping'] = nicMappings[0];
-    }
-    let defaultOption = {
-      label: translate('server.none.prompt'),
-      value: ''
-    };
-    let footer = (
-      <div className='btn-row'>
-        <ActionButton type='default' clickAction={this.cancelAddServerManuallyModal}
-          displayLabel={translate('cancel')}/>
-        <ActionButton type='default' clickAction={this.addMoreServer} displayLabel={translate('add.more')}
-          isDisabled={!this.state.validAddServerManuallyForm}/>
-        <ActionButton clickAction={this.addOneServer} displayLabel={translate('save')}
-          isDisabled={!this.state.validAddServerManuallyForm}/>
-      </div>
-    );
+  renderEditServerAddedManuallyModal = () => {
     return (
-      <ConfirmModal show={this.state.showAddServerManuallyModal} title={translate('add.server.add')}
-        className={'manual-discover-modal'} onHide={this.cancelAddServerManuallyModal} footer={footer}>
-
-        <div className='server-details-container'>
-          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', UniqueIdValidator)}
-          {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
-          {this.renderDropdownLine(true, 'server.group.prompt', 'server-group',
-            serverGroups, this.handleSelectGroup)}
-          {this.renderDropdownLine(true, 'server.nicmapping.prompt', 'nic-mapping',
-            nicMappings, this.handleSelectNicMapping)}
-          {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles,
-            this.handleSelectRole, defaultOption)}
-        </div>
-        <div className='message-line'>{translate('server.ipmi.message')}</div>
-        <div className='server-details-container'>
-          {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
-          {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
-        </div>
-
-      </ConfirmModal>
+      <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
+        closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
+        updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
+        rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}/>
     );
+  }
+
+  closeEditServerAddedManuallyModal = () => {
+    this.setState({showEditServerAddedManuallyModal: false});
+  }
+
+  updateServerAddedManually = (server) => {
+    const uid = server.uid;
+    this.setState((prevState) => {
+      let updateIndex = prevState.serversAddedManually.findIndex((server) => {return server.uid === uid;});
+      prevState.serversAddedManually[updateIndex] = server;
+      return {serversAddedManually: prevState.serversAddedManually};});
   }
 
   sortServersById(servers) {
@@ -1047,6 +889,11 @@ class AssignServerRoles extends BaseWizardPage {
             });
           });
       }
+    } else {
+      this.setState((prevState) => {
+        prevState.serversAddedManually[idx].role = '';
+        return {serversAddedManually: prevState.serversAddedManually};
+      });
     }
   }
 
@@ -1266,6 +1113,7 @@ class AssignServerRoles extends BaseWizardPage {
         tableConfig={tableConfig}
         tableData={filteredAvailableServers}
         viewAction={this.handleShowServerDetails}
+        editAction={type === '_manual' ? this.showEditServerAddedManuallyModal : undefined}
         deleteAction={this.handleDeleteServer}>
       </ServerTable>
     );
@@ -1488,17 +1336,10 @@ class AssignServerRoles extends BaseWizardPage {
       dialogClass = dialogClass + 'more-width';
     }
     return (
-      <BaseInputModal
-        show={this.state.showServerDetailsModal}
-        className={dialogClass}
-        onHide={this.handleCloseServerDetails}
-        title={translate('view.server.details.heading')}>
-
-        <ViewServerDetails
-          cancelAction={this.handleCloseServerDetails}
-          data={this.state.activeRowData} {...theProps}>
-        </ViewServerDetails>
-      </BaseInputModal>
+      <ConfirmModal show={this.state.showServerDetailsModal} className={dialogClass} hideFooter
+        onHide={this.handleCloseServerDetails} title={translate('view.server.details.heading')}>
+        <ViewServerDetails data={this.state.activeRowData} {...theProps}/>
+      </ConfirmModal>
     );
   }
 
@@ -1561,6 +1402,7 @@ class AssignServerRoles extends BaseWizardPage {
           {this.renderServerRoleContent()}
           {this.renderCredsInputModal()}
           {this.renderAddServerManuallyModal()}
+          {this.renderEditServerAddedManuallyModal()}
           {this.renderServerDetailsModal()}
           {this.renderEditServerDetailsModal()}
           {this.renderLoadingMask()}
