@@ -73,6 +73,7 @@
     "model.picker.filter.network-type": "Any Network Type",
     "model.picker.filter.network-type.option.flat": "Flat Network",
     "model.picker.filter.network-type.option.multi-tenant": "Multi-tenant Network",
+    "model.picker.custom-model": "## Custom model\n\nNo additional details are available for this customized model.",
 
     "model.summary.heading": "Cloud Model to Deploy",
     "model.summary.mandatory": "Mandatory Components",

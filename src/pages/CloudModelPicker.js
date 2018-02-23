@@ -66,6 +66,23 @@ class CloudModelPicker extends BaseWizardPage {
     fetchJson('/api/v1/clm/templates')
       .then((templates) => {
         this.templates = templates;
+
+        // If the already-selected model name is not in the list of templates, then
+        // the user is using some model with a modified name and likely other things
+        // modified as well.  When that happens, add another bogus template to choose
+        // from that reflects this.  Note that if the customer does not change this
+        // selection, then the updated model remains intact when navigating to the next
+        // page.
+        if (this.state.selectedModelName &&
+          ! this.templates.some(e => e['name'] == this.state.selectedModelName)) {
+
+          this.templates.push({
+            'name' : this.state.selectedModelName,
+            'overview' : translate('model.picker.custom-model'),
+            'metadata': { 'nodeCount': 200, 'hypervisor': [] }
+          });
+        }
+
         this.setState({loading: false});
       })
       .catch((error) => {
