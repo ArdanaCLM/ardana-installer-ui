@@ -869,7 +869,10 @@ class AssignServerRoles extends BaseWizardPage {
     });
     // can not find in manually added servers list
     if(idx < 0) {
-      // try the discoverd server list
+      // clear server role value
+      server.role = '';
+
+      // try the discovered server list
       idx = this.state.rawDiscoveredServers.findIndex(svr => {
         return svr['uid'] === server.uid;
       });
