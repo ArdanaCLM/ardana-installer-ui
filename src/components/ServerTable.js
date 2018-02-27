@@ -53,9 +53,16 @@ class ServerTable extends Component {
       });
 
     // push an empty header to hold show detail icon
-    headers.push(<th key={keyCount++}></th>);
+    if (this.props.viewAction)
+      headers.push(<th key={keyCount++}></th>);
+
+    // push another empty header to hold edit icon
+    if (this.props.editAction)
+      headers.push(<th key={keyCount++}></th>);
+
     // push another empty header to hold delete icon
-    headers.push(<th key={keyCount++}></th>);
+    if (this.props.deleteAction)
+      headers.push(<th key={keyCount++}></th>);
     return (
       <tr>{headers}</tr>
     );

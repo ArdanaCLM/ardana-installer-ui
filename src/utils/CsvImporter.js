@@ -14,7 +14,7 @@
 **/
 import Papa from 'papaparse';
 import { IpV4AddressValidator, MacAddressValidator } from './InputValidators.js';
-import {translate} from "../localization/localize";
+import {translate} from '../localization/localize';
 
 /**
  * import CSV from the given file

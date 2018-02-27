@@ -66,9 +66,10 @@ class CloudModelSummary extends BaseWizardPage {
     if (this.state.activeItem && this.state.activeItem.indexOf('clusters') !== -1 &&
       this.origActiveNodeCount === 3) {
       warning = (
-      <div className='warning-banner'>
-        <InfoBanner message={translate('model.summary.change.node.warning')}/>
-      </div>);
+        <div className='warning-banner'>
+          <InfoBanner message={translate('model.summary.change.node.warning')}/>
+        </div>
+      );
     }
     return warning;
   }

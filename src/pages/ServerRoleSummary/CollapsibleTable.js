@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import EditServerDetails from '../../components/EditServerDetails.js';
 import ViewServerDetails from '../AssignServerRoles/ViewServerDetails.js';
-import { BaseInputModal } from '../../components/Modals.js';
+import { BaseInputModal, ConfirmModal } from '../../components/Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../../utils/Sort.js';
 import { getAllOtherServerIds } from '../../utils/ModelUtils.js';
@@ -134,9 +134,9 @@ class CollapsibleTable extends Component {
 
     cols.push(
       <td key='action-buttons'>
-        <span className='glyphicon glyphicon-pencil edit'
+        <span className='glyphicon glyphicon-pencil edit collapsible'
           onClick={() => this.handleShowEditServer(server)}/>
-        <span className='glyphicon glyphicon-info-sign detail-info'
+        <span className='glyphicon glyphicon-info-sign detail-info collapsible'
           onClick={() => this.handleShowServerDetails(server)}/>
       </td>
     );
@@ -202,13 +202,10 @@ class CollapsibleTable extends Component {
 
   renderServerDetailsModal() {
     return (
-      <BaseInputModal
-        show={this.state.showServerDetailsModal} className='view-details-dialog'
+      <ConfirmModal show={this.state.showServerDetailsModal} className='view-details-dialog' hideFooter
         onHide={this.handleCancelServerDetails} title={translate('view.server.details.heading')}>
-        <ViewServerDetails
-          cancelAction={this.handleCancelServerDetails} data={this.state.activeRowData}>
-        </ViewServerDetails>
-      </BaseInputModal>
+        <ViewServerDetails data={this.state.activeRowData}/>
+      </ConfirmModal>
     );
   }
   render() {
