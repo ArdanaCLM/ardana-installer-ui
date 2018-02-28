@@ -125,10 +125,8 @@ class ConnectionCredsInfo extends Component {
   isDoneDisabled() {
     return (
       !this.isFormValid() ||
-      (this.state.isSmChecked &&
-        (this.state.smTestStatus === TEST_STATUS.UNKNOWN || this.state.smTestStatus === TEST_STATUS.INVALID)) ||
-      (this.state.isOvChecked &&
-        (this.state.ovTestStatus === TEST_STATUS.UNKNOWN || this.state.ovTestStatus === TEST_STATUS.INVALID)) ||
+      (this.state.isSmChecked && this.state.smTestStatus === TEST_STATUS.INVALID) ||
+      (this.state.isOvChecked && this.state.ovTestStatus === TEST_STATUS.INVALID) ||
       (!this.state.isSmChecked && !this.state.isOvChecked)
     );
   }
@@ -231,8 +229,8 @@ class ConnectionCredsInfo extends Component {
       tests.push(this.testOv());
     }
 
-    // Perform all tests and turn off the loading mask when all have completed
-    Promise.all(tests).then(() => this.setState({loading: false}));
+    // Perform all tests
+    return Promise.all(tests);
   }
 
   handleInputChange = (e, isValid, props) => {
@@ -247,14 +245,29 @@ class ConnectionCredsInfo extends Component {
     this.props.cancelAction();
   }
 
-  handleDone = () => {
+  setDataForDone = () => {
     let retData = this.data;
     retData.sm.checked = this.state.isSmChecked;
     retData.ov.checked = this.state.isOvChecked;
     retData.sm.secured = this.state.isSmSecured;
     retData.ov.secured = this.state.isOvSecured;
-
     this.props.doneAction(retData);
+  }
+
+  handleDone = () => {
+    if(this.state.isSmChecked && this.state.smTestStatus === TEST_STATUS.UNKNOWN ||
+      this.state.isOvChecked && this.state.ovTestStatus === TEST_STATUS.UNKNOWN) {
+      this.handleTest().then(() => {
+        this.setState({loading: false});
+        if(this.state.smTestStatus !== TEST_STATUS.INVALID &&
+          this.state.ovTestStatus !== TEST_STATUS.INVALID) {
+          this.setDataForDone();
+        }
+      });
+    }
+    else {
+      this.setDataForDone();
+    }
   }
 
   handleSmCheckBoxChange = () => {
@@ -306,9 +319,7 @@ class ConnectionCredsInfo extends Component {
               message={msgObj.msg}/>);
         }
       });
-      return (
-        <div className='notification-message-container'>{msgList}</div>
-      );
+      return (<div>{msgList}</div>);
     }
   }
 
@@ -396,10 +407,11 @@ class ConnectionCredsInfo extends Component {
           clickAction={this.handleCancel} displayLabel={translate('cancel')}/>
         <ActionButton type='default'
           isDisabled={this.isTestDisabled()}
-          clickAction={this.handleTest} displayLabel={translate('test')}/>
+          clickAction={()=> this.handleTest().then(() => this.setState({loading: false}))}
+          displayLabel={translate('test')}/>
         <ActionButton
           isDisabled={this.isDoneDisabled()}
-          clickAction={this.handleDone} displayLabel={translate('done')}/>
+          clickAction={this.handleDone} displayLabel={translate('common.save.continue')}/>
       </div>
     );
   }
@@ -407,11 +419,11 @@ class ConnectionCredsInfo extends Component {
   render() {
     return (
       <div className='connection-creds-info'>
+        {this.renderMessage()}
         {this.renderSmCreds()}
         {this.renderOvCreds()}
         {this.renderFooter()}
         {this.renderLoadingMask()}
-        {this.renderMessage()}
       </div>
     );
   }
