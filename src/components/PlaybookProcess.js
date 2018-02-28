@@ -551,6 +551,13 @@ class PlaybookProgress extends Component {
     });
     if (complete && playbookName) {
       this.updateGlobalPlaybookStatus(playbookName, playId, STATUS.COMPLETE);
+
+      // playbook completes, check if it is in the last step
+      // handle the case when can not receive end event for playbook
+      let lastStepPlaybooks = this.props.steps[this.props.steps.length - 1].playbooks;
+      if(lastStepPlaybooks.indexOf(playbookName + '.yml') !== -1) {
+         this.processEndMonitorPlaybook(playbookName);
+      }
     }
   }
 
