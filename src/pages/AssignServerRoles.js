@@ -56,7 +56,6 @@ class AssignServerRoles extends BaseWizardPage {
     this.smApiToken = undefined;
     this.smSessionKey = undefined;
     this.ovSessionKey = undefined;
-    this.forcePromtCreds = false;
 
     this.state = {
       //server list on the available servers side
@@ -232,28 +231,20 @@ class AssignServerRoles extends BaseWizardPage {
       this.ovSessionKey = oKey; //key or undefined
     }
 
-    if((!this.smApiToken && this.connections.sm.checked && !this.smSessionKey) ||
-      (this.connections.ov.checked && !this.ovSessionKey)) {
-      //don't have session keys...need inputs
-      this.setState({showCredsModal: true});
-      this.forcePromtCreds = true;
-    }
-    else {
-      this.setState({loading: true, messages: []});
-      let resultServers = [];
-      this.discoverAllServers()
-        .then((allServerData) => {
-          allServerData.forEach((oneSet, idx) => {
-            resultServers = resultServers.concat(oneSet);
-          });
-          resultServers = this.sortServersById(resultServers);
-          this.saveAllDiscoveredServers(resultServers);
-          this.setState({loading: false, rawDiscoveredServers: resultServers});
-        })
-        .catch((error) => {
-          this.setState({loading: false});
+    this.setState({loading: true, messages: []});
+    let resultServers = [];
+    this.discoverAllServers()
+      .then((allServerData) => {
+        allServerData.forEach((oneSet, idx) => {
+          resultServers = resultServers.concat(oneSet);
         });
-    }
+        resultServers = this.sortServersById(resultServers);
+        this.saveAllDiscoveredServers(resultServers);
+        this.setState({loading: false, rawDiscoveredServers: resultServers});
+      })
+      .catch((error) => {
+        this.setState({loading: false});
+      });
   }
 
   //handle filter text change
@@ -440,7 +431,6 @@ class AssignServerRoles extends BaseWizardPage {
 
   handleConfDiscovery = () => {
     if(!this.smApiToken) {
-      this.forcePromtCreds = false;
       this.setState({showCredsModal: true});
     }
     else {
@@ -472,7 +462,7 @@ class AssignServerRoles extends BaseWizardPage {
     return retOp;
   }
 
-  setSmCredentials(credsData) {
+  setSmCredentials = (credsData) => {
     this.connections.sm = credsData.sm;
     this.connections.sm.apiUrl =
       this.getSmUrl(this.connections.sm.creds.host, this.connections.sm.creds.port);
@@ -482,12 +472,14 @@ class AssignServerRoles extends BaseWizardPage {
     );
     this.smSessionKey = this.connections.sm.sessionKey;
 
+    // make a copy and delete password for saving later
+    // while this.connection.sm still keeps the password in session
     let conn = JSON.parse(JSON.stringify(this.connections.sm));
     delete conn.creds.password;
     return conn;
   }
 
-  setOvCredentials(credsData) {
+  setOvCredentials = (credsData) => {
     this.connections.ov = credsData.ov;
     this.connections.ov.apiUrl =
       'https://' + this.connections.ov.creds.host;
@@ -497,42 +489,41 @@ class AssignServerRoles extends BaseWizardPage {
     );
     this.ovSessionKey = this.connections.ov.sessionKey;
 
+    // make a copy and delete password for saving later
+    // while this.connection.ov still keeps the password in session
     let conn = JSON.parse(JSON.stringify(this.connections.ov));
     delete conn.creds.password;
     return conn;
   }
 
   handleDoneCredsInput = (credsData) => {
-    this.setState({showCredsModal: false,});
+    this.setState({showCredsModal: false});
     // need to update saved connections
     let saveConnect =
-      this.props.connectionInfo ? this.props.connectionInfo : {
+      this.props.connectionInfo ? JSON.parse(JSON.stringify(this.props.connectionInfo)) : {
         sm: {checked: false, secured: true}, ov: {checked: false, secured: true}};
     if (credsData.sm && credsData.sm.checked) {
       let smConn = this.setSmCredentials(credsData);
       saveConnect.sm = smConn;
     }
-    else {
+    else {  //when unchecked, anything changed will be ignored
       saveConnect.sm.checked = false;
+      this.connections.sm.checked = false;
     }
 
     if (credsData.ov && credsData.ov.checked) {
       let ovConn = this.setOvCredentials(credsData);
       saveConnect.ov = ovConn;
     }
-    else {
+    else { // when unchecked, anything changed will be ignored
       saveConnect.ov.checked = false;
+      this.connections.ov.checked = false;
     }
 
     this.props.updateGlobalState('connectionInfo', saveConnect);
 
-    //if it is very first time...run discovery
-    //if it is invoked from configure button, don't run discovery
-    //if clicks discovery button and force promt credential inputs...need to run discovery
-    if((this.state.rawDiscoveredServers && this.state.rawDiscoveredServers.length === 0) ||
-      this.forcePromtCreds) {
-      this.handleDiscovery();
-    }
+    // go to run discovery
+    this.handleDiscovery();
   }
 
   handleShowServerDetails = (rowData, tableId) => {
@@ -1196,14 +1187,6 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
-  renderConfigDiscoveryButton() {
-    return  (
-      <ActionButton type='default'
-        clickAction={this.handleConfDiscovery}
-        displayLabel={translate('add.server.conf.discover')}/>
-    );
-  }
-
   renderSearchBar() {
     if (this.state.selectedServerTabKey === MANUALADD_TAB &&
       this.state.serversAddedManually.length > 0) {
@@ -1239,9 +1222,8 @@ class AssignServerRoles extends BaseWizardPage {
           </div>
           <div>
             <div className='btn-row action-item-right'>
-              {!this.smApiToken && this.renderConfigDiscoveryButton()}
               <ActionButton type='default'
-                clickAction={this.handleDiscovery}
+                clickAction={this.handleConfDiscovery}
                 displayLabel={translate('add.server.discover')}/>
             </div>
           </div>
@@ -1317,7 +1299,8 @@ class AssignServerRoles extends BaseWizardPage {
         title={translate('add.server.connection.creds')}>
 
         <ConnectionCredsInfo
-          cancelAction={this.handleCancelCredsInput} doneAction={this.handleDoneCredsInput}
+          cancelAction={this.handleCancelCredsInput}
+          doneAction={credsData => this.handleDoneCredsInput(credsData)}
           data={this.connections}>
         </ConnectionCredsInfo>
       </BaseInputModal>
