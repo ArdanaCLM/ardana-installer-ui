@@ -145,7 +145,7 @@ class CloudModelPicker extends BaseWizardPage {
   goForward = (e) => {
     e.preventDefault();
     const propsModelName = this.props.model.get('name');
-    if (propsModelName === undefined) {
+    if (propsModelName == undefined) {
       this.saveModel();
     } else {
       if (this.state.selectedModelName !== propsModelName) {
