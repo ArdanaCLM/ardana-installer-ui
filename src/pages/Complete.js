@@ -54,6 +54,13 @@ class Complete extends BaseWizardPage {
 
   render() {
     const modelName = translateModelName(this.props.model.get('name'));
+    let modelLines = [];
+    if (modelName && modelName !== '') {
+      modelLines.push(<div className='body-header' key='modelLine1'>
+        {translate('complete.message.body2')}</div>);
+      modelLines.push(<div className='body-line' key='modelLine2'>
+        {translate('complete.message.body3', modelName)}</div>);
+    }
 
     let commandLines = [];
     if (this.state.userName) {
@@ -94,8 +101,7 @@ class Complete extends BaseWizardPage {
           <div className='sub-heading'>{translate('complete.message.body1')}</div>
         </Modal.Header>
         <Modal.Body>
-          <div className='body-header'>{translate('complete.message.body2')}</div>
-          <div className='body-line'>{translate('complete.message.body3', modelName)}</div>
+          {modelLines}
           {commandLines}
           {linkSection}
         </Modal.Body>

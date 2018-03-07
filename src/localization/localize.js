@@ -63,7 +63,7 @@ export function translateModelName(key) {
     // The join() corrects this by joining the elements into a signle string.
     return strings.formatString(strings['model.name.' + key]).join('');
   } catch (e) {
-    return key
+    return (key || '')
       .replace(/[-_.]/g, ' ')                            // change _, - and . to space
       .split(' ')                                        // split into words
       .map(s => s.charAt(0).toUpperCase() + s.slice(1))  // capitalize the first letter of each word
