@@ -41,7 +41,7 @@ class Complete extends BaseWizardPage {
         console.log('Unable to retrieve external URLs');// eslint-disable-line no-console
       });
 
-    fetchJson('/api/v1/clm/user')
+    fetchJson('/api/v1/user')
       .then(responseData => {
         if (responseData.username) {
           this.setState({userName: responseData.username});
@@ -59,6 +59,13 @@ class Complete extends BaseWizardPage {
     if (this.state.userName) {
       commandLines.push(<div className='body-header' key='commandLine1'>
         {translate('complete.message.body4', this.state.userName)}</div>);
+      commandLines.push(<div className='body-line' key='commandLine2'>
+        {translate('complete.message.body5')}</div>);
+      commandLines.push(<div className='body-line' key='commandLine3'>
+        {translate('complete.message.body6')}</div>);
+    } else {
+      commandLines.push(<div className='body-header' key='commandLine1'>
+        {translate('complete.message.body4a')}</div>);
       commandLines.push(<div className='body-line' key='commandLine2'>
         {translate('complete.message.body5')}</div>);
       commandLines.push(<div className='body-line' key='commandLine3'>
