@@ -91,32 +91,33 @@ class InstallWizard extends Component {
       .catch((error) => {
         console.log('Unable to retrieve saved model');// eslint-disable-line no-console
       })
-      .then(() => fetchJson('/api/v1/progress'))
-      .then((responseData) => {
-        if (! forcedReset && responseData.steps && this.areStepsInOrder(responseData.steps, this.props.pages)) {
-          this.setState(responseData);
-        } else {
-          // Set the currentStep to 0 and update its stepProgress to inprogress
-          this.setState((prevState) => {
-            var newSteps = prevState.steps.slice();
-            newSteps.splice(0, 1, {
-              name: prevState.steps[0].name,
-              stepProgress: STATUS.IN_PROGRESS
-            });
+      .finally(() => fetchJson('/api/v1/progress')
+        .then((responseData) => {
+          if (! forcedReset && responseData.steps && this.areStepsInOrder(responseData.steps, this.props.pages)) {
+            this.setState(responseData);
+          } else {
+            // Set the currentStep to 0 and update its stepProgress to inprogress
+            this.setState((prevState) => {
+              var newSteps = prevState.steps.slice();
+              newSteps.splice(0, 1, {
+                name: prevState.steps[0].name,
+                stepProgress: STATUS.IN_PROGRESS
+              });
 
-            return {
-              currentStep: 0,
-              steps: newSteps
-            };
-          }, this.persistState);
-        }})
+              return {
+                currentStep: 0,
+                steps: newSteps
+              };
+            }, this.persistState);
+          }})
+        .catch((error) => {
+          this.setState({currentStep: 0}, this.persistState);
+        })
+      )
       .then(() => {
         if (forcedReset) {
           return deleteJson('/api/v1/server?source=sm,ov,manual');
         }
-      })
-      .catch((error) => {
-        this.setState({currentStep: 0}, this.persistState);
       });
   }
 
