@@ -118,6 +118,13 @@ class CloudDeployProgress extends BaseWizardPage {
     e.preventDefault();
     // reset so can rerun deploy if failed
     this.resetPlaybookStatus();
+
+    // reset wipeDisks to false
+    if (this.props.deployConfig.wipeDisks) {
+      let newDeployConfig = JSON.parse(JSON.stringify(this.props.deployConfig));
+      newDeployConfig.wipeDisks = false;
+      this.props.updateGlobalState('deployConfig', newDeployConfig);
+    }
     super.goBack(e);
   }
 
