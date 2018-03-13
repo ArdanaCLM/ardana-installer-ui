@@ -98,9 +98,8 @@ class CloudDeployProgress extends BaseWizardPage {
   resetPlaybookStatus = () => {
     if (this.props.playbookStatus) {
       // remove playbook status for any playbook in this.playbooks
-      let playStatus = this.props.playbookStatus.filter(status => {
-        return this.playbooks.indexOf(status.name) === -1;
-      });
+      let playStatus = this.props.playbookStatus.filter(status =>
+        !this.playbooks.includes(status.name));
       this.props.updateGlobalState('playbookStatus', playStatus);
     }
   }
