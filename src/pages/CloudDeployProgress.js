@@ -78,6 +78,8 @@ class CloudDeployProgress extends BaseWizardPage {
   constructor(props) {
     super(props);
 
+    this.playbooks = [];
+
     this.state = {
       overallStatus: STATUS.UNKNOWN // overall status of entire playbook
     };
@@ -95,14 +97,9 @@ class CloudDeployProgress extends BaseWizardPage {
   // need to go back
   resetPlaybookStatus = () => {
     if (this.props.playbookStatus) {
-      let playStatus = this.props.playbookStatus.slice();
-      playStatus.forEach((play, idx) => {
-        // remove the exist one
-        if (play.name === PRE_DEPLOYMENT_PLAYBOOK ||
-          play.name === DAYZERO_SITE_PLAYBOOK || play.name === SITE_PLAYBOOK) {
-          play.playId = '';
-          play.status = '';
-        }
+      // remove playbook status for any playbook in this.playbooks
+      let playStatus = this.props.playbookStatus.filter(status => {
+        return this.playbooks.indexOf(status.name) === -1;
       });
       this.props.updateGlobalState('playbookStatus', playStatus);
     }
@@ -151,6 +148,8 @@ class CloudDeployProgress extends BaseWizardPage {
       }
     }
 
+    this.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook];
+
     return (
       <div className='wizard-page'>
         <div className='content-header'>
@@ -161,7 +160,7 @@ class CloudDeployProgress extends BaseWizardPage {
             updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
             playbookStatus = {this.props.playbookStatus}
             steps = {PLAYBOOK_STEPS} deployConfig = {this.props.deployConfig}
-            playbooks = {[PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook]} payload = {payload}/>
+            playbooks = {this.playbooks} payload = {payload}/>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}
               show={this.state.overallStatus === STATUS.FAILED}/>
