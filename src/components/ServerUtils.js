@@ -88,7 +88,8 @@ export class ServerRolesAccordion extends Component {
         checkDupIds={this.props.checkDupIds}
         tableData={serverList}
         editAction={this.props.editAction}
-        viewAction={this.props.viewAction}/>
+        viewAction={this.props.viewAction}
+        deleteAction={this.props.deleteAction}/>
     );
   }
 
