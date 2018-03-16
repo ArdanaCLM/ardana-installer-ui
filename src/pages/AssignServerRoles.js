@@ -980,6 +980,9 @@ class AssignServerRoles extends BaseWizardPage {
     for (let list of ['rawDiscoveredServers', 'serversAddedManually']) {
       let idx = this.state[list].findIndex(s => deleted_server.uid === s.uid);
       if (idx >= 0) {
+        if (!deleted_server.source) {
+          deleted_server.source = this.state[list][idx].source;
+        }
         this.setState(prev => {
           prev[list].splice(idx, 1);
           return {[list]: prev[list]};
@@ -996,6 +999,13 @@ class AssignServerRoles extends BaseWizardPage {
         });
         break;
       }
+    }
+    // remove server from right table
+    if (deleted_server.role !== '') {
+      let index = this.props.model.getIn(['inputModel', 'servers']).findIndex(
+        server => server.get('id') === deleted_server.id);
+      let newModel = this.props.model.removeIn(['inputModel', 'servers', index]);
+      this.props.updateGlobalState('model', newModel);
     }
     this.setState({showDeleteServerConfirmModal: false});
   }
