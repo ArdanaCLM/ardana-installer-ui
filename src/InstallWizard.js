@@ -91,7 +91,7 @@ class InstallWizard extends Component {
       .catch((error) => {
         console.log('Unable to retrieve saved model');// eslint-disable-line no-console
       })
-      .finally(() => fetchJson('/api/v1/progress')
+      .then(() => fetchJson('/api/v1/progress')
         .then((responseData) => {
           if (! forcedReset && responseData.steps && this.areStepsInOrder(responseData.steps, this.props.pages)) {
             this.setState(responseData);
