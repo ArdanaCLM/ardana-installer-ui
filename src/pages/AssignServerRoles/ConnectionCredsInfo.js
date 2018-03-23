@@ -295,13 +295,10 @@ class ConnectionCredsInfo extends Component {
 
   handleShowSslHelp = (type) => {
     if(type === 'sm') {
-      //TODO proper doc link
-      window.open('https://www.suse.com/documentation/suse-manager-3/singlehtml' +
-        '/suse_manager21/book_susemanager_clientconf/book_susemanager_clientconf.html#s1-certificate-rpms');
+      window.open('https://www.suse.com/documentation/cloud');
     }
     else {
-      //TODO proper doc link
-      window.open('https://www.hpe.com/h20195/v2/default.aspx?cc=us&lc=en&oid=5410258');
+      window.open('https://www.suse.com/documentation/cloud');
     }
   }
 
