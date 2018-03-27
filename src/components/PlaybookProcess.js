@@ -211,24 +211,14 @@ class PlaybookProgress extends Component {
     this.socket.emit('join', playId);
   }
 
-  findNextPlaybook = (completedPlaybookNames) => {
-    let lastIndex = 0;
-    // find which playbook is the last completed
-    completedPlaybookNames.forEach((plyName) => {
-      let theIndex = this.props.playbooks.findIndex((pName) => {
-        return plyName === pName;
-      });
-      if (theIndex >= lastIndex) {
-        lastIndex = theIndex;
-      }
-    });
+  findNextPlaybook = (lastCompletedPlaybookName) => {
+    // Find the next playbook in sequence after the given one.  Note that if the completed
+    // playbook is not found, indexOf() will return -1, so next will be 0 (the first playbook)
+    const next = this.props.playbooks.indexOf(lastCompletedPlaybookName) + 1;
 
-    if (lastIndex + 1 < this.props.playbooks.length) {
-      //return next playbook name
-      return this.props.playbooks[lastIndex + 1];
+    if (next < this.props.playbooks.length) {
+      return this.props.playbooks[next];
     }
-    //done, no more next playbook
-    return;
   }
 
   processEndMonitorPlaybook = (playbookName) => {
@@ -236,7 +226,7 @@ class PlaybookProgress extends Component {
     const thisPlaybook = this.globalPlaybookStatus.find(e => e.name === playbookName);
     // the global playbookStatus should be updated in playbookError or playbookStopped
     if(thisPlaybook && thisPlaybook.status === STATUS.COMPLETE) {
-      let nextPlaybookName = this.findNextPlaybook([thisPlaybook.name]);
+      let nextPlaybookName = this.findNextPlaybook(thisPlaybook.name);
       if (nextPlaybookName) {
         this.launchPlaybook(nextPlaybookName);
       }
@@ -280,25 +270,13 @@ class PlaybookProgress extends Component {
     return retStatus;
   }
 
-  // summarize playbook processes status before processing
-  sumPlaybookProcessStatus = () => {
-    let retStatus = {in_progress: undefined, complete: [], failed: []};
-    this.globalPlaybookStatus.forEach((play) => {
-      if (this.props.playbooks.indexOf(play.name) !== -1) {
-        if (play.playId && play.status === STATUS.COMPLETE) {
-          retStatus.complete.push(play);
-        }
-        else if (play.playId && play.status === STATUS.IN_PROGRESS) {
-          //should be just one in progress
-          retStatus.in_progress = play;
-        }
-        else if (play.playId && play.status === STATUS.FAILED) {
-          retStatus.failed.push(play);
-        }
-      }
-    });
-    return retStatus;
+  // return playbooks with the given status
+  getPlaybooksWithStatus = (status) => {
+    return this.globalPlaybookStatus.filter(play =>
+      (this.props.playbooks.includes(play.name) && play.playId && play.status === status));
   }
+
+
 
   processAlreadyDonePlaybook = (playbook) => {
     // go get logs
@@ -341,13 +319,15 @@ class PlaybookProgress extends Component {
   }
 
   processPlaybooks = () => {
-    let playStatus = this.sumPlaybookProcessStatus();
-    let progressPlay = playStatus.in_progress;
-    let completePlaybooks = playStatus.complete;
-    let failedPlaybooks = playStatus.failed;
+    const inProgressPlaybooks = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS);
+    const completePlaybooks = this.getPlaybooksWithStatus(STATUS.COMPLETE);
+    const failedPlaybooks = this.getPlaybooksWithStatus(STATUS.FAILED);
 
     // if have last recorded in progress
-    if (progressPlay) {
+    if (inProgressPlaybooks.length) {
+      // There is a playbook in progress
+
+      const progressPlay = inProgressPlaybooks[0];  // there will only be one playbook in progress
       // if have completes, process completed logs first
       if(completePlaybooks.length > 0) {
         completePlaybooks.forEach((book) => {
@@ -372,7 +352,7 @@ class PlaybookProgress extends Component {
             this.updateGlobalPlaybookStatus(progressPlay.name, progressPlay.playId, status);
 
             if (status === STATUS.COMPLETE) {
-              let nextPlaybookName = this.findNextPlaybook([progressPlay.name]);
+              let nextPlaybookName = this.findNextPlaybook(progressPlay.name);
               if(nextPlaybookName) {
                 this.launchPlaybook(nextPlaybookName);
               }
@@ -425,7 +405,8 @@ class PlaybookProgress extends Component {
             this.processAlreadyDonePlaybook(book);
             bookNames.push(book.name); //saved the names for checking next playbook
           });
-          let nextPlaybookName = this.findNextPlaybook(bookNames);
+
+          let nextPlaybookName = this.findNextPlaybook(bookNames.pop());
           // if have more to run
           if (nextPlaybookName) {
             this.launchPlaybook(nextPlaybookName);
@@ -556,7 +537,7 @@ class PlaybookProgress extends Component {
       // handle the case when can not receive end event for playbook
       let lastStepPlaybooks = this.props.steps[this.props.steps.length - 1].playbooks;
       if(lastStepPlaybooks.indexOf(playbookName + '.yml') !== -1) {
-         this.processEndMonitorPlaybook(playbookName);
+        this.processEndMonitorPlaybook(playbookName);
       }
     }
   }
