@@ -379,46 +379,42 @@ class PlaybookProgress extends Component {
 
           this.props.updatePageStatus(STATUS.FAILED);
         });
-    }
-    else { //don't have in progress playbook
-      //recorded either have completes or failed playbooks or never started
-      if(completePlaybooks.length > 0 || failedPlaybooks.length > 0) {
-        if (failedPlaybooks.length > 0) {
-          // go for the logs for completed if have any first
-          if (completePlaybooks.length > 0) {
-            completePlaybooks.forEach((book) => {
-              this.processAlreadyDonePlaybook(book);
-            });
-          }
-          // for failed, don't continue running playbook at all
-          // only go for logs
-          failedPlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book);
-          });
 
-          this.props.updatePageStatus(STATUS.FAILED);
-        }
-        else { //don't have failed, just have complete books
-          // go for logs for completed
-          let bookNames = [];
-          completePlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book);
-            bookNames.push(book.name); //saved the names for checking next playbook
-          });
+    } else if (failedPlaybooks.length > 0) {
+      // Some playbook has failed.  First get the logs from the completed plays
+      if (completePlaybooks.length > 0) {
+        completePlaybooks.forEach((book) => {
+          this.processAlreadyDonePlaybook(book);
+        });
+      }
+      // Next add the failed playbook logs
+      failedPlaybooks.forEach((book) => {
+        this.processAlreadyDonePlaybook(book);
+      });
 
-          let nextPlaybookName = this.findNextPlaybook(bookNames.pop());
-          // if have more to run
-          if (nextPlaybookName) {
-            this.launchPlaybook(nextPlaybookName);
-          }
-          else {
-            this.props.updatePageStatus(STATUS.COMPLETE);
-          }
-        }
+      // update the status without launching any other playbooks
+      this.props.updatePageStatus(STATUS.FAILED);
+
+    } else if (completePlaybooks.length > 0) {
+      // Get the logs from the completed plays
+      let bookNames = [];
+      completePlaybooks.forEach((book) => {
+        this.processAlreadyDonePlaybook(book);
+        bookNames.push(book.name); //saved the names for checking next playbook
+      });
+
+      // launch another playbook if there is more to run, otherwise finish up
+      let nextPlaybookName = this.findNextPlaybook(bookNames.pop());
+      if (nextPlaybookName) {
+        this.launchPlaybook(nextPlaybookName);
       }
-      else {//don't have any recorded in progress, failed or complete books
-        this.launchPlaybook(this.props.playbooks[0]);
+      else {
+        this.props.updatePageStatus(STATUS.COMPLETE);
       }
+
+    } else {
+      //don't have any playbooks in progress, failed or completed
+      this.launchPlaybook(this.props.playbooks[0]);
     }
   }
 
