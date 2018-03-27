@@ -380,34 +380,28 @@ class PlaybookProgress extends Component {
         });
 
     } else if (failedPlaybooks.length > 0) {
-      // Next add the failed playbook logs
-      failedPlaybooks.forEach((book) => {
+      // Append the failed playbook logs
+      for (let book of failedPlaybooks) {
         this.processAlreadyDonePlaybook(book);
-      });
+      }
 
       // update the status without launching any other playbooks
       this.props.updatePageStatus(STATUS.FAILED);
 
-    } else if (completePlaybooks.length > 0) {
-      // Get the logs from the completed plays
-      let bookNames = [];
-      completePlaybooks.forEach((book) => {
-        this.processAlreadyDonePlaybook(book);
-        bookNames.push(book.name); //saved the names for checking next playbook
-      });
+    } else {
+      // No playbooks running or failed, so either launch the next one or finish up
 
-      // launch another playbook if there is more to run, otherwise finish up
-      let nextPlaybookName = this.findNextPlaybook(bookNames.pop());
+      const lastCompleted = completePlaybooks.pop();  // returns undefined if none have completed
+
+      let nextPlaybookName = this.findNextPlaybook(lastCompleted);
       if (nextPlaybookName) {
+        // launch the next playbook if there is more to run
         this.launchPlaybook(nextPlaybookName);
       }
       else {
+        // No more playbooks to run.  Consider this page to be complete
         this.props.updatePageStatus(STATUS.COMPLETE);
       }
-
-    } else {
-      //don't have any playbooks in progress, failed or completed
-      this.launchPlaybook(this.props.playbooks[0]);
     }
   }
 
