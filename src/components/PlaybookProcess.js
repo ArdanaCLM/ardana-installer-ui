@@ -323,18 +323,17 @@ class PlaybookProgress extends Component {
     const completePlaybooks = this.getPlaybooksWithStatus(STATUS.COMPLETE);
     const failedPlaybooks = this.getPlaybooksWithStatus(STATUS.FAILED);
 
+    // Retrieve the logs and events for any completed playbooks
+    for (let book of completePlaybooks) {
+      this.processAlreadyDonePlaybook(book);
+    }
+
     // if have last recorded in progress
     if (inProgressPlaybooks.length) {
       // There is a playbook in progress
 
       const progressPlay = inProgressPlaybooks[0];  // there will only be one playbook in progress
       // if have completes, process completed logs first
-      if(completePlaybooks.length > 0) {
-        completePlaybooks.forEach((book) => {
-          this.processAlreadyDonePlaybook(book);
-        });
-      }
-
       //check the in progress one
       fetchJson('/api/v1/clm/plays/' + progressPlay.playId, {
         // Note: Use no-cache in order to get an up-to-date response
@@ -381,12 +380,6 @@ class PlaybookProgress extends Component {
         });
 
     } else if (failedPlaybooks.length > 0) {
-      // Some playbook has failed.  First get the logs from the completed plays
-      if (completePlaybooks.length > 0) {
-        completePlaybooks.forEach((book) => {
-          this.processAlreadyDonePlaybook(book);
-        });
-      }
       // Next add the failed playbook logs
       failedPlaybooks.forEach((book) => {
         this.processAlreadyDonePlaybook(book);
