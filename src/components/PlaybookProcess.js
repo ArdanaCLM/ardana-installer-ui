@@ -272,11 +272,14 @@ class PlaybookProgress extends Component {
 
   // return playbooks with the given status
   getPlaybooksWithStatus = (status) => {
+    // If called before globalPlaybookStatus is created (comoonentDidMount), return an empty array
+    if (!this.globalPlaybookStatus) {
+      return [];
+    }
+
     return this.globalPlaybookStatus.filter(play =>
       (this.props.playbooks.includes(play.name) && play.playId && play.status === status));
   }
-
-
 
   processAlreadyDonePlaybook = (playbook) => {
     // go get logs
@@ -424,9 +427,7 @@ class PlaybookProgress extends Component {
           // update local this.globalPlaybookStatus and also update global state playbookSatus
           this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
           // overall status for caller page
-          this.props.updatePageStatus(STATUS.FALIED);
-
-          this.showErrorMessage(translate('deploy.cancel.playbook', running.name));
+          this.props.updatePageStatus(STATUS.FAILED);
         })
         .catch((error) => {
           // overall status for caller, if failed, just stop
@@ -452,17 +453,16 @@ class PlaybookProgress extends Component {
   }
 
   renderCancelButton() {
-    const cancelButtonLabel = translate('cancel');
+    if (!this.state.errorMsg &&
+      this.getPlaybooksWithStatus(STATUS.IN_PROGRESS).length > 0 &&
+      this.getPlaybooksWithStatus(STATUS.FAILED).length == 0) {
 
-    /*
-     * Need to look at playbook progress and decide whether we are in the proper statu
-     * to even show this
-     */
-    return (
-      <ActionButton
-        displayLabel={cancelButtonLabel}
-        clickAction={() => this.cancelRunningPlaybook()} />
-    );
+      return (
+        <ActionButton
+          displayLabel={translate('cancel')}
+          clickAction={() => this.cancelRunningPlaybook()} />
+      );
+    }
   }
 
   renderLogViewer() {
