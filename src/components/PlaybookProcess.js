@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 
 import { translate } from '../localization/localize.js';
 import { getAppConfig } from '../utils/ConfigHelper.js';
-import { fetchJson, postJson } from '../utils/RestUtils.js';
+import { fetchJson, postJson, deleteJson } from '../utils/RestUtils.js';
 import { STATUS } from '../utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
@@ -428,6 +428,24 @@ class PlaybookProgress extends Component {
       });
   }
 
+  cancelRunningPlaybook = () => {
+
+    const running = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS)[0];
+    if (running) {
+      deleteJson('/api/v1/clm/plays/' + running.playId)
+        .then(response => {
+          // update local this.globalPlaybookStatus and also update global state playbookSatus
+          this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
+          // overall status for caller page
+          this.props.updatePageStatus(STATUS.FALIED);
+        })
+        .catch((error) => {
+          // overall status for caller, if failed, just stop
+          this.props.updatePageStatus(STATUS.FAILED);
+        });
+    }
+  }
+
   renderShowLogButton() {
     const logButtonLabel = translate('progress.show.log');
 
@@ -435,6 +453,20 @@ class PlaybookProgress extends Component {
       <ActionButton type='link'
         displayLabel={logButtonLabel}
         clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
+    );
+  }
+
+  renderCancelButton() {
+    const cancelButtonLabel = translate('cancel');
+
+    /*
+     * Need to look at playbook progress and decide whether we are in the proper statu
+     * to even show this
+     */
+    return (
+      <ActionButton
+        displayLabel={cancelButtonLabel}
+        clickAction={() => this.cancelRunningPlaybook()} />
     );
   }
 
@@ -456,6 +488,7 @@ class PlaybookProgress extends Component {
           <div className='col-xs-4'>
             <ul>{this.getProgress()}</ul>
             <div>
+              {this.renderCancelButton()}
               {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
             </div>
           </div>
