@@ -324,6 +324,14 @@
     "network.groups": "Network Groups",
     "forced.network.groups": "Forced Network Groups",
 
+    "manage.server.roles" : "Manage Server Roles",
+    "server.roles" : "Server Roles",
+    "server.role.name": "Server Role Name",
+    "add.server.role": "Add Server Role",
+    "edit.server.role": "Edit Server Role",
+    "manage.server.roles.close.confirm": "You've selected to leave Manage Server Roles but you have unsaved changes. \n\n Are you sure you want to proceed?",
+    "manage.server.roles.remove.confirm": "You've selected to remove the server role: {0}.\n\n Are you sure you want to proceed?",
+
     "complete.heading": "Cloud Deployment Successful",
     "complete.message.body1": "Congratulations! You've successfully deploy your cloud.",
     "complete.message.body2": "This is the information about your cloud:",

@@ -16,6 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { Tabs, Tab } from 'react-bootstrap';
 import { ConfirmModal, YesNoModal } from '../../components/Modals.js';
+import { TAB } from '../../utils/constants.js';
 import CloudConfigTab from './CloudConfigTab.js';
 import NicMappingTab from './NicMappingTab.js';
 import ServerGroupsTab from './ServerGroupsTab.js';
@@ -23,14 +24,6 @@ import NetworksTab from './NetworksTab.js';
 import DiskModelsTab from './DiskModelsTab.js';
 import InterfaceModelsTab from './InterfaceModelsTab.js';
 
-const TAB = {
-  CLOUD_CONFIG: 'CLOUD_CONFIG',
-  NIC_MAPPINGS: 'NIC_MAPPINGS',
-  SERVER_GROUPS: 'SERVER_GROUPS',
-  NETWORKS: 'NETWORKS',
-  DISK_MODELS: 'DISK_MODELS',
-  INTERFACE_MODELS: 'INTERFACE_MODELS'
-};
 const TABINDEX = [
   'CLOUD_CONFIG', 'NIC_MAPPINGS', 'SERVER_GROUPS', 'NETWORKS', 'DISK_MODELS', 'INTERFACE_MODELS'
 ];
