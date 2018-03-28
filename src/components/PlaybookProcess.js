@@ -288,11 +288,8 @@ class PlaybookProgress extends Component {
           return {displayedLogs: prevState.displayedLogs.concat(this.logsReceived)}; });
       })
       .catch((error) => {
-        this.setState((prevState) => {
-          let msg = translate('deploy.get.log.error', playbook.name + '.yml', playbook.playId, error.toString());
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
-
+        this.showErrorMessage(translate('deploy.get.log.error',
+          playbook.name + '.yml', playbook.playId, error.toString()));
         this.props.updatePageStatus(STATUS.FAILED);
       });
 
@@ -309,11 +306,8 @@ class PlaybookProgress extends Component {
         }
       })
       .catch((error) => {
-        this.setState((prevState) => {
-          let msg = translate('deploy.get.event.error', playbook.name + '.yml', playbook.playId, error.toString());
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
-
+        this.showErrorMessage(translate('deploy.get.event.error',
+          playbook.name + '.yml', playbook.playId, error.toString()));
         this.props.updatePageStatus(STATUS.FAILED);
       });
   }
@@ -370,12 +364,8 @@ class PlaybookProgress extends Component {
           }
         })
         .catch((error) => {
-          this.setState((prevState) => {
-            let msg =
-              translate('deploy.fail.check.playbook', progressPlay.name + '.yml', progressPlay.playId, error.message);
-            return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-          });
-
+          this.showErrorMessage(translate('deploy.fail.check.playbook',
+            progressPlay.name + '.yml', progressPlay.playId, error.message));
           this.props.updatePageStatus(STATUS.FAILED);
         });
 
@@ -421,10 +411,7 @@ class PlaybookProgress extends Component {
         this.props.updatePageStatus(STATUS.FAILED);
         // update local this.globalPlaybookStatus and also update global state playbookSatus
         this.updateGlobalPlaybookStatus(playbookName, '', STATUS.FAILED);
-        this.setState((prevState) => {
-          let msg = translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message);
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
+        this.showErrorMessage(translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message));
       });
   }
 
@@ -438,12 +425,20 @@ class PlaybookProgress extends Component {
           this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
           // overall status for caller page
           this.props.updatePageStatus(STATUS.FALIED);
+
+          this.showErrorMessage(translate('deploy.cancel.playbook', running.name));
         })
         .catch((error) => {
           // overall status for caller, if failed, just stop
           this.props.updatePageStatus(STATUS.FAILED);
         });
     }
+  }
+
+  showErrorMessage = (msg) => {
+    this.setState((prevState) => {
+      return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+    });
   }
 
   renderShowLogButton() {
