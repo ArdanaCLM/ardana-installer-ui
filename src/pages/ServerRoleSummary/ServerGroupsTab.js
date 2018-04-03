@@ -18,6 +18,7 @@ import { alphabetically } from '../../utils/Sort.js';
 import { YesNoModal } from '../../components/Modals.js';
 import ServerGroupDetails from './ServerGroupDetails.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class ServerGroupsTab extends Component {
 
@@ -80,12 +81,22 @@ class ServerGroupsTab extends Component {
       .map((m,idx) => {
         let numNetworks = '-';
         if (m.has('networks')) {
-          numNetworks = m.get('networks').size;
+          const tooltipText = m.get('networks').toJS().toString().replace(/,/g, ',\n');
+          const tooltip = (<Tooltip id='network' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numNetworks = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('networks').size}</span>
+            </OverlayTrigger>);
         }
 
         let numServerGroups = '-';
         if (m.has('server-groups')) {
-          numServerGroups = m.get('server-groups').size;
+          const tooltipText = m.get('server-groups').toJS().toString().replace(/,/g, ',\n');
+          const tooltip = (<Tooltip id='server-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numServerGroups = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('server-groups').size}</span>
+            </OverlayTrigger>);
         }
 
         const name = m.get('name');

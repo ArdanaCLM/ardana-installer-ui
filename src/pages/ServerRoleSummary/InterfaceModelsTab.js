@@ -24,6 +24,7 @@ import { YamlValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
 import { dump,  safeLoad } from 'js-yaml';
 import { isEmpty } from 'lodash';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class InterfaceModelsTab extends Component {
 
@@ -167,10 +168,20 @@ class InterfaceModelsTab extends Component {
     // build the rows in the main table
     const rows = this.getRows()
       .map((m,idx) => {
+        let numInterfaces = '-';
+        if (m.has('network-interfaces')) {
+          const interfaceList = m.get('network-interfaces').toJS();
+          const tooltipText = interfaceList.map(i => i.name).toString().replace(/,/g, ',\n');
+          const tooltip = (<Tooltip id='interfaces' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numInterfaces = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('network-interfaces').size}</span>
+            </OverlayTrigger>);
+        }
         return (
           <tr key={idx}>
             <td>{m.get('name')}</td>
-            <td>{m.get('network-interfaces', new List()).size}</td>
+            <td>{numInterfaces}</td>
             <td>
               <div className='row-action-container'>
                 <span className={editClass}
@@ -457,7 +468,7 @@ class InterfaceModelsTab extends Component {
                 inputValue={this.state.interfaceModel.get('name')} inputName='modelname'
                 inputType='text' inputAction={this.handleInterfaceModelNameChange}
                 disabled={this.state.detailMode !== MODE.NONE}/>
-              <div className='details-group-title'>{translate('network.interfaces') + ':'}</div>
+              <div className='details-group-title'>{translate('network.interfaces') + '* :'}</div>
               {interfaces}
               {addButton}
 
@@ -608,7 +619,7 @@ class InterfaceModelsTab extends Component {
                 inputValue={this.state.networkInterface.get('name')} inputName='interfacename'
                 inputAction={this.handleInterfaceNameChange}
                 autoFocus="true" />
-              <div className='details-group-title'>{translate('network.devices') + ':'}</div>
+              <div className='details-group-title'>{translate('network.devices') + '* :'}</div>
               {this.renderDevices()}
               {this.renderNetworkGroups()}
 

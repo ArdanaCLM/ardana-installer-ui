@@ -556,7 +556,7 @@ class PlaybookProgress extends Component {
       // handle the case when can not receive end event for playbook
       let lastStepPlaybooks = this.props.steps[this.props.steps.length - 1].playbooks;
       if(lastStepPlaybooks.indexOf(playbookName + '.yml') !== -1) {
-         this.processEndMonitorPlaybook(playbookName);
+        this.processEndMonitorPlaybook(playbookName);
       }
     }
   }
