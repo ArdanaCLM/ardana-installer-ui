@@ -340,7 +340,7 @@ class PlaybookProgress extends Component {
         }
       })
         .then(response => {
-          if ('endTime' in response) {
+          if ('endTime' in response || response['killed']) {
             let status = (response['code'] == 0 ? STATUS.COMPLETE : STATUS.FAILED);
             // update logs
             this.processAlreadyDonePlaybook(progressPlay);
