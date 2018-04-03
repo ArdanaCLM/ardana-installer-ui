@@ -326,7 +326,7 @@ class NicMappingTab extends Component {
     const rows = this.getRows()
       .map((m,idx) => {
         const portList = m.get('physical-ports').toJS();
-        const tooltipText = portList.map(p => p['logical-name']).toString().replace(/,/g, ',\n');
+        const tooltipText = portList.map(p => p['logical-name']).join(',\n');
         const tooltip = (<Tooltip id='physical-ports' className='cell-tooltip'>{tooltipText}</Tooltip>);
         const numPorts = (
           <OverlayTrigger placement='right' overlay={tooltip}>

@@ -171,7 +171,7 @@ class InterfaceModelsTab extends Component {
         let numInterfaces = '-';
         if (m.has('network-interfaces')) {
           const interfaceList = m.get('network-interfaces').toJS();
-          const tooltipText = interfaceList.map(i => i.name).toString().replace(/,/g, ',\n');
+          const tooltipText = interfaceList.map(i => i.name).join(',\n');
           const tooltip = (<Tooltip id='interfaces' className='cell-tooltip'>{tooltipText}</Tooltip>);
           numInterfaces = (
             <OverlayTrigger placement='right' overlay={tooltip}>

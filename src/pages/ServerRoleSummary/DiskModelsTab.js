@@ -87,7 +87,7 @@ class DiskModelsTab extends Component {
         let numVolumeGroups = '-';
         if (m.has('volume-groups')) {
           const vgList = m.get('volume-groups').toJS();
-          const tooltipText = vgList.map(vg => vg.name).toString().replace(/,/g, ',\n');
+          const tooltipText = vgList.map(vg => vg.name).join(',\n');
           const tooltip = (<Tooltip id='volume-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
           numVolumeGroups = (
             <OverlayTrigger placement='right' overlay={tooltip}>
@@ -97,7 +97,7 @@ class DiskModelsTab extends Component {
         let numDeviceGroups = '-';
         if (m.has('device-groups')) {
           const dgList = m.get('device-groups').toJS();
-          const tooltipText = dgList.map(dg => dg.name).toString().replace(/,/g, ',\n');
+          const tooltipText = dgList.map(dg => dg.name).join(',\n');
           const tooltip = (<Tooltip id='device-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
           numDeviceGroups = (
             <OverlayTrigger placement='right' overlay={tooltip}>

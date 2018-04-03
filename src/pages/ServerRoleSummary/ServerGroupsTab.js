@@ -81,7 +81,7 @@ class ServerGroupsTab extends Component {
       .map((m,idx) => {
         let numNetworks = '-';
         if (m.has('networks')) {
-          const tooltipText = m.get('networks').toJS().toString().replace(/,/g, ',\n');
+          const tooltipText = m.get('networks').join(',\n');
           const tooltip = (<Tooltip id='network' className='cell-tooltip'>{tooltipText}</Tooltip>);
           numNetworks = (
             <OverlayTrigger placement='right' overlay={tooltip}>
@@ -91,7 +91,7 @@ class ServerGroupsTab extends Component {
 
         let numServerGroups = '-';
         if (m.has('server-groups')) {
-          const tooltipText = m.get('server-groups').toJS().toString().replace(/,/g, ',\n');
+          const tooltipText = m.get('server-groups').join(',\n');
           const tooltip = (<Tooltip id='server-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
           numServerGroups = (
             <OverlayTrigger placement='right' overlay={tooltip}>
