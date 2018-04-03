@@ -82,13 +82,15 @@ class ServerRoleSummary extends BaseWizardPage {
 
   updateServerForEditServer = (server) => {
     for (let list of ['autoServers', 'manualServers']) {
-      let idx = this.state[list].findIndex(s => server.uid === s.uid);
-      if (idx >= 0) {
-        let updated_server;
-        let tempList = this.state[list].slice();
-        updated_server = getMergedServer(tempList[idx], server, MODEL_SERVER_PROPS);
-        putJson('/api/v1/server', JSON.stringify(updated_server));
-        break;
+      if(this.state[list]) {
+        let idx = this.state[list].findIndex(s => server.uid === s.uid);
+        if (idx >= 0) {
+          let updated_server;
+          let tempList = this.state[list].slice();
+          updated_server = getMergedServer(tempList[idx], server, MODEL_SERVER_PROPS);
+          putJson('/api/v1/server', JSON.stringify(updated_server));
+          break;
+        }
       }
     }
   }
