@@ -24,6 +24,7 @@ import { PickerButton } from '../components/Buttons.js';
 import Dropdown from '../components/Dropdown.js';
 import { YesNoModal } from '../components/Modals.js';
 import { Converter } from 'showdown';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 const NODE_COUNT_THRESHOLD = 30;
 const NODE_COUNT_OPT1 = '1';
@@ -370,13 +371,32 @@ class CloudModelPicker extends BaseWizardPage {
         );
       });
 
+      const tooltip = (
+        <Tooltip id='clear-filters' className='tooltip'>{translate('model.picker.filter.clear')}</Tooltip>);
+      const clearFilterButton = (
+        <OverlayTrigger placement='top' overlay={tooltip}>
+          <i className='material-icons clear-filters' onClick={this.clearFilters}>clear</i>
+        </OverlayTrigger>
+      );
+
       return (
         <div className='filter-bar-container'>
           <h4 className='filter-line-header'>{translate('model.picker.filter.line.header')}</h4>
           {filterDropdowns}
+          {clearFilterButton}
         </div>
       );
     }
+  }
+
+  clearFilters = () => {
+    this.setState({
+      filterNodeCount: 'none',
+      filterHypervisorType: 'none',
+      filterStorageType: 'none',
+      filterNetworkType: 'none',
+    });
+    this.selectedFilters = [];
   }
 
   renderDetails = () => {
