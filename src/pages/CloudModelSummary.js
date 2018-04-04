@@ -18,6 +18,8 @@ import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { ActivePickerButton } from '../components/Buttons.js';
 import { InfoBanner } from '../components/Messages.js';
+import { ActionButton } from '../components/Buttons.js';
+import ManageServerRoles from './CloudModelSummary/ManageServerRoles.js';
 
 class CloudModelSummary extends BaseWizardPage {
   constructor(props) {
@@ -157,8 +159,21 @@ class CloudModelSummary extends BaseWizardPage {
 
     return (
       <div className='wizard-page'>
+        <ManageServerRoles
+          show={this.state.showManageServerRoles}
+          onHide={() => this.setState({showManageServerRoles: false})}
+          model={this.props.model}
+          updateGlobalState={this.props.updateGlobalState}/>
         <div className='content-header'>
-          {this.renderHeading(translate('model.summary.heading'))}
+          <div className='titleBox'>
+            {this.renderHeading(translate('model.summary.heading'))}
+          </div>
+          <div className='buttonBox'>
+            <div className='btn-row'>
+              <ActionButton displayLabel={translate('manage.server.roles')} type='default'
+                clickAction={() => this.setState({showManageServerRoles: true})} />
+            </div>
+          </div>
         </div>
         <div className='wizard-content'>
           <div className='picker-container'>
