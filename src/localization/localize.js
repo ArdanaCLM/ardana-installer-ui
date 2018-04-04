@@ -14,6 +14,7 @@
 **/
 import LocalizedStrings from 'react-localization';
 
+
 var supportedLangs = ['en', 'ja'];
 var translationData, bundlename, brandingData, bundlebrandingname, allTranslatedData, catalog = {};
 
@@ -32,13 +33,21 @@ for (var i = 0; i < supportedLangs.length; i++) {
   catalog[supportedLangs[i]] = allTranslatedData;
 }
 
-//TODO - determine what to do with annotated langs... like en-US
+// window.navigator.language is the language that user sets at the top of
+// installed and enabled languages like en-US, en, ja-JP, ja, zh-CN, zh
+// since we have language without country like en or ja as supported languages,
+// need to find a matching or kind of matching one to set on strings
 var strings = new LocalizedStrings(catalog);
-for (i = 0; i < window.navigator.languages.length; i++) {
-  if (supportedLangs.indexOf(window.navigator.languages[i]) !== -1) {
-    strings.setLanguage(window.navigator.languages[i]);
-    break;
-  }
+
+var findLang =
+  supportedLangs.find(sLang => window.navigator.language === sLang) ||
+  supportedLangs.find(sLang => window.navigator.language.startsWith(sLang));
+
+if(findLang) {
+  strings.setLanguage(findLang);
+}
+else { //default
+  strings.setLanguage('en');
 }
 
 export function translate(key, ...args) {

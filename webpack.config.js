@@ -18,6 +18,8 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: [
+    'babel-polyfill',
+    'whatwg-fetch',
     'react-hot-loader/patch',
     './index.js'
   ],

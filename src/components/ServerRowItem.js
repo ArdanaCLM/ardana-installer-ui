@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import { EditPencilForTableRow , InfoForTableRow, DeleteForTableRow } from './Buttons.js';
-import {IS_MS_EDGE} from '../utils/constants.js';
+import { IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 
 class ServerRowItem extends Component {
   constructor(props) {
@@ -30,7 +30,7 @@ class ServerRowItem extends Component {
    */
   drag(ev, data) {
     //setData only supports strings, JSON stringify here, parse on the other end
-    let format = IS_MS_EDGE ? 'text' : 'data';
+    let format = IS_MS_EDGE || IS_MS_IE ? 'text' : 'data';
     ev.dataTransfer.setData(format, JSON.stringify(data));
   }
 

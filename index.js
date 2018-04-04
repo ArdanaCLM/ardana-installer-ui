@@ -12,6 +12,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+import 'babel-polyfill';
+import 'whatwg-fetch';
 import { AppContainer } from 'react-hot-loader';
 import React from 'react';
 import ReactDOM from 'react-dom';
