@@ -18,6 +18,7 @@ import { alphabetically } from '../../utils/Sort.js';
 import { YesNoModal } from '../../components/Modals.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
 import DiskModelDetails from './DiskModelDetails.js';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class DiskModelsTab extends Component {
 
@@ -85,11 +86,23 @@ class DiskModelsTab extends Component {
       .map((m,idx) => {
         let numVolumeGroups = '-';
         if (m.has('volume-groups')) {
-          numVolumeGroups = m.get('volume-groups').size;
+          const vgList = m.get('volume-groups').toJS();
+          const tooltipText = vgList.map(vg => vg.name).join(',\n');
+          const tooltip = (<Tooltip id='volume-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numVolumeGroups = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('volume-groups').size}</span>
+            </OverlayTrigger>);
         }
         let numDeviceGroups = '-';
         if (m.has('device-groups')) {
-          numDeviceGroups = m.get('device-groups').size;
+          const dgList = m.get('device-groups').toJS();
+          const tooltipText = dgList.map(dg => dg.name).join(',\n');
+          const tooltip = (<Tooltip id='device-groups' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numDeviceGroups = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('device-groups').size}</span>
+            </OverlayTrigger>);
         }
 
         const name = m.get('name');

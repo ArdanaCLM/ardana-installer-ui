@@ -21,6 +21,7 @@ import { ActionButton } from '../../components/Buttons.js';
 import { List, Map } from 'immutable';
 import { NetworkInterfaceValidator, PCIAddressValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class NicMappingTab extends Component {
 
@@ -324,7 +325,13 @@ class NicMappingTab extends Component {
 
     const rows = this.getRows()
       .map((m,idx) => {
-        const numPorts = m.get('physical-ports').size;
+        const portList = m.get('physical-ports').toJS();
+        const tooltipText = portList.map(p => p['logical-name']).join(',\n');
+        const tooltip = (<Tooltip id='physical-ports' className='cell-tooltip'>{tooltipText}</Tooltip>);
+        const numPorts = (
+          <OverlayTrigger placement='right' overlay={tooltip}>
+            <span>{m.get('physical-ports').size}</span>
+          </OverlayTrigger>);
         return (
           <tr key={idx}>
             <td>{m.get('name')}</td>
