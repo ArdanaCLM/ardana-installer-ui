@@ -38,4 +38,4 @@ export const MODEL_SERVER_PROPS =  [
 
 export const MODEL_SERVER_PROPS_ALL = MODEL_SERVER_PROPS.concat(['role', 'uid']);
 
-export const IS_MS_EDGE = (/Edge/.test(navigator.userAgent)) ? true : false;
+export const IS_MS_EDGE = /Edge/.test(navigator.userAgent);

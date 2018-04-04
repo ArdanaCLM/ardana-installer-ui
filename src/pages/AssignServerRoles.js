@@ -875,7 +875,6 @@ class AssignServerRoles extends BaseWizardPage {
         this.setState((prevState) => {
           return {serversAddedManually: prevState.serversAddedManually.concat([server])};
         });
-data
         // save to the backend
         postJson('/api/v1/server', JSON.stringify([server]))
           .catch((error) => {
