@@ -36,7 +36,7 @@ for (var i = 0; i < supportedLangs.length; i++) {
 // window.navigator.language is the language that user sets at the top of
 // installed and enabled languages like en-US, en, ja-JP, ja, zh-CN, zh
 // since we have language without country like en or ja as supported languages,
-// need to find a exact match or match the language part
+// need to find an exact match or a match of the language part
 var strings = new LocalizedStrings(catalog);
 
 var findLang =
