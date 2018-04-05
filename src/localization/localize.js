@@ -40,8 +40,10 @@ for (var i = 0; i < supportedLangs.length; i++) {
 var strings = new LocalizedStrings(catalog);
 
 var findLang =
-  supportedLangs.find(sLang => window.navigator.language === sLang) ||
-  supportedLangs.find(sLang => window.navigator.language.startsWith(sLang));
+  supportedLangs.find(
+    sLang => window.navigator.language === sLang ||
+    window.navigator.language.startsWith(sLang)
+  );
 
 if(findLang) {
   strings.setLanguage(findLang);
