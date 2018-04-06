@@ -37,7 +37,7 @@ import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
   updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds
 } from '../utils/ModelUtils.js';
-import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE } from '../utils/constants.js';
+import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 import { YesNoModal } from '../components/Modals.js';
 
 const AUTODISCOVER_TAB = 1;
@@ -807,7 +807,7 @@ class AssignServerRoles extends BaseWizardPage {
    * @param {string} role - the role to assign the server to
    */
   assignServerToRoleDnD = (event, role) => {
-    let format = IS_MS_EDGE ? 'text' : 'data';
+    let format = IS_MS_EDGE || IS_MS_IE ? 'text' : 'data';
     let serverData = JSON.parse(event.dataTransfer.getData(format));
 
     this.assignServerToRole(serverData, role);
@@ -822,7 +822,7 @@ class AssignServerRoles extends BaseWizardPage {
    *   JSON object per ServerRowItem.js
    */
   removeServerFromRoleDnD = (event) => {
-    let format = IS_MS_EDGE ? 'text' : 'data';
+    let format = IS_MS_EDGE || IS_MS_IE ? 'text' : 'data';
     let serverData = JSON.parse(event.dataTransfer.getData(format));
     this.removeServerFromRole(serverData, serverData.role);
 
