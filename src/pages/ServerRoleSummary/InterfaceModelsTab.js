@@ -547,10 +547,19 @@ class InterfaceModelsTab extends Component {
       }
     } else {
       networkInterface = networkInterface.set('device', prevState.deviceList.get(0));
-      if (networkInterface.get('forced-network-groups').last() === undefined) {
+    }
+
+    if (networkInterface.get('forced-network-groups').last() === undefined) {
+      if (networkInterface.get('forced-network-groups').size > 1) {
+        networkInterface = networkInterface.updateIn(['forced-network-groups'], list => list.pop());
+      } else {
         networkInterface = networkInterface.delete('forced-network-groups');
       }
-      if (networkInterface.get('network-groups').last() === undefined) {
+    }
+    if (networkInterface.get('network-groups').last() === undefined) {
+      if (networkInterface.get('network-groups').size > 1) {
+        networkInterface = networkInterface.updateIn(['network-groups'], list => list.pop());
+      } else {
         networkInterface = networkInterface.delete('network-groups');
       }
     }
@@ -570,11 +579,13 @@ class InterfaceModelsTab extends Component {
   isNetworkInterfaceSaveAllowed = () => {
     // The save button is allowed if the values are all valid and there is
     // some change compared to the initial values
+    const forcedNetworkGroups = this.state.networkInterface.get('forced-network-groups');
+    const networkGroups = this.state.networkInterface.get('network-groups');
     const isValid =
       this.state.isInterfaceNameValid &&
       this.state.deviceList.last().get('name') !== undefined &&
-      (this.state.networkInterface.get('forced-network-groups').last() !== undefined ||
-        this.state.networkInterface.get('network-groups').last() !== undefined) &&
+      (forcedNetworkGroups.size > 1 || forcedNetworkGroups.last() !== undefined ||
+        networkGroups.size > 1 || networkGroups.last() !== undefined) &&
       (! this.state.networkInterface.has('bond-data') || (
         this.state.isBondOptionsValid  &&
         this.state.isBondDeviceNameValid
@@ -772,8 +783,8 @@ class InterfaceModelsTab extends Component {
 
       let newInterface = prev.networkInterface.deleteIn([groupKey, idx]);
 
-      if (newInterface.get('network-groups').size === 0) {
-        newInterface = newInterface.updateIn(['network-groups'], list => list.push(undefined));
+      if (newInterface.get(groupKey).size === 0) {
+        newInterface = newInterface.updateIn([groupKey], list => list.push(undefined));
       }
 
       return {networkInterface: newInterface};
