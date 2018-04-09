@@ -145,6 +145,10 @@ class CloudDeployProgress extends BaseWizardPage {
         payload['extraVars']['encrypt'] = '';
         payload['extraVars']['rekey'] = '';
       }
+      if (this.props.deployConfig['clearServers']) {
+        payload['extraVars']['remove_deleted_servers'] = 'y';
+        payload['extraVars']['free_unused_addresses'] = 'y';
+      }
     }
 
     this.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook];

@@ -99,6 +99,8 @@
     "validate.deployment.verbosity.tooltip": "The amount of debug messages to provide during cloud deployment.",
     "validate.deployment.verbosity.lowest": "0-No debug messages",
     "validate.deployment.verbosity.highest": "4-Extremely verbose",
+    "validate.deployment.clearServers": "Clear Unused Servers/Addresses",
+    "validate.deployment.clearServers.tooltip": "Turns on remove_deleted_servers and free-unused_addresses options. These options are not needed upon initial deployment.",
 
     "validate.tab.model": "Model",
     "validate.tab.templates": "Templates and Services",
