@@ -323,7 +323,8 @@ class ConfigForm extends Component {
       this.state = {
         wipeDisks: false,
         encryptKey: '',
-        verbosity: 0
+        verbosity: 0,
+        clearServers: false
       };
     } else {
       this.state = props.deployConfig;
@@ -336,6 +337,10 @@ class ConfigForm extends Component {
 
   handlePasswordChange = (e) => {
     this.setState({encryptKey: e.target.value});
+  };
+
+  handleClearServers = () => {
+    this.setState({clearServers: !this.state.clearServers});
   };
 
   render() {
@@ -384,6 +389,19 @@ class ConfigForm extends Component {
               <option key="3" value="3">3</option>
               <option key="4" value="4">{translate('validate.deployment.verbosity.highest')}</option>
             </Dropdown>
+          </div>
+        </div>
+
+        <div className='detail-line'>
+          <div className='col-xs-4 label-container'>
+            {translate('validate.deployment.clearServers')}
+            <HelpText tooltipText={translate('validate.deployment.clearServers.tooltip')}/>
+          </div>
+          <div className='col-xs-8 checkbox-line'>
+            <input type='checkbox'
+              value='clearServers'
+              checked={this.state.clearServers}
+              onChange={this.handleClearServers}/>
           </div>
         </div>
       </div>
