@@ -78,6 +78,12 @@ class InstallWizard extends Component {
     // Note: if no progress data can be found, responseData is an empty string
     const forcedReset = window.location.search.indexOf('reset=true') !== -1;
 
+    // temporary (until login is implemented) approach to handle the case where the UI
+    // is in auth-required mode... a 403 or 401 has triggered a redirect to the login URL
+    // for now, this will take users to the last page in the wizard, but in the future
+    // this will be handled in the deployer component and will redirect to a login screen
+    const requiresLogin = window.location.search.indexOf('login=required') !== -1;
+
     // Load the current state information from the backend
 
     // To simulate a delay in startup and to be able to see the initial loading mask,
@@ -93,7 +99,23 @@ class InstallWizard extends Component {
       })
       .then(() => fetchJson('/api/v1/progress')
         .then((responseData) => {
-          if (! forcedReset && responseData.steps && this.areStepsInOrder(responseData.steps, this.props.pages)) {
+          if (! forcedReset && requiresLogin) { //TEMPORARY until login is implemented
+            // Set the currentStep to the last step and update its stepProgress to inprogress
+            // this handles the case where the user returns to the install UI after a deployment is completed
+            // in the future, a redirect to a login page will occur prior to this, and this section can be removed
+            this.setState((prevState) => {
+              var newSteps = prevState.steps.slice();
+              newSteps.splice((prevState.steps.length - 1), 1, {
+                name: prevState.steps[(prevState.steps.length - 1)].name,
+                stepProgress: STATUS.IN_PROGRESS
+              });
+
+              return {
+                currentStep: (prevState.steps.length - 1),
+                steps: newSteps
+              };
+            }, this.persistState);
+          } else if (! forcedReset && responseData.steps && this.areStepsInOrder(responseData.steps, this.props.pages)) {
             this.setState(responseData);
           } else {
             // Set the currentStep to 0 and update its stepProgress to inprogress
