@@ -19,12 +19,12 @@ import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { YamlValidator } from '../utils/InputValidators.js';
 import { ActionButton } from '../components/Buttons.js';
 import BaseWizardPage from './BaseWizardPage.js';
-import { ServerInput } from '../components/ServerUtils.js';
 import { Tabs, Tab } from 'react-bootstrap';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import Dropdown from '../components/Dropdown.js';
 import HelpText from '../components/HelpText.js';
 import { InfoBanner } from '../components/Messages.js';
+import { ValidatingInput } from '../components/ValidatingInput.js';
 import { STATUS } from '../utils/constants.js';
 
 const INVALID = 0;
@@ -91,7 +91,7 @@ class EditFile extends Component {
         <h3>{this.props.file.name}</h3>
         <div className='col-md-12'>
           <div className={editPanelCssClass}>
-            <ServerInput
+            <ValidatingInput
               inputValue={this.state.contents}
               inputName='fileContents'
               inputType='textarea'
@@ -365,7 +365,7 @@ class ConfigForm extends Component {
             <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
           </div>
           <div className='col-xs-8'>
-            <ServerInput
+            <ValidatingInput
               inputName='encryptKey'
               inputType='password'
               inputValue={this.state.encryptKey}

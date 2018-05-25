@@ -18,7 +18,7 @@ import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { fetchJson, postJson } from '../../utils/RestUtils.js';
 import { ErrorMessage, InfoBanner } from '../../components/Messages.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 
 class EditTemplateFile extends Component {
   constructor(props) {
@@ -51,7 +51,7 @@ class EditTemplateFile extends Component {
   render() {
     return (
       <div className='edit-container file-editor'>
-        <ServerInput
+        <ValidatingInput
           inputValue={this.state.contents}
           inputName='fileContents'
           inputType='textarea'

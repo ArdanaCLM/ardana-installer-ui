@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator } from '../../utils/InputValidators.js';
-import { ServerInputLine } from '../../components/ServerUtils.js';
+import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { fromJS } from 'immutable';
 
@@ -89,16 +89,16 @@ class BaremetalSettings extends Component {
         title={translate('add.server.set.network')} onHide={this.props.cancelAction} footer={footer}>
         <div className='description-line'>{translate('add.server.set.network.description')}</div>
         <div className='server-details-container'>
-          <ServerInputLine isRequired={true} label={'add.server.set.network.subnet'}
+          <InputLine isRequired={true} label={'add.server.set.network.subnet'}
             inputName={'subnet'} inputType={'text'} inputValidate={IpV4AddressValidator}
             inputAction={this.handleInputChange} inputValue={this.state.subnet}/>
-          <ServerInputLine isRequired={true} label={'add.server.set.network.netmask'}
+          <InputLine isRequired={true} label={'add.server.set.network.netmask'}
             inputName={'netmask'} inputType={'text'} inputValidate={NetmaskValidator}
             inputAction={this.handleInputChange} inputValue={this.state.netmask}/>
           <div className='detail-line'>
             <div className='detail-heading'></div>
             <div className='input-body'>
-              <div className='server-input'>
+              <div className='validating-input'>
                 <div className='error-message'>{this.state.maskingError}</div>
               </div>
             </div>

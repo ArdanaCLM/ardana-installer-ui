@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import Dropdown from '../../components/Dropdown.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
@@ -436,7 +436,7 @@ class InterfaceModelsTab extends Component {
 
         return (
           <div key={idx} className='dropdown-plus-minus'>
-            <ServerInput isRequired='true' placeholder={translate('interface.name') + '*'}
+            <ValidatingInput isRequired='true' placeholder={translate('interface.name') + '*'}
               inputValue={e.get('name')} inputType='text' disabled='true' />
             <div className='plus-minus-container'> {edit} {minus} </div>
           </div>
@@ -464,7 +464,7 @@ class InterfaceModelsTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('interface.model.name') + '*'}
+              <ValidatingInput isRequired='true' placeholder={translate('interface.model.name') + '*'}
                 inputValue={this.state.interfaceModel.get('name')} inputName='modelname'
                 inputType='text' inputAction={this.handleInterfaceModelNameChange}
                 disabled={this.state.detailMode !== MODE.NONE}/>
@@ -626,7 +626,7 @@ class InterfaceModelsTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('interface.name')}
+              <ValidatingInput isRequired='true' placeholder={translate('interface.name')}
                 inputValue={this.state.networkInterface.get('name')} inputName='interfacename'
                 inputAction={this.handleInterfaceNameChange}
                 autoFocus="true" />
@@ -637,7 +637,7 @@ class InterfaceModelsTab extends Component {
               {this.state.networkInterface.has('bond-data') ?
                 <div>
                   <div className='details-group-title'>{translate('bond.device.name') + '* :'}</div>
-                  <ServerInput required='true' placeholder={translate('bond.device.name')}
+                  <ValidatingInput required='true' placeholder={translate('bond.device.name')}
                     inputValue={this.state.bondDeviceName} inputName='bonddevicename'
                     inputAction={(e, valid) => this.handleBondDeviceNameChange(e.target.value, valid)}
                   />
@@ -647,7 +647,7 @@ class InterfaceModelsTab extends Component {
               {this.state.networkInterface.has('bond-data') ?
                 <div>
                   <div className='details-group-title'>{translate('bond.options') + ':'}</div>
-                  <ServerInput placeholder={translate('bond.options')}
+                  <ValidatingInput placeholder={translate('bond.options')}
                     inputValue={this.state.bondOptions} inputName='bondoptions'
                     inputType='textarea'
                     inputValidate={YamlValidator}

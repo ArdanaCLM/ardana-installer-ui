@@ -199,8 +199,6 @@
     "server.port.prompt": "Port",
     "server.sm": "SUSE Manager",
     "server.ov": "HPE OneView",
-    "server.validator.error": "Failed to execute validator",
-    "server.input.required.error": "Input is required",
     "context.menu.item.detail": "Details",
     "context.menu.item.edit": "Edit",
     "server.test.sm.success": "Successfully tested connection to SUSE Manager {0}.",
@@ -377,6 +375,7 @@
 
     "server.role.summary.heading": "Server and Server Role Summary",
 
+    "input.required.error": "Input is required",
     "input.validator.ipv4address.error": "Please enter a valid IPV4 Address",
     "input.validator.macaddress.error": "Please enter a valid MAC Address",
     "input.validator.port.error": "Please enter a valid port between 0 and 65535",
@@ -393,6 +392,7 @@
     "input.validator.yaml.error": "Invalid YAML",
     "input.validator.netmask.error": "Please enter a valid netmask",
     "input.validator.netmask.ipinvalid.error": "Netmask is valid but does not contain the specified subnet",
+    "input.validator.error": "Failed to execute validator",
 
     "clouddeploy.installsteps.ConfigPage": "Deployment Configuration",
     "clouddeploy.installsteps.InstallIntro": "Introduction",
