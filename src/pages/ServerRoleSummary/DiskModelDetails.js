@@ -15,8 +15,9 @@
 import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
-import { ServerInput, getModelIndexByName } from '../../components/ServerUtils.js';
+import { getModelIndexByName } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { UniqueNameValidator, YamlValidator } from '../../utils/InputValidators.js';
 import { InlineAddRemoveInput } from '../../components/InlineAddRemoveFields.js';
 import { alphabetically } from '../../utils/Sort.js';
@@ -190,7 +191,7 @@ class DiskModelDetails extends Component {
     textFields.map((lv, index) => {
       logicalVolumeLines.push(
         <div className='dropdown-plus-minus' key={lv + index}>
-          <ServerInput key={lv.name + index} inputType='text' inputValue={lv.name}
+          <ValidatingInput key={lv.name + index} inputType='text' inputValue={lv.name}
             disabled='true'/>
           <div className='plus-minus-container'>
             <span key={lv.name + 'edit' + index} className={editClass}
@@ -266,23 +267,23 @@ class DiskModelDetails extends Component {
         <div className='col-xs-4 details-section second-details'>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
-            <ServerInput isRequired={true} placeholder={translate('logical.volume.name') + '*'}
+            <ValidatingInput isRequired={true} placeholder={translate('logical.volume.name') + '*'}
               inputValue={this.state.logicalVolume.name || ''} inputName='lvName' inputType='text'
               inputAction={this.handleInputLine} autoFocus={true}/>
             <div className='details-group-title'>{translate('logical.volume.size') + '* :'}</div>
-            <ServerInput isRequired={true} placeholder={translate('logical.volume.size')}
+            <ValidatingInput isRequired={true} placeholder={translate('logical.volume.size')}
               inputValue={this.state.logicalVolume.size || ''} inputName='lvSize' inputType='number'
               inputAction={this.handleInputLine} {...{min: 0, max: 100}}/>
             <div className='details-group-title'>{translate('logical.volume.mount') + ':'}</div>
-            <ServerInput placeholder={translate('logical.volume.mount')} inputType='text'
+            <ValidatingInput placeholder={translate('logical.volume.mount')} inputType='text'
               inputValue={this.state.logicalVolume.mount || ''} inputName='lvMount'
               inputAction={this.handleInputLine}/>
             <div className='details-group-title'>{translate('logical.volume.fstype') + ':'}</div>
-            <ServerInput placeholder={translate('logical.volume.fstype')} inputType='text'
+            <ValidatingInput placeholder={translate('logical.volume.fstype')} inputType='text'
               inputValue={this.state.logicalVolume.fstype || ''} inputName='lvFstype'
               inputAction={this.handleInputLine}/>
             <div className='details-group-title'>{translate('logical.volume.mkfs') + ':'}</div>
-            <ServerInput placeholder={translate('logical.volume.mkfs')} inputType='text'
+            <ValidatingInput placeholder={translate('logical.volume.mkfs')} inputType='text'
               inputValue={this.state.logicalVolume['mkfs-opts'] || ''} inputName='lvMkfs'
               inputAction={this.handleInputLine}/>
             <div className='btn-row details-btn'>
@@ -425,15 +426,15 @@ class DiskModelDetails extends Component {
           values={this.state.deviceGroupDevices} sendSelectedList={this.getSelectedDGDevices}
           editable='true'/>
         <div className='details-group-title'>{translate('device.group.consumer') + ':'}</div>
-        <ServerInput isRequired={true} placeholder={translate('device.group.consumer.name') + '*'}
+        <ValidatingInput isRequired={true} placeholder={translate('device.group.consumer.name') + '*'}
           inputValue={this.state.deviceGroupConsumer.name || ''} inputName='dgConsumerName'
           inputType='text' inputAction={this.handleInputLine}/>
         <div className='details-group-title'>{translate('device.group.consumer.usage') + ':'}</div>
-        <ServerInput placeholder={translate('device.group.consumer.usage')}
+        <ValidatingInput placeholder={translate('device.group.consumer.usage')}
           inputValue={this.state.deviceGroupConsumer.usage || ''} inputName='dgConsumerUsage'
           inputType='text' inputAction={this.handleInputLine}/>
         <div className='details-group-title'>{translate('device.group.consumer.attrs') + ':'}</div>
-        <ServerInput placeholder={translate('device.group.consumer.attrs')}
+        <ValidatingInput placeholder={translate('device.group.consumer.attrs')}
           inputValue={this.consumerAttrs} inputName='dgConsumerAttrs'
           inputType='textarea' inputValidate={YamlValidator}
           inputAction={(e, valid) => this.handleDeviceGroupConsumerAttrs(e.target.value, valid)}/>
@@ -613,7 +614,7 @@ class DiskModelDetails extends Component {
         <div className={detailsClass}>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
-            <ServerInput isRequired={true} placeholder={placeholder} autoFocus={true}
+            <ValidatingInput isRequired={true} placeholder={placeholder} autoFocus={true}
               inputValue={value} inputName={groupName} inputType='text'
               inputAction={this.handleInputLine} disabled={this.state.showThirdDetails}/>
             {secondDetailsLines}
@@ -746,7 +747,7 @@ class DiskModelDetails extends Component {
     this.state.volumeGroups.map((vg, index) => {
       firstDetailsLines.push(
         <div className='dropdown-plus-minus' key={vg.name + index}>
-          <ServerInput key={vg.name + index} inputType='text' inputValue={vg.name}
+          <ValidatingInput key={vg.name + index} inputType='text' inputValue={vg.name}
             disabled='true'/>
           <div className='plus-minus-container'>
             <span key={vg.name + 'edit' + index} className={editClass}
@@ -770,7 +771,7 @@ class DiskModelDetails extends Component {
     this.state.deviceGroups.map((dg, index) => {
       firstDetailsLines.push(
         <div className='dropdown-plus-minus' key={dg.name + index}>
-          <ServerInput key={dg.name + index} inputType='text' inputValue={dg.name}
+          <ValidatingInput key={dg.name + index} inputType='text' inputValue={dg.name}
             disabled='true'/>
           <div className='plus-minus-container'>
             <span key={dg.name + 'edit' + index} className={editClass}
@@ -834,7 +835,7 @@ class DiskModelDetails extends Component {
         <div className={detailsClass}>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
-            <ServerInput isRequired={true} placeholder={translate('disk.model.name') + '*'}
+            <ValidatingInput isRequired={true} placeholder={translate('disk.model.name') + '*'}
               inputValue={this.state.diskModelName} inputName='dmName' inputType='text'
               inputAction={this.handleInputLine} inputValidate={UniqueNameValidator} {...extraProps}
               autoFocus={true} disabled={this.secondDetails !== ''}/>

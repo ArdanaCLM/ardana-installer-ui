@@ -16,7 +16,7 @@ import React from 'react';
 
 /*
  * Custom Dropdown that provides the ability to add an extra option, emptyOption, at the beginning of the
- * list when no option has yet been selected, and which uses the same styling as ServerDropdown
+ * list when no option has yet been selected, and which uses the same styling as ListDropdown
  *
  * Other than the addition of emptyOption, it behaves identically to the standard html select.  See
  * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select  for a description of all of its

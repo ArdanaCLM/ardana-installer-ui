@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { InlineAddRemoveDropdown } from '../../components/InlineAddRemoveFields.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
@@ -147,7 +147,7 @@ class ServerGroupDetails extends Component {
         <div className='details-section'>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
-            <ServerInput isRequired={true} placeholder={translate('server.group.name') + '*'}
+            <ValidatingInput isRequired={true} placeholder={translate('server.group.name') + '*'}
               inputValue={this.state.name} inputName='name' inputType='text' {...extraProps}
               inputAction={this.handleInputLine} inputValidate={UniqueNameValidator}
               autoFocus={true}/>

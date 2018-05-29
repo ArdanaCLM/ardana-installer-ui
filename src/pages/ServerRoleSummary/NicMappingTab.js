@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { List, Map } from 'immutable';
 import { NetworkInterfaceValidator, PCIAddressValidator } from '../../utils/InputValidators.js';
@@ -210,7 +210,7 @@ class NicMappingTab extends Component {
       return (
         <div key={idx} className='dropdown-plus-minus'>
           <div className="field-container">
-            <ServerInput
+            <ValidatingInput
               inputAction={(e, valid) => this.updateDetailRow(idx, 'logical-name', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('logical-name')}
@@ -218,7 +218,7 @@ class NicMappingTab extends Component {
               isRequired='true'
               placeholder={translate('port.logical.name') + '*'} />
 
-            <ServerInput
+            <ValidatingInput
               inputAction={(e, valid) => this.updateDetailRow(idx, 'bus-address', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('bus-address')}
@@ -264,7 +264,7 @@ class NicMappingTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('nic.mapping.name') + '*'}
+              <ValidatingInput isRequired='true' placeholder={translate('nic.mapping.name') + '*'}
                 inputValue={this.state.nicMappingName} inputName='name' inputType='text'
                 inputAction={this.handleNameChange} />
               <div className="field-title-container">

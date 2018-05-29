@@ -16,8 +16,9 @@ import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { LabeledDropdown } from '../../components/LabeledDropdown.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { ServerInputLine, ServerDropdownLine } from '../../components/ServerUtils.js';
+import { InputLine } from '../../components/InputLine.js';
 import { postJson, putJson } from '../../utils/RestUtils.js';
 import { INPUT_STATUS } from '../../utils/constants.js';
 import { MODEL_SERVER_PROPS_ALL } from '../../utils/constants.js';
@@ -195,7 +196,7 @@ class ServersAddedManually extends Component {
     }
 
     return (
-      <ServerInputLine isRequired={required} label={title} inputName={name} {...theProps}
+      <InputLine isRequired={required} label={title} inputName={name} {...theProps}
         inputType={type} inputValidate={validator} inputAction={this.handleInputLine}
         inputValue={this.newServer[name]}/>
     );
@@ -203,7 +204,7 @@ class ServersAddedManually extends Component {
 
   renderDropdownLine(required, title, name, list, defaultOption) {
     return (
-      <ServerDropdownLine label={title} name={name} value={this.newServer[name]} optionList={list}
+      <LabeledDropdown label={title} name={name} value={this.newServer[name]} optionList={list}
         isRequired={required} selectAction={(value) => this.updateNewServer(value, name)}
         defaultOption={defaultOption}/>
     );

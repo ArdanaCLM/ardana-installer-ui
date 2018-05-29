@@ -16,8 +16,8 @@ import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
 import { InlineAddRemoveInput } from '../../components/InlineAddRemoveFields.js';
-import { ServerInput } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 
 class CloudConfigTab extends Component {
 
@@ -128,14 +128,14 @@ class CloudConfigTab extends Component {
           <div className='config-line'>
             <div className='config-title'>{translate('config.host.name.prefix') + ':'}</div>
             <div className='config-input'>
-              <ServerInput inputName={'namePrefix'} inputType={'text'}
+              <ValidatingInput inputName={'namePrefix'} inputType={'text'}
                 inputAction={this.handleInputChange} inputValue={this.state.namePrefix}/>
             </div>
           </div>
           <div className='config-line'>
             <div className='config-title'>{translate('config.host.member.prefix') + ':'}</div>
             <div className='config-input'>
-              <ServerInput inputName={'memberPrefix'} inputType={'text'}
+              <ValidatingInput inputName={'memberPrefix'} inputType={'text'}
                 inputAction={this.handleInputChange} inputValue={this.state.memberPrefix}/>
             </div>
           </div>

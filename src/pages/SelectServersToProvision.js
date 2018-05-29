@@ -21,7 +21,7 @@ import { YesNoModal } from '../components/Modals.js';
 import { ErrorBanner } from '../components/Messages.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import TransferTable from '../components/TransferTable.js';
-import { ServerInputLine } from '../components/ServerUtils.js';
+import { InputLine } from '../components/InputLine.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
 import { fetchJson } from '../utils/RestUtils.js';
 
@@ -158,7 +158,7 @@ class SelectServersToProvision extends BaseWizardPage {
                 <div className='detail-heading'>{translate('server.user.prompt')}</div>
                 <div className='detail-field'>{this.state.osInstallUsername}</div>
               </div>
-              <ServerInputLine
+              <InputLine
                 isRequired='true'
                 label='server.pass.prompt'
                 inputName='osInstallPassword'

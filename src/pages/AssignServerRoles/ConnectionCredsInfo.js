@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
-import { ServerInputLine } from '../../components/ServerUtils.js';
+import { InputLine } from '../../components/InputLine.js';
 import { ActionButton, ItemHelpButton } from '../../components/Buttons.js';
 import { postJson } from '../../utils/RestUtils.js';
 import {
@@ -335,7 +335,7 @@ class ConnectionCredsInfo extends Component {
       required = false;
     }
     return (
-      <ServerInputLine label={title} isRequired={required} inputName={name} inputType={type}
+      <InputLine label={title} isRequired={required} inputName={name} inputType={type}
         inputValidate={validate} category={category} {...theprops}
         inputValue={this.data[category]['creds'][name] || ''}
         inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>

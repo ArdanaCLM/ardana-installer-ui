@@ -15,8 +15,10 @@
 import React, { Component } from 'react';
 import { fromJS } from 'immutable';
 import { translate } from '../../localization/localize.js';
-import { ServerInputLine, ServerDropdownLine, ServerInput } from '../../components/ServerUtils.js';
+import { LabeledDropdown } from '../../components/LabeledDropdown.js';
+import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
   IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator
@@ -213,7 +215,7 @@ class UpdateNetworks extends Component {
     return (
       <div key={0} className='dropdown-plus-minus network-plus-minus'>
         <div className="field-container">
-          <ServerInput
+          <ValidatingInput
             inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, 0)}
             inputType='text' inputValue={''} inputValidate={AddressesValidator}
             isRequired='false' placeholder={translate('network.addresses')}/>
@@ -231,7 +233,7 @@ class UpdateNetworks extends Component {
       return (
         <div key={idx} className='dropdown-plus-minus network-plus-minus'>
           <div className="field-container">
-            <ServerInput
+            <ValidatingInput
               inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, idx)}
               inputType='text' inputValue={addr} inputValidate={AddressesValidator}
               isRequired='false' placeholder={translate('network.addresses')}/>
@@ -279,7 +281,7 @@ class UpdateNetworks extends Component {
     }
 
     return (
-      <ServerInputLine
+      <InputLine
         isRequired={isRequired} inputName={name} inputType={type}
         placeholder={placeholderText} inputValidate={validate}
         inputValue={this.props.mode === MODE.EDIT ? this.state.data[name] : ''} {...extraProps}
@@ -296,7 +298,7 @@ class UpdateNetworks extends Component {
       };
     }
     return (
-      <ServerDropdownLine value={this.state.data['network-group']}
+      <LabeledDropdown value={this.state.data['network-group']}
         optionList={this.networkGroups} isRequired={true}
         emptyOption={emptyOptProps} selectAction={this.handleSelectNetworkGroup}/>
     );

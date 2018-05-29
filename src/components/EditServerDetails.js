@@ -15,7 +15,8 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
-import { ServerInputLine, ServerDropdown} from '../components/ServerUtils.js';
+import { InputLine } from '../components/InputLine.js';
+import { ListDropdown } from '../components/ListDropdown.js';
 import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
@@ -123,7 +124,7 @@ class EditServerDetails extends Component {
       theProps.ids = this.props.ids;
     }
     return (
-      <ServerInputLine
+      <InputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title} {...theProps}
         inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
         inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
@@ -175,7 +176,7 @@ class EditServerDetails extends Component {
         <div className='detail-heading'>{translate(title) + '*'}</div>
         <div className='input-body'>
           <div className='input-with-button'>
-            <ServerDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
+            <ListDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
               optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
             <ActionButton type={'default'} clickAction={addAction} moreClass={'inline-button'}
               displayLabel={translate(buttonLabel) + ' ...'}/>
