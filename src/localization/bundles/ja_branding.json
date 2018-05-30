@@ -1,3 +1,4 @@
 {
-    "openstack.cloud.deployer.title": "SUSE OpenStack Cloud Deployer"
+    "openstack.cloud.deployer.title": "SUSE OpenStack Cloud Deployer",
+    "openstack.cloud.deployer.title.version": "SUSE OpenStack Cloud 8"
 }
