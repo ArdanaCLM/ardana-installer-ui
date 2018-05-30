@@ -18,8 +18,6 @@ import '../Deployer.css';
 import { translate } from '../localization/localize.js';
 import ServerTable from './ServerTable.js';
 import { isRoleAssignmentValid } from '../utils/ModelUtils.js';
-import { LabeledDropdown } from './LabeledDropdown.js';
-import { ValidatingInput } from './ValidatingInput.js';
 
 export class SearchBar extends Component {
   constructor(props) {
