@@ -143,6 +143,12 @@ function extractResponse(response) {
       if (response.ok) {
         return value;
       } else {
+        //if the status here is 401 or 403, we should redirect to the login page (once implemented)
+        // or to the cloud deployment summary
+        if((response.status === 401 || response.status === 403) &&
+           window.location.search.indexOf('login=required') === -1) {
+          window.location.replace(window.location.href + "?login=required");
+        }
         return Promise.reject(new RestError(response.statusText, response.status, value));
       }
     });

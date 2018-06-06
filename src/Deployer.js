@@ -22,6 +22,8 @@ import { translate } from './localization/localize.js';
 
 class Deployer extends Component {
   render() {
+    //TODO - wrap the InstallWizard with a component that varies the wizard by task
+    // and has a selection or menuing system and the login page
     return (
       <Router>
         <Switch>
