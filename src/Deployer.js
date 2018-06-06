@@ -16,13 +16,35 @@ import React, { Component } from 'react';
 import './Deployer.css';
 import InstallWizard from './InstallWizard';
 import { pages } from './utils/WizardDefaults.js';
+import { HashRouter as Router, Switch } from 'react-router-dom';
+import Route from 'react-router-dom/Route';
+import { translate } from './localization/localize.js';
 
 class Deployer extends Component {
   render() {
     return (
-      <div>
-        <InstallWizard pages={pages}/>
-      </div>
+      <Router>
+        <Switch>
+          <Route path='/login' render={() => {
+            return(
+                <div>This will be the login component</div>
+            )}
+          } />
+
+          <Route path='/about' render={() => {
+              return(
+                <div>{translate('openstack.cloud.deployer.title.version')}</div>
+              )}
+          } />
+
+          <Route path='/' render={() => {
+            return(
+              <InstallWizard pages={pages} />
+            )}
+          } />
+
+        </Switch>
+      </Router>
     );
   }
 }
