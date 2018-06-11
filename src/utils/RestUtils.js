@@ -13,6 +13,8 @@
 * limitations under the License.
 **/
 import { getConfig } from './ConfigHelper.js';
+import { redirectToLogin } from './RouteUtils.js';
+import { getAuthToken } from './Auth.js';
 
 // Merge init objects together.  Any nested 'headers' objects will also be merged
 function mergeInits(...inits) {
@@ -28,7 +30,7 @@ function mergeInits(...inits) {
   return Object.assign({}, ...inits, {'headers': mergedHeaders});
 }
 
-function doJson(url, method, body, init) {
+function doJson(url, method, body, init, forceLogin=true) {
 
   let myInit = {
     method: method,
@@ -37,6 +39,11 @@ function doJson(url, method, body, init) {
       'Content-Type': 'application/json'
     }
   };
+
+  const token = getAuthToken();
+  if (token) {
+    myInit.headers['X-Auth-Token'] = token;
+  }
 
   if (init) {
     myInit = mergeInits(myInit, init);
@@ -54,7 +61,7 @@ function doJson(url, method, body, init) {
 
   return buildUrl(url)
     .then(url => fetch(url, myInit))
-    .then(res => extractResponse(res));
+    .then(res => extractResponse(res, forceLogin));
 }
 
 /**
@@ -65,9 +72,13 @@ function doJson(url, method, body, init) {
  *                       is received the request will be directed to the "shim".
  * @param {Object} init - optional argument that will be passed to the fetch() function.  It often
  *                       will contain HTTP headers when supplied.
+ * @param {Object} forceLogin - optional argument that indicates that requests that are rejected
+ *                        with auth errors (401, 403) should cause UI to navigate to the login page. This
+ *                        will normally be true, but in some corner cases (like the login page itself) it
+ *                        will be set to false.
  */
-export function fetchJson(url, init) {
-  return doJson(url, 'GET', undefined, init);
+export function fetchJson(url, init, forceLogin=true) {
+  return doJson(url, 'GET', undefined, init, forceLogin);
 }
 
 
@@ -82,9 +93,13 @@ export function fetchJson(url, init) {
  *                        is undefined, then an empty string will be POSTed
  * @param {Object} init - optional argument that will be passed to the fetch() function.  It often
  *                        will contain HTTP headers when supplied.
+ * @param {Object} forceLogin - optional argument that indicates that requests that are rejected
+ *                        with auth errors (401, 403) should cause UI to navigate to the login page. This
+ *                        will normally be true, but in some corner cases (like the login page itself) it
+ *                        will be set to false.
  */
-export function postJson(url, body, init) {
-  return doJson(url, 'POST', body, init);
+export function postJson(url, body, init, forceLogin=true) {
+  return doJson(url, 'POST', body, init, forceLogin);
 }
 
 
@@ -118,7 +133,7 @@ export function deleteJson(url) {
  * text of the response (when valid) or returns rejected Promise with the text of the
  * error message
  */
-function extractResponse(response) {
+function extractResponse(response, forceLogin) {
 
   return response.text()
     .then(txt => {
@@ -143,6 +158,10 @@ function extractResponse(response) {
       if (response.ok) {
         return value;
       } else {
+        // if the status is 401 or 403, redirect to the login page
+        if(forceLogin && [401,403].includes(response.status)) {
+          redirectToLogin();
+        }
         return Promise.reject(new RestError(response.statusText, response.status, value));
       }
     });
