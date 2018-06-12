@@ -53,6 +53,23 @@ class ActionButton extends Component {
 }
 
 
+class SubmitButton extends Component {
+  render() {
+    let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
+      (this.props.isDisabled ? ' disabled' : '');
+    buttonClass += (this.props.lastButton) ? 'last-button' : '';
+    buttonClass += (this.props.moreClass) ? 'inline-button' : '';
+    return (
+      <button
+        type="submit"
+        className={buttonClass}
+        disabled={this.props.isDisabled}>{this.props.displayLabel}
+      </button>
+    );
+  }
+}
+
+
 class LoadFileButton extends Component {
 
   constructor(props) {
@@ -278,6 +295,7 @@ module.exports = {
   PickerButton: PickerButton,
   ActivePickerButton: ActivePickerButton,
   ActionButton: ActionButton,
+  SubmitButton: SubmitButton,
   LoadFileButton: LoadFileButton,
   ItemHelpButton: ItemHelpButton,
   AssignmentButton: AssignmentButton,

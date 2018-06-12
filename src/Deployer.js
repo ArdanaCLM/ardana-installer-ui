@@ -19,28 +19,31 @@ import { pages } from './utils/WizardDefaults.js';
 import { HashRouter as Router, Switch } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
 import { translate } from './localization/localize.js';
+import LoginPage from './pages/Login.js';
 
 class Deployer extends Component {
   render() {
+    //TODO - wrap the InstallWizard with a component that varies the wizard by task
+    // and has a selection or menuing system and the login page
     return (
       <Router>
         <Switch>
           <Route path='/login' render={() => {
             return(
-                <div>This will be the login component</div>
-            )}
+              <LoginPage />
+            );}
           } />
 
           <Route path='/about' render={() => {
-              return(
-                <div>{translate('openstack.cloud.deployer.title.version')}</div>
-              )}
+            return(
+              <div>{translate('openstack.cloud.deployer.title.version')}</div>
+            );}
           } />
 
           <Route path='/' render={() => {
             return(
               <InstallWizard pages={pages} />
-            )}
+            );}
           } />
 
         </Switch>

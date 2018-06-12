@@ -322,15 +322,6 @@ class CloudModelPicker extends BaseWizardPage {
     const hypervisorFilter = {name: 'hypervisor-type', options: hOptions};
     newFilters.push(hypervisorFilter);
 
-    const sSource = this.state.currentFilter === 'storage-type' ? this.filteredTemplates : templates;
-    let storages = sSource.map((template) => {
-      return (template.metadata && template.metadata.storage) ? template.metadata.storage : undefined;
-    }).filter(storage => storage !== undefined);
-    const uniqueStorages = [...new Set(storages)].sort();
-    const sOptions = uniqueStorages.length > 0 ? ['none'].concat(uniqueStorages) : ['none'];
-    const storageFilter = {name: 'storage-type', options: sOptions};
-    //newFilters.push(storageFilter);
-
     const nSource = this.state.currentFilter === 'network-type' ? this.filteredTemplates : templates;
     let networks = nSource.map((template) => {
       return (template.metadata && template.metadata.network) ? template.metadata.network : undefined;
