@@ -463,7 +463,10 @@ class PlaybookProgress extends Component {
       return (
         <ActionButton
           displayLabel={translate('cancel')}
-          clickAction={() => this.setState({showConfirmationDlg: true})} />
+          clickAction={() => this.setState({
+            errorMsg: translate('deploy.cancel.message'),
+            showConfirmationDlg: true})
+          } />
       );
     }
   }
