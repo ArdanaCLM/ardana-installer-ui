@@ -118,6 +118,9 @@ p {
   tbody > tr > td.actions {
     width: 0.1em;
     padding-left: 0em;
+    .material-icons {
+      font-size: 18px;
+    }
   }
 }
 
@@ -165,7 +168,7 @@ p {
   }
 }
 
-.glyphicon, .fa-minus, .fa-plus, .material-icons {
+.material-icons {
   cursor: pointer;
   color: @info-link-color;
   &.disabled {
@@ -193,6 +196,10 @@ p {
 
 .tooltip-icon {
   margin-left: 4px;
+  .material-icons {
+    font-size: 18px;
+    vertical-align: text-bottom;
+  }
 }
 
 .login-page {

@@ -148,6 +148,10 @@
       .right-sign {
         margin: auto 0 auto 0;
       }
+      .material-icons {
+        font-size: 18px;
+        vertical-align: middle;
+      }
     }
     .details-btn {
       width: 100%;
@@ -254,6 +258,9 @@
     .remove-button {
       margin: auto 0 auto 0;
     }
+    .material-icons {
+      font-size: 18px;
+    }
   }
   .action-column {
     margin-top: 1em;
@@ -317,9 +324,11 @@
       text-align: end;
     }
     .expand-collapse-icon {
-      padding-left: 1em;
-      font-size: 0.8em;
-      color: @box-border-color;
+      .material-icons {
+        padding-left: 0.3em;
+        vertical-align: middle;
+        color: @box-border-color;
+      }
     }
     &.has-error {
       color: @errorcolor;
@@ -340,13 +349,14 @@
   .show-row td span,
   .show-row td div {
     max-height: 40em;
-    transition: max-height 0.2s;
+    transition: max-height 0.4s;
   }
+
   .hide-row td span,
   .hide-row td div {
     overflow: hidden;
     max-height: 0;
-    transition: max-height 0.2s;
+    transition: max-height 0.4s;
   }
 }
 

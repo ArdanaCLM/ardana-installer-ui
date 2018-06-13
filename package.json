@@ -4,7 +4,6 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "better-react-spinkit": "^2.0.0",
-    "font-awesome": "^4.7.0",
     "history": "^4.7.2",
     "immutable": "^3.8.1",
     "js-yaml": "^3.10.0",

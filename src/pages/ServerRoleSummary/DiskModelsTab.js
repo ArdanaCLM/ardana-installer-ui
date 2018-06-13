@@ -112,8 +112,8 @@ class DiskModelsTab extends Component {
           deviceGroups: m.has('device-groups') ? m.get('device-groups').toJS() : []
         };
 
-        let editClass = 'glyphicon glyphicon-pencil edit-button';
-        let removeClass = 'glyphicon glyphicon-trash remove-button';
+        let editClass = 'material-icons edit-button';
+        let removeClass = 'material-icons remove-button';
         if (this.state.showDiskModelDetails) {
           editClass = editClass + ' disabled';
           removeClass = removeClass + ' disabled';
@@ -126,8 +126,12 @@ class DiskModelsTab extends Component {
             <td>{numDeviceGroups}</td>
             <td>
               <div className='row-action-container'>
-                <span onClick={() => this.editDiskModel(selected)} className={editClass}/>
-                <span onClick={() => this.confirmRemoveDiskModel(name)} className={removeClass}/>
+                <span onClick={() => this.editDiskModel(selected)} >
+                  <i className={editClass}>edit</i>
+                </span>
+                <span onClick={() => this.confirmRemoveDiskModel(name)} >
+                  <i className={removeClass}>delete</i>
+                </span>
               </div>
             </td>
           </tr>);

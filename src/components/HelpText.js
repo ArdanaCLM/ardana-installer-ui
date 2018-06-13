@@ -22,7 +22,9 @@ export default function HelpText(props) {
 
   return (
     <OverlayTrigger placement="top" overlay={tooltip}>
-      <span className='glyphicon glyphicon-info-sign tooltip-icon'/>
+      <span className='tooltip-icon'>
+        <i className='material-icons'>info</i>
+      </span>
     </OverlayTrigger>
   );
 }

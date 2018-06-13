@@ -39,7 +39,9 @@ export class SearchBar extends Component {
             type="text" placeholder={translate('placeholder.search.server.text')}
             value={this.props.filterText} onChange={this.handleFilterTextInputChange}/>
         </span>
-        <span className='glyphicon glyphicon-search search-icon'></span>
+        <span className='search-icon'>
+          <i className='material-icons'>search</i>
+        </span>
       </div>
     );
   }
