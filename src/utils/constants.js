@@ -37,3 +37,9 @@ export const MODEL_SERVER_PROPS =  [
 ];
 
 export const MODEL_SERVER_PROPS_ALL = MODEL_SERVER_PROPS.concat(['role', 'uid']);
+
+export const IS_MS_EDGE = /Edge/.test(window.navigator.userAgent);
+
+export const IS_MS_IE = /MSIE\s|Trident\/7\./.test(window.navigator.userAgent);
+
+export const TRUTHY = [true, 'true', 'True', 'yes', 'Yes'];

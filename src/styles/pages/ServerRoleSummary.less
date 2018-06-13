@@ -76,7 +76,7 @@
       font-weight: bold;
       line-height: 2.8em;
     }
-    .details-body .server-input {
+    .details-body .validating-input {
       input, textarea {
         width: 85%;
       }
@@ -115,7 +115,7 @@
       display: flex;
       align-items: baseline;
 
-      .server-detail-select, .server-input {
+      .server-detail-select, .validating-input {
         width: 85%;
         select, input { 
           width: 100%;
@@ -123,7 +123,7 @@
       }
 
       &.network-plus-minus {
-        .server-input {
+        .validating-input {
           width: 100%;
         }
         input {
@@ -134,7 +134,7 @@
       .field-container {
         width: 85%;
         display: flex;
-        .server-input:not(:last-child) {
+        .validating-input:not(:last-child) {
           margin-right: 0.5em;
         }
       }
@@ -225,12 +225,12 @@
       padding: 4px;
       width: 85%;
     }
-    .details-section .details-body .server-input input {
+    .details-section .details-body .validating-input input {
       padding: 4px;
       width: 85%;
     }
 
-    .details-section .details-body .dropdown-plus-minus .server-input input {
+    .details-section .details-body .dropdown-plus-minus .validating-input input {
       padding: 4px;
       width: 100%;
     }
@@ -277,10 +277,10 @@
     }
     .config-input {
       width: 30em;
-      .server-input {
+      .validating-input {
         width: 85%;
       }
-      .server-input input {
+      .validating-input input {
         width: 100%;
       }
     }
@@ -288,6 +288,13 @@
       width: 30em;
       margin-bottom: 0.5em;
     }
+  }
+}
+
+.cell-tooltip {
+  .tooltip-inner {
+    white-space: pre-line;
+    text-align: start;
   }
 }
 

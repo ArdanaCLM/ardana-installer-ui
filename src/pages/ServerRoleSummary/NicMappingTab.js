@@ -16,11 +16,12 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { List, Map } from 'immutable';
 import { NetworkInterfaceValidator, PCIAddressValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class NicMappingTab extends Component {
 
@@ -209,7 +210,7 @@ class NicMappingTab extends Component {
       return (
         <div key={idx} className='dropdown-plus-minus'>
           <div className="field-container">
-            <ServerInput
+            <ValidatingInput
               inputAction={(e, valid) => this.updateDetailRow(idx, 'logical-name', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('logical-name')}
@@ -217,7 +218,7 @@ class NicMappingTab extends Component {
               isRequired='true'
               placeholder={translate('port.logical.name') + '*'} />
 
-            <ServerInput
+            <ValidatingInput
               inputAction={(e, valid) => this.updateDetailRow(idx, 'bus-address', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('bus-address')}
@@ -263,7 +264,7 @@ class NicMappingTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('nic.mapping.name') + '*'}
+              <ValidatingInput isRequired='true' placeholder={translate('nic.mapping.name') + '*'}
                 inputValue={this.state.nicMappingName} inputName='name' inputType='text'
                 inputAction={this.handleNameChange} />
               <div className="field-title-container">
@@ -324,7 +325,13 @@ class NicMappingTab extends Component {
 
     const rows = this.getRows()
       .map((m,idx) => {
-        const numPorts = m.get('physical-ports').size;
+        const portList = m.get('physical-ports').toJS();
+        const tooltipText = portList.map(p => p['logical-name']).join(',\n');
+        const tooltip = (<Tooltip id='physical-ports' className='cell-tooltip'>{tooltipText}</Tooltip>);
+        const numPorts = (
+          <OverlayTrigger placement='right' overlay={tooltip}>
+            <span>{m.get('physical-ports').size}</span>
+          </OverlayTrigger>);
         return (
           <tr key={idx}>
             <td>{m.get('name')}</td>

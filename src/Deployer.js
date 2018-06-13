@@ -16,13 +16,76 @@ import React, { Component } from 'react';
 import './Deployer.css';
 import InstallWizard from './InstallWizard';
 import { pages } from './utils/WizardDefaults.js';
+import { HashRouter as Router, Switch, Redirect } from 'react-router-dom';
+import Route from 'react-router-dom/Route';
+import { translate } from './localization/localize.js';
+import LoginPage from './pages/Login.js';
+import { fetchJson } from './utils/RestUtils.js';
+import { getAuthToken } from './utils/Auth.js';
 
 class Deployer extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isSecured: undefined
+    };
+  }
+
+  componentDidMount = () => {
+    fetchJson('/api/v1/clm/is_secured')
+      .then(response => {
+        this.setState({isSecured: response['isSecured']});
+      });
+  }
+
   render() {
+
+    // Decide which path that / should route to depending on whether
+    //    the ardana service is running in secured mode and whether
+    //    we have a valid auth token
+
+    let defaultPath;
+    if (this.state.isSecured === undefined) {
+      // If the REST call has not yet completed, then show a loading page (briefly)
+      defaultPath = (
+        <div className="loading-message">{translate('wizard.loading.pleasewait')}</div>
+      );
+    } else if (this.state.isSecured) {
+      if (! getAuthToken()) {
+        // If a login is required, Redirect to the login page
+        defaultPath = <Redirect to='/login'/> ;
+      } else {
+
+        // In a secured (post-install) mode with a valid auth token.
+        // TODO - display post-install UI
+        defaultPath = (<div>Post-install UI goes here</div>);
+      }
+    } else {
+
+      // Initial, unsecured mode.  Display the InstallWizard
+      defaultPath = <InstallWizard pages={pages}/>;
+    }
+
     return (
-      <div>
-        <InstallWizard pages={pages}/>
-      </div>
+      <Router>
+        <Switch>
+          <Route path='/login' render={() => {
+            return(
+              <LoginPage />
+            );}
+          } />
+
+          <Route path='/about' render={() => {
+            return(
+              <div>{translate('openstack.cloud.deployer.title.version')}</div>
+            );}
+          } />
+
+          <Route path='/' render={() => defaultPath} />
+
+        </Switch>
+      </Router>
     );
   }
 }

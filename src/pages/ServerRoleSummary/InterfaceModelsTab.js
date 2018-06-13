@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
-import { ServerInput } from '../../components/ServerUtils.js';
+import { ValidatingInput } from '../../components/ValidatingInput.js';
 import Dropdown from '../../components/Dropdown.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
@@ -24,6 +24,7 @@ import { YamlValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
 import { dump,  safeLoad } from 'js-yaml';
 import { isEmpty } from 'lodash';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class InterfaceModelsTab extends Component {
 
@@ -167,10 +168,20 @@ class InterfaceModelsTab extends Component {
     // build the rows in the main table
     const rows = this.getRows()
       .map((m,idx) => {
+        let numInterfaces = '-';
+        if (m.has('network-interfaces')) {
+          const interfaceList = m.get('network-interfaces').toJS();
+          const tooltipText = interfaceList.map(i => i.name).join(',\n');
+          const tooltip = (<Tooltip id='interfaces' className='cell-tooltip'>{tooltipText}</Tooltip>);
+          numInterfaces = (
+            <OverlayTrigger placement='right' overlay={tooltip}>
+              <span>{m.get('network-interfaces').size}</span>
+            </OverlayTrigger>);
+        }
         return (
           <tr key={idx}>
             <td>{m.get('name')}</td>
-            <td>{m.get('network-interfaces', new List()).size}</td>
+            <td>{numInterfaces}</td>
             <td>
               <div className='row-action-container'>
                 <span className={editClass}
@@ -425,7 +436,7 @@ class InterfaceModelsTab extends Component {
 
         return (
           <div key={idx} className='dropdown-plus-minus'>
-            <ServerInput isRequired='true' placeholder={translate('interface.name') + '*'}
+            <ValidatingInput isRequired='true' placeholder={translate('interface.name') + '*'}
               inputValue={e.get('name')} inputType='text' disabled='true' />
             <div className='plus-minus-container'> {edit} {minus} </div>
           </div>
@@ -453,11 +464,11 @@ class InterfaceModelsTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('interface.model.name') + '*'}
+              <ValidatingInput isRequired='true' placeholder={translate('interface.model.name') + '*'}
                 inputValue={this.state.interfaceModel.get('name')} inputName='modelname'
                 inputType='text' inputAction={this.handleInterfaceModelNameChange}
                 disabled={this.state.detailMode !== MODE.NONE}/>
-              <div className='details-group-title'>{translate('network.interfaces') + ':'}</div>
+              <div className='details-group-title'>{translate('network.interfaces') + '* :'}</div>
               {interfaces}
               {addButton}
 
@@ -536,10 +547,19 @@ class InterfaceModelsTab extends Component {
       }
     } else {
       networkInterface = networkInterface.set('device', prevState.deviceList.get(0));
-      if (networkInterface.get('forced-network-groups').last() === undefined) {
+    }
+
+    if (networkInterface.get('forced-network-groups').last() === undefined) {
+      if (networkInterface.get('forced-network-groups').size > 1) {
+        networkInterface = networkInterface.updateIn(['forced-network-groups'], list => list.pop());
+      } else {
         networkInterface = networkInterface.delete('forced-network-groups');
       }
-      if (networkInterface.get('network-groups').last() === undefined) {
+    }
+    if (networkInterface.get('network-groups').last() === undefined) {
+      if (networkInterface.get('network-groups').size > 1) {
+        networkInterface = networkInterface.updateIn(['network-groups'], list => list.pop());
+      } else {
         networkInterface = networkInterface.delete('network-groups');
       }
     }
@@ -559,11 +579,13 @@ class InterfaceModelsTab extends Component {
   isNetworkInterfaceSaveAllowed = () => {
     // The save button is allowed if the values are all valid and there is
     // some change compared to the initial values
+    const forcedNetworkGroups = this.state.networkInterface.get('forced-network-groups');
+    const networkGroups = this.state.networkInterface.get('network-groups');
     const isValid =
       this.state.isInterfaceNameValid &&
       this.state.deviceList.last().get('name') !== undefined &&
-      (this.state.networkInterface.get('forced-network-groups').last() !== undefined ||
-        this.state.networkInterface.get('network-groups').last() !== undefined) &&
+      (forcedNetworkGroups.size > 1 || forcedNetworkGroups.last() !== undefined ||
+        networkGroups.size > 1 || networkGroups.last() !== undefined) &&
       (! this.state.networkInterface.has('bond-data') || (
         this.state.isBondOptionsValid  &&
         this.state.isBondDeviceNameValid
@@ -604,18 +626,18 @@ class InterfaceModelsTab extends Component {
             <div className='details-header'>{title}</div>
             <div className='details-body'>
 
-              <ServerInput isRequired='true' placeholder={translate('interface.name')}
+              <ValidatingInput isRequired='true' placeholder={translate('interface.name')}
                 inputValue={this.state.networkInterface.get('name')} inputName='interfacename'
                 inputAction={this.handleInterfaceNameChange}
                 autoFocus="true" />
-              <div className='details-group-title'>{translate('network.devices') + ':'}</div>
+              <div className='details-group-title'>{translate('network.devices') + '* :'}</div>
               {this.renderDevices()}
               {this.renderNetworkGroups()}
 
               {this.state.networkInterface.has('bond-data') ?
                 <div>
                   <div className='details-group-title'>{translate('bond.device.name') + '* :'}</div>
-                  <ServerInput required='true' placeholder={translate('bond.device.name')}
+                  <ValidatingInput required='true' placeholder={translate('bond.device.name')}
                     inputValue={this.state.bondDeviceName} inputName='bonddevicename'
                     inputAction={(e, valid) => this.handleBondDeviceNameChange(e.target.value, valid)}
                   />
@@ -625,7 +647,7 @@ class InterfaceModelsTab extends Component {
               {this.state.networkInterface.has('bond-data') ?
                 <div>
                   <div className='details-group-title'>{translate('bond.options') + ':'}</div>
-                  <ServerInput placeholder={translate('bond.options')}
+                  <ValidatingInput placeholder={translate('bond.options')}
                     inputValue={this.state.bondOptions} inputName='bondoptions'
                     inputType='textarea'
                     inputValidate={YamlValidator}
@@ -761,8 +783,8 @@ class InterfaceModelsTab extends Component {
 
       let newInterface = prev.networkInterface.deleteIn([groupKey, idx]);
 
-      if (newInterface.get('network-groups').size === 0) {
-        newInterface = newInterface.updateIn(['network-groups'], list => list.push(undefined));
+      if (newInterface.get(groupKey).size === 0) {
+        newInterface = newInterface.updateIn([groupKey], list => list.push(undefined));
       }
 
       return {networkInterface: newInterface};

@@ -32,6 +32,15 @@
     "common.details": "Details",
     "common.save.continue": "Save & Continue",
 
+    "login": "Log In",
+
+    "login.header": "Enter credentials",
+    "login.placeholder.username": "Enter your username...",
+    "login.placeholder.password": "Enter your password...",
+    "login.invalid": "Invalid username or password",
+    "login.unprivileged": "Insufficient privileges",
+    "login.error": "Login error: {0}",
+
     "install.intro.message.body1": "You are about to install a new cloud.",
     "install.intro.message.body2": "You will need to supply information about the servers, networks and storage that will make up your cloud. The OpenStack Cloud installer will then take care of deploying and configuring your new cloud for you.",
     "install.intro.message.steps.heading": "The steps you will complete to install your cloud are:",
@@ -74,6 +83,7 @@
     "model.picker.filter.network-type": "Any Network Type",
     "model.picker.filter.network-type.option.flat": "Flat Network",
     "model.picker.filter.network-type.option.multi-tenant": "Multi-tenant Network",
+    "model.picker.filter.clear": "Clear all filters",
     "model.picker.custom-model": "## Custom model\n\nNo additional details are available for this customized model.",
 
     "model.summary.heading": "Cloud Model to Deploy",
@@ -99,6 +109,8 @@
     "validate.deployment.verbosity.tooltip": "The amount of debug messages to provide during cloud deployment.",
     "validate.deployment.verbosity.lowest": "0-No debug messages",
     "validate.deployment.verbosity.highest": "4-Extremely verbose",
+    "validate.deployment.clearServers": "Clear Unused Servers/Addresses",
+    "validate.deployment.clearServers.tooltip": "Turns on remove_deleted_servers and free-unused_addresses options. These options are not needed upon initial deployment.",
 
     "validate.tab.model": "Model",
     "validate.tab.templates": "Templates and Services",
@@ -196,8 +208,6 @@
     "server.port.prompt": "Port",
     "server.sm": "SUSE Manager",
     "server.ov": "HPE OneView",
-    "server.validator.error": "Failed to execute validator",
-    "server.input.required.error": "Input is required",
     "context.menu.item.detail": "Details",
     "context.menu.item.edit": "Edit",
     "server.test.sm.success": "Successfully tested connection to SUSE Manager {0}.",
@@ -375,6 +385,7 @@
 
     "server.role.summary.heading": "Server and Server Role Summary",
 
+    "input.required.error": "Input is required",
     "input.validator.ipv4address.error": "Please enter a valid IPV4 Address",
     "input.validator.macaddress.error": "Please enter a valid MAC Address",
     "input.validator.port.error": "Please enter a valid port between 0 and 65535",
@@ -391,6 +402,7 @@
     "input.validator.yaml.error": "Invalid YAML",
     "input.validator.netmask.error": "Please enter a valid netmask",
     "input.validator.netmask.ipinvalid.error": "Netmask is valid but does not contain the specified subnet",
+    "input.validator.error": "Failed to execute validator",
 
     "clouddeploy.installsteps.ConfigPage": "Deployment Configuration",
     "clouddeploy.installsteps.InstallIntro": "Introduction",

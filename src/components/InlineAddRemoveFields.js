@@ -13,7 +13,8 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { ServerInput, ServerDropdown } from '../components/ServerUtils.js';
+import { ListDropdown } from '../components/ListDropdown.js';
+import { ValidatingInput } from '../components/ValidatingInput.js';
 
 class InlineAddRemoveDropdown extends Component {
   constructor(props) {
@@ -124,7 +125,7 @@ class InlineAddRemoveDropdown extends Component {
       textFields.map((item, index) => {
         lines.push(
           <div className='dropdown-plus-minus' key={this.props.name + item + index}>
-            <ServerInput key={this.props.name + item + index} inputType='text' inputValue={item}
+            <ValidatingInput key={this.props.name + item + index} inputType='text' inputValue={item}
               disabled='true'/>
             <div className='plus-minus-container'>
               <span key={this.props.name + item + 'minus' + index}
@@ -161,7 +162,7 @@ class InlineAddRemoveDropdown extends Component {
       <div>
         {lines}
         <div className='dropdown-plus-minus'>
-          <ServerDropdown key={this.props.name + 'start'} name={this.props.name} value={lastItem}
+          <ListDropdown key={this.props.name + 'start'} name={this.props.name} value={lastItem}
             optionList={options} defaultOption={this.props.defaultOption}
             selectAction={this.handleSelectedItem}/>
           <div className='plus-minus-container'>
@@ -272,7 +273,7 @@ class InlineAddRemoveInput extends Component {
     textFields.map((item, index) => {
       lines.push(
         <div className='dropdown-plus-minus' key={this.props.name + index}>
-          <ServerInput key={this.props.name + index} inputType='text' inputValue={item}
+          <ValidatingInput key={this.props.name + index} inputType='text' inputValue={item}
             inputAction={(e) => this.updateRow(e, index)}
             disabled={this.props.disabled || !this.props.editable}/>
           <div className='plus-minus-container'>
@@ -288,7 +289,7 @@ class InlineAddRemoveInput extends Component {
       <div>
         {lines}
         <div className='dropdown-plus-minus'>
-          <ServerInput key={this.props.name + 'start'} inputValue={this.state.selectedItem}
+          <ValidatingInput key={this.props.name + 'start'} inputValue={this.state.selectedItem}
             inputType='text' inputAction={this.handleInputLine} placeholder={this.props.placeholder}
             isRequired={required} disabled={this.props.disabled}/>
           <div className='plus-minus-container'>
