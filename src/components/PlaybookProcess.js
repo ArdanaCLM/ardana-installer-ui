@@ -22,6 +22,7 @@ import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
 import { List } from 'immutable';
 import debounce from 'lodash/debounce';
+import { YesNoModal } from '../components/Modals.js';
 
 const PROGRESS_UI_CLASS = {
   NOT_STARTED: 'notstarted',
@@ -89,7 +90,8 @@ class PlaybookProgress extends Component {
       playbooksStarted: [],          // list of playbooks that have started
       playbooksComplete: [],         // list of playbooks that have completed
       playbooksError: [],            // list of playbooks that have errored
-      displayedLogs: List()          // log messages to display in the log viewer
+      displayedLogs: List(),         // log messages to display in the log viewer
+      showConfirmationDlg: false,    // show the confirmation dialog
     };
   }
 
@@ -420,6 +422,7 @@ class PlaybookProgress extends Component {
 
   cancelRunningPlaybook = () => {
 
+    this.setState({showConfirmationDlg: false});
     const running = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS)[0];
     if (running) {
       deleteJson('/api/v1/clm/plays/' + running.playId)
@@ -460,7 +463,7 @@ class PlaybookProgress extends Component {
       return (
         <ActionButton
           displayLabel={translate('cancel')}
-          clickAction={() => this.cancelRunningPlaybook()} />
+          clickAction={() => this.setState({showConfirmationDlg: true})} />
       );
     }
   }
@@ -485,6 +488,12 @@ class PlaybookProgress extends Component {
             <div>
               {this.renderCancelButton()}
               {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
+              <YesNoModal show={this.state.showConfirmationDlg}
+                title={translate('warning')}
+                yesAction={this.cancelRunningPlaybook}
+                noAction={() => this.setState({showConfirmationDlg: false})}>
+                {translate('deploy.cancel.confirm')}
+              </YesNoModal>
             </div>
           </div>
           <div className='col-xs-8'>
