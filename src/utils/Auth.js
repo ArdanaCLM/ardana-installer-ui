@@ -23,8 +23,8 @@ import Cookies from 'universal-cookie';
 // Abstract base class for storing tokens
 class TokenStore {
   setAuthToken() { throw new Error('Method setAuthToken() must be implemented'); }
-  getAuthToken() { throw new Error('Method setAuthToken() must be implemented'); }
-  clearAuthToken() { throw new Error('Method setAuthToken() must be implemented'); }
+  getAuthToken() { throw new Error('Method getAuthToken() must be implemented'); }
+  clearAuthToken() { throw new Error('Method clearAuthToken() must be implemented'); }
 }
 
 class CookieToken extends TokenStore {
