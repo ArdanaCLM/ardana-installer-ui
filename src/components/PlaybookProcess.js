@@ -95,12 +95,6 @@ class PlaybookProgress extends Component {
     };
   }
 
-  getError() {
-    if (this.state.errorMsg)
-      return (<div>{translate('progress.failure')}<br/>
-        <pre className='log'>{this.state.errorMsg}</pre></div>);
-  }
-
   getStatusCSSClass = (status) => {
     let retClass = '';
     switch (status) {
@@ -431,6 +425,7 @@ class PlaybookProgress extends Component {
           this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
           // overall status for caller page
           this.props.updatePageStatus(STATUS.FAILED);
+          this.showErrorMessage(translate('deploy.cancel.message'));
         })
         .catch((error) => {
           // overall status for caller, if failed, just stop
@@ -464,7 +459,6 @@ class PlaybookProgress extends Component {
         <ActionButton
           displayLabel={translate('cancel')}
           clickAction={() => this.setState({
-            errorMsg: translate('deploy.cancel.message'),
             showConfirmationDlg: true})
           } />
       );
@@ -483,6 +477,9 @@ class PlaybookProgress extends Component {
   }
 
   render() {
+    const errorDiv = (<div>{translate('progress.failure')}<br/>
+      <pre className='log'>{this.state.errorMsg}</pre></div>);
+
     return (
       <div className='playbook-progress'>
         <div className='progress-body'>
@@ -500,8 +497,7 @@ class PlaybookProgress extends Component {
             </div>
           </div>
           <div className='col-xs-8'>
-            {this.getError()}
-            {this.state.showLog && this.renderLogViewer()}
+            {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
           </div>
         </div>
       </div>
