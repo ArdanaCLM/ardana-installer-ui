@@ -32,7 +32,7 @@ export function importCSV(file, restrictedValues, callback) {
   const field_defs  = {
     'id': {
       unique: true,
-      aliases: [ 'server_id', 'id' ],
+      aliases: [ 'server-id', 'id' ],
       required: true
     },
     'ip-addr': {
