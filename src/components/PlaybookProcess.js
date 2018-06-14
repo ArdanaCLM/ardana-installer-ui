@@ -16,12 +16,13 @@ import React, { Component } from 'react';
 
 import { translate } from '../localization/localize.js';
 import { getAppConfig } from '../utils/ConfigHelper.js';
-import { fetchJson, postJson } from '../utils/RestUtils.js';
+import { fetchJson, postJson, deleteJson } from '../utils/RestUtils.js';
 import { STATUS } from '../utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
 import { List } from 'immutable';
 import debounce from 'lodash/debounce';
+import { YesNoModal } from '../components/Modals.js';
 
 const PROGRESS_UI_CLASS = {
   NOT_STARTED: 'notstarted',
@@ -89,14 +90,9 @@ class PlaybookProgress extends Component {
       playbooksStarted: [],          // list of playbooks that have started
       playbooksComplete: [],         // list of playbooks that have completed
       playbooksError: [],            // list of playbooks that have errored
-      displayedLogs: List()          // log messages to display in the log viewer
+      displayedLogs: List(),         // log messages to display in the log viewer
+      showConfirmationDlg: false,    // show the confirmation dialog
     };
-  }
-
-  getError() {
-    if (this.state.errorMsg)
-      return (<div>{translate('progress.failure')}<br/>
-        <pre className='log'>{this.state.errorMsg}</pre></div>);
   }
 
   getStatusCSSClass = (status) => {
@@ -211,24 +207,14 @@ class PlaybookProgress extends Component {
     this.socket.emit('join', playId);
   }
 
-  findNextPlaybook = (completedPlaybookNames) => {
-    let lastIndex = 0;
-    // find which playbook is the last completed
-    completedPlaybookNames.forEach((plyName) => {
-      let theIndex = this.props.playbooks.findIndex((pName) => {
-        return plyName === pName;
-      });
-      if (theIndex >= lastIndex) {
-        lastIndex = theIndex;
-      }
-    });
+  findNextPlaybook = (lastCompletedPlaybookName) => {
+    // Find the next playbook in sequence after the given one.  Note that if the completed
+    // playbook is not found, indexOf() will return -1, so next will be 0 (the first playbook)
+    const next = this.props.playbooks.indexOf(lastCompletedPlaybookName) + 1;
 
-    if (lastIndex + 1 < this.props.playbooks.length) {
-      //return next playbook name
-      return this.props.playbooks[lastIndex + 1];
+    if (next < this.props.playbooks.length) {
+      return this.props.playbooks[next];
     }
-    //done, no more next playbook
-    return;
   }
 
   processEndMonitorPlaybook = (playbookName) => {
@@ -236,7 +222,7 @@ class PlaybookProgress extends Component {
     const thisPlaybook = this.globalPlaybookStatus.find(e => e.name === playbookName);
     // the global playbookStatus should be updated in playbookError or playbookStopped
     if(thisPlaybook && thisPlaybook.status === STATUS.COMPLETE) {
-      let nextPlaybookName = this.findNextPlaybook([thisPlaybook.name]);
+      let nextPlaybookName = this.findNextPlaybook(thisPlaybook.name);
       if (nextPlaybookName) {
         this.launchPlaybook(nextPlaybookName);
       }
@@ -280,24 +266,15 @@ class PlaybookProgress extends Component {
     return retStatus;
   }
 
-  // summarize playbook processes status before processing
-  sumPlaybookProcessStatus = () => {
-    let retStatus = {in_progress: undefined, complete: [], failed: []};
-    this.globalPlaybookStatus.forEach((play) => {
-      if (this.props.playbooks.indexOf(play.name) !== -1) {
-        if (play.playId && play.status === STATUS.COMPLETE) {
-          retStatus.complete.push(play);
-        }
-        else if (play.playId && play.status === STATUS.IN_PROGRESS) {
-          //should be just one in progress
-          retStatus.in_progress = play;
-        }
-        else if (play.playId && play.status === STATUS.FAILED) {
-          retStatus.failed.push(play);
-        }
-      }
-    });
-    return retStatus;
+  // return playbooks with the given status
+  getPlaybooksWithStatus = (status) => {
+    // If called before globalPlaybookStatus is created (comoonentDidMount), return an empty array
+    if (!this.globalPlaybookStatus) {
+      return [];
+    }
+
+    return this.globalPlaybookStatus.filter(play =>
+      (this.props.playbooks.includes(play.name) && play.playId && play.status === status));
   }
 
   processAlreadyDonePlaybook = (playbook) => {
@@ -310,11 +287,8 @@ class PlaybookProgress extends Component {
           return {displayedLogs: prevState.displayedLogs.concat(this.logsReceived)}; });
       })
       .catch((error) => {
-        this.setState((prevState) => {
-          let msg = translate('deploy.get.log.error', playbook.name + '.yml', playbook.playId, error.toString());
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
-
+        this.showErrorMessage(translate('deploy.get.log.error',
+          playbook.name + '.yml', playbook.playId, error.toString()));
         this.props.updatePageStatus(STATUS.FAILED);
       });
 
@@ -331,30 +305,28 @@ class PlaybookProgress extends Component {
         }
       })
       .catch((error) => {
-        this.setState((prevState) => {
-          let msg = translate('deploy.get.event.error', playbook.name + '.yml', playbook.playId, error.toString());
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
-
+        this.showErrorMessage(translate('deploy.get.event.error',
+          playbook.name + '.yml', playbook.playId, error.toString()));
         this.props.updatePageStatus(STATUS.FAILED);
       });
   }
 
   processPlaybooks = () => {
-    let playStatus = this.sumPlaybookProcessStatus();
-    let progressPlay = playStatus.in_progress;
-    let completePlaybooks = playStatus.complete;
-    let failedPlaybooks = playStatus.failed;
+    const inProgressPlaybooks = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS);
+    const completePlaybooks = this.getPlaybooksWithStatus(STATUS.COMPLETE);
+    const failedPlaybooks = this.getPlaybooksWithStatus(STATUS.FAILED);
+
+    // Retrieve the logs and events for any completed playbooks
+    for (let book of completePlaybooks) {
+      this.processAlreadyDonePlaybook(book);
+    }
 
     // if have last recorded in progress
-    if (progressPlay) {
-      // if have completes, process completed logs first
-      if(completePlaybooks.length > 0) {
-        completePlaybooks.forEach((book) => {
-          this.processAlreadyDonePlaybook(book);
-        });
-      }
+    if (inProgressPlaybooks.length) {
+      // There is a playbook in progress
 
+      const progressPlay = inProgressPlaybooks[0];  // there will only be one playbook in progress
+      // if have completes, process completed logs first
       //check the in progress one
       fetchJson('/api/v1/clm/plays/' + progressPlay.playId, {
         // Note: Use no-cache in order to get an up-to-date response
@@ -364,7 +336,7 @@ class PlaybookProgress extends Component {
         }
       })
         .then(response => {
-          if ('endTime' in response) {
+          if ('endTime' in response || response['killed']) {
             let status = (response['code'] == 0 ? STATUS.COMPLETE : STATUS.FAILED);
             // update logs
             this.processAlreadyDonePlaybook(progressPlay);
@@ -372,7 +344,7 @@ class PlaybookProgress extends Component {
             this.updateGlobalPlaybookStatus(progressPlay.name, progressPlay.playId, status);
 
             if (status === STATUS.COMPLETE) {
-              let nextPlaybookName = this.findNextPlaybook([progressPlay.name]);
+              let nextPlaybookName = this.findNextPlaybook(progressPlay.name);
               if(nextPlaybookName) {
                 this.launchPlaybook(nextPlaybookName);
               }
@@ -391,52 +363,33 @@ class PlaybookProgress extends Component {
           }
         })
         .catch((error) => {
-          this.setState((prevState) => {
-            let msg =
-              translate('deploy.fail.check.playbook', progressPlay.name + '.yml', progressPlay.playId, error.message);
-            return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-          });
-
+          this.showErrorMessage(translate('deploy.fail.check.playbook',
+            progressPlay.name + '.yml', progressPlay.playId, error.message));
           this.props.updatePageStatus(STATUS.FAILED);
         });
-    }
-    else { //don't have in progress playbook
-      //recorded either have completes or failed playbooks or never started
-      if(completePlaybooks.length > 0 || failedPlaybooks.length > 0) {
-        if (failedPlaybooks.length > 0) {
-          // go for the logs for completed if have any first
-          if (completePlaybooks.length > 0) {
-            completePlaybooks.forEach((book) => {
-              this.processAlreadyDonePlaybook(book);
-            });
-          }
-          // for failed, don't continue running playbook at all
-          // only go for logs
-          failedPlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book);
-          });
 
-          this.props.updatePageStatus(STATUS.FAILED);
-        }
-        else { //don't have failed, just have complete books
-          // go for logs for completed
-          let bookNames = [];
-          completePlaybooks.forEach((book) => {
-            this.processAlreadyDonePlaybook(book);
-            bookNames.push(book.name); //saved the names for checking next playbook
-          });
-          let nextPlaybookName = this.findNextPlaybook(bookNames);
-          // if have more to run
-          if (nextPlaybookName) {
-            this.launchPlaybook(nextPlaybookName);
-          }
-          else {
-            this.props.updatePageStatus(STATUS.COMPLETE);
-          }
-        }
+    } else if (failedPlaybooks.length > 0) {
+      // Append the failed playbook logs
+      for (let book of failedPlaybooks) {
+        this.processAlreadyDonePlaybook(book);
       }
-      else {//don't have any recorded in progress, failed or complete books
-        this.launchPlaybook(this.props.playbooks[0]);
+
+      // update the status without launching any other playbooks
+      this.props.updatePageStatus(STATUS.FAILED);
+
+    } else {
+      // No playbooks running or failed, so either launch the next one or finish up
+
+      const lastCompleted = completePlaybooks.pop();  // returns undefined if none have completed
+
+      let nextPlaybookName = this.findNextPlaybook(lastCompleted);
+      if (nextPlaybookName) {
+        // launch the next playbook if there is more to run
+        this.launchPlaybook(nextPlaybookName);
+      }
+      else {
+        // No more playbooks to run.  Consider this page to be complete
+        this.props.updatePageStatus(STATUS.COMPLETE);
       }
     }
   }
@@ -457,11 +410,34 @@ class PlaybookProgress extends Component {
         this.props.updatePageStatus(STATUS.FAILED);
         // update local this.globalPlaybookStatus and also update global state playbookSatus
         this.updateGlobalPlaybookStatus(playbookName, '', STATUS.FAILED);
-        this.setState((prevState) => {
-          let msg = translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message);
-          return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
-        });
+        this.showErrorMessage(translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message));
       });
+  }
+
+  cancelRunningPlaybook = () => {
+
+    this.setState({showConfirmationDlg: false});
+    const running = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS)[0];
+    if (running) {
+      deleteJson('/api/v1/clm/plays/' + running.playId)
+        .then(response => {
+          // update local this.globalPlaybookStatus and also update global state playbookSatus
+          this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
+          // overall status for caller page
+          this.props.updatePageStatus(STATUS.FAILED);
+          this.showErrorMessage(translate('deploy.cancel.message'));
+        })
+        .catch((error) => {
+          // overall status for caller, if failed, just stop
+          this.props.updatePageStatus(STATUS.FAILED);
+        });
+    }
+  }
+
+  showErrorMessage = (msg) => {
+    this.setState((prevState) => {
+      return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
+    });
   }
 
   renderShowLogButton() {
@@ -472,6 +448,21 @@ class PlaybookProgress extends Component {
         displayLabel={logButtonLabel}
         clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
     );
+  }
+
+  renderCancelButton() {
+    if (!this.state.errorMsg &&
+      this.getPlaybooksWithStatus(STATUS.IN_PROGRESS).length > 0 &&
+      this.getPlaybooksWithStatus(STATUS.FAILED).length == 0) {
+
+      return (
+        <ActionButton
+          displayLabel={translate('cancel')}
+          clickAction={() => this.setState({
+            showConfirmationDlg: true})
+          } />
+      );
+    }
   }
 
   renderLogViewer() {
@@ -486,18 +477,27 @@ class PlaybookProgress extends Component {
   }
 
   render() {
+    const errorDiv = (<div>{translate('progress.failure')}<br/>
+      <pre className='log'>{this.state.errorMsg}</pre></div>);
+
     return (
       <div className='playbook-progress'>
         <div className='progress-body'>
           <div className='col-xs-4'>
             <ul>{this.getProgress()}</ul>
             <div>
+              {this.renderCancelButton()}
               {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
+              <YesNoModal show={this.state.showConfirmationDlg}
+                title={translate('warning')}
+                yesAction={this.cancelRunningPlaybook}
+                noAction={() => this.setState({showConfirmationDlg: false})}>
+                {translate('deploy.cancel.confirm')}
+              </YesNoModal>
             </div>
           </div>
           <div className='col-xs-8'>
-            {this.getError()}
-            {this.state.showLog && this.renderLogViewer()}
+            {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
           </div>
         </div>
       </div>

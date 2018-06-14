@@ -361,6 +361,9 @@
     "deploy.fail.check.playbook": "Failed to check in-progress playbook status for {0} - {1}. {2}",
     "deploy.fail.launch.playbook": "Failed to launch playbook {0}. {1}",
     "deploy.get.event.error": "Failed to get the event for playbook {0} - {1}. {2}",
+    "deploy.cancel.playbook": "Cancelled {0} playbook",
+    "deploy.cancel.confirm": "You have selected to cancel the running playbook.  Proceed?",
+    "deploy.cancel.message": "Playbook cancelled.",
     "deploy.get.log.error": "Failed to get the log for playbook {0} - {1}. {2}",
     "deploy.progress.failure": "Cloud provisioning has failed. Please review the errors in the log, hit Back, address the issue by editing any necessary files, re-run Validate, and Deploy again.",
 
