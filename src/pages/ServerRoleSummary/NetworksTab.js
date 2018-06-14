@@ -117,8 +117,8 @@ class NetworksTab extends Component {
 
   renderNetworkTable() {
     const checkMark = <i className='material-icons data-icon'>check</i>;
-    let editClass = 'glyphicon glyphicon-pencil edit-button';
-    let removeClass = 'glyphicon glyphicon-trash remove-button';
+    let editClass = 'material-icons edit-button';
+    let removeClass = 'material-icons remove-button';
     if (this.state.mode !== MODE.NONE) {
       editClass = editClass + ' disabled';
       removeClass = removeClass + ' disabled';
@@ -137,8 +137,12 @@ class NetworksTab extends Component {
             <td>{network.get('tagged-vlan') ? checkMark : ''}</td>
             <td>
               <div className='row-action-container'>
-                <span onClick={() => this.handleEditNetwork(network)} className={editClass} />
-                <span onClick={() => this.handleConfirmDeleteNetwork(network)} className={removeClass}/>
+                <span onClick={() => this.handleEditNetwork(network)}>
+                  <i className={editClass}>edit</i>
+                </span>
+                <span onClick={() => this.handleConfirmDeleteNetwork(network)}>
+                  <i className={removeClass}>delete</i>
+                </span>
               </div>
             </td>
           </tr>

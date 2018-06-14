@@ -182,10 +182,10 @@ class DiskModelDetails extends Component {
   }
 
   renderVolumeGroup = () => {
-    const removeClass = !this.state.showThirdDetails ? 'glyphicon glyphicon-trash right-sign' :
-      'glyphicon glyphicon-trash right-sign disabled';
-    const editClass = !this.state.showThirdDetails ? 'glyphicon glyphicon-pencil left-sign' :
-      'glyphicon glyphicon-pencil left-sign disabled';
+    const removeClass = !this.state.showThirdDetails ? 'material-icons right-sign' :
+      'material-icons right-sign disabled';
+    const editClass = !this.state.showThirdDetails ? 'material-icons left-sign' :
+      'material-icons left-sign disabled';
     let logicalVolumeLines = [];
     let textFields = this.state.logicalVolumes.slice();
     textFields.map((lv, index) => {
@@ -194,10 +194,14 @@ class DiskModelDetails extends Component {
           <ValidatingInput key={lv.name + index} inputType='text' inputValue={lv.name}
             disabled='true'/>
           <div className='plus-minus-container'>
-            <span key={lv.name + 'edit' + index} className={editClass}
-              onClick={() => this.editLogicalVolume(lv)}/>
-            <span key={lv + 'minus' + index} className={removeClass}
-              onClick={() => this.confirmRemoveLogicalVolume(index)}/>
+            <span key={lv.name + 'edit' + index}
+              onClick={() => this.editLogicalVolume(lv)}>
+                <i className={editClass}>edit</i>
+            </span>
+            <span key={lv + 'minus' + index}
+              onClick={() => this.confirmRemoveLogicalVolume(index)}>
+                <i className={removeClass}>delete</i>
+            </span>
           </div>
         </div>
       );
@@ -733,10 +737,10 @@ class DiskModelDetails extends Component {
       (this.state.showThirdDetails) ? 'col-xs-7 multiple-details' : 'col-xs-6 multiple-details';
     const addClass = this.secondDetails === '' ? 'material-icons add-button' :
       'material-icons add-button disabled';
-    const removeClass = this.secondDetails === '' ? 'glyphicon glyphicon-trash right-sign' :
-      'glyphicon glyphicon-trash right-sign disabled';
-    const editClass = this.secondDetails === '' ? 'glyphicon glyphicon-pencil left-sign' :
-      'glyphicon glyphicon-pencil left-sign disabled';
+    const removeClass = this.secondDetails === '' ? 'material-icons right-sign' :
+      'material-icons right-sign disabled';
+    const editClass = this.secondDetails === '' ? 'material-icons left-sign' :
+      'material-icons left-sign disabled';
 
     let firstDetailsLines = [];
     // show volume groups
@@ -750,10 +754,14 @@ class DiskModelDetails extends Component {
           <ValidatingInput key={vg.name + index} inputType='text' inputValue={vg.name}
             disabled='true'/>
           <div className='plus-minus-container'>
-            <span key={vg.name + 'edit' + index} className={editClass}
-              onClick={() => this.editVolumeGroup(vg)}/>
-            <span key={vg.name + 'minus' + index} className={removeClass}
-              onClick={() => this.confirmRemoveVolumeGroup(index)}/>
+            <span key={vg.name + 'edit' + index}
+              onClick={() => this.editVolumeGroup(vg)}>
+                <i className={editClass}>edit</i>
+            </span>
+            <span key={vg.name + 'minus' + index}
+              onClick={() => this.confirmRemoveVolumeGroup(index)}>
+                <i className={removeClass}>delete</i>
+            </span>
           </div>
         </div>
       );

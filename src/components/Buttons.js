@@ -201,28 +201,32 @@ class ItemHelpButton extends Component {
   render() {
     return (
       <span
-        className='glyphicon glyphicon-info-sign helper'
+        className='helper'
         onClick={this.props.clickAction}>
+          <i className="material-icons">info</i>
       </span>
     );
   }
 }
 
 function AssignmentButton(props) {
-  let cName = ' assignment-button';
+  let cName = 'material-icons assignment-button';
+  let iconName = '';
   if (props.type === 'right') {
-    cName = 'fa fa-angle-right' + cName;
+    iconName = 'chevron_right';
     cName = cName + ' right-button';
   } else if (props.type === 'left') {
-    cName = 'fa fa-angle-left' + cName;
+    iconName = 'chevron_left';
   } else if (props.type === 'double-right') {
-    cName = 'fa fa-angle-double-right' + cName;
+    iconName = 'last_page';
   } else if (props.type === 'double-left') {
-    cName = 'fa fa-angle-double-left' + cName;
+    iconName = 'first_page';
   }
   cName = (props.isDisabled === true) ? cName + ' disabled' : cName;
   return (
-    <span className={cName} onClick={props.clickAction}/>
+    <span onClick={props.clickAction}>
+      <i className={cName}>{iconName}</i>
+    </span>
   );
 }
 
@@ -234,11 +238,12 @@ class ItemMenuButton extends Component {
   render() {
     let showMenuAction = this.props.clickAction;
     let moreClass = this.props.className || '';
-    let cName = 'glyphicon glyphicon-option-vertical ' + moreClass;
+    let cName = 'material-icons ' + moreClass;
     return (
       <span
         name='itemMenuButton'
-        className={cName} onClick={showMenuAction}>
+        onClick={showMenuAction}>
+          <i className={cName}>more_vert</i>
       </span>
     );
   }
@@ -252,7 +257,9 @@ class EditPencilForTableRow extends Component {
     return (
       <td className='actions'>
         <p onClick={this.props.clickAction}>
-          <span className='glyphicon glyphicon-pencil edit'></span>
+          <span className='edit'>
+              <i className="material-icons">edit</i>
+          </span>
         </p>
       </td>
     );
@@ -267,7 +274,9 @@ class InfoForTableRow extends Component {
     return (
       <td className='actions'>
         <p onClick={this.props.clickAction}>
-          <span className='glyphicon glyphicon-info-sign detail-info'></span>
+          <span className='detail-info'>
+            <i className='material-icons'>info</i>
+          </span>
         </p>
       </td>
     );
@@ -282,7 +291,9 @@ class DeleteForTableRow extends Component {
     return (
       <td className='actions'>
         <p onClick={this.props.clickAction}>
-          <span className='glyphicon glyphicon-trash delete'></span>
+          <span className='delete'>
+            <i className='material-icons'>delete</i>
+          </span>
         </p>
       </td>
     );

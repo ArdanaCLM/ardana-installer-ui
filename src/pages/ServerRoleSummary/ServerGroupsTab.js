@@ -106,8 +106,8 @@ class ServerGroupsTab extends Component {
           serverGroups: m.has('server-groups') ? m.get('server-groups').toJS() : [],
         };
 
-        let editClass = 'glyphicon glyphicon-pencil edit-button';
-        let removeClass = 'glyphicon glyphicon-trash remove-button';
+        let editClass = 'material-icons edit-button';
+        let removeClass = 'material-icons remove-button';
         if (this.state.showServerGroupDetails) {
           editClass = editClass + ' disabled';
           removeClass = removeClass + ' disabled';
@@ -120,8 +120,12 @@ class ServerGroupsTab extends Component {
             <td>{numServerGroups}</td>
             <td>
               <div className='row-action-container'>
-                <span onClick={() => this.editServerGroup(selected)} className={editClass}/>
-                <span onClick={() => this.confirmRemoveServerGroup(name)} className={removeClass}/>
+                <span onClick={() => this.editServerGroup(selected)}>
+                  <i className={editClass}>edit</i>
+                </span>
+                <span onClick={() => this.confirmRemoveServerGroup(name)}>
+                  <i className={removeClass}>delete</i>
+                </span>
               </div>
             </td>
           </tr>);
