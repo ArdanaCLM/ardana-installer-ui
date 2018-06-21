@@ -1,0 +1,122 @@
+// (c) Copyright 2018 SUSE LLC
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+@import "./../palette.less";
+
+@main-menu-width: 250px;
+@main-menu-hr-color: @sb-blue-400;
+
+@main-menu-bg-color: @sb-blue-500;
+@main-menu-color: @sb-white;
+@main-menu-active-bg-color: @sb-green-500;
+@main-menu-active-hover-color: @sb-white;
+@main-menu-active-color: @sb-white;
+
+// The submenu height controls the line under the header on the main menu as well as the height
+// of the submenu to the right
+@submenu-height: 48px;
+
+@submenu-text-color: @sb-gray-900;
+@submenu-hr-color: @sb-gray-80;
+@submenu-hover-border-color: @sb-gray-100;
+@submenu-hover-color: @sb-green-500;
+@submenu-active-border-color: @sb-green-500;
+
+.main-menu {
+   background-color: @main-menu-bg-color;
+   border-right: 1px solid @sb-gray-100;
+   font-size: 14px;
+
+   position: fixed;
+   left: 0;
+   top: 0;
+   width: @main-menu-width;
+   height: 100%;
+
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  header {
+    color: @main-menu-color;
+    font-weight: 200;
+    font-size: 1.2em;
+    padding-left: 16px;
+    margin: 0 16px 0 0;
+    padding: 8px 0 8px 16px;
+    height: @submenu-height;
+    border-bottom: 1px solid @main-menu-hr-color;
+  }
+
+  li a {
+    color: @main-menu-color;
+    display: block;
+    font-weight: 400;
+    margin: 0 16px 0 0;
+    padding: 8px 0 8px 16px;
+  }
+
+  .active {
+     background: @main-menu-active-bg-color;
+     border-radius: 0 2px 2px 0;
+     color: @main-menu-active-color;
+     text-decoration: none;
+
+     &:hover {
+      color: @main-menu-active-hover-color;
+    }
+  }
+}
+
+.submenu {
+  border-bottom: 1px solid @submenu-hr-color;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: @submenu-height;
+
+  a {
+    color: @submenu-text-color;
+
+    &:hover {
+      border-color: @submenu-hover-border-color;
+      color: @submenu-hover-color;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    &.active {
+      border-color: @submenu-active-border-color;
+    }
+
+    &:focus {
+      text-decoration: none;
+    }
+
+    border-bottom: 3px solid transparent;
+    padding: 11px 16px;
+    transition: all ease-in 0.25s;
+    white-space: nowrap;
+
+  }
+}
+
+.main-window {
+  margin-left: @main-menu-width;
+  height: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
