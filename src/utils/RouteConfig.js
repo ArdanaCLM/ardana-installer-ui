@@ -15,6 +15,7 @@
 
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
+import { SpeedometerTest } from '../pages/SpeedometerTest';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -59,6 +60,12 @@ export const routes = [
   { name: translate('servers'), slug: '/servers', component: Example,
     items: [
       { name: translate('add_server'), slug: '/servers/add-server', component: Example },
+    ]
+  },
+  // Avoid the hassle of creating translations for this disposable code:
+  { name: 'Example', slug: '/example', component: Example,
+    items: [
+      { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
     ]
   }
 ];
