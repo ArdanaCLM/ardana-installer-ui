@@ -54,7 +54,7 @@
     font-weight: 200;
     font-size: 1.2em;
     padding-left: 16px;
-    margin: 0 16px 0 0;
+    margin-bottom: 16px;
     padding: 8px 0 8px 16px;
     height: @submenu-height;
     border-bottom: 1px solid @main-menu-hr-color;
@@ -66,6 +66,7 @@
     font-weight: 400;
     margin: 0 16px 0 0;
     padding: 8px 0 8px 16px;
+    outline: 0;
   }
 
   .active {
@@ -89,6 +90,7 @@
 
   a {
     color: @submenu-text-color;
+    outline: 0;
 
     &:hover {
       border-color: @submenu-hover-border-color;
@@ -119,4 +121,8 @@
   align-items: center;
   display: flex;
   flex-direction: column;
+
+  > .content {
+    width: 100%;
+  }
 }
