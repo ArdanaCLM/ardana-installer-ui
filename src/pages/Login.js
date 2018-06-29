@@ -118,7 +118,7 @@ class LoginPage extends Component {
         <div className='col-md-5 input-section'>
           <div className='header'>{translate('login.header')}</div>
           <form onSubmit={this.handleLogin}>
-            <input type='text' className='rounded-corner' required='true'
+            <input type='text' className='rounded-corner' required='true' autoFocus='true'
               autoComplete='username' value={this.state.username}
               placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
             <div>
