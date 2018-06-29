@@ -18,6 +18,7 @@ import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { setAuthToken, clearAuthToken } from '../utils/Auth.js';
 import { navigateTo, navigateBack, wasRedirectedToLogin } from '../utils/RouteUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
+import { LoadingMask } from '../components/LoadingMask.js';
 
 class LoginPage extends Component {
 
@@ -28,7 +29,8 @@ class LoginPage extends Component {
       username: '',
       password: '',
       errorMsg: '',
-      showMask: true
+      showPasswordMask: true,
+      showLoadMask: false
     };
   }
 
@@ -51,6 +53,8 @@ class LoginPage extends Component {
       'password': this.state.password
     };
 
+    this.setState({showLoadMask: true});
+
     postJson('/api/v1/clm/login', payload, undefined, false)
       .then(response => {
 
@@ -63,7 +67,7 @@ class LoginPage extends Component {
         return fetchJson('/api/v1/clm/user', undefined, false);
       })
       .then(response => {
-        this.setState({show: false, errorMsg: ''});
+        this.setState({show: false, errorMsg: '', showLoadMask: false});
 
         if (wasRedirectedToLogin()) {
           navigateBack();
@@ -74,6 +78,7 @@ class LoginPage extends Component {
       .catch((error) => {
         // Invalidate the token if it was saved above
         clearAuthToken();
+        this.setState({showLoadMask: false});
 
         if (error.status == 401) {
           this.setState({errorMsg: translate('login.invalid')});
@@ -87,8 +92,8 @@ class LoginPage extends Component {
 
   toggleShowHidePassword = (e) => {
     let passwordField = e.target.previousSibling;
-    passwordField.type = this.state.showMask ? 'text' : 'password';
-    this.setState((prevState) => {return {showMask: !prevState.showMask};});
+    passwordField.type = this.state.showPasswordMask ? 'text' : 'password';
+    this.setState((prevState) => {return {showPasswordMask: !prevState.showPasswordMask};});
   }
 
   renderErrorMessage() {
@@ -108,6 +113,7 @@ class LoginPage extends Component {
     return (
       <div className='login-page'>
         {this.renderErrorMessage()}
+        <LoadingMask show={this.state.showLoadMask}></LoadingMask>
         <div className='col-md-7'/>
         <div className='col-md-5 input-section'>
           <div className='header'>{translate('login.header')}</div>
@@ -120,7 +126,8 @@ class LoginPage extends Component {
                 autoComplete='current-password' value={this.state.password}
                 placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
               <span className='material-icons password-icon'
-                onClick={this.toggleShowHidePassword}>{ this.state.showMask ? 'visibility' : 'visibility_off' }</span>
+                onClick={this.toggleShowHidePassword}>{ this.state.showPasswordMask ?  'visibility' : 'visibility_off'}
+              </span>
             </div>
             <button className="rounded-corner" type="submit" onClick={this.handleLogin}>{translate('login')}</button>
           </form>

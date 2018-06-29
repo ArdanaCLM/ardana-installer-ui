@@ -271,6 +271,16 @@
     "config.host.name.prefix": "Host Name Prefix",
     "config.host.member.prefix": "Host Member Prefix",
 
+    "services": "Services",
+    "topology": "Topology",
+    "regions": "Regions",
+    "networks": "Networks",
+    "servers": "Servers",
+    "server_groups": "Server Groups",
+    "configure": "Configure",
+    "packages": "Packages",
+    "add_server": "Add Server",
+
     "vlanid": "VLAN ID",
     "cidr": "CIDR",
     "gateway": "Gateway",

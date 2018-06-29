@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import './Deployer.css';
 import InstallWizard from './InstallWizard';
+import NavMenu from './components/NavMenu.js';
 import { pages } from './utils/WizardDefaults.js';
 import { HashRouter as Router, Switch, Redirect } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
@@ -22,6 +23,7 @@ import { translate } from './localization/localize.js';
 import LoginPage from './pages/Login.js';
 import { fetchJson } from './utils/RestUtils.js';
 import { getAuthToken } from './utils/Auth.js';
+import { routes } from './utils/RouteConfig.js';
 
 class Deployer extends Component {
   constructor(props) {
@@ -57,9 +59,8 @@ class Deployer extends Component {
         defaultPath = <Redirect to='/login'/> ;
       } else {
 
-        // In a secured (post-install) mode with a valid auth token.
-        // TODO - display post-install UI
-        defaultPath = (<div>Post-install UI goes here</div>);
+        // If in secured (post-install) mode with a valid auth token, display menu
+        defaultPath = <NavMenu routes={routes}/>;
       }
     } else {
 
@@ -70,18 +71,10 @@ class Deployer extends Component {
     return (
       <Router>
         <Switch>
-          <Route path='/login' render={() => {
-            return(
-              <LoginPage />
-            );}
-          } />
-
-          <Route path='/about' render={() => {
-            return(
-              <div>{translate('openstack.cloud.deployer.title.version')}</div>
-            );}
-          } />
-
+          <Route path='/login' component={LoginPage}/>
+          <Route path='/about' render={() => (
+            <div>{translate('openstack.cloud.deployer.title.version')}</div>
+          )}/>
           <Route path='/' render={() => defaultPath} />
 
         </Switch>
