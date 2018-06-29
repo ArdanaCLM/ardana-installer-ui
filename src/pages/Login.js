@@ -72,7 +72,7 @@ class LoginPage extends Component {
         if (wasRedirectedToLogin()) {
           navigateBack();
         } else {
-          navigateTo('/');
+          navigateTo('/services');
         }
       })
       .catch((error) => {
