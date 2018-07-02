@@ -32,6 +32,10 @@
     "common.details": "Details",
     "common.save.continue": "Save & Continue",
 
+    "speedometer.used": "USED",
+    "speedometer.percentage": "{0}%",
+    "speedometer.caption": "{0} of {1}{2}",
+
     "login": "Log In",
 
     "login.header": "Enter credentials",
