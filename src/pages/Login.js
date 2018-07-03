@@ -72,7 +72,12 @@ class LoginPage extends Component {
         if (wasRedirectedToLogin()) {
           navigateBack();
         } else {
-          navigateTo('/services');
+          const search = new URLSearchParams(window.location.search);
+          if (search.has('start') && search.get('start').startsWith('installer')) {
+            navigateTo('/', undefined, search.toString());
+          } else {
+            navigateTo('/services');
+          }
         }
       })
       .catch((error) => {
