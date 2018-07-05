@@ -20,14 +20,15 @@ import createHistory from 'history/createBrowserHistory';
  * is used (currently the HashRouter).  If this router is replaced with another, then
  * the rest of the application should not need to change.
  */
-export function navigateTo(url, state) {
+export function navigateTo(url, state, search) {
   const history = createHistory();
 
   // The HashRouter expects the location to be in the "hash" property of the location.
   // Add the destination to the history object
   history.push({
     pathname: '/',
-    hash: '#' + url
+    search: search,
+    hash: '#' + url,
   }, state);
 
   // Now navigate the browser to the newly added history entry
