@@ -30,6 +30,7 @@ import ServerTable from '../components/ServerTable.js';
 import ViewServerDetails from './AssignServerRoles/ViewServerDetails';
 import BaremetalSettings from './AssignServerRoles/BaremetalSettings';
 import EditServerDetails from '../components/EditServerDetails.js';
+import { EditCloudSettings } from './ServerRoleSummary/EditCloudSettings.js';
 import { importCSV } from '../utils/CsvImporter.js';
 import { fromJS } from 'immutable';
 import { isEmpty } from 'lodash';
@@ -1374,6 +1375,11 @@ class AssignServerRoles extends BaseWizardPage {
     let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
     return (
       <div className='wizard-page'>
+        <EditCloudSettings
+          show={this.state.showCloudSettings}
+          onHide={() => this.setState({showCloudSettings: false})}
+          model={this.props.model}
+          updateGlobalState={this.props.updateGlobalState}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('add.server.heading'))}
@@ -1390,6 +1396,8 @@ class AssignServerRoles extends BaseWizardPage {
           </YesNoModal>
           <div className='buttonBox'>
             <div className='btn-row'>
+              <ActionButton displayLabel={translate('edit.cloud.settings')} type='default'
+                clickAction={() => this.setState({showCloudSettings: true})} />
               <ActionButton displayLabel={translate('add.server.set.network')} type='default'
                 clickAction={() => this.setState({showBaremetalSettings: true})}/>
             </div>

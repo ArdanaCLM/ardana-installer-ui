@@ -128,7 +128,7 @@
     "add.server.set.network": "Manage Subnet and Netmask",
     "add.server.set.network.netmask": "Netmask",
     "add.server.set.network.subnet": "Subnet",
-    "add.server.set.network.description": "Change these values to match your environment. Define the network range that contains the ip address values for the individual servers",
+    "add.server.set.network.description": "Change these values to match your environment. Define the network range that contains the ip address values for the individual servers. These settings apply to the management network.",
     "add.server.auto.discover": "Auto Discover",
     "add.server.manual.add": "Manual Entry",
     "add.server.add": "Add Server",
