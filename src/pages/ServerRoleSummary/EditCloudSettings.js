@@ -112,30 +112,30 @@ class EditCloudSettings extends Component {
               setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.CLOUD_CONFIG)}
               closeAction={this.showConfirmCloseModal}/>
           </Tab>
+          <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
+            <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+            setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.DISK_MODELS)}
+            ref={instance => {this.diskModelsTab = instance;}}/>
+          </Tab>
           <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
             <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
               setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.NIC_MAPPINGS)}
               ref={instance => {this.nicMappingTab = instance;}}/>
           </Tab>
-          <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
-            <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-              setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.SERVER_GROUPS)}
-              ref={instance => {this.serverGroupsTab = instance;}}/>
+          <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
+            <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+            setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.INTERFACE_MODELS)}
+            ref={instance => {this.interfaceModelsTab = instance;}}/>
           </Tab>
           <Tab eventKey={TAB.NETWORKS} title={translate('edit.networks')}>
             <NetworksTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
               setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.NETWORKS)}
               ref={instance => {this.networksTab = instance;}}/>
           </Tab>
-          <Tab eventKey={TAB.DISK_MODELS} title={translate('edit.disk.models')}>
-            <DiskModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-              setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.DISK_MODELS)}
-              ref={instance => {this.diskModelsTab = instance;}}/>
-          </Tab>
-          <Tab eventKey={TAB.INTERFACE_MODELS} title={translate('edit.interface.models')}>
-            <InterfaceModelsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-              setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.INTERFACE_MODELS)}
-              ref={instance => {this.interfaceModelsTab = instance;}}/>
+          <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
+            <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+            setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.SERVER_GROUPS)}
+            ref={instance => {this.serverGroupsTab = instance;}}/>
           </Tab>
         </Tabs>
       );
