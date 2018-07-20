@@ -61,7 +61,7 @@ class EditFile extends Component {
 
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => this.props.loadModel());
-  }
+  };
 
   handleCancel() {
     this.props.doneEditingFile();
@@ -73,7 +73,7 @@ class EditFile extends Component {
       contents: value,
       isValid: valid
     });
-  }
+  };
 
   render() {
     let errorMsgPanel = '';
@@ -220,35 +220,53 @@ class ValidateConfigFiles extends Component {
     this.props.enableBackButton(false);
     this.props.enableNextButton(false);
 
-    postJson('/api/v1/clm/config_processor')
-      .then(() => {
-        //go commit model changes
-        const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
-        postJson('/api/v1/clm/model/commit', commitMessage)
-          .then((response) => {
-            this.setState({valid: VALID, commit: STATUS.COMPLETE});
-            this.props.disableTab(false);
-            this.props.enableBackButton(true);
-            this.props.enableNextButton(true);
-            this.clearAllChangeMarkers();
-          })
-          .catch((error) => {
-            this.setState({
-              valid: INVALID,
-              invalidMsg: translate('deploy.commit.failure', error.toString()),
-              commit: STATUS.FAILED});
-            this.props.disableTab(false);
-            this.props.enableBackButton(true);
-            this.props.enableNextButton(false);
-          });
-      })
-      .catch(error => {
-        this.props.enableNextButton(false);
-        this.setState({valid: INVALID, invalidMsg: error.value.log});
-        this.props.disableTab(false);
-        this.props.enableBackButton(true);
-      });
-  }
+    if (!this.props.sshPassphrase) {
+      this.props.enableNextButton(false);
+      this.setState({valid: INVALID, invalidMsg: translate('validate.config.sshPassphrase.missing')});
+      this.props.disableTab(false);
+      this.props.enableBackButton(true);
+    } else {
+      // set the password and validate
+      var password = {'password': this.props.sshPassphrase};
+      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password))
+        .then(() => {
+          postJson('/api/v1/clm/config_processor')
+            .then(() => {
+              //go commit model changes
+              const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
+              postJson('/api/v1/clm/model/commit', commitMessage)
+                .then(() => {
+                  this.setState({valid: VALID, commit: STATUS.COMPLETE});
+                  this.props.disableTab(false);
+                  this.props.enableBackButton(true);
+                  this.props.enableNextButton(true);
+                  this.clearAllChangeMarkers();
+                })
+                .catch((error) => {
+                  this.setState({
+                    valid: INVALID,
+                    invalidMsg: translate('deploy.commit.failure', error.toString()),
+                    commit: STATUS.FAILED});
+                  this.props.disableTab(false);
+                  this.props.enableBackButton(true);
+                  this.props.enableNextButton(false);
+                });
+            })
+            .catch(error => {
+              this.props.enableNextButton(false);
+              this.setState({valid: INVALID, invalidMsg: error.value.log});
+              this.props.disableTab(false);
+              this.props.enableBackButton(true);
+            });
+        })
+        .catch((error) => {
+          this.props.enableNextButton(false);
+          this.setState({valid: INVALID, invalidMsg: translate('validate.config.sshPassphrase.error', error.value['error_msg'])});
+          this.props.disableTab(false);
+          this.props.enableBackButton(true);
+        })
+    }
+  };
 
   renderBody() {
     if (this.state.editingFile === '') {
@@ -270,7 +288,6 @@ class ValidateConfigFiles extends Component {
           valid={this.state.valid}
           setChanged={() => this.setChanged()}
           loadModel={this.props.loadModel}
-          valid={this.state.valid}
           invalidMsg={this.state.invalidMsg}
         />
       );
@@ -324,7 +341,8 @@ class ConfigForm extends Component {
         wipeDisks: false,
         encryptKey: '',
         verbosity: 0,
-        clearServers: false
+        clearServers: false,
+        sshPassphrase: ''
       };
     } else {
       this.state = props.deployConfig;
@@ -342,6 +360,32 @@ class ConfigForm extends Component {
   handleClearServers = () => {
     this.setState({clearServers: !this.state.clearServers});
   };
+
+  handleSshPassphrase = (e) => {
+    this.setState({sshPassphrase: e.target.value});
+    this.props.passAction(e.target.value);
+  };
+
+  renderSshPassphrase() {
+    if (this.props.requiresPassword) {
+      return (
+        <div className='detail-line'>
+          <div className='col-xs-4 label-container'>
+            {translate('validate.config.sshPassphrase')}
+            <HelpText
+              tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
+          </div>
+          <div className='col-xs-8'>
+            <ValidatingInput
+              inputName='sshPassphrase'
+              inputType='password'
+              inputValue={this.state.sshPassphrase}
+              inputAction={this.handleSshPassphrase}/>
+          </div>
+        </div>
+      )
+    }
+  }
 
   render() {
     return (
@@ -404,6 +448,9 @@ class ConfigForm extends Component {
               onChange={this.handleClearServers}/>
           </div>
         </div>
+
+        {this.renderSshPassphrase()}
+
       </div>
     );
   }
@@ -417,8 +464,18 @@ class ConfigPage extends BaseWizardPage {
       isNextable: false,
       isBackable: true,
       showNavButtons: true,
-      disableTab: false
+      disableTab: false,
+      requiresPassword: false,
     };
+  }
+
+  componentWillMount() {
+    fetchJson('/api/v1/clm/sshagent/requires_password')
+      .then((responseData) => {
+        this.setState({
+          requiresPassword: responseData['requires_password']
+        });
+      });
   }
 
   setNextButtonLabel() {
@@ -459,11 +516,15 @@ class ConfigPage extends BaseWizardPage {
 
   enableBackButton = (enable) => {
     this.setState({isBackable : enable});
-  }
+  };
 
   disableTab = (disable) => {
     this.setState({disableTab : disable});
-  }
+  };
+
+  setSshPassphrase = (passphrase) => {
+    this.setState({sshPassphrase : passphrase});
+  };
 
   render() {
     return (
@@ -477,7 +538,10 @@ class ConfigPage extends BaseWizardPage {
               eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
               <ValidateConfigFiles disableTab={this.disableTab} enableBackButton={this.enableBackButton}
                 enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
-                loadModel={this.props.loadModel} />
+                loadModel={this.props.loadModel}
+                requiresPassword={this.state.requiresPassword}
+                sshPassphrase={this.state.sshPassphrase} />
+
             </Tab>
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.TEMPLATE_FILES} title={translate('validate.tab.templates')}>
@@ -485,8 +549,10 @@ class ConfigPage extends BaseWizardPage {
                 updateGlobalState={this.props.updateGlobalState} showNavButtons={this.showNavButtons}/>
             </Tab>
             <Tab disabled={this.state.disableTab}
-              eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
-              <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig} />
+                 eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
+              <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig}
+                requiresPassword={this.state.requiresPassword}
+                passAction={this.setSshPassphrase} />
             </Tab>
           </Tabs>
         </div>
