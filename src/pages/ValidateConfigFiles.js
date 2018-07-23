@@ -228,7 +228,7 @@ class ValidateConfigFiles extends Component {
     } else {
       // set the password and validate
       var password = {'password': this.props.sshPassphrase};
-      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password))
+      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
         .then(() => {
           postJson('/api/v1/clm/config_processor')
             .then(() => {
