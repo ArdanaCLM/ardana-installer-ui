@@ -9,6 +9,7 @@
     "html-webpack-plugin": "^3.2.0",
     "immutable": "^3.8.1",
     "js-yaml": "^3.10.0",
+    "lato-font": "^3.0.0",
     "lodash": "^4.17.4",
     "material-design-icons-iconfont": "^3.0.1",
     "papaparse": "^4.3.6",
@@ -53,7 +54,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lints": "eslint .",
-    "protractor-setup": "./node_modules/protractor/bin/webdriver-manager update",
+    "protractor-setup": "webdriver-manager update",
     "protractor": "protractor protractor.conf.js",
     "start": " webpack-dev-server --mode=development --port 3000 --hot --host 0.0.0.0",
     "dist": "webpack --mode=production -p"
