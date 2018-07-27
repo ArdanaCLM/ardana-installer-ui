@@ -16,23 +16,20 @@
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url(https://example.com/MaterialIcons-Regular.eot); /* For IE6-8 */
-  src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url(/lib/fonts/MaterialIcons-Regular.woff2) format('woff2'),
-    url(/lib/fonts/MaterialIcons-Regular.woff) format('woff'),
-    url(/lib/fonts/MaterialIcons-Regular.ttf) format('truetype');
+  src: 
+    // The following directory names are relative to where the generated .css lives, since
+    // the less compilation happens first and then webpack only sees the generated css
+    url(../../node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff2) format('woff2'),
+    url(../../node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.woff) format('woff'),
+    url(../../node_modules/material-design-icons-iconfont/dist/fonts/MaterialIcons-Regular.ttf) format('truetype');
 }
 
 @font-face {
   font-family: 'Lato';
   font-style: normal;
   font-weight: 400;
-  src: local('Lato'),
-  local('Lato-Regular'),
-  url(/lib/fonts/Lato-Regular.ttf) format('truetype');
+  src: url(../../third_party/fonts/Lato-Regular.ttf) format('truetype');
 }
-
 
 .material-icons {
   font-family: 'Material Icons';

@@ -14,7 +14,7 @@
 **/
 import React from 'react';
 import { fromJS } from 'immutable';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import { translate, translateModelName } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import BaseWizardPage from './BaseWizardPage.js';

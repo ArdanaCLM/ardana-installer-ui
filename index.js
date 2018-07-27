@@ -19,14 +19,23 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Deployer from './src/Deployer';
-import './src/Deployer.css';
+import './src/styles/deployer.less';
+import './src/images/favicon.ico';
 
 const render = Component => {
+  let root = document.getElementById('root');
+  if (! root) {
+    // If there is not already a root div, create one, since react warns against
+    // rendering directly into the body
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.append(root);
+  }
   ReactDOM.render(
     <AppContainer>
       <Component />
     </AppContainer>,
-    document.getElementById('root')
+    root
   );
 };
 
