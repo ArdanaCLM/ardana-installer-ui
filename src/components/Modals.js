@@ -19,7 +19,7 @@ import { translate } from '../localization/localize.js';
 import { InputLine } from '../components/InputLine.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { getAuthToken, setAuthToken, clearAuthToken } from '../utils/Auth.js';
-import '../Deployer.css';
+import '../styles/deployer.less';
 
 function ConfirmModal(props) {
   return (

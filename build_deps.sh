@@ -1,5 +1,5 @@
 #!/bin/bash
-# (c) Copyright 2017-2018 SUSE LLC
+# (c) Copyright 2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#
-# This script must be runnable by a system (like OBS) that has no 
-# connectivity to the network for downloading dependencies; therefore all
-# dependencies must be present already in the node_modules directory.
+# Download all dev dependencies and runtime dependencies and build them
+# into a tarball for consumption by OBS, which has no network connectivity
 die() {
    echo "$@" >&2
    exit 1
 }
 
-#erase the previous dist
-rm -rf dist
+rm -rf node_modules node_modules.tar.bz2
 
-#build a bundle version of the javascript
-npm run dist || die "npm run dist failed"
+# if yarn is available, use it as a drop-in replacement for npm.  It
+# is faster and produces smaller tarballs
+if yarn --version &> /dev/null ; then
+    yarn install --link-duplicates
+else
+    npm install
+fi
+
+tar -c --bzip2 -f node_modules.tar.bz2 node_modules

@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 
 class ContextMenuItems extends Component {

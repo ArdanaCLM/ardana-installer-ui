@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React from 'react';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import Cookies from 'universal-cookie';
 import { Tabs, Tab } from 'react-bootstrap';
 import { translate } from '../localization/localize.js';

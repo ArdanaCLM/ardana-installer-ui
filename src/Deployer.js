@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import './Deployer.css';
+import './styles/deployer.less';
 import InstallWizard from './InstallWizard';
 import NavMenu from './components/NavMenu.js';
 import { pages } from './utils/WizardDefaults.js';

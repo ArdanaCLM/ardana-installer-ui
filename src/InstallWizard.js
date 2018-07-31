@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import './Deployer.css';
+import './styles/deployer.less';
 import { translate, translateModelName } from './localization/localize.js';
 import { STATUS } from './utils/constants.js';
 import WizardProgress from './components/WizardProgress';

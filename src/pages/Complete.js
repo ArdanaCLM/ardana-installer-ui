@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React from 'react';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage';
 import { fetchJson } from '../utils/RestUtils.js';

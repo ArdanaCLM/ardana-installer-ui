@@ -14,7 +14,7 @@
 **/
 import React, { Component } from 'react';
 import Collapsible from 'react-collapsible';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 import ServerTable from './ServerTable.js';
 import { isRoleAssignmentValid } from '../utils/ModelUtils.js';

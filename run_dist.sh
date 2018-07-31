@@ -17,8 +17,20 @@
 SCRIPTDIR=$(dirname "$(readlink -e "${BASH_SOURCE[0]}")")
 cd $SCRIPTDIR
 
-# package the server and UI components into the dist folder
-./build_dist.sh
+die() {
+   echo "$@" >&2
+   exit 1
+}
+
+# Install/update dependencies
+if yarn --version &> /dev/null ; then
+    yarn install --link-duplicates
+else
+    npm install
+fi
+
+# build the neccessary UI files
+./build_ui.sh || die "building UI files failed, exiting"
 
 # Check out a local copy of the installer server
 if [ ! -d run ] ; then

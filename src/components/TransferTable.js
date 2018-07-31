@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import '../Deployer.css';
+import '../styles/deployer.less';
 import { AssignmentButton } from '../components/Buttons.js';
 
 class InnerTable extends Component {

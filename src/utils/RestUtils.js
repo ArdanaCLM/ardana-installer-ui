@@ -12,7 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import { getConfig } from './ConfigHelper.js';
+import { getAppConfig } from './ConfigHelper.js';
 import { redirectToLogin } from './RouteUtils.js';
 import { getAuthToken } from './Auth.js';
 
@@ -59,8 +59,9 @@ function doJson(url, method, body, init, forceLogin=true) {
     }
   }
 
-  return buildUrl(url)
-    .then(url => fetch(url, myInit))
+  const fullUrl = buildUrl(url);
+
+  return fetch(fullUrl, myInit)
     .then(res => extractResponse(res, forceLogin));
 }
 
@@ -172,18 +173,16 @@ function extractResponse(response, forceLogin) {
  * Return a promise that returns the full URL (a promise is used because
  * the information needed to build the URL comes from an asynchonous function)
  */
-export function buildUrl(url) {
+function buildUrl(url) {
 
-  return getConfig('shimurl').
-    then(val => {
-      if (url.startsWith('http')) {
-        return url;
-      } else {
-        // prepend the shimurl if we receive a URL without a scheme.  Note that the incoming
-        // url may contain a leading / but is not required to.
-        return val + '/' + url.replace(/^\//, '');
-      }
-    });
+  if (url.startsWith('http')) {
+      return url;
+  } else {
+    const baseUrl = getAppConfig('shimurl');
+    // prepend the baseUrl if we receive a URL without a scheme.  Note that the
+    // incoming url may contain a leading / but is not required to.
+    return baseUrl + '/' + url.replace(/^\//, '');
+  }
 }
 
 /**
