@@ -105,6 +105,41 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   return retIds;
 }
 
+export function getModelMacAddresses (model) {
+  let macAddresses = model.getIn(['inputModel','servers'])
+    .map(server => server.get('mac-addr')).toJS();
+  return macAddresses;
+}
+
+export function getModelIPMIAddresses (model) {
+  let ipAddresses = model.getIn(['inputModel','servers'])
+    .map(server => server.get('ilo-ip')).toJS();
+  return ipAddresses;
+}
+
+// get all available server ids which are not in the model
+export function getAvailableServerIds (model, autoServers, manualServers) {
+  let modelUids= model.getIn(['inputModel','servers'])
+    .map(server => server.get('uid') || server.get('id')).toJS();
+
+  let allAvailableServers = [];
+  if (autoServers && autoServers.length > 0) {
+    allAvailableServers = allAvailableServers.concat(autoServers);
+  }
+  if(manualServers && manualServers.length > 0) {
+    allAvailableServers = allAvailableServers.concat(manualServers);
+  }
+
+  // all the servers that don't belong to model
+  let servers = allAvailableServers.filter((server) => {
+    return (!modelUids.includes(server.uid));
+  });
+
+  let retServerIds = servers.map(server => server.id);
+
+  return retServerIds;
+}
+
 export function getCleanedServer(srv, props) {
   let retServer = {};
   props.forEach(key => {
@@ -180,7 +215,8 @@ export function updateServersInModel(server, model, props, originId) {
   let retModel = model.updateIn(['inputModel','servers'], list => list.map(svr => {
     // originId is used to deal with example model item where it has no uid to begin
     // with
-    if ((originId && svr.get('id') === originId) || (svr.get('uid') === server.uid)) {
+    if ((originId && svr.get('id') === originId) ||
+      (svr.get('uid') !== undefined && svr.get('uid') === server.uid)) {
       let update_server = getMergedServerMap(svr, server, props);
       // clean up unwanted entries before save to the model so it
       // can pass model validator
@@ -209,3 +245,10 @@ export function genUID(prefix) {
   return retID;
 }
 
+export function maskPassword(pass) {
+  if(!pass || pass.length === 0) {
+    return '';
+  }
+
+  return '*'.repeat(pass.length);
+}

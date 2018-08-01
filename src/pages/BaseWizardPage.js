@@ -14,11 +14,12 @@
 **/
 import React, { Component } from 'react';
 import '../styles/deployer.less';
-//import { translate } from '../localization/localize.js';
 
 import {
   NextButton,
   BackButton,
+  CloseButton,
+  CancelButton
 } from '../components/Buttons.js';
 
 
@@ -73,7 +74,17 @@ class BaseWizardPage extends Component {
     return false;
   }
 
-  renderNavButtons() {
+  closeUpdateProcess(e) {
+    e.preventDefault();
+    this.props.closeUpdateProcess();
+  }
+
+  cancelUpdateProcess(e) {
+    e.preventDefault();
+    this.props.cancelUpdateProcess();
+  }
+
+  renderNavButtons(close, cancel) {
 
     let back = null;
     if(this.props.back !== undefined) {
@@ -93,10 +104,26 @@ class BaseWizardPage extends Component {
       />;
     }
 
+    //buttons for update process
+    let cancelB = null;
+    if(cancel) {
+      cancelB = <CancelButton
+        clickAction={this.cancelUpdateProcess.bind(this)}
+      />;
+    }
+
+    let closeB = null;
+    if(close) {
+      closeB = <CloseButton
+        clickAction={this.closeUpdateProcess.bind(this)}
+      />;
+    }
     return (
       <div className='btn-row footer-container'>
         {back}
+        {cancel && cancelB}
         {forward}
+        {close && closeB}
       </div>
     );
   }

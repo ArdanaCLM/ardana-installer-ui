@@ -16,6 +16,8 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
+import UpdateServers from '../pages/UpdateServers.js';
+import InstallWizard from '../InstallWizard.js';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -34,6 +36,14 @@ class Example extends Component {
         <h3>Content</h3>
         <div>Example: {foo}</div>
       </div>
+    );
+  }
+}
+
+class Servers extends  Component {
+  render() {
+    return(
+      <InstallWizard menuComponent={UpdateServers} menuName='servers'/>
     );
   }
 }
@@ -57,7 +67,7 @@ export const routes = [
       { name: translate('server_groups'), slug: '/topology/server-groups', component: Example },
     ]
   },
-  { name: translate('servers'), slug: '/servers', component: Example,
+  { name: translate('servers'), slug: '/servers', component: Servers,
     items: [
       { name: translate('add_server'), slug: '/servers/add-server', component: Example },
     ]

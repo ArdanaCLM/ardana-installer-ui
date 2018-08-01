@@ -21,6 +21,10 @@
   display: flex;
   justify-content: space-between;
 
+  &.update {
+    width: 60%;
+  }
+
   > span:before {
     font-weight: bold;
     color: white;
@@ -151,6 +155,10 @@
   //   40px for wizard-content top and bottom margins
   //   55px for footer-container
   height: calc(~"100vh - 291px");
+
+  &.unlimited-height {
+    height: auto;
+  }
 
   overflow-y: auto;
 }

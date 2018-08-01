@@ -36,6 +36,26 @@ function NextButton(props) {
   );
 }
 
+function CloseButton(props) {
+  return (
+    <ActionButton
+      clickAction={props.clickAction}
+      displayLabel={props.displayLabel || translate('common.close')}
+      isDisabled={props.isDisabled}
+    />
+  );
+}
+
+function CancelButton(props) {
+  return (
+    <ActionButton
+      clickAction={props.clickAction}
+      displayLabel={props.displayLabel || translate('cancel')}
+      isDisabled={props.isDisabled}
+    />
+  );
+}
+
 class ActionButton extends Component {
   render() {
     let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
@@ -303,6 +323,8 @@ class DeleteForTableRow extends Component {
 module.exports = {
   BackButton: BackButton,
   NextButton: NextButton,
+  CloseButton: CloseButton,
+  CancelButton: CancelButton,
   PickerButton: PickerButton,
   ActivePickerButton: ActivePickerButton,
   ActionButton: ActionButton,
