@@ -30,7 +30,14 @@
     "no.component.select": "No Component Selected",
     "no.model.select": "No Model Selected",
     "common.details": "Details",
+    "common.delete": "Delete",
+    "common.activate": "Activate",
+    "common.deactivate": "Deactivate",
     "common.save.continue": "Save & Continue",
+    "common.replace": "Replace",
+    "common.installos": "Install OS",
+    "common.wipedisk":  "Wipe Data Disks",
+    "common.servers": "Servers",
 
     "speedometer.used": "USED",
     "speedometer.percentage": "{0}%",
@@ -403,7 +410,9 @@
 
     "input.required.error": "Input is required",
     "input.validator.ipv4address.error": "Please enter a valid IPV4 Address",
+    "input.validator.ipv4address.exist.error": "Address exists, please enter a different IPV4 Address",
     "input.validator.macaddress.error": "Please enter a valid MAC Address",
+    "input.validator.macaddress.exist.error": "Address exists, please enter a different MAC Address",
     "input.validator.port.error": "Please enter a valid port between 0 and 65535",
     "input.validator.ipv4addresshost.error": "Please enter a valid IPV4 Address or Host",
     "input.validator.pciaddress.error": "Please enter a valid PCI Address",
@@ -458,5 +467,26 @@
 
     "tooltip.network.addresses": "IP addresses used to limit the network access. Addresses could be an IP range or an IP address. For example, 10.0.1.1-10.0.1.10 or 10.0.1.23",
     "tooltip.network.cidr": "Network address in Classless Inter-Domain Routing notation, such as 10.0.1.0/24",
-    "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094."
+    "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094.",
+
+    "server.replace.heading": "Replace a Server - {0}",
+    "server.available.prompt": "Available Servers",
+    "server.replace.installos": "Install OS",
+    "server.replace.details.message": "Please provide MAC address and IPMI information for the replacement server.",
+    "replace.server.details.role": "Role",
+    "replace.server.details.ip-addr": "IP Address",
+    "replace.server.details.server-group": "Server Group",
+    "replace.server.details.nic-mapping": "NIC Mapping",
+    "replace.server.details.mac-addr": "MAC Address",
+    "replace.server.details.ilo-ip": "IPMI IP Address",
+    "replace.server.details.ilo-user": "IPMI Username",
+    "replace.server.details.ilo-password": "IPMI Password",
+    "replace.server.details.use.availservers": "Use Available Servers",
+    "server.replace.details.select.message": "Check and select from the available servers to fill out inputs.",
+    "server.replace.prepare": "Preparing Replace Server in Progress",
+    "server.replace.complete.heading": "Successfully Completed Replacing Server",
+    "server.replace.complete": "Completed replacing server {0}",
+    "server.replace.prepare.failure": "Failed to prepare for replacing server",
+    "update.commit.failure": "Failed to commit update changes. {0}",
+    "install.progress.failure": "Failed to install SLES OS"
 }

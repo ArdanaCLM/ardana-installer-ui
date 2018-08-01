@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import React from 'react';
-import { translate } from '../../localization/localize.js';
+import { translate } from '../localization/localize.js';
 import BaseServerDetails from './BaseServerDetails.js';
 
 class SmServerDetails extends BaseServerDetails {
