@@ -236,10 +236,11 @@ class ValidateConfigFiles extends Component {
           })
           .catch((error) => {
             this.props.enableNextButton(false);
-            this.setState({valid: INVALID, invalidMsg: translate('validate.config.sshPassphrase.error', error.value['error_msg'])});
+            this.setState({valid: INVALID,
+              invalidMsg: translate('validate.config.sshPassphrase.error', error.value['error_msg'])});
             this.props.disableTab(false);
             this.props.enableBackButton(true);
-          })
+          });
       }
     } else {
       this.testAndCommit();
@@ -247,34 +248,34 @@ class ValidateConfigFiles extends Component {
   };
 
   testAndCommit = () => {
-            postJson('/api/v1/clm/config_processor')
-              .then(() => {
-                //go commit model changes
-                const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
-                postJson('/api/v1/clm/model/commit', commitMessage)
-                  .then(() => {
-                    this.setState({valid: VALID, commit: STATUS.COMPLETE});
-                    this.props.disableTab(false);
-                    this.props.enableBackButton(true);
-                    this.props.enableNextButton(true);
-                    this.clearAllChangeMarkers();
-                  })
-                  .catch((error) => {
-                    this.setState({
-                      valid: INVALID,
-                      invalidMsg: translate('deploy.commit.failure', error.toString()),
-                      commit: STATUS.FAILED});
-                    this.props.disableTab(false);
-                    this.props.enableBackButton(true);
-                    this.props.enableNextButton(false);
-                  });
-              })
-              .catch(error => {
-                this.props.enableNextButton(false);
-                this.setState({valid: INVALID, invalidMsg: error.value.log});
-                this.props.disableTab(false);
-                this.props.enableBackButton(true);
-              });
+    postJson('/api/v1/clm/config_processor')
+      .then(() => {
+        //go commit model changes
+        const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
+        postJson('/api/v1/clm/model/commit', commitMessage)
+          .then(() => {
+            this.setState({valid: VALID, commit: STATUS.COMPLETE});
+            this.props.disableTab(false);
+            this.props.enableBackButton(true);
+            this.props.enableNextButton(true);
+            this.clearAllChangeMarkers();
+          })
+          .catch((error) => {
+            this.setState({
+              valid: INVALID,
+              invalidMsg: translate('deploy.commit.failure', error.toString()),
+              commit: STATUS.FAILED});
+            this.props.disableTab(false);
+            this.props.enableBackButton(true);
+            this.props.enableNextButton(false);
+          });
+      })
+      .catch(error => {
+        this.props.enableNextButton(false);
+        this.setState({valid: INVALID, invalidMsg: error.value.log});
+        this.props.disableTab(false);
+        this.props.enableBackButton(true);
+      });
   }
 
   renderBody() {
@@ -392,7 +393,7 @@ class ConfigForm extends Component {
               inputAction={this.handleSshPassphrase}/>
           </div>
         </div>
-      )
+      );
     }
   }
 
@@ -563,7 +564,7 @@ class ConfigPage extends BaseWizardPage {
                 updateGlobalState={this.props.updateGlobalState} showNavButtons={this.showNavButtons}/>
             </Tab>
             <Tab disabled={this.state.disableTab}
-                 eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
+              eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
               <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig}
                 requiresPassword={this.state.requiresPassword}
                 passAction={this.setSshPassphrase}/>
