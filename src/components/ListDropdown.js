@@ -37,35 +37,35 @@ export class ListDropdown extends Component {
   renderOptions() {
     let options = this.props.optionList.map((opt) => {
       if (this.props.defaultOption && opt === this.props.defaultOption.value) {
-      return <option key={opt} value={opt}>{this.props.defaultOption.label}</option>;
-    } else {
-      return <option key={opt} value={opt}>{opt}</option>;
+        return <option key={opt} value={opt}>{this.props.defaultOption.label}</option>;
+      } else {
+        return <option key={opt} value={opt}>{opt}</option>;
+      }
+    });
+
+    if (this.props.emptyOption && (this.state.value === '' || this.state.value === undefined)) {
+      let emptyOption = [
+        <option
+          key='noopt' value={this.props.emptyOption.value}>{this.props.emptyOption.label}
+        </option>
+      ];
+      //add at the beginning
+      options = emptyOption.concat(options);
     }
-  });
 
-  if(this.props.emptyOption && (this.state.value === '' || this.state.value === undefined)) {
-    let emptyOption = [
-      <option
-      key='noopt' value={this.props.emptyOption.value}>{this.props.emptyOption.label}
-      </option>
-    ];
-    //add at the beginning
-    options = emptyOption.concat(options);
+    return options;
   }
 
-  return options;
-}
-
-render() {
-  let classname = 'server-detail-select';
-  if (this.props.moreClass) {
-    classname += ' ' + this.props.moreClass;
-  }
-  return (
+  render() {
+    let classname = 'server-detail-select';
+    if (this.props.moreClass) {
+      classname += ' ' + this.props.moreClass;
+    }
+    return (
       <div className={classname}>
         <select className='rounded-corner' value={this.state.value} name={this.props.name}
-        onChange={this.handleSelect}>{this.renderOptions()}</select>
+          onChange={this.handleSelect}>{this.renderOptions()}</select>
       </div>
-      );
-}
+    );
+  }
 }

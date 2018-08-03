@@ -240,15 +240,13 @@ class UpdateNetworks extends Component {
           </div>
           <div className='plus-minus-container'>
             { idx > 0 || (addr !== '') ?
-              <span key={'address_minus'}
-                onClick={() => this.removeAddress(idx)}>
-                  <i className='material-icons left-sign'>remove</i>
+              <span key={'address_minus'} onClick={() => this.removeAddress(idx)}>
+                <i className='material-icons left-sign'>remove</i>
               </span>
               : ''}
             { lastRow && (this.allAddressesStatus[idx] !== INPUT_STATUS.INVALID && addr !== '') ?
-              <span key={'address_plus'}
-                onClick={this.addAddress}>
-                  <i className='material-icons right-sign'>add</i>
+              <span key={'address_plus'} onClick={this.addAddress}>
+                <i className='material-icons right-sign'>add</i>
               </span>
               : ''}
           </div>

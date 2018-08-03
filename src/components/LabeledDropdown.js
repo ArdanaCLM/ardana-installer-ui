@@ -21,15 +21,15 @@ export class LabeledDropdown extends Component {
     let labelStr = this.props.label ? translate(this.props.label) : '';
     let label = this.props.label ? ((this.props.isRequired) ? labelStr + '*' : labelStr) : '';
     return (
-        <div className='detail-line'>
-          <div className='detail-heading'>{label}</div>
-          <div className='input-body'>
-            <ListDropdown name={this.props.name} value={this.props.value}
+      <div className='detail-line'>
+        <div className='detail-heading'>{label}</div>
+        <div className='input-body'>
+          <ListDropdown name={this.props.name} value={this.props.value}
             optionList={this.props.optionList} emptyOption={this.props.emptyOption}
             selectAction={this.props.selectAction} defaultOption={this.props.defaultOption}
             moreClass={this.props.moreClass}/>
-          </div>
         </div>
-        );
+      </div>
+    );
   }
 }

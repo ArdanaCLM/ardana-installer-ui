@@ -41,7 +41,7 @@ export function navigateBack(fallback='/', state) {
 }
 
 export function redirectToLogin() {
-  navigateTo('/login', { forcedRedirect: true })
+  navigateTo('/login', { forcedRedirect: true });
 }
 
 export function wasRedirectedToLogin() {

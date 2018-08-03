@@ -430,16 +430,18 @@ class InterfaceModelsTab extends Component {
           editClass += ' disabled';
           minusClass += ' disabled';
         }
-        edit = (<span key='edit'
-          onClick={(e) => this.editInterface(e, idx)}>
+        edit = (
+          <span key='edit' onClick={(e) => this.editInterface(e, idx)}>
             <i className={editClass}>edit</i>
-          </span>);
+          </span>
+        );
         //}
         //if (idx > 0 || this.state.deviceList.get(idx).get('name')) {
-        minus = (<span key='remove'
-          onClick={(e) => this.confirmRemoveInterface(idx)}>
+        minus = (
+          <span key='remove' onClick={(e) => this.confirmRemoveInterface(idx)}>
             <i className={minusClass}>delete</i>
-          </span>);
+          </span>
+        );
         //}
 
         return (
@@ -747,16 +749,18 @@ class InterfaceModelsTab extends Component {
 
       let minus, plus;
       if (idx === arr.size-1 && this.state.deviceList.get(idx).get('name')) {
-        plus = (<span key={this.props.name + 'plus'}
-          onClick={this.addDevice}>
+        plus = (
+          <span key={this.props.name + 'plus'} onClick={this.addDevice}>
             <i className='material-icons right-sign'>add</i>
-          </span>);
+          </span>
+        );
       }
       if (idx > 0 || this.state.deviceList.get(idx).get('name')) {
-        minus = (<span key={this.props.name + 'minus'}
-          onClick={() => this.removeDevice(idx)}>
+        minus = (
+          <span key={this.props.name + 'minus'} onClick={() => this.removeDevice(idx)}>
             <i className='material-icons'>remove</i>
-          </span>);
+          </span>
+        );
       }
 
       return (
@@ -835,17 +839,19 @@ class InterfaceModelsTab extends Component {
       let minus, plus;
       // Render a plus only on the last row, and only if a valid value has been selected
       if (idx === arr.size-1 && this.state.networkInterface.getIn([groupKey, idx])) {
-        plus = (<span key={this.props.name + 'plus'}
-          onClick={() => this.addNetworkGroup(groupKey)}>
+        plus = (
+          <span key={this.props.name + 'plus'} onClick={() => this.addNetworkGroup(groupKey)}>
             <i className='material-icons right-sign'>add</i>
-          </span>);
+          </span>
+        );
       }
       // Render a minus on every row except the first for when no valid value has been selected
       if (idx > 0 || this.state.networkInterface.getIn([groupKey, idx])) {
-        minus = (<span key={this.props.name + 'minus'}
-          onClick={() => this.removeNetworkGroup(groupKey, idx)}>
+        minus = (
+          <span key={this.props.name + 'minus'} onClick={() => this.removeNetworkGroup(groupKey, idx)}>
             <i className='material-icons left-sign'>remove</i>
-          </span>);
+          </span>
+        );
       }
 
       return (

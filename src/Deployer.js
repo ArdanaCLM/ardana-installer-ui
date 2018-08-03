@@ -70,14 +70,14 @@ class Deployer extends Component {
         }
       }
     } else {
-        // Go to installer unless the url specifically requests the menu
-        if (search.has('start') && search.get('start').startsWith('menu')) {
-          // If in secured (post-install) mode with a valid auth token, display menu
-          defaultPath = <NavMenu routes={routes}/>;
-        } else {
-          // Initial, unsecured mode.  Display the InstallWizard
-          defaultPath = <InstallWizard pages={pages}/>;
-        }
+      // Go to installer unless the url specifically requests the menu
+      if (search.has('start') && search.get('start').startsWith('menu')) {
+        // If in secured (post-install) mode with a valid auth token, display menu
+        defaultPath = <NavMenu routes={routes}/>;
+      } else {
+        // Initial, unsecured mode.  Display the InstallWizard
+        defaultPath = <InstallWizard pages={pages}/>;
+      }
     }
 
     return (

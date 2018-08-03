@@ -134,13 +134,11 @@ class CollapsibleTable extends Component {
 
     cols.push(
       <td key='action-buttons'>
-        <span className='edit collapsible'
-          onClick={() => this.handleShowEditServer(server)}>
-            <i className="material-icons collapsible">edit</i>
+        <span className='edit collapsible' onClick={() => this.handleShowEditServer(server)}>
+          <i className="material-icons collapsible">edit</i>
         </span>
-        <span className="detail-info collapsible"
-          onClick={() => this.handleShowServerDetails(server)}>
-            <i className="material-icons collapsible">info</i>
+        <span className="detail-info collapsible" onClick={() => this.handleShowServerDetails(server)}>
+          <i className="material-icons collapsible">info</i>
         </span>
       </td>
     );

@@ -128,9 +128,8 @@ class InlineAddRemoveDropdown extends Component {
             <ValidatingInput key={this.props.name + item + index} inputType='text' inputValue={item}
               disabled='true'/>
             <div className='plus-minus-container'>
-              <span key={this.props.name + item + 'minus' + index}
-                onClick={() => this.removeItem(index)}>
-                  <i className={'material-icons left-sign'}>remove</i>
+              <span key={this.props.name + item + 'minus' + index} onClick={() => this.removeItem(index)}>
+                <i className={'material-icons left-sign'}>remove</i>
               </span>
             </div>
           </div>
@@ -168,13 +167,11 @@ class InlineAddRemoveDropdown extends Component {
             optionList={options} defaultOption={this.props.defaultOption}
             selectAction={this.handleSelectedItem}/>
           <div className='plus-minus-container'>
-            <span key={this.props.name + 'minus'}
-              onClick={() => this.removeItem(-1)}>
-                <i className='material-icons left-sign'>remove</i>
+            <span key={this.props.name + 'minus'} onClick={() => this.removeItem(-1)}>
+              <i className='material-icons left-sign'>remove</i>
             </span>
-            <span key={this.props.name + 'plus'}
-              onClick={this.addItem}>
-                <i className={addClass}>add</i>
+            <span key={this.props.name + 'plus'} onClick={this.addItem}>
+              <i className={addClass}>add</i>
             </span>
           </div>
         </div>
@@ -283,9 +280,9 @@ class InlineAddRemoveInput extends Component {
             inputAction={(e) => this.updateRow(e, index)}
             disabled={this.props.disabled || !this.props.editable}/>
           <div className='plus-minus-container'>
-            <span key={this.props.name + 'minus' + index}
-              className={removeClass} onClick={() => this.removeItem(index)}>
-                <i className={removeClass}>remove</i>
+            <span key={this.props.name + 'minus' + index} className={removeClass}
+              onClick={() => this.removeItem(index)}>
+              <i className={removeClass}>remove</i>
             </span>
           </div>
         </div>
@@ -301,13 +298,11 @@ class InlineAddRemoveInput extends Component {
             inputType='text' inputAction={this.handleInputLine} placeholder={this.props.placeholder}
             isRequired={required} disabled={this.props.disabled}/>
           <div className='plus-minus-container'>
-            <span key={this.props.name + 'minus'}
-              onClick={() => this.removeItem(-1)}>
-                <i className={selectedRemoveClass}>remove</i>
+            <span key={this.props.name + 'minus'} onClick={() => this.removeItem(-1)}>
+              <i className={selectedRemoveClass}>remove</i>
             </span>
-            <span key={this.props.name + 'plus'}
-              onClick={this.addItem}>
-                <i className={addClass}>add</i>
+            <span key={this.props.name + 'plus'} onClick={this.addItem}>
+              <i className={addClass}>add</i>
             </span>
           </div>
         </div>

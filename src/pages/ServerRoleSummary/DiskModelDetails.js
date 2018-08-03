@@ -194,13 +194,11 @@ class DiskModelDetails extends Component {
           <ValidatingInput key={lv.name + index} inputType='text' inputValue={lv.name}
             disabled='true'/>
           <div className='plus-minus-container'>
-            <span key={lv.name + 'edit' + index}
-              onClick={() => this.editLogicalVolume(lv)}>
-                <i className={editClass}>edit</i>
+            <span key={lv.name + 'edit' + index} onClick={() => this.editLogicalVolume(lv)}>
+              <i className={editClass}>edit</i>
             </span>
-            <span key={lv + 'minus' + index}
-              onClick={() => this.confirmRemoveLogicalVolume(index)}>
-                <i className={removeClass}>delete</i>
+            <span key={lv + 'minus' + index} onClick={() => this.confirmRemoveLogicalVolume(index)}>
+              <i className={removeClass}>delete</i>
             </span>
           </div>
         </div>
@@ -754,13 +752,11 @@ class DiskModelDetails extends Component {
           <ValidatingInput key={vg.name + index} inputType='text' inputValue={vg.name}
             disabled='true'/>
           <div className='plus-minus-container'>
-            <span key={vg.name + 'edit' + index}
-              onClick={() => this.editVolumeGroup(vg)}>
-                <i className={editClass}>edit</i>
+            <span key={vg.name + 'edit' + index} onClick={() => this.editVolumeGroup(vg)}>
+              <i className={editClass}>edit</i>
             </span>
-            <span key={vg.name + 'minus' + index}
-              onClick={() => this.confirmRemoveVolumeGroup(index)}>
-                <i className={removeClass}>delete</i>
+            <span key={vg.name + 'minus' + index} onClick={() => this.confirmRemoveVolumeGroup(index)}>
+              <i className={removeClass}>delete</i>
             </span>
           </div>
         </div>
