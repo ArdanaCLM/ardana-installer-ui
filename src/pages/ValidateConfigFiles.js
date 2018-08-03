@@ -61,7 +61,7 @@ class EditFile extends Component {
 
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => this.props.loadModel());
-  };
+  }
 
   handleCancel() {
     this.props.doneEditingFile();
@@ -73,7 +73,7 @@ class EditFile extends Component {
       contents: value,
       isValid: valid
     });
-  };
+  }
 
   render() {
     let errorMsgPanel = '';
@@ -245,7 +245,7 @@ class ValidateConfigFiles extends Component {
     } else {
       this.testAndCommit();
     }
-  };
+  }
 
   testAndCommit = () => {
     postJson('/api/v1/clm/config_processor')
@@ -361,20 +361,20 @@ class ConfigForm extends Component {
 
   handleWipeDisks = () => {
     this.setState({wipeDisks: !this.state.wipeDisks});
-  };
+  }
 
   handlePasswordChange = (e) => {
     this.setState({encryptKey: e.target.value});
-  };
+  }
 
   handleClearServers = () => {
     this.setState({clearServers: !this.state.clearServers});
-  };
+  }
 
   handleSshPassphrase = (e) => {
     this.setState({sshPassphrase: e.target.value});
     this.props.passAction(e.target.value);
-  };
+  }
 
   renderSshPassphrase() {
     if (this.props.requiresPassword) {
@@ -518,27 +518,27 @@ class ConfigPage extends BaseWizardPage {
 
   showNavButtons = (enable) => {
     this.setState({showNavButtons: enable});
-  };
+  }
 
   enableNextButton = (enable) => {
     this.setState({isNextable: enable});
-  };
+  }
 
   enableBackButton = (enable) => {
     this.setState({isBackable : enable});
-  };
+  }
 
   disableTab = (disable) => {
     this.setState({disableTab : disable});
-  };
+  }
 
   setSshPassphrase = (passphrase) => {
     this.setState({sshPassphrase : passphrase});
-  };
+  }
 
   setRequiresPassword = (required) => {
     this.setState({requiresPassword : required});
-  };
+  }
 
   render() {
     return (
