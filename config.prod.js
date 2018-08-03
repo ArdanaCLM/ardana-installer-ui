@@ -14,7 +14,7 @@
 **/
 
 const config = {
-  "shimurl": "",
+  'shimurl': '',
 };
 
 export { config };

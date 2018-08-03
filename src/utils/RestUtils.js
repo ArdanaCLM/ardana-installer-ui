@@ -176,7 +176,7 @@ function extractResponse(response, forceLogin) {
 function buildUrl(url) {
 
   if (url.startsWith('http')) {
-      return url;
+    return url;
   } else {
     const baseUrl = getAppConfig('shimurl');
     // prepend the baseUrl if we receive a URL without a scheme.  Note that the

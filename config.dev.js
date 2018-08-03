@@ -14,7 +14,7 @@
 **/
 
 const config = {
-  "shimurl": "http://localhost:8081",
+  'shimurl': 'http://localhost:8081',
 };
 
 export { config };

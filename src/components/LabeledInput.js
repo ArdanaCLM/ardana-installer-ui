@@ -14,22 +14,23 @@
  **/
 import React, { Component } from 'react';
 import { ValidatingInput } from './ValidatingInput.js';
+import { translate } from '../localization/localize.js';
 
 export class LabeledInput extends Component {
   render() {
     let labelStr = this.props.label ? translate(this.props.label) : '';
     let label = this.props.label ? ((this.props.isRequired) ? labelStr + '*' : labelStr) : '';
     return (
-        <div className='detail-line'>
-          <div className='detail-heading'>{label}</div>
-          <div className='input-body'>
-            <ValidatingInput isRequired={this.props.isRequired} inputName={this.props.inputName}
+      <div className='detail-line'>
+        <div className='detail-heading'>{label}</div>
+        <div className='input-body'>
+          <ValidatingInput isRequired={this.props.isRequired} inputName={this.props.inputName}
             inputType={this.props.inputType} inputValidate={this.props.inputValidate} {... this.props}
             inputAction={this.props.inputAction} inputValue={this.props.inputValue}
             updateFormValidity={this.props.updateFormValidity} category={this.props.category}
             moreClass={this.props.moreClass}/>
-          </div>
         </div>
-        );
+      </div>
+    );
   }
 }

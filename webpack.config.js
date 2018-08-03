@@ -16,7 +16,7 @@
 var path = require('path');
 var webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = (env, argv) => {
 
@@ -49,8 +49,8 @@ module.exports = (env, argv) => {
       }),
 
       new MiniCssExtractPlugin({
-        filename: "[name].css",
-        chunkFilename: "[id].css",
+        filename: '[name].css',
+        chunkFilename: '[id].css',
       }),
 
       new webpack.DefinePlugin({'PRODUCTION': JSON.stringify(productionMode)})
@@ -100,9 +100,9 @@ module.exports = (env, argv) => {
             // for the MiniCssExtractPlugin: https://github.com/webpack-contrib/mini-css-extract-plugin
             { loader: devMode ? 'style-loader' : MiniCssExtractPlugin.loader },
             { loader: 'css-loader',       // Treat url() in css as an import
-               options: { sourceMap: devMode }},
+              options: { sourceMap: devMode }},
             { loader: 'less-loader',      // Compile less to CSS
-               options: { sourceMap: devMode }},
+              options: { sourceMap: devMode }},
           ]
         },
         {

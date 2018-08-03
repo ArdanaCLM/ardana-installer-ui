@@ -200,10 +200,8 @@ class ActivePickerButton extends Component {
 class ItemHelpButton extends Component {
   render() {
     return (
-      <span
-        className='helper'
-        onClick={this.props.clickAction}>
-          <i className="material-icons">info</i>
+      <span className='helper' onClick={this.props.clickAction}>
+        <i className="material-icons">info</i>
       </span>
     );
   }
@@ -240,10 +238,8 @@ class ItemMenuButton extends Component {
     let moreClass = this.props.className || '';
     let cName = 'material-icons ' + moreClass;
     return (
-      <span
-        name='itemMenuButton'
-        onClick={showMenuAction}>
-          <i className={cName}>more_vert</i>
+      <span name='itemMenuButton' onClick={showMenuAction}>
+        <i className={cName}>more_vert</i>
       </span>
     );
   }
@@ -258,7 +254,7 @@ class EditPencilForTableRow extends Component {
       <td className='actions'>
         <p onClick={this.props.clickAction}>
           <span className='edit'>
-              <i className="material-icons">edit</i>
+            <i className="material-icons">edit</i>
           </span>
         </p>
       </td>
