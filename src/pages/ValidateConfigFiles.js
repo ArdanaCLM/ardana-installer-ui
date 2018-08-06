@@ -220,12 +220,40 @@ class ValidateConfigFiles extends Component {
     this.props.enableBackButton(false);
     this.props.enableNextButton(false);
 
+    if (this.props.requiresPassword) {
+      if (!this.props.sshPassphrase) {
+        this.props.enableNextButton(false);
+        this.setState({valid: INVALID, invalidMsg: translate('validate.config.sshPassphrase.missing')});
+        this.props.disableTab(false);
+        this.props.enableBackButton(true);
+      } else {
+        // set the password and validate
+        let password = {'password': this.props.sshPassphrase};
+        postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+          .then(() => {
+            this.props.setRequiresPassword(false);
+            this.testAndCommit();
+          })
+          .catch((error) => {
+            this.props.enableNextButton(false);
+            this.setState({valid: INVALID,
+              invalidMsg: translate('validate.config.sshPassphrase.error', error.value['error_msg'])});
+            this.props.disableTab(false);
+            this.props.enableBackButton(true);
+          });
+      }
+    } else {
+      this.testAndCommit();
+    }
+  }
+
+  testAndCommit = () => {
     postJson('/api/v1/clm/config_processor')
       .then(() => {
         //go commit model changes
         const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
         postJson('/api/v1/clm/model/commit', commitMessage)
-          .then((response) => {
+          .then(() => {
             this.setState({valid: VALID, commit: STATUS.COMPLETE});
             this.props.disableTab(false);
             this.props.enableBackButton(true);
@@ -270,7 +298,6 @@ class ValidateConfigFiles extends Component {
           valid={this.state.valid}
           setChanged={() => this.setChanged()}
           loadModel={this.props.loadModel}
-          valid={this.state.valid}
           invalidMsg={this.state.invalidMsg}
         />
       );
@@ -324,7 +351,8 @@ class ConfigForm extends Component {
         wipeDisks: false,
         encryptKey: '',
         verbosity: 0,
-        clearServers: false
+        clearServers: false,
+        sshPassphrase: ''
       };
     } else {
       this.state = props.deployConfig;
@@ -333,15 +361,41 @@ class ConfigForm extends Component {
 
   handleWipeDisks = () => {
     this.setState({wipeDisks: !this.state.wipeDisks});
-  };
+  }
 
   handlePasswordChange = (e) => {
     this.setState({encryptKey: e.target.value});
-  };
+  }
 
   handleClearServers = () => {
     this.setState({clearServers: !this.state.clearServers});
-  };
+  }
+
+  handleSshPassphrase = (e) => {
+    this.setState({sshPassphrase: e.target.value});
+    this.props.passAction(e.target.value);
+  }
+
+  renderSshPassphrase() {
+    if (this.props.requiresPassword) {
+      return (
+        <div className='detail-line'>
+          <div className='col-xs-4 label-container'>
+            {translate('validate.config.sshPassphrase')}
+            <HelpText
+              tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
+          </div>
+          <div className='col-xs-8'>
+            <ValidatingInput
+              inputName='sshPassphrase'
+              inputType='password'
+              inputValue={this.state.sshPassphrase}
+              inputAction={this.handleSshPassphrase}/>
+          </div>
+        </div>
+      );
+    }
+  }
 
   render() {
     return (
@@ -404,6 +458,9 @@ class ConfigForm extends Component {
               onChange={this.handleClearServers}/>
           </div>
         </div>
+
+        {this.renderSshPassphrase()}
+
       </div>
     );
   }
@@ -417,8 +474,18 @@ class ConfigPage extends BaseWizardPage {
       isNextable: false,
       isBackable: true,
       showNavButtons: true,
-      disableTab: false
+      disableTab: false,
+      requiresPassword: false,
     };
+  }
+
+  componentWillMount() {
+    fetchJson('/api/v1/clm/sshagent/requires_password')
+      .then((responseData) => {
+        this.setState({
+          requiresPassword: responseData['requires_password']
+        });
+      });
   }
 
   setNextButtonLabel() {
@@ -451,11 +518,11 @@ class ConfigPage extends BaseWizardPage {
 
   showNavButtons = (enable) => {
     this.setState({showNavButtons: enable});
-  };
+  }
 
   enableNextButton = (enable) => {
     this.setState({isNextable: enable});
-  };
+  }
 
   enableBackButton = (enable) => {
     this.setState({isBackable : enable});
@@ -463,6 +530,14 @@ class ConfigPage extends BaseWizardPage {
 
   disableTab = (disable) => {
     this.setState({disableTab : disable});
+  }
+
+  setSshPassphrase = (passphrase) => {
+    this.setState({sshPassphrase : passphrase});
+  }
+
+  setRequiresPassword = (required) => {
+    this.setState({requiresPassword : required});
   }
 
   render() {
@@ -477,7 +552,11 @@ class ConfigPage extends BaseWizardPage {
               eventKey={TAB.MODEL_FILES} title={translate('validate.tab.model')}>
               <ValidateConfigFiles disableTab={this.disableTab} enableBackButton={this.enableBackButton}
                 enableNextButton={this.enableNextButton} showNavButtons={this.showNavButtons}
-                loadModel={this.props.loadModel} />
+                loadModel={this.props.loadModel}
+                requiresPassword={this.state.requiresPassword}
+                sshPassphrase={this.state.sshPassphrase}
+                setRequiresPassword={this.setRequiresPassword}/>
+
             </Tab>
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.TEMPLATE_FILES} title={translate('validate.tab.templates')}>
@@ -486,7 +565,9 @@ class ConfigPage extends BaseWizardPage {
             </Tab>
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
-              <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig} />
+              <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig}
+                requiresPassword={this.state.requiresPassword}
+                passAction={this.setSshPassphrase}/>
             </Tab>
           </Tabs>
         </div>
