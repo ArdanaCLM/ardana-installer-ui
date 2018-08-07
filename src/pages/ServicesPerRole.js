@@ -16,12 +16,11 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fromJS } from 'immutable';
-import { fetchJson } from '../utils/RestUtils.js';
 
 class ServicesPerRole extends Component {
 
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = {
       model: undefined
     };
@@ -30,39 +29,34 @@ class ServicesPerRole extends Component {
   componentWillMount() {
     fetchJson('/api/v1/clm/model')
       .then(responseData => {
-        this.setState({'model': fromJS(responseData)});
+        this.setState({'model': responseData.inputModel});
       });
   }
 
   render() {
     let roles = [];
     if (this.state.model) {
-      this.state.model.getIn(['inputModel', 'control-planes'])
-        .map(controlPlane => {
-          const commonServices = controlPlane.get('common-service-components');
-          controlPlane.get('clusters')
-            .map(cluster => {
-              const combinedServices = commonServices.concat(cluster.get('service-components'));
-              roles.push({serverRole: cluster.get('server-role'), services: combinedServices.sort().toJS()});
-            });
-          controlPlane.get('resources')
-            .map(resource => {
-              const combinedServices = commonServices.concat(resource.get('service-components'));
-              roles.push({serverRole: resource.get('server-role'), services: combinedServices.sort().toJS()});
-            });
+      this.state.model['control-planes'].map(controlPlane => {
+        const commonServices = controlPlane['common-service-components'];
+        controlPlane.clusters.map(cluster => {
+          const combinedServices = commonServices.concat(cluster['service-components']);
+          roles.push({serverRole: cluster['server-role'], services: combinedServices.sort()});
         });
-      this.state.model.getIn(['inputModel', 'servers'])
-        .map(server => {
-          const role = server.get('role');
-          const foundIndex = roles.findIndex(s => s.serverRole === role);
-          if (foundIndex !== -1) {
-            if (roles[foundIndex].ids) {
-              roles[foundIndex].ids.push(server.get('id'));
-            } else {
-              roles[foundIndex].ids = [server.get('id')];
-            }
+        controlPlane.resources.map(resource => {
+          const combinedServices = commonServices.concat(resource['service-components']);
+          roles.push({serverRole: resource['server-role'], services: combinedServices.sort()});
+        });
+      });
+      this.state.model['servers'].map(server => {
+        const foundIndex = roles.findIndex(s => s.serverRole === server.role);
+        if (foundIndex !== -1) {
+          if (roles[foundIndex].ids) {
+            roles[foundIndex].ids.push(server.id);
+          } else {
+            roles[foundIndex].ids = [server.id];
           }
-        });
+        }
+      });
     }
 
     const rows = roles.map((role, idx) => {
@@ -81,7 +75,7 @@ class ServicesPerRole extends Component {
         <table className='table'>
           <thead>
             <tr>
-              <th width="20%">{translate('roles')}</th>
+              <th width="20%">{translate('services.role')}</th>
               <th width="35%">{translate('servers')}</th>
               <th width="50%">{translate('services')}</th>
             </tr>

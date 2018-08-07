@@ -465,5 +465,6 @@
     "tooltip.network.cidr": "Network address in Classless Inter-Domain Routing notation, such as 10.0.1.0/24",
     "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094.",
 
-    "services.services.per.role" : "Services Per Role"
+    "services.services.per.role" : "Services Per Role",
+    "services.role" : "Role"
 }
