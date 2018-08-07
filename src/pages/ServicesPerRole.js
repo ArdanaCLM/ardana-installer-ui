@@ -15,7 +15,7 @@
 
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
-import { fromJS } from 'immutable';
+import { fetchJson } from '../utils/RestUtils.js';
 
 class ServicesPerRole extends Component {
 
