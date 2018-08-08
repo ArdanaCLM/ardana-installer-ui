@@ -30,7 +30,7 @@ class NavMenu extends Component {
         path={e.slug}
         children={({ match }) => (
           <li >
-            <Link className={match ? 'active' : ''} to={e.slug}>{e.name}</Link>
+            <Link className={match ? 'active' : ''} to={e.items[0].slug}>{e.name}</Link>
           </li>)}
       />
     ));
@@ -60,16 +60,8 @@ class NavMenu extends Component {
       />
     ));
 
-    // Render the content of any top-level items chosen.  This permits rendering
-    // content for a top-level item even when no submenu item is chosen
-    let content = this.props.routes.map(e => (
-      <Route
-        key={e.slug}
-        exact path={e.slug}
-        component={e.component}/>
-    ));
-
-    // Render the contents of the chose submenu item.
+    // Render the contents of the chosen submenu item.
+    let content = [];
     this.props.routes.forEach(route => {
       route.items.forEach(item => {
         content.push(
