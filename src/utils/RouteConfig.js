@@ -15,6 +15,7 @@
 
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
+import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
@@ -46,6 +47,7 @@ export const routes = [
     items: [
       { name: translate('packages'), slug: '/services/packages', component: Example },
       { name: translate('configure'), slug: '/services/configure', component: Example },
+      { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
   },
   { name: translate('topology'), slug: '/topology', component: Example,
