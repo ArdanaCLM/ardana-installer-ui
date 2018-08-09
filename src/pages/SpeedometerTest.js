@@ -14,7 +14,7 @@
 **/
 
 import React, { Component } from 'react';
-import { Speedometer } from '../components/Speedometer';
+import { Speedometer } from '../components/Graph';
 
 // This is a test/demonstration page to explore how the Speedometer component
 // works and to see the effect of changing its various settings

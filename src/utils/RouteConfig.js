@@ -17,6 +17,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
+import { AlarmDonutTest } from '../pages/AlarmDonutTest';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -68,6 +69,7 @@ export const routes = [
   { name: 'Example', slug: '/example', component: Example,
     items: [
       { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
+      { name: 'Alarm Donut', slug: '/example/alarmdonut', component: AlarmDonutTest },
     ]
   }
 ];
