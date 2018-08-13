@@ -76,7 +76,7 @@ class LoginPage extends Component {
           if (search.has('start') && search.get('start').startsWith('installer')) {
             navigateTo('/', undefined, search.toString());
           } else {
-            navigateTo('/services');
+            navigateTo('/services/info');
           }
         }
       })
