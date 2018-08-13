@@ -21,7 +21,25 @@ import { LoadingMask } from './components/LoadingMask.js';
 import { Map, fromJS } from 'immutable';
 import { fetchJson, postJson, deleteJson } from './utils/RestUtils.js';
 
+// global states vars used in installation and update
+const COMMON_GLOBAL_STATES_VARS = [
+  'playbookStatus', 'model', 'connectionInfo', 'deployConfig'
+];
 
+// global states vars used in update
+const UPDATE_GLOBAL_STATES_VARS = [
+  'currentMenuName', 'currentOperation', 'steps', 'pages', 'operationProps'
+];
+
+// global persisted states vars used in installation and update
+const COMMON_PERSISTED_STATES_VARS = [
+  'currentStep', 'steps', 'playbookStatus', 'connectionInfo', 'deployConfig'
+];
+
+// global persisted states vars used in update
+const UPDATE_PERSISTED_STATES_VARS = [
+  'currentMenuName', 'currentOperation', 'operationProps'
+];
 
 /**
  * The InstallWizard component is a container for ordering the install pages and tracking
@@ -33,6 +51,8 @@ class InstallWizard extends Component {
   {
     super(props);
 
+    this.IS_UPDATE = this.props.menuName ? true : false;
+
     this.state = {
       // The current step in the wizard
       currentStep: undefined,
@@ -40,7 +60,12 @@ class InstallWizard extends Component {
       // The status and name of each step in the wizard.  If a user has an error in a step
       // and then returns to the previous step, this array will track the fact that the
       // later step had an error even though it is no longer the current step.
-      steps: props.pages,
+      //
+      // when install, the steps are derived from the static pages
+      // when update, the steps are unknown to start with until user
+      // startUpdate process. steps are used to record step name and step progress
+      // steps are persisted
+      steps: this.props.menuName ? undefined : props.pages,
 
       // The remaining values capture the state of the user's progress through the wizard.  A primary
       // function of these values is so that if the user were to close the browser and then re-open it,
@@ -63,31 +88,99 @@ class InstallWizard extends Component {
       model: Map(),           // immutable model
       connectionInfo: undefined, // config info for external discovery services
       deployConfig: undefined, // cloud deployment configuration
+
+      // deal with update
+      currentMenuName: this.props.menuName,
+      currentOperation: undefined,
+      // when update, the pages are dynamically assembled based on steps when
+      // user startUpdate process. pages include names and page components
+      // which are needed when render html pages
+      // pages are not persisted
+      pages: undefined,
+      // operationProps record all the bits that need to run to update
+      // TODO how to deal with install password
+      operationProps: undefined
     };
 
-
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
-    this.globalStateVars = ['playbookStatus', 'model', 'connectionInfo', 'deployConfig'];
+    this.globalStateVars = COMMON_GLOBAL_STATES_VARS;
+    //if update. add more global states
+    if(this.IS_UPDATE) {
+      this.globalStateVars = this.globalStateVars.concat(UPDATE_GLOBAL_STATES_VARS);
+    }
 
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
-    this.persistedStateVars = [
-      'currentStep', 'steps', 'playbookStatus', 'connectionInfo', 'deployConfig'
-    ];
+    this.persistedStateVars = COMMON_PERSISTED_STATES_VARS;
+    //if update. add more persisted states
+    if(this.IS_UPDATE) {
+      this.persistedStateVars = this.persistedStateVars.concat(UPDATE_PERSISTED_STATES_VARS);
+    }
+
+  }
+
+  // deal with day0 install
+  loadInstallProgress = (responseData, forcedReset) => {
+    if (! forcedReset && responseData.steps &&
+        this.areStepsInOrder(responseData.steps, this.props.pages)) {
+      this.setState(responseData);
+    }
+    else {
+      // Set the currentStep to 0 and update its stepProgress to inprogress
+      this.setState((prevState) => {
+        var newSteps = prevState.steps.slice();
+        newSteps.splice(0, 1, {
+          name: prevState.steps[0].name,
+          stepProgress: STATUS.IN_PROGRESS
+        });
+
+        return {
+          currentStep: 0,
+          steps: newSteps
+        };
+      }, this.persistState);
+    }
+  }
+
+  // deal with day2 update when refresh
+  loadUpdateProgress = (responseData) => {
+    //TODO if refresh with default url or logout due to timeout
+    //need to find a way to set the menu
+    if(responseData && responseData.steps) {
+      let steps = responseData.steps;
+      let pages =
+        this.getPages(steps);
+      let updateStates = responseData;
+      updateStates.pages = pages;
+      this.setState(updateStates, this.persistState);
+    }
+  }
+
+  /**
+   * get the actual pages based on steps and all the possible pages in pageSet passed in
+   * @param steps         the steps for the process.
+   * @returns pages       assembled page components based on steps and this.props.pageSet
+   */
+  getPages = (steps) => {
+    let pages = undefined;
+    if(this.props.pageSet && steps && steps.length > 0) {
+      pages = steps.map(step => {
+        return {
+          name: step.name,
+          component: this.props.pageSet[step.name]
+        };
+      });
+    }
+    return pages;
   }
 
   componentDidMount = () => {
-
     // Note: if no progress data can be found, responseData is an empty string
-    const forcedReset = window.location.search.indexOf('reset=true') !== -1;
+    const forcedReset =
+      this.IS_UPDATE ? false : window.location.search.indexOf('reset=true') !== -1;
 
     // Load the current state information from the backend
-
-    // To simulate a delay in startup and to be able to see the initial loading mask,
-    //    uncomment the following line and the line with the closing parenthesis two lines later
-    // new Promise(resolve => setTimeout(resolve, 1000)).then(() =>
     fetchJson('/api/v1/clm/model')
-      //  )
       .then(responseData => {
         this.setState({'model': fromJS(responseData)});
       })
@@ -96,27 +189,22 @@ class InstallWizard extends Component {
       })
       .then(() => fetchJson('/api/v1/progress')
         .then((responseData) => {
-          if (! forcedReset && responseData.steps &&
-            this.areStepsInOrder(responseData.steps, this.props.pages)) {
-
-            this.setState(responseData);
-          } else {
-            // Set the currentStep to 0 and update its stepProgress to inprogress
-            this.setState((prevState) => {
-              var newSteps = prevState.steps.slice();
-              newSteps.splice(0, 1, {
-                name: prevState.steps[0].name,
-                stepProgress: STATUS.IN_PROGRESS
-              });
-
-              return {
-                currentStep: 0,
-                steps: newSteps
-              };
-            }, this.persistState);
-          }})
+          // update
+          if(this.IS_UPDATE) {
+            this.loadUpdateProgress(responseData);
+          }
+          else { // install
+            this.loadInstallProgress(responseData, forcedReset);
+          }
+        })
         .catch((error) => {
-          this.setState({currentStep: 0}, this.persistState);
+          if(this.IS_UPDATE) { //update
+            // load progress error..TODO
+          }
+          else { // install
+            this.setState({currentStep: 0}, this.persistState);
+          }
+          console.log(JSON.stringify(error)); // eslint-disable-line no-console
         })
       )
       .then(() => {
@@ -151,20 +239,31 @@ class InstallWizard extends Component {
    * and the current index
    */
   buildElement() {
-    if (this.state.currentStep === undefined) {
+    // install
+    if (!this.IS_UPDATE && this.state.currentStep === undefined) {
       return (<div className="loading-message">{translate('wizard.loading.pleasewait')}</div>);
     }
 
     let props = {};
 
-    //check if first element
-    if(this.state.currentStep !== 0) {
-      props.back = this.stepBack.bind(this);
+    // check if first element
+    // install
+    if(!this.IS_UPDATE && this.state.currentStep !== 0) {
+      props.back = this.stepBack;
     }
 
+    // use dynamic pages when update, use static pages when install
+    let pages = this.IS_UPDATE ? this.state.pages : this.props.pages;
+
     //check for additional steps
-    if(this.state.currentStep < (this.props.pages.length - 1)) {
-      props.next = this.stepForward.bind(this);
+    if(this.state.currentStep !== undefined && this.state.currentStep < (pages.length - 1)) {
+      props.next = this.stepForward;
+    }
+
+    // update last page with complete page which has close button
+    if(this.IS_UPDATE && this.state.currentStep !== undefined &&
+      this.state.currentStep === (pages.length -1)) {
+      props.close = true;
     }
 
     //Pass all global state vars as properties
@@ -178,7 +277,21 @@ class InstallWizard extends Component {
     props.saveModel = this.saveModel;
     props.loadModel = this.loadModel;
 
-    return React.createElement(this.props.pages[this.state.currentStep].component, props);
+    //update
+    if (this.IS_UPDATE) {
+      props.startUpdateProcess = this.startUpdate;
+      props.closeUpdateProcess = this.closeUpdate;
+      props.cancelUpdateProcess = this.cancelUpdate;
+    }
+
+    // if update don't have any progress steps
+    if (this.IS_UPDATE && this.state.currentStep === undefined) {
+      return React.createElement(this.props.menuComponent, props);
+    }
+    else {
+      //use dynamic pages when update, use static pages when install
+      return React.createElement(pages[this.state.currentStep].component, props);
+    }
   }
 
   /**
@@ -198,7 +311,7 @@ class InstallWizard extends Component {
    * Move the wizard forward one step unless there is an error
    * @param {boolean} isError - if an error has occurred, do not advance to the next step
    */
-  stepForward(isError) {
+  stepForward = (isError) => {
     //TODO - update state setting logic to accept error states
     var steps = this.state.steps, stateUpdates = {};
     if(isError) {
@@ -230,7 +343,7 @@ class InstallWizard extends Component {
    * Go back a step in the wizard
    * @param {boolean} isError - whether the current step has an error
    */
-  stepBack(isError) {
+  stepBack = (isError) => {
     //TODO - update state setting logic to accept error states
     var steps = this.state.steps, stateUpdates = {};
     if(isError) {
@@ -257,7 +370,7 @@ class InstallWizard extends Component {
    * Set the wizard to a specific step in the workflow, can only be used to go to previous steps and not forward
    * @param {number} the step number to switch the wizard to
    */
-  stepTo(stepNumber) {
+  stepTo = (stepNumber) => {
     var steps = this.state.steps, stateUpdates = {};
     // sanity check the stepNumber, it must be greater than 0 and less than the current step
     if(stepNumber >= 0 && this.state.currentStep > stepNumber) {
@@ -272,6 +385,55 @@ class InstallWizard extends Component {
       stateUpdates.steps = steps;
       this.setState(stateUpdates, this.persistState);
     }
+  }
+
+  // this uses the infrastructure of the exiting logic to
+  // dynamically render the progress pages on the fly
+  // this is triggered when start the update processes
+  // for example click replace button on Replace server modal
+  startUpdate = (operation, pages, theProps) => {
+    //build steps dynamically
+    let steps = pages.map(page => { return {'name': page.name}; });
+    //get the first one start
+    steps[0].stepProgress = STATUS.IN_PROGRESS;
+
+    this.setState({
+      currentStep: 0,
+      pages: pages,
+      steps: steps,
+      currentOperation: operation,
+      operationProps: theProps, //TODO some props include password which need to be persisted
+      playbookStatus: undefined
+    }, this.persistState);
+  }
+
+  // successfully updated, close to go back to the page where
+  // the update process is originated
+  closeUpdate = () => {
+    this.setState({
+      steps: undefined,
+      currentStep : undefined,
+      currentOperation: undefined,
+      playbookStatus: undefined,
+      operationProps: undefined,
+      pages: undefined,
+      updateUser: undefined
+    }, this.persistState);
+  }
+
+  // has something wrong with update, cancel to go back to
+  // the page where the update process is originated
+  // TODO need some other process to deal with cancel??
+  cancelUpdate = () => {
+    this.setState({
+      steps: undefined,
+      currentStep : undefined,
+      currentOperation: undefined,
+      playbookStatus: undefined,
+      operationProps: undefined,
+      pages: undefined,
+      updateUser: undefined
+    }, this.persistState);
   }
 
   // Setter functions for all state variables that need to be modified within pages.
@@ -302,7 +464,6 @@ class InstallWizard extends Component {
 
     this.setState(prevState => {
       modelChanged = (key == 'model' && value !== prevState.model);
-
       let updatedState = {};
       updatedState[key] = value;
       return updatedState;
@@ -325,6 +486,21 @@ class InstallWizard extends Component {
   // to the model.  Returns a promise
   saveModel = () => postJson('/api/v1/clm/model', this.state.model);
 
+  renderInstallTitle() {
+    const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
+      <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3> : '';
+    return (
+      <div className='top-line'>
+        <h1>{translate('openstack.cloud.deployer.title')}</h1>
+        {selectedModelLine}
+      </div>
+    );
+  }
+
+  renderProgressBar() {
+    return (<WizardProgress steps={this.state.steps} isUpdate={this.IS_UPDATE}/>);
+  }
+
   /**
    * boilerplate ReactJS render function
    */
@@ -332,20 +508,14 @@ class InstallWizard extends Component {
     // overwrite default tab title to use branding title
     document.title = translate('openstack.cloud.deployer.title');
 
-    const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
-      <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3> : '';
-
     return (
       <div>
         <div className='wizard-header'>
-          <div className='top-line'>
-            <h1>{translate('openstack.cloud.deployer.title')}</h1>
-            {selectedModelLine}
-          </div>
-          <WizardProgress steps={this.state.steps} />
+          {!this.IS_UPDATE && this.renderInstallTitle()}
+          {this.state.currentStep !== undefined  && this.state.steps && this.renderProgressBar()}
         </div>
         <div className='wizard-content-container'>
-          <LoadingMask show={this.state.currentStep === undefined}></LoadingMask>
+          <LoadingMask show={!this.IS_UPDATE && this.state.currentStep === undefined}></LoadingMask>
           {this.buildElement()}
         </div>
       </div>
