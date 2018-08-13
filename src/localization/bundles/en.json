@@ -285,6 +285,7 @@
     "networks": "Networks",
     "servers": "Servers",
     "server_groups": "Server Groups",
+    "information": "Information",
     "configure": "Configure",
     "packages": "Packages",
     "roles": "Roles",
@@ -465,6 +466,11 @@
     "tooltip.network.cidr": "Network address in Classless Inter-Domain Routing notation, such as 10.0.1.0/24",
     "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094.",
 
+    "services.info" : "Service Information",
+    "services.name" : "Name",
+    "services.description" : "Description",
+    "services.regions" : "Regions",
+    "services.endpoints" : "Endpoints",
     "services.services.per.role" : "Services Per Role",
     "services.role" : "Role"
 }

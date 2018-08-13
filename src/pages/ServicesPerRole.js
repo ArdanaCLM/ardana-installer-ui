@@ -70,7 +70,7 @@ class ServicesPerRole extends Component {
     });
 
     return (
-      <div className='tab-content-update'>
+      <div className='menu-tab-content'>
         <div className='header'>{translate('services.services.per.role')}</div>
         <table className='table'>
           <thead>
