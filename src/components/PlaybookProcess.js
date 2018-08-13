@@ -239,7 +239,9 @@ class PlaybookProgress extends Component {
         playbook.playId = playId;
       }
       playbook.status = status;
-      this.props.updateGlobalState('playbookStatus', this.globalPlaybookStatus);
+      if (this.props.updateGlobalState) {
+        this.props.updateGlobalState('playbookStatus', this.globalPlaybookStatus);
+      }
     }
   }
 
@@ -395,6 +397,7 @@ class PlaybookProgress extends Component {
   }
 
   launchPlaybook = (playbookName) => {
+    console.log('launching playbook');
     postJson('/api/v1/clm/playbooks/' + playbookName,
       JSON.stringify(this.props.payload || ''))
       .then(response => {

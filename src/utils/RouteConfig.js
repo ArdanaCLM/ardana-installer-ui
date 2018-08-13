@@ -16,10 +16,19 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import ServicesPerRole from '../pages/ServicesPerRole';
+import ServiceStatus from '../pages/ServiceStatus';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
+import { ActionButton } from '../components/Buttons.js';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
+
+//  constructor() {
+//    super();
+//    this.state = {
+//      show: false
+//    };
+//  }
 
   render() {
     const foo = this.props.match.path;
@@ -32,8 +41,11 @@ class Example extends Component {
 
     return (
       <div style={style}>
+        <ServiceStatus/>
         <h3>Content</h3>
         <div>Example: {foo}</div>
+        <ActionButton displayLabel={translate('edit.cloud.settings')} type='default'
+                clickAction={() => this.setState({show: true})} />
       </div>
     );
   }
