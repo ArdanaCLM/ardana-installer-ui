@@ -22,7 +22,7 @@ import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
 import { List } from 'immutable';
 import debounce from 'lodash/debounce';
-import { YesNoModal } from '../components/Modals.js';
+import { ConfirmModal, YesNoModal } from '../components/Modals.js';
 
 const PROGRESS_UI_CLASS = {
   NOT_STARTED: 'notstarted',
@@ -479,32 +479,50 @@ class PlaybookProgress extends Component {
     );
   }
 
+  renderModal() {
+    return (
+      <ConfirmModal show={this.props.showModal} title={translate('edit.cloud.settings')}>
+        <pre ref={(comp) => {this.viewer = comp; }}>
+          {this.state.displayedLogs.join('')}
+        </pre>
+      </ConfirmModal>
+    );
+  }
+
   render() {
     const errorDiv = (<div>{translate('progress.failure')}<br/>
       <pre className='log'>{this.state.errorMsg}</pre></div>);
 
-    return (
-      <div className='playbook-progress'>
-        <div className='progress-body'>
-          <div className='col-xs-4'>
-            <ul>{this.getProgress()}</ul>
-            <div>
-              {this.renderCancelButton()}
-              {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
-              <YesNoModal show={this.state.showConfirmationDlg}
-                title={translate('warning')}
-                yesAction={this.cancelRunningPlaybook}
-                noAction={() => this.setState({showConfirmationDlg: false})}>
-                {translate('deploy.cancel.confirm')}
-              </YesNoModal>
+    if (this.props.modalMode) {
+      return (
+        <div>
+          {this.state.errorMsg ? errorDiv : this.renderModal()}
+        </div>
+      );
+    } else {
+      return (
+        <div className='playbook-progress'>
+          <div className='progress-body'>
+            <div className='col-xs-4'>
+              <ul>{this.getProgress()}</ul>
+              <div>
+                {this.renderCancelButton()}
+                {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
+                <YesNoModal show={this.state.showConfirmationDlg}
+                  title={translate('warning')}
+                  yesAction={this.cancelRunningPlaybook}
+                  noAction={() => this.setState({showConfirmationDlg: false})}>
+                  {translate('deploy.cancel.confirm')}
+                </YesNoModal>
+              </div>
+            </div>
+            <div className='col-xs-8'>
+              {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
             </div>
           </div>
-          <div className='col-xs-8'>
-            {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
-          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   componentDidMount() {

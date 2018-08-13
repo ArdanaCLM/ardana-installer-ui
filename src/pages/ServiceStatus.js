@@ -29,35 +29,15 @@ class ServiceStatus extends Component {
     };
   }
 
-//  componentWillMount() {
-//    fetchJson('/api/v1/clm/model')
-//      .then(responseData => {
-//        this.setState({'model': responseData.inputModel});
-//      });
-//  }
-
-
   updatePageStatus = (status) => {
     this.setState({status: status});
   }
 
   render() {
-    const STEP = [
-      {
-        label: 'my status',
-        playbooks: ['keystone-status.yml']
-      }
-    ];
-//    return (
-//      <ConfirmModal show={this.props.show} title={translate('edit.cloud.settings')}
-//        className={'modal'} hideFooter='true'>
-//        <PlaybookProgress
-//          updatePageStatus={this.updatePageStatus} steps={STEP} playbooks={['keystone-status']}/>
-//      </ConfirmModal>
-//    );
     return (
-        <PlaybookProgress
-          updatePageStatus={this.updatePageStatus} steps={STEP} playbooks={['keystone-status']}/>
+      <PlaybookProgress steps={[{label: 'status', playbooks: ['keystone-status.yml']}]}
+        updatePageStatus={this.updatePageStatus} playbooks={['keystone-status']} modalMode={true}
+        showModal={true}/>
     );
   }
 }
