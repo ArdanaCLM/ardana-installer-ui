@@ -59,7 +59,7 @@ class ServiceInfo extends Component {
     }
 
     return (
-      <div className='tab-content'>
+      <div className='menu-tab-content'>
         <div className='header'>{translate('services.info')}</div>
         <table className='table'>
           <thead>
