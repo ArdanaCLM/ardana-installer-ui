@@ -13,13 +13,15 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { translate } from '../../localization/localize.js';
-import EditServerDetails from '../../components/EditServerDetails.js';
-import ViewServerDetails from '../AssignServerRoles/ViewServerDetails.js';
-import { BaseInputModal, ConfirmModal } from '../../components/Modals.js';
+import { translate } from '../localization/localize.js';
+import EditServerDetails from './EditServerDetails.js';
+import ViewServerDetails from './ViewServerDetails.js';
+import ReplaceServerDetails from './ReplaceServerDetails.js';
+import ContextMenu from './ContextMenu.js';
+import { BaseInputModal, ConfirmModal } from './Modals.js';
 import { List, Map } from 'immutable';
-import { byServerNameOrId } from '../../utils/Sort.js';
-import { getAllOtherServerIds } from '../../utils/ModelUtils.js';
+import { byServerNameOrId } from '../utils/Sort.js';
+import { getAllOtherServerIds } from '../utils/ModelUtils.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -29,7 +31,11 @@ class CollapsibleTable extends Component {
       showEditServerModal: false,
       showServerDetailsModal: false,
       activeRowData: undefined,
-      model: this.props.model
+      model: this.props.model,
+      showReplaceServerModal: false,
+      showMenu: false,
+      menuItems: [],
+      menuLocation: undefined
     };
   }
 
@@ -58,6 +64,68 @@ class CollapsibleTable extends Component {
 
   handleShowServerDetails = (rowData) => {
     this.setState({showServerDetailsModal: true, activeRowData: rowData});
+  }
+
+  handleShowMenuServerDetails = () => {
+    this.setState({showServerDetailsModal: true, showMenu: false});
+  }
+
+  handleDoneReplaceServer = (server, wipeDisk, installOS) => {
+    this.props.replaceServer(server, wipeDisk, installOS);
+    this.setState({showReplaceServerModal: false, activeRowData: undefined});
+  }
+
+  handleCancelReplaceServer = () => {
+    this.setState({showReplaceServerModal: false, activeRowData: undefined});
+  }
+
+  handleShowMenuReplaceServer = () => {
+    this.setState({showReplaceServerModal: true, showMenu: false});
+  }
+
+  handleShowMenuServerDetails = () => {
+    this.setState({showServerDetailsModal: true, showMenu: false});
+  }
+
+  handleShowMenuDeleteServer = () => {
+    //TODO
+  }
+
+  handleShowMenuActivateServer = () => {
+    //TODO
+  }
+
+  handleShowMenuDeactivateServer = () => {
+    //TODO
+  }
+
+  handleShowMenu = (event, rowData) => {
+    let role = rowData.role;
+    let items = [];
+    if (role.indexOf('COMPUTE') === -1) { //not compute node
+      items = [{
+        show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails,
+      }, {
+        show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
+      }];
+    }
+    else { //TODO need dynamically show or not show based on the rowData status
+      items = [{
+        show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails
+      }, {
+        show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
+      }, {
+        show: true, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
+      }, {
+        show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
+      }, {
+        show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
+      }];
+    }
+    this.setState({
+      showMenu: true, activeRowData: rowData, menuItems: items,
+      menuLocation: {x: event.pageX, y: event.pageY}
+    });
   }
 
   toggleShowHide(event, clickedGroup, wasExpanded) {
@@ -97,7 +165,7 @@ class CollapsibleTable extends Component {
       .map(g => new Map({
         'groupName': g,
         'members': groupMap.get(g),
-        'isExpanded': this.props.expandedGroup.includes(g)}))
+        'isExpanded': this.props.expandedGroup && this.props.expandedGroup.includes(g)}))
       .toJS();                              // return as JavaScript objects
   }
 
@@ -107,6 +175,7 @@ class CollapsibleTable extends Component {
         this.props.checkInputs.every(key => (server[key] ? true : false))
       );
     }
+    return true;
   }
 
   isDataRowValid = (member) => {
@@ -123,6 +192,32 @@ class CollapsibleTable extends Component {
     return isValid;
   }
 
+  renderEditAction = (server) => {
+    return (
+      <span className='edit collapsible'
+        onClick={() => this.handleShowEditServer(server)}>
+        <i className="material-icons collapsible">edit</i>
+      </span>
+    );
+  }
+
+  renderViewAction = (server) => {
+    return (
+      <span className="detail-info collapsible"
+        onClick={() => this.handleShowServerDetails(server)}>
+        <i className="material-icons collapsible">info</i>
+      </span>
+    );
+  }
+
+  renderMenuAction = (server) => {
+    return (
+      <span className='menu-icon' onClick={(event) => this.handleShowMenu(event, server)}>
+        <i className='material-icons'>more_vert</i>
+      </span>
+    );
+  }
+
   renderServerDataCols(server) {
     let count = 0;
     let cols = [];
@@ -134,12 +229,9 @@ class CollapsibleTable extends Component {
 
     cols.push(
       <td key='action-buttons'>
-        <span className='edit collapsible' onClick={() => this.handleShowEditServer(server)}>
-          <i className="material-icons collapsible">edit</i>
-        </span>
-        <span className="detail-info collapsible" onClick={() => this.handleShowServerDetails(server)}>
-          <i className="material-icons collapsible">info</i>
-        </span>
+        {this.props.saveEditServer && this.renderEditAction(server)}
+        {this.props.saveEditServer && this.renderViewAction(server)}
+        {this.props.replaceServer && this.renderMenuAction(server)}
       </td>
     );
     return cols;
@@ -169,7 +261,7 @@ class CollapsibleTable extends Component {
       memberRowClassName =
         this.isDataRowValid(member) ? memberRowClassName : memberRowClassName + ' required-update';
       memberRowClassName += group.isExpanded ? ' show-row' : ' hide-row';
-      groupRows.push(<tr className={memberRowClassName} key={member['name']}>{cols}</tr>);
+      groupRows.push(<tr className={memberRowClassName} key={member['id']}>{cols}</tr>);
     });
 
     return groupRows;
@@ -177,16 +269,14 @@ class CollapsibleTable extends Component {
 
   renderEditServerModal() {
     let theProps = {};
-    if(this.state.activeRowData) {
-      // check against all the server ids to make sure
-      // whatever changes on id won't conflict with other
-      // ids.
-      let ids =
-        getAllOtherServerIds(
-          this.props.model, this.props.autoServers,
-          this.props.manualServers, this.state.activeRowData.id);
-      theProps.ids = ids;
-    }
+    // check against all the server ids to make sure
+    // whatever changes on id won't conflict with other
+    // ids.
+    let ids =
+      getAllOtherServerIds(
+        this.props.model, this.props.autoServers,
+        this.props.manualServers, this.state.activeRowData.id);
+    theProps.ids = ids;
     return (
       <BaseInputModal
         show={this.state.showEditServerModal} className='edit-details-dialog'
@@ -200,14 +290,39 @@ class CollapsibleTable extends Component {
     );
   }
 
+  renderReplaceServerModal() {
+    let title = translate('server.replace.heading', this.state.activeRowData.id);
+    return (
+      <BaseInputModal
+        show={this.state.showReplaceServerModal} className='edit-details-dialog'
+        onHide={this.handleCancelReplaceServer} title={title}>
+        <ReplaceServerDetails
+          cancelAction={this.handleCancelReplaceServer} doneAction={this.handleDoneReplaceServer}
+          data={this.state.activeRowData} {...this.props}>
+        </ReplaceServerDetails>
+      </BaseInputModal>
+    );
+  }
+
   renderServerDetailsModal() {
     return (
-      <ConfirmModal show={this.state.showServerDetailsModal} className='view-details-dialog' hideFooter
+      <ConfirmModal
+        show={this.state.showServerDetailsModal} className='view-details-dialog' hideFooter
         onHide={this.handleCancelServerDetails} title={translate('view.server.details.heading')}>
         <ViewServerDetails data={this.state.activeRowData}/>
       </ConfirmModal>
     );
   }
+
+  renderActionItemsMenu() {
+    return (
+      <ContextMenu
+        show={this.state.showMenu} items={this.state.menuItems} close={() => this.setState({showMenu: false})}
+        location={this.state.menuLocation}>
+      </ContextMenu>
+    );
+  }
+
   render() {
     // data should be in this following format:
     // [{"groupName": "Group A", members: [{"id": "Server1", "addr": "192.168.2.2"}, {..}]},
@@ -221,8 +336,10 @@ class CollapsibleTable extends Component {
         <div className='rounded-corner'>
           <table className='full-width'><tbody>{rows}</tbody></table>
         </div>
-        {this.renderEditServerModal()}
-        {this.renderServerDetailsModal()}
+        {this.props.saveEditServer && this.state.activeRowData && this.renderEditServerModal()}
+        {this.props.replaceServer && this.state.activeRowData && this.renderReplaceServerModal()}
+        {this.state.activeRowData && this.renderServerDetailsModal()}
+        {this.state.showMenu && this.renderActionItemsMenu()}
       </div>
     );
   }

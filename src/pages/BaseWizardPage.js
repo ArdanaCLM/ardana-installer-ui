@@ -14,11 +14,10 @@
 **/
 import React, { Component } from 'react';
 import '../styles/deployer.less';
-//import { translate } from '../localization/localize.js';
 
 import {
   NextButton,
-  BackButton,
+  BackButton
 } from '../components/Buttons.js';
 
 
@@ -73,30 +72,33 @@ class BaseWizardPage extends Component {
     return false;
   }
 
-  renderNavButtons() {
-
-    let back = null;
+  renderBackButton() {
     if(this.props.back !== undefined) {
-      back= <BackButton
-        clickAction={this.goBack.bind(this)}
-        displayLabel={this.setBackButtonLabel()}
-        isDisabled={this.setBackButtonDisabled()}
-      />;
+      return (
+        <BackButton
+          clickAction={this.goBack.bind(this)}
+          displayLabel={this.setBackButtonLabel()}
+          isDisabled={this.setBackButtonDisabled()}/>
+      );
     }
+  }
 
-    let forward = null;
+  renderForwardButton() {
     if(this.props.next !== undefined) {
-      forward = <NextButton
-        clickAction={this.goForward.bind(this)}
-        displayLabel={this.setNextButtonLabel()}
-        isDisabled={this.setNextButtonDisabled()}
-      />;
+      return (
+        <NextButton
+          clickAction={this.goForward.bind(this)}
+          displayLabel={this.setNextButtonLabel()}
+          isDisabled={this.setNextButtonDisabled()}/>
+      );
     }
+  }
 
+  renderNavButtons() {
     return (
       <div className='btn-row footer-container'>
-        {back}
-        {forward}
+        {this.renderBackButton()}
+        {this.renderForwardButton()}
       </div>
     );
   }
@@ -106,8 +108,6 @@ class BaseWizardPage extends Component {
       <h3 className='heading'>{text}</h3>
     );
   }
-
-
 }
 
 export default BaseWizardPage;

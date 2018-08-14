@@ -18,6 +18,9 @@ import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
+import UpdateServers from '../pages/UpdateServers.js';
+import InstallWizard from '../InstallWizard.js';
+import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -36,6 +39,14 @@ class Example extends Component {
         <h3>Content</h3>
         <div>Example: {foo}</div>
       </div>
+    );
+  }
+}
+
+class ServerSummary extends  Component {
+  render() {
+    return(
+      <InstallWizard pageSet={UpdateServerPages} menuComponent={UpdateServers} menuName='/servers/server-summary'/>
     );
   }
 }
@@ -63,6 +74,7 @@ export const routes = [
   },
   { name: translate('servers'), slug: '/servers',
     items: [
+      { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
       { name: translate('add_server'), slug: '/servers/add-server', component: Example },
     ]
   },

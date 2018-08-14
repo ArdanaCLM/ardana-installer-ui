@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2018 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -12,29 +12,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-@import "./../palette.less";
 
-.context-menu-container {
-  position: absolute;
-  z-index: 999;
-  width: 9em;
-  margin-left: -10px;
-  margin-top: 5px;
+import PrepareReplace from './PrepareReplace.js';
+import InstallOS from './InstallOS.js';
+import UpdateComplete from './UpdateComplete.js';
 
-  .menu-item-list {
-    padding: 0.5em 0;
-  }
-
-  .menu-item {
-    width: 100%;
-    cursor: default;
-    font-size: 1.1em;
-    padding: 0.2em 1.5em;
-    border-bottom: 1px solid @box-border-color;
-    &:hover {
-      background: @inactivecolor;
-      width: 100%
-    }
-  }
-}
-
+// potential pages for all kinds of server replacement pages
+export const UpdateServerPages = {
+  'PrepareReplace' :  PrepareReplace,
+  'InstallOS' : InstallOS,
+  //TODO more possible pages list here
+  'UpdateComplete': UpdateComplete
+};

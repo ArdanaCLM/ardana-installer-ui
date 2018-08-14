@@ -13,7 +13,8 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { translate } from '../../localization/localize.js';
+import { translate } from '../localization/localize.js';
+import { maskPassword } from '../utils/ModelUtils.js';
 
 class ModelServerDetails extends Component {
   constructor(props) {
@@ -29,14 +30,6 @@ class ModelServerDetails extends Component {
     );
   }
 
-  maskPassword(pass) {
-    if(!pass || pass.length === 0) {
-      return '';
-    }
-
-    return '*'.repeat(pass.length);
-  }
-
   renderDetailsContent = () => {
     if(this.props.data) {
       return (
@@ -49,7 +42,7 @@ class ModelServerDetails extends Component {
           {this.renderTextLine('server.mac.prompt', this.props.data['mac-addr'])}
           {this.renderTextLine('server.ipmi.ip.prompt', this.props.data['ilo-ip'])}
           {this.renderTextLine('server.ipmi.username.prompt', this.props.data['ilo-user'])}
-          {this.renderTextLine('server.ipmi.password.prompt', this.maskPassword(this.props.data['ilo-password']))}
+          {this.renderTextLine('server.ipmi.password.prompt', maskPassword(this.props.data['ilo-password']))}
         </div>
       );
     }
