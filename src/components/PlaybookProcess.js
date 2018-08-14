@@ -397,7 +397,6 @@ class PlaybookProgress extends Component {
   }
 
   launchPlaybook = (playbookName) => {
-    console.log('launching playbook');
     postJson('/api/v1/clm/playbooks/' + playbookName,
       JSON.stringify(this.props.payload || ''))
       .then(response => {
@@ -481,7 +480,8 @@ class PlaybookProgress extends Component {
 
   renderModal() {
     return (
-      <ConfirmModal show={this.props.showModal} title={translate('edit.cloud.settings')}>
+      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide}
+        title={translate('services.status.result', this.props.selectedService)}>
         <pre ref={(comp) => {this.viewer = comp; }}>
           {this.state.displayedLogs.join('')}
         </pre>

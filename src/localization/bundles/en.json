@@ -471,6 +471,7 @@
     "services.description" : "Description",
     "services.regions" : "Regions",
     "services.endpoints" : "Endpoints",
+    "services.status.result" : "Run Status Playbook - {0}",
     "services.services.per.role" : "Services Per Role",
     "services.role" : "Role"
 }
