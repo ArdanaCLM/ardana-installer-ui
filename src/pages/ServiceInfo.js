@@ -101,10 +101,10 @@ class ServiceInfo extends Component {
           <table className='table'>
             <thead>
               <tr>
-                <th>{translate('services.name')}</th>
-                <th>{translate('services.description')}</th>
-                <th>{translate('services.endpoints')}</th>
-                <th>{translate('services.regions')}</th>
+                <th>{translate('name')}</th>
+                <th>{translate('description')}</th>
+                <th>{translate('endpoints')}</th>
+                <th>{translate('regions')}</th>
                 <th width="3em"></th>
               </tr>
             </thead>
