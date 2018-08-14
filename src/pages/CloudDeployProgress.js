@@ -162,7 +162,7 @@ class CloudDeployProgress extends BaseWizardPage {
           <PlaybookProgress
             updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
             playbookStatus = {this.props.playbookStatus}
-            steps = {PLAYBOOK_STEPS} deployConfig = {this.props.deployConfig}
+            steps = {PLAYBOOK_STEPS}
             playbooks = {this.playbooks} payload = {payload}/>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}

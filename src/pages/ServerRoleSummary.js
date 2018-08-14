@@ -15,7 +15,7 @@
 import React from 'react';
 import { translate } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage.js';
-import CollapsibleTable from './ServerRoleSummary/CollapsibleTable.js';
+import CollapsibleTable from '../components/CollapsibleTable.js';
 import { ActionButton } from '../components/Buttons.js';
 import { EditCloudSettings } from './ServerRoleSummary/EditCloudSettings.js';
 import { getServerRoles, isRoleAssignmentValid, updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
@@ -28,10 +28,6 @@ class ServerRoleSummary extends BaseWizardPage {
     super(props);
 
     this.checkInputs = ['nic-mapping', 'server-group'];
-    this.state = {
-      autoServers: undefined,
-      manualServers: undefined
-    };
 
     // expand COMPUTE-ROLE if available, otherwise expand the first group
     const allGroups = this.props.model.getIn(['inputModel','server-roles']).map(e => e.get('name')).toJS();

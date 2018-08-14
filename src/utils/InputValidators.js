@@ -39,7 +39,7 @@ const NETMASK = new RegExp('' +
 const IPV4ADDRESS_RANGE =
   /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
-export function IpV4AddressValidator(ipAddress) {
+export function IpV4AddressValidator(ipAddress, props) {
   let retValue = {
     isValid: true,
     errorMsg: ''
@@ -49,10 +49,26 @@ export function IpV4AddressValidator(ipAddress) {
     retValue.isValid = false;
     retValue.errorMsg = translate('input.validator.ipv4address.error');
   }
+
+  if(props && props.exist_ip_addresses && props.exist_ip_addresses.includes(ipAddress)) {
+    retValue.isValid = false;
+    retValue.errorMsg = translate('input.validator.ipv4address.exist.error');
+  }
+
+  if(props && props.exist_availservers_ip_addr_objs) {
+    let found =
+      props.exist_availservers_ip_addr_objs.find(addr => addr['ilo-ip'] === ipAddress);
+    if (found !== undefined) {
+      retValue.isValid = false;
+      retValue.errorMsg =
+        translate('input.validator.ipv4address.availservers.exist.error', found.serverId);
+    }
+  }
+
   return retValue;
 }
 
-export function MacAddressValidator(macAddress) {
+export function MacAddressValidator(macAddress, props) {
   let retValue = {
     isValid: true,
     errorMsg: ''
@@ -61,6 +77,21 @@ export function MacAddressValidator(macAddress) {
   if(MACADDRESS.exec(macAddress) === null) {
     retValue.isValid = false;
     retValue.errorMsg = translate('input.validator.macaddress.error');
+  }
+
+  if(props && props.exist_mac_addresses && props.exist_mac_addresses.includes(macAddress)) {
+    retValue.isValid = false;
+    retValue.errorMsg = translate('input.validator.macaddress.exist.error');
+  }
+
+  if(props && props.exist_availservers_mac_addr_objs) {
+    let found =
+      props.exist_availservers_mac_addr_objs.find(mac => mac['mac-addr'] === macAddress);
+    if (found !== undefined) {
+      retValue.isValid = false;
+      retValue.errorMsg =
+        translate('input.validator.macaddress.availserver.exist.error' , found.serverId);
+    }
   }
 
   return retValue;
