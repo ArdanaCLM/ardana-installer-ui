@@ -146,7 +146,7 @@ class InstallWizard extends Component {
   loadUpdateProgress = (responseData) => {
     //TODO if refresh with default url or logout due to timeout
     //need to find a way to set the menu
-    if(responseData && responseData.steps) {
+    if(responseData && responseData.currentMenuName && responseData.steps) {
       let steps = responseData.steps;
       let pages =
         this.getPages(steps);
