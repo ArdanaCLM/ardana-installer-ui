@@ -58,16 +58,8 @@ becomes public
 # Open Build Service (OBS)
 
 In order to build with OBS, a tarball containing the contents of the node_modules must be created
-and added to the package.  Create a clean node_modules directory with either:
+and added to the package.  Run the command:
 
-    yarn install --link-duplicates
+    ./build_deps.sh
 
-or:
-
-
-    rm -rf node_modules
-    npm install
-
-and then create the tarball with:
-
-    tar cjf node_modules.tar.bz2 node_modules
+to refresh `node_modules` and create `node_modules.tar.bz2`.
