@@ -31,7 +31,7 @@ class ViewServerDetails extends Component {
       return (<OvServerDetails data={this.props.data} {...this.props}/>);
     }
     else { //for manual added items or no source item
-      this.className = this.className + 'shorter-height';
+      this.className = this.className + ' shorter-height';
       return (<ModelServerDetails data={this.props.data}/>);
     }
   }

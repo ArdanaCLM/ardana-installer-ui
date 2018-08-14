@@ -15,9 +15,13 @@
 
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
+import ServiceInfo from '../pages/ServiceInfo';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 import { AlarmDonutTest } from '../pages/AlarmDonutTest';
+import UpdateServers from '../pages/UpdateServers.js';
+import InstallWizard from '../InstallWizard.js';
+import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -40,18 +44,27 @@ class Example extends Component {
   }
 }
 
+class ServerSummary extends  Component {
+  render() {
+    return(
+      <InstallWizard pageSet={UpdateServerPages} menuComponent={UpdateServers} menuName='/servers/server-summary'/>
+    );
+  }
+}
+
 /**
  * Define all fixed entries on the navigation menu
  */
 export const routes = [
-  { name: translate('services'), slug: '/services', component: Example,
+  { name: translate('services'), slug: '/services',
     items: [
+      { name: translate('information'), slug: '/services/info', component: ServiceInfo },
       { name: translate('packages'), slug: '/services/packages', component: Example },
       { name: translate('configure'), slug: '/services/configure', component: Example },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
   },
-  { name: translate('topology'), slug: '/topology', component: Example,
+  { name: translate('topology'), slug: '/topology',
     items: [
       { name: translate('services'), slug: '/topology/services', component: Example },
       { name: translate('regions'), slug: '/topology/regions', component: Example },
@@ -60,13 +73,14 @@ export const routes = [
       { name: translate('server_groups'), slug: '/topology/server-groups', component: Example },
     ]
   },
-  { name: translate('servers'), slug: '/servers', component: Example,
+  { name: translate('servers'), slug: '/servers',
     items: [
+      { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
       { name: translate('add_server'), slug: '/servers/add-server', component: Example },
     ]
   },
   // Avoid the hassle of creating translations for this disposable code:
-  { name: 'Example', slug: '/example', component: Example,
+  { name: 'Example', slug: '/example',
     items: [
       { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
       { name: 'Alarm Donut', slug: '/example/alarmdonut', component: AlarmDonutTest },

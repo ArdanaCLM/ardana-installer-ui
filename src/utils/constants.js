@@ -36,6 +36,10 @@ export const MODEL_SERVER_PROPS =  [
   'id', 'ip-addr', 'mac-addr' ,'server-group' ,'nic-mapping' ,'ilo-ip' ,'ilo-user', 'ilo-password'
 ];
 
+export const REPLACE_SERVER_PROPS =  [
+  'ip-addr', 'mac-addr' ,'server-group' ,'nic-mapping' ,'ilo-ip' ,'ilo-user', 'ilo-password'
+];
+
 export const MODEL_SERVER_PROPS_ALL = MODEL_SERVER_PROPS.concat(['role', 'uid']);
 
 export const IS_MS_EDGE = /Edge/.test(window.navigator.userAgent);

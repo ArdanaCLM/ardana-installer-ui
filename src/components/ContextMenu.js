@@ -12,43 +12,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import '../styles/deployer.less';
+
 import { translate } from '../localization/localize.js';
-
-class ContextMenuItems extends Component {
-  constructor(props) {
-    super(props);
-    this.renderMenuItems = this.renderMenuItems.bind(this);
-  }
-
-  renderMenuItems() {
-    let items = [];
-    this.props.items.forEach((item) => {
-      if(item.show) {
-        let displayLabel = translate(item.key);
-        items.push(
-          <div className='menu-item'
-            key={item.key} onClick={item.callback}>
-            {displayLabel}
-          </div>
-        );
-      }
-    });
-    return items;
-  }
-
-  render() {
-    return (
-      <div className='menu-item-list'>
-        <div>
-          {this.renderMenuItems()}
-        </div>
-      </div>
-    );
-  }
-}
 
 class ContextMenu extends Component {
   constructor(props) {
@@ -58,16 +26,17 @@ class ContextMenu extends Component {
       show: this.props.show,
       location: this.props.location
     };
-
-    this.handleClickOutside = this.handleClickOutside.bind(this);
   }
 
   componentDidMount() {
-    document.addEventListener('click', this.handleClickOutside);
+    // add a listener for clicking outside menu area
+    // when user clicks outside menu area, the menu will be closed
+    document.addEventListener('click', this.handleCloseMenu);
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.handleClickOutside);
+    // remove the listener for clicking outside menu area
+    document.removeEventListener('click', this.handleCloseMenu);
   }
 
   componentWillReceiveProps(newProps) {
@@ -77,32 +46,35 @@ class ContextMenu extends Component {
     });
   }
 
-  //dealing with mouth click outside
-  handleClickOutside(e) {
-    let show = this.state.show;
-    let menuContainer = ReactDOM.findDOMNode(this.refs[this.props.refType]);
-    //close the menu when click somewhere else
-    if (!menuContainer.contains(e.target) &&
-      e.target.getAttribute('name') !== 'itemMenuButton' && show) {
-      this.setState({show: false});
+  handleCloseMenu = (event) => {
+    if (!this.dropdownMenu.contains(event.target)) {
+      this.props.close();
     }
+  }
+
+  renderMenuItems() {
+    let items = this.props.items.filter(item => item.show).map((item => {
+      return (
+        <div className='menu-item' key={item.key} onClick={item.handleShowModal}>
+          {translate(item.key)}
+        </div>
+      );
+    }));
+    return items;
   }
 
   render() {
     let cName = 'context-menu-container rounded-corner shadowed-border';
-    cName = this.state.show ? cName : cName + ' hide';
-
     let locStyle = {
       left: this.state.location ? (this.state.location.x -100) : 0,
       top:  this.state.location ? this.state.location.y : 0
     };
 
     return (
-      <div ref={this.props.refType} className={cName} style={locStyle}>
-        <ContextMenuItems
-          items={this.props.items}>
-        </ContextMenuItems>
-      </div>
+      this.state.show ?
+        <div ref={(element) => this.dropdownMenu = element} className={cName} style={locStyle}>
+          {this.renderMenuItems()}
+        </div> : null
     );
   }
 }
