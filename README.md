@@ -2,7 +2,7 @@
 
 # SUSE OpenStack Cloud Deployer
 
-The cloud installer that will reside with SUSE Manager
+The GUI installer for SUSE Openstack Cloud.
 
 ## How to run
 
@@ -28,22 +28,6 @@ Build just the ui components (output to "dist" folder):
 
     build_ui.sh
 
-Build just the ui components and package them into a tarball:
-
-    build_ui.sh -t
-
-Build the entire app (output to manager_cloud_installer_server_venv):
-
-    build_dist.sh
-
-Build the entire app and create tarball out of the output:
-
-    build_dist.sh -t
-
-Create a cloudinstaller-{SHA}.tar file that can be untarred in another location:
-
-    build_dist.sh -t
-
 To run the application from that location, together with a local copy
 of the ardana-installer-server:
 
@@ -51,13 +35,12 @@ of the ardana-installer-server:
 
 ## Note!
 
-You will need an appropriate ardana-service backend to provide data
-model information. A link to that repo will be put here if/when it
-becomes public
+You will need the ardana-service to provide data model information.  The source 
+code for that service resides in the git repo https://github.com/ArdanaCLM/ardana-service.
 
 # Open Build Service (OBS)
 
-In order to build with OBS, a tarball containing the contents of the node_modules must be created
+In order to build with OBS, a tarball containing the contents of the `node_modules` directory must be created
 and added to the package.  Run the command:
 
     ./build_deps.sh
