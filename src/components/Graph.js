@@ -365,7 +365,10 @@ Speedometer.defaultProps = Object.assign({}, BaseCircularGraph.defaultProps, {
 });
 
 
-const CRITICAL_STROKE_WIDTH = 8;
+/*
+ * Stroke width of critical alarms, which forms the outer-most (largest) component in the graph.
+ */
+const CRITICAL_STROKE_WIDTH = 12;
 
 export class AlarmDonut extends BaseCircularGraph {
   /*
