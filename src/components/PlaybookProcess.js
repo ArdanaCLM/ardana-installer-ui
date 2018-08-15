@@ -75,6 +75,50 @@ class LogViewer extends Component {
   }
 }
 
+class StatusModal extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      action: 'cancel'
+    };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Scroll to the bottom whenever the component updates
+    this.viewer.scrollTop = this.viewer.scrollHeight - this.viewer.clientHeight;
+    console.log('running - ' + this.props.getPlaybookStatus(STATUS.IN_PROGRESS)[0]);
+    if (!this.props.getPlaybookStatus(STATUS.IN_PROGRESS)[0]) {
+      this.setState({action: 'close'});
+    }
+  }
+
+  handleCancel = () => {
+    this.setState({action: 'close'}, () => {
+      // reset focus of the close button which for some reason gets focused on after cancel button
+      document.getElementById('closePlaybookStatus').blur();
+    });
+  }
+
+  render() {
+    const footer = (this.state.action === 'close') ?
+      <ActionButton id='closePlaybookStatus' clickAction={this.props.onHide} displayLabel={translate('close')}/> :
+      <ActionButton clickAction={this.handleCancel} displayLabel={translate('services.cancel.playbook')}/>;
+
+    return (
+      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide} className='status-modal'
+        title={translate('services.status.result', this.props.selectedService)} hideCloseButton
+        footer={footer}>
+        <div className='log-viewer'>
+          <pre ref={(comp) => {this.viewer = comp; }}>
+            {this.props.contents.join('')}
+          </pre>
+        </div>
+      </ConfirmModal>
+    );
+  }
+}
+
 class PlaybookProgress extends Component {
   constructor(props) {
     super(props);
@@ -480,12 +524,10 @@ class PlaybookProgress extends Component {
 
   renderModal() {
     return (
-      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide}
-        title={translate('services.status.result', this.props.selectedService)}>
-        <pre ref={(comp) => {this.viewer = comp; }}>
-          {this.state.displayedLogs.join('')}
-        </pre>
-      </ConfirmModal>
+      <StatusModal showModal={this.props.showModal} selectedService={this.props.selectedService}
+        onHide={this.props.onHide} contents={this.state.displayedLogs}
+        cancelPlaybook={this.cancelRunningPlaybook}
+        getPlaybookStatus={this.getPlaybooksWithStatus}/>
     );
   }
 

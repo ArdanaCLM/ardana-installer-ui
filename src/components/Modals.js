@@ -30,7 +30,7 @@ function ConfirmModal(props) {
       backdrop={'static'}
       dialogClassName={props.className}>
 
-      <Modal.Header closeButton>
+      <Modal.Header closeButton={!props.hideCloseButton}>
         <Modal.Title className='title'>{props.title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>

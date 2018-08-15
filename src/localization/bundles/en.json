@@ -7,7 +7,7 @@
     "next" : "Next",
     "back" : "Back",
     "cancel" : "Cancel",
-    "common.close": "Close",
+    "close": "Close",
     "common.nodata": "No Data",
     "done" : "Done",
     "none" : "None",
@@ -485,6 +485,7 @@
     "services.info" : "Service Information",
     "services.services.per.role" : "Services Per Role",
     "services.status.result" : "Run Status Playbook - {0}",
+    "services.cancel.playbook" : "Cancel Playbook",
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",
