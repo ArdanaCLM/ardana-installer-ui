@@ -43,6 +43,11 @@
     "speedometer.used": "USED",
     "speedometer.percentage": "{0}%",
     "speedometer.caption": "{0} of {1}{2}",
+    "alarmdonut.alarms": "Alarms",
+    "legend.critical": "Critical",
+    "legend.warning": "Warning",
+    "legend.unknown": "Unknown",
+    "legend.ok": "ok",
 
     "login": "Log In",
 

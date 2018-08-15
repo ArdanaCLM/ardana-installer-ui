@@ -15,43 +15,23 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 
-
-/*
- * The following constants are here (in code instead of in CSS) so that they can be used in
- * calculations, especially those that determine the overall size of the graph.
- */
-
-/*
- * Stroke width of the danger arc, which is the outer-most (largest) component in the graph.
- */
-const DANGER_STROKE_WIDTH = 2;
-/*
- * Distance from the center of the value arc line to the center of the danger arc.  This value is
- * somewhat dependent on the stroke width of the value arc that it set in CSS; if the value arc
- * stroke width is made significantly wider than it currently is, then it may fill and overflow this
- * gap
- */
-const DANGER_GAP = 7;
-
-export class Speedometer extends Component {
+class BaseCircularGraph extends Component {
 
   /*
-   * This component is made up of an SVG drawing plus a smattering of labels: a header at the top, a
-   * value in the middle, and a caption at the bottom.  The trickiest part is the graph, especially
-   * calcalating the coordinates for where the arcs and points are to be drawn, since we are going
-   * to draw arcs with two different radii, and since the size, rotation and range of the chart is
-   * configurable.  To make all of this math simple, we take advantage of svg's ability to compose
-   * things in one coordinate system and then transform them to another.  Circles (and arcs) are
-   * more naturally handled in the standard mathematical coordinate system centered around the
-   * origin (0,0), with all angles originating on the positive x-axis and increasing
-   * counterclockwise.  SVG scaling, translation, and rotation are then used to move that graph to
-   * its final position and orientation.
+   * This basic component supports drawing an circular chart and can be used to build
+   * Speedometers and other components. The trickiest part is calcalating the coordinates for
+   * where the arcs and points are to be drawn, since the size, rotation, and range of the chart
+   * is configurable. To make all of this math simple, we take advantage of svg's ability to
+   * compose things in one coordinate system and then transform them to another.  Circles (and
+   * arcs) are more naturally handled in the standard mathematical coordinate system centered
+   * around the origin (0,0), with all angles originating on the positive x-axis and increasing
+   * counterclockwise.  SVG scaling, translation, and rotation are then used to move that graph
+   * to its final position and orientation.
    *
    * The order of the arguments in a couple of methods in this class where the radius is the last
    * argument is done to permit the radius to be an optional parameter; JavaScript requires that
    * optional parameters come after required ones.
    *
-   * The props that are supported by this component are documented after the end of the component
    */
 
   /*
@@ -62,7 +42,7 @@ export class Speedometer extends Component {
    */
   getCirclePortion = () => {
     let range = this.props.startAngle - this.props.endAngle;
-    if (range < 0) {
+    if (range <= 0) {
       range += 360;
     }
     return range / 360;
@@ -137,6 +117,50 @@ export class Speedometer extends Component {
 
     return path.join(' ');       // SVG expects space delimited args rather than an array of values
   }
+}
+BaseCircularGraph.defaultProps = {
+  /*
+   * Start angle (0-360) for where the arcs should begin, with 0 being to the right and increasing
+   * CCW, like the normal math convention.  i.e., 90 would be at the top center of the circle.
+   */
+  startAngle: 90,
+
+  /*
+   * End angle (0-360) for where the arcs should end, with 0 being to the right and increasing
+   * CCW, like the normal math convention.  i.e., 270 would be at the bottom center of the circle.
+   */
+  endAngle: 90,
+
+  /*
+   * Radius of the graph.  The stroke width of this arc is controlled via a CSS style.
+   */
+  radius: 60,
+};
+
+/*
+ * The following constants are here (in code instead of in CSS) so that they can be used in
+ * calculations, especially those that determine the overall size of the graph.
+ */
+
+/*
+ * Stroke width of the danger arc, which is the outer-most (largest) component in the graph.
+ */
+const DANGER_STROKE_WIDTH = 2;
+/*
+ * Distance from the center of the value arc line to the center of the danger arc.  This value is
+ * somewhat dependent on the stroke width of the value arc that it set in CSS; if the value arc
+ * stroke width is made significantly wider than it currently is, then it may fill and overflow this
+ * gap
+ */
+const DANGER_GAP = 7;
+
+export class Speedometer extends BaseCircularGraph {
+  /*
+   * This component is made up of graph plus a smattering of labels: a header at the top, a
+   * value in the middle, and a caption at the bottom.
+   *
+   * The props that are supported by this component are documented after the end of the component
+   */
 
   /*
    * Render the entire speedometer include its svg graph and the labels
@@ -265,7 +289,7 @@ export class Speedometer extends Component {
 }
 
 
-Speedometer.defaultProps = {
+Speedometer.defaultProps = Object.assign({}, BaseCircularGraph.defaultProps, {
 
   /*
    * Value to be rendered on the speedometer.  The minimum value is 0, and its max is defined by
@@ -338,4 +362,127 @@ Speedometer.defaultProps = {
    * Units to be displayed in the default caption when no explicit caption is defined.
    */
   units: undefined,
-};
+});
+
+
+/*
+ * Stroke width of critical alarms, which forms the outer-most (largest) component in the graph.
+ */
+const CRITICAL_STROKE_WIDTH = 12;
+
+export class AlarmDonut extends BaseCircularGraph {
+  /*
+   * This component is made up of graph plus a legend on the right showing the separate alarm
+   * counts.
+   *
+   * The props that are supported by this component are documented after the end of the component
+   */
+
+  render = () => {
+
+    const sum = this.props.critical + this.props.warning + this.props.unknown + this.props.ok;
+
+    // The stroke width of the critical arc is defined here (in code) rather than in the css because it is
+    // used programatically to determine the size of the graph
+    const criticalStyle = {
+      strokeWidth: CRITICAL_STROKE_WIDTH,
+    };
+
+    // Cacluate the outermost edge of the graph
+    const outer_radius = this.props.radius + (CRITICAL_STROKE_WIDTH/2);
+
+    const graph_size = 2 * outer_radius;
+
+    /*
+     * In the innermost section (below), the donut is being drawn in the standard mathematical coordinate system
+     * centered around the origin (0,0), with all angles originating on the positive x-axis and increasing
+     * counterclockwise.
+     *
+     * Prepare two svg transforms to render the graph in its final orientation.
+     * 1. The first (the <g> grouping element) has a translation with two parts:
+     *     a. scale(-1, 1).  This flips the graph horizontally (a reflection around the y-axis),
+     *        causing the circle to start on the negative x-axis and increase in a clockwise direction
+     *     b. rotate(start-180).  This rotates the circle to start at the appropriate angle.  Since this happens
+     *         after flipping the graph 0 degrees is now where 180 is, so we have to subtract 180 from the start
+     *        angle.
+     *
+     * At this point all of labels and text are added, with the arcs still being centered at (0 ,0)
+     *
+     * 2. The second (outermost) transform just translates (re-centers) the whole graph+labels
+     *    so that it is entirely in positive screen coordinates, i.e. it moves it down and to the right
+     *    by half of the chart's width.
+     */
+    const transformArcs = 'scale(-1,1) ' +  // flip horizontally
+                          'rotate(-90) ';   // spin to start angle
+
+    const recenter = `translate(${outer_radius},${outer_radius})`;  // re-center the whole thing
+
+    let start = 0;
+    let end = 100.0*this.props.critical / sum;
+    const criticalArc = this.getPath(start, end);
+
+    start = end;
+    end += 100.0*this.props.warning / sum;
+    const warningArc = this.getPath(start, end);
+
+    start = end;
+    end += 100.0*this.props.unknown / sum;
+    const unknownArc = this.getPath(start, end);
+
+    start = end;
+    end = 100;
+    const okArc = this.getPath(start, end);
+
+    return (
+      <div className="alarmdonut">
+        <figure>
+          <svg height={graph_size} width={graph_size} >
+            <g transform={recenter}>
+              {/* Draw text first (before the svg graph).  If the text is drawn aftwards, the
+                corners of its bounding box may cover up part of the graph */}
+              <text x="0" y="10" className="value">{sum}</text>
+              <text x="0" y="25" className="used">{translate('alarmdonut.alarms')}</text>
+
+              <g transform={transformArcs}>
+                {/* Draw all circle sections */}
+                <path className='critical' style={criticalStyle} d={criticalArc} />
+                <path className='warning' d={warningArc} />
+                <path className='unknown' d={unknownArc} />
+                <path className='ok' d={okArc} />
+              </g>
+            </g>
+          </svg>
+        </figure>
+        <table className="legend"><tbody>
+          <tr>
+            <td><div className="square critical"></div></td>
+            <td>{translate('legend.critical')}</td>
+            <td className="count">{this.props.critical}</td></tr>
+          <tr>
+            <td><div className="square warning"></div></td>
+            <td>{translate('legend.warning')}</td>
+            <td className="count">{this.props.warning}</td></tr>
+          <tr>
+            <td><div className="square unknown"></div></td>
+            <td>{translate('legend.unknown')}</td>
+            <td className="count">{this.props.unknown}</td></tr>
+          <tr>
+            <td><div className="square ok"></div></td>
+            <td>{translate('legend.ok')}</td>
+            <td className="count">{this.props.ok}</td></tr>
+        </tbody></table>
+      </div>
+    );
+  }
+}
+
+AlarmDonut.defaultProps = Object.assign({}, BaseCircularGraph.defaultProps, {
+
+  /*
+   * Counts of alarms of each type
+   */
+  critical: 0,
+  warning: 0,
+  unknown: 0,
+  ok: 0,
+});

@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
+import { AlarmDonutTest } from '../pages/AlarmDonutTest';
 import UpdateServers from '../pages/UpdateServers.js';
 import InstallWizard from '../InstallWizard.js';
 import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
@@ -82,6 +83,7 @@ export const routes = [
   { name: 'Example', slug: '/example',
     items: [
       { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
+      { name: 'Alarm Donut', slug: '/example/alarmdonut', component: AlarmDonutTest },
     ]
   }
 ];
