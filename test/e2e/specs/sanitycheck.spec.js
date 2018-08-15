@@ -21,14 +21,14 @@ describe('basic sanity tests', function() {
   });
 
   it('loads the app', function() {
-    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Installer');
+    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Deployer');
   });
 
   it('has the first step selected by default', function() {
     var stateLineWrapperContainer = element(by.css('.wizard-progress-container'));
     var firstIndicator = stateLineWrapperContainer.all(by.css('.progress')).first();
 
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(2, 164, 156, 1)');//the rgba value of #02A49C
+    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
   });
 
   it('advances to the next page and updates the indicator', function() {
@@ -37,13 +37,13 @@ describe('basic sanity tests', function() {
     var lastIndicator = stateLineWrapperContainer.all(by.css('.progress')).last();
 
     //the first indicator is the correct "in-progress" color
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(2, 164, 156, 1)');//the rgba value of #02A49C
+    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
 
     var nextButton = element(by.xpath('.//Button[.="Next"]'));
     nextButton.click();
     //the first indicator has updated to the "complete" color
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(2, 211, 95, 1)');//the rgba value of #00C081
+    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
     //the last indicator has a "notdone" color
-    expect(lastIndicator.getCssValue('background-color')).toEqual('rgba(220, 221, 222, 1)');//the rgba value of #DCDDDE
+    expect(lastIndicator.getCssValue('background-color')).toEqual('rgba(106, 114, 118, 1)');//the rgba value of #6a7276
   });
 });
