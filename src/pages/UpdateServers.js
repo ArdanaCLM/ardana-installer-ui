@@ -17,6 +17,7 @@ import React from 'react';
 import { translate } from '../localization/localize.js';
 import CollapsibleTable from '../components/CollapsibleTable.js';
 import { ActionButton } from '../components/Buttons.js';
+import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
 import { fetchJson, putJson } from '../utils/RestUtils.js';
@@ -28,13 +29,18 @@ class UpdateServers extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
     this.state = {
-      model: this.props.model
+      model: this.props.model,
+      // loading errors from wizard model or progress loading
+      loadingErrors: this.props.loadingErrors
     };
   }
 
   componentWillReceiveProps(newProps) {
+    // depends on the backend, sometimes it could be
+    // slow, need to update once they are there
     this.setState({
-      model : newProps.model,
+      model: newProps.model,
+      loadingErrors: newProps.loadingErrors
     });
     if(newProps.model.getIn(['inputModel', 'server-roles'])) {
       const allGroups =
@@ -176,24 +182,60 @@ class UpdateServers extends BaseUpdateWizardPage {
     );
   }
 
+  renderGlobalButtons() {
+    return (
+      <div className='buttonBox'>
+        <div className='btn-row'>
+          <ActionButton type='default'
+            displayLabel={translate('collapse.all')} clickAction={() => this.collapseAll()} />
+          <ActionButton type='default'
+            displayLabel={translate('expand.all')} clickAction={() => this.expandAll()} />
+        </div>
+      </div>
+    );
+  }
+
+  renderProgressErrorMessage() {
+    return (
+      <div className='notification-message-container'>
+        <ErrorMessage
+          message={translate('common.load.progress.error')}
+          closeAction={() => this.setState({loadingErrors: undefined})}/>
+      </div>
+    );
+  }
+
+  renderModelErrorBanner() {
+    return (
+      <div className='banner-container'>
+        <ErrorBanner
+          message={translate('common.load.model.error')}
+          show={this.state.loadingErrors && this.state.loadingErrors.get('modelError')}/>
+      </div>
+    );
+  }
+
   render() {
+    // if have modelError from InstallWizard loading, will block server contents to show
+    let modelError =
+      this.state.loadingErrors && this.state.loadingErrors.get('modelError');
+    // if have progressError from InstallWizard loading, but no model error, will show
+    // an error message
+    let progressError =
+      this.state.loadingErrors && this.state.loadingErrors.get('progressError');
     return (
       <div className='wizard-page'>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
           </div>
-          <div className='buttonBox'>
-            <div className='btn-row'>
-              <ActionButton type='default'
-                displayLabel={translate('collapse.all')} clickAction={() => this.collapseAll()} />
-              <ActionButton type='default'
-                displayLabel={translate('expand.all')} clickAction={() => this.expandAll()} />
-            </div>
-          </div>
+          {this.state.model && this.state.model.size > 0 && this.renderGlobalButtons()}
         </div>
         <div className='wizard-content unlimited-height'>
-          {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}</div>
+          {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
+          {modelError && this.renderModelErrorBanner()}
+          {!modelError && progressError && this.renderProgressErrorMessage()}
+        </div>
       </div>
     );
   }

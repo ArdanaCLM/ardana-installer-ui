@@ -39,6 +39,8 @@
     "common.wipedisk":  "Wipe Data Disks",
     "common.servers": "Servers",
     "common.summary": "Summary",
+    "common.load.model.error": "Unable to load model from backend. Please check and fix the problem on deployer.",
+    "common.load.progress.error": "There are some errors communicating with the backend.\n Please check and fix the problem on deployer before performing server update.",
 
     "speedometer.used": "USED",
     "speedometer.percentage": "{0}%",

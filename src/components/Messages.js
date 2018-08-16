@@ -25,6 +25,10 @@ class NotificationMessage extends Component {
         msgs.push(<p key={idx}>{msg}</p>);
       });
     }
+    else if(this.props.message.indexOf('\n') !== -1) {
+      let splits = this.props.message.split('\n');
+      msgs = splits.map((ms, idx) => <p key={idx}>{ms}</p>);
+    }
     else {
       msgs.push(<p key={0}>{this.props.message}</p>);
     }
