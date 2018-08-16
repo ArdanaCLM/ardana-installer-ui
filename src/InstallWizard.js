@@ -144,9 +144,14 @@ class InstallWizard extends Component {
 
   // deal with day2 update when refresh
   loadUpdateProgress = (responseData) => {
-    //TODO if refresh with default url or logout due to timeout
-    //need to find a way to set the menu
-    if(responseData && responseData.steps) {
+    // TODO if refresh with default url or logout due to timeout
+    // need to find a way to set the menu from navigation
+
+    // When the update progress starts, it records currentMenuName, steps
+    // and other items related to the update progress in the progress.json.
+    // If both steps and currentMenuName are present, the update progress
+    // is on going, otherwise, no progress.
+    if(responseData && responseData.currentMenuName && responseData.steps) {
       let steps = responseData.steps;
       let pages =
         this.getPages(steps);
