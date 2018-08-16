@@ -205,12 +205,10 @@ class UpdateServers extends BaseUpdateWizardPage {
     );
   }
 
-  renderModelErrorBanner() {
+  renderModelErrorBanner(show) {
     return (
       <div className='banner-container'>
-        <ErrorBanner
-          message={translate('common.load.model.error')}
-          show={this.state.loadingErrors && this.state.loadingErrors.get('modelError')}/>
+        <ErrorBanner message={translate('common.load.model.error')} show={show}/>
       </div>
     );
   }
@@ -233,7 +231,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content unlimited-height'>
           {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
-          {modelError && this.renderModelErrorBanner()}
+          {this.renderModelErrorBanner(modelError)}
           {!modelError && progressError && this.renderProgressErrorMessage()}
         </div>
       </div>

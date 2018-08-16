@@ -191,9 +191,10 @@ class InstallWizard extends Component {
         this.setState({'model': fromJS(responseData)});
       })
       .catch((error) => {
-        console.log('Unable to retrieve saved model . ' + JSON.stringify(error));// eslint-disable-line no-console
+        const ErrorMsg = JSON.stringify(error);
+        console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
         if(this.IS_UPDATE) {
-          this.setState({loadingErrors: Map({modelError: JSON.stringify(error)})});
+          this.setState({loadingErrors: Map({modelError: ErrorMsg})});
         }
       })
       .then(() => fetchJson('/api/v1/progress')
@@ -207,22 +208,21 @@ class InstallWizard extends Component {
           }
         })
         .catch((error) => {
+          const errorMsg = JSON.stringify(error);
           if(this.IS_UPDATE) { // update
-            if(this.state.loadingErrors !== undefined) {
-              this.setState(prev => {
-                return {
-                  loadingErrors: prev.loadingErrors.set('progressError', JSON.stringify(error))
-                };
-              });
-            }
-            else {
-              this.setState({loadingErrors: Map({progressError: JSON.stringify(error)})});
-            }
+            this.setState(prev => {
+              if (prev.loadingErrors) {
+                return {loadingErrors: prev.loadingErrors.set('progressError', errorMsg)};
+              }
+              else {
+                return {loadingErrors: Map({'progressError': errorMsg})};
+              }
+            });
           }
           else { // install
             this.setState({currentStep: 0}, this.persistState);
           }
-          console.log(JSON.stringify(error)); // eslint-disable-line no-console
+          console.log(errorMsg); // eslint-disable-line no-console
         })
       )
       .then(() => {
