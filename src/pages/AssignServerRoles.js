@@ -34,6 +34,7 @@ import { EditCloudSettings } from './ServerRoleSummary/EditCloudSettings.js';
 import { importCSV } from '../utils/CsvImporter.js';
 import { fromJS } from 'immutable';
 import { isEmpty } from 'lodash';
+import $ from 'jquery';
 import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
   updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds
