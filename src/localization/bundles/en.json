@@ -39,9 +39,8 @@
     "common.wipedisk":  "Wipe Data Disks",
     "common.servers": "Servers",
     "common.summary": "Summary",
-    "common.load.model.error": "Unable to load model from backend. Please check and fix the problem on deployer.",
-    "common.load.progress.error": "There are some errors communicating with the backend.\n Please check and fix the problem on deployer before performing server update.",
-
+    "common.load.model.error": "Unable to load model. Please identify the problem(s) and correct them on the deployer.",
+    "common.load.progress.error": "There are some communication errors with the backend.\n These must be fixed on the deployer before performing server update.",
     "speedometer.used": "USED",
     "speedometer.percentage": "{0}%",
     "speedometer.caption": "{0} of {1}{2}",
@@ -370,7 +369,7 @@
     "forced.network.groups": "Forced Network Groups",
 
     "complete.heading": "Cloud Deployment Successful",
-    "complete.message.body1": "Congratulations! You've successfully deploy your cloud.",
+    "complete.message.body1": "Congratulations! You've successfully deployed your cloud.",
     "complete.message.body2": "This is the information about your cloud:",
     "complete.message.body3": "Cloud Model - {0}",
     "complete.message.body4": "Please login as '{0}' on your Lifecycle Manager and shut down the Installer UI with the following commands:",
