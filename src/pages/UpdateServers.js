@@ -195,32 +195,37 @@ class UpdateServers extends BaseUpdateWizardPage {
     );
   }
 
-  renderProgressErrorMessage() {
-    return (
-      <div className='notification-message-container'>
-        <ErrorMessage
-          message={translate('common.load.progress.error')}
-          closeAction={() => this.setState({loadingErrors: undefined})}/>
-      </div>
-    );
-  }
-
-  renderModelErrorBanner(show) {
-    return (
-      <div className='banner-container'>
-        <ErrorBanner message={translate('common.load.model.error')} show={show}/>
-      </div>
-    );
+  renderWizardLoadingErrors() {
+    // if have modelError and progressError from InstallWizard loading, will block server contents
+    if(this.state.loadingErrors.get('modelError') && this.state.loadingErrors.get('progressError')) {
+      return (
+        <div className='banner-container'>
+          <ErrorBanner message={translate('common.load.modelprogress.error')} show={true}/>
+        </div>
+      );
+    }
+    // if have modelError from InstallWizard loading, will block server contents
+    else if(this.state.loadingErrors.get('modelError')) {
+      return (
+        <div className='banner-container'>
+          <ErrorBanner message={translate('common.load.model.error')} show={true}/>
+        </div>
+      );
+    }
+    // if have progressError from InstallWizard loading, but no model error, will show
+    // an error message
+    else if(this.state.loadingErrors.get('progressError')) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage
+            message={translate('common.load.progress.error')}
+            closeAction={() => this.setState({loadingErrors: undefined})}/>
+        </div>
+      );
+    }
   }
 
   render() {
-    // if have modelError from InstallWizard loading, will block server contents to show
-    let modelError =
-      this.state.loadingErrors && this.state.loadingErrors.get('modelError');
-    // if have progressError from InstallWizard loading, but no model error, will show
-    // an error message
-    let progressError =
-      this.state.loadingErrors && this.state.loadingErrors.get('progressError');
     return (
       <div className='wizard-page'>
         <div className='content-header'>
@@ -231,8 +236,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content unlimited-height'>
           {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
-          {this.renderModelErrorBanner(modelError)}
-          {!modelError && progressError && this.renderProgressErrorMessage()}
+          {this.state.loadingErrors && this.renderWizardLoadingErrors()}
         </div>
       </div>
     );
