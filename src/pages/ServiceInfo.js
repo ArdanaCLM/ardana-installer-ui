@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { alphabetically } from '../utils/Sort.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { LoadingMask } from '../components/LoadingMask.js';
 
 class ServiceInfo extends Component {
 
@@ -28,14 +29,16 @@ class ServiceInfo extends Component {
       showModal: false,
       playbooks: [],
       steps: [],
-      selectedService: ''
+      selectedService: '',
+      showLoadingMask: false
     };
   }
 
   componentWillMount() {
+    this.setState({showLoadingMask: true});
     fetchJson('/api/v1/clm/endpoints')
       .then(responseData => {
-        this.setState({services: responseData});
+        this.setState({services: responseData, showLoadingMask: false});
       });
   }
 
@@ -87,7 +90,7 @@ class ServiceInfo extends Component {
     if (this.state.showModal) {
       statusModal = (
         <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
-          updatePageStatus={() => {}} modalMode={true} showModal={this.state.showModal}
+          updatePageStatus={(status) => {console.log('callback: ' + status)}} modalMode={true} showModal={this.state.showModal}
           onHide={() => this.setState({showModal: false})}
           selectedService={this.state.selectedService}/>
       );
@@ -96,6 +99,7 @@ class ServiceInfo extends Component {
     return (
       <div>
         {statusModal}
+        <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
           <div className='header'>{translate('services.info')}</div>
           <table className='table'>

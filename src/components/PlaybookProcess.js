@@ -87,9 +87,11 @@ class StatusModal extends Component {
   componentDidUpdate(prevProps, prevState) {
     // Scroll to the bottom whenever the component updates
     this.viewer.scrollTop = this.viewer.scrollHeight - this.viewer.clientHeight;
-    console.log('running - ' + this.props.getPlaybookStatus(STATUS.IN_PROGRESS)[0]);
     if (!this.props.getPlaybookStatus(STATUS.IN_PROGRESS)[0]) {
       this.setState({action: 'close'});
+      console.log('should be done here');
+    } else {
+      console.log(this.props.getPlaybookStatus(STATUS.IN_PROGRESS).length);
     }
   }
 
@@ -166,6 +168,7 @@ class PlaybookProgress extends Component {
   }
 
   getProgress() {
+    console.log('###getProgress');
     let progresses =  this.props.steps.map((step, index) => {
       let status = STATUS.NOT_STARTED, i = 0;
 
@@ -278,6 +281,7 @@ class PlaybookProgress extends Component {
 
   updateGlobalPlaybookStatus = (playbookName, playId, status) => {
     const playbook = this.globalPlaybookStatus.find(e => e.name === playbookName);
+    console.log('playbook in updateGlobal: ' + playbook);
     if (playbook) {
       if (playId && playId !== '') {
         playbook.playId = playId;
@@ -324,6 +328,7 @@ class PlaybookProgress extends Component {
   }
 
   processAlreadyDonePlaybook = (playbook) => {
+    console.log('processAlreadyDonePlaybook');
     // go get logs
     fetchJson('/api/v1/clm/plays/' + playbook.playId + '/log')
       .then(response => {
@@ -342,6 +347,7 @@ class PlaybookProgress extends Component {
     fetchJson('/api/v1/clm/plays/' + playbook.playId + '/events')
       .then(response => {
         for (let evt of response) {
+          console.log('event: ' + evt.event);
           if (evt.event === 'playbook-stop')
             this.playbookStopped(evt.playbook);
           else if (evt.event === 'playbook-start')
@@ -358,9 +364,13 @@ class PlaybookProgress extends Component {
   }
 
   processPlaybooks = () => {
+    console.log('!!! processPlaybooks');
     const inProgressPlaybooks = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS);
     const completePlaybooks = this.getPlaybooksWithStatus(STATUS.COMPLETE);
     const failedPlaybooks = this.getPlaybooksWithStatus(STATUS.FAILED);
+    console.log('inProgressPlaybooks: ' + inProgressPlaybooks.length);
+    console.log('completePlaybooks: ' + completePlaybooks.length);
+    console.log('failedPlaybooks: ' + failedPlaybooks.length);
 
     // Retrieve the logs and events for any completed playbooks
     for (let book of completePlaybooks) {
@@ -383,6 +393,7 @@ class PlaybookProgress extends Component {
       })
         .then(response => {
           if ('endTime' in response || response['killed']) {
+            console.log('done progress');
             let status = (response['code'] == 0 ? STATUS.COMPLETE : STATUS.FAILED);
             // update logs
             this.processAlreadyDonePlaybook(progressPlay);
@@ -404,6 +415,7 @@ class PlaybookProgress extends Component {
           }
           else {
             // The play is still in progress
+            console.log('in progress');
             this.props.updatePageStatus(STATUS.IN_PROGRESS);
             this.monitorSocket(progressPlay.name, progressPlay.playId);
           }
@@ -590,6 +602,7 @@ class PlaybookProgress extends Component {
    * @param {String} the playbook filename
    */
   playbookStarted = (stepPlaybook) => {
+    console.log('playbookStarted');
     this.setState((prevState) => {
       return {'playbooksStarted': prevState.playbooksStarted.concat(stepPlaybook)};
     });
@@ -605,6 +618,7 @@ class PlaybookProgress extends Component {
    * @param playId
    */
   playbookStopped = (stepPlaybook, playbookName, playId) => {
+    console.log('playbookStopped');
     let complete = false;
 
     this.setState((prevState) => {
@@ -652,6 +666,7 @@ class PlaybookProgress extends Component {
   }
 
   logMessage = (message) => {
+//    console.log('logMessage: ' + message);
     this.logsReceived = this.logsReceived.push(message);
     this.updateState(this.logsReceived);
   }
