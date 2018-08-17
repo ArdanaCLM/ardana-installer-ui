@@ -28,7 +28,7 @@ const COMMON_GLOBAL_STATES_VARS = [
 
 // global states vars used in update
 const UPDATE_GLOBAL_STATES_VARS = [
-  'currentMenuName', 'currentOperation', 'steps', 'pages', 'operationProps'
+  'currentMenuName', 'currentOperation', 'steps', 'pages', 'operationProps', 'loadingErrors'
 ];
 
 // global persisted states vars used in installation and update
@@ -99,7 +99,9 @@ class InstallWizard extends Component {
       pages: undefined,
       // operationProps record all the bits that need to run to update
       // TODO how to deal with install password
-      operationProps: undefined
+      operationProps: undefined,
+      // errors during wizard loading
+      loadingErrors: undefined
     };
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
@@ -108,7 +110,6 @@ class InstallWizard extends Component {
     if(this.IS_UPDATE) {
       this.globalStateVars = this.globalStateVars.concat(UPDATE_GLOBAL_STATES_VARS);
     }
-
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
     this.persistedStateVars = COMMON_PERSISTED_STATES_VARS;
@@ -190,7 +191,10 @@ class InstallWizard extends Component {
         this.setState({'model': fromJS(responseData)});
       })
       .catch((error) => {
-        console.log('Unable to retrieve saved model');// eslint-disable-line no-console
+        const ErrorMsg = JSON.stringify(error);
+        // loadingErrors are only handled in update at this point
+        this.setState({loadingErrors: Map({modelError: ErrorMsg})});
+        console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
       })
       .then(() => fetchJson('/api/v1/progress')
         .then((responseData) => {
@@ -203,13 +207,21 @@ class InstallWizard extends Component {
           }
         })
         .catch((error) => {
-          if(this.IS_UPDATE) { //update
-            // load progress error..TODO
+          const errorMsg = JSON.stringify(error);
+          if(this.IS_UPDATE) { // update
+            this.setState(prev => {
+              if (prev.loadingErrors) {
+                return {loadingErrors: prev.loadingErrors.set('progressError', errorMsg)};
+              }
+              else {
+                return {loadingErrors: Map({'progressError': errorMsg})};
+              }
+            });
           }
           else { // install
             this.setState({currentStep: 0}, this.persistState);
           }
-          console.log(JSON.stringify(error)); // eslint-disable-line no-console
+          console.log(errorMsg); // eslint-disable-line no-console
         })
       )
       .then(() => {
