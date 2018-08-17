@@ -17,21 +17,48 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { alphabetically } from '../utils/Sort.js';
+import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { LoadingMask } from '../components/LoadingMask.js';
 
 class ServiceInfo extends Component {
 
   constructor() {
     super();
     this.state = {
-      services: undefined
+      services: undefined,
+      showModal: false,
+      playbooks: [],
+      steps: [],
+      selectedService: '',
+      showLoadingMask: false
     };
   }
 
   componentWillMount() {
+    this.setState({showLoadingMask: true});
     fetchJson('/api/v1/clm/endpoints')
       .then(responseData => {
-        this.setState({services: responseData});
+        this.setState({services: responseData, showLoadingMask: false});
       });
+  }
+
+  renderActionMenuIcon = (service) => {
+    return (
+      <span onClick={(event) => this.runStatusPlaybook(event, service)}>
+        <i className='material-icons'>more_horiz</i>
+      </span>
+    );
+  }
+
+  runStatusPlaybook = (event, service) => {
+    const playbookName = service + '-status';
+    this.setState({
+      showModal: true,
+      playbooks: [playbookName],
+      steps: [{label: 'status', playbooks: [playbookName + '.yml']}],
+      selectedService: service[0].toUpperCase() + service.substr(1)
+    });
+
   }
 
   render() {
@@ -43,7 +70,7 @@ class ServiceInfo extends Component {
           const regions = srv.endpoints.map(ep => {return ep.region;}).join('\n');
           const endpoints = srv.endpoints.map(ep => {
             // capitalize the interface before concat with the url
-            const types = ep.interface.charAt(0).toUpperCase() + ep.interface.substr(1);
+            const types = ep.interface[0].toUpperCase() + ep.interface.substr(1);
             return types + ' ' + ep.url;
           }).join('\n');
 
@@ -53,27 +80,43 @@ class ServiceInfo extends Component {
               <td>{srv.description}</td>
               <td className='line-break'>{endpoints}</td>
               <td className='line-break'>{regions}</td>
+              <td>{this.renderActionMenuIcon(srv.name)}</td>
             </tr>
           );
         });
     }
 
+    let statusModal;
+    if (this.state.showModal) {
+      statusModal = (
+        <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
+          updatePageStatus={(status) => {console.log('callback: ' + status)}} modalMode={true} showModal={this.state.showModal}
+          onHide={() => this.setState({showModal: false})}
+          selectedService={this.state.selectedService}/>
+      );
+    }
+
     return (
-      <div className='menu-tab-content'>
-        <div className='header'>{translate('services.info')}</div>
-        <table className='table'>
-          <thead>
-            <tr>
-              <th>{translate('services.name')}</th>
-              <th>{translate('services.description')}</th>
-              <th>{translate('services.endpoints')}</th>
-              <th>{translate('services.regions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
+      <div>
+        {statusModal}
+        <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
+        <div className='menu-tab-content'>
+          <div className='header'>{translate('services.info')}</div>
+          <table className='table'>
+            <thead>
+              <tr>
+                <th>{translate('name')}</th>
+                <th>{translate('description')}</th>
+                <th>{translate('endpoints')}</th>
+                <th>{translate('regions')}</th>
+                <th width="3em"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }

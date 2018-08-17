@@ -40,7 +40,7 @@ function CloseButton(props) {
   return (
     <ActionButton
       clickAction={props.clickAction}
-      displayLabel={props.displayLabel || translate('common.close')}
+      displayLabel={props.displayLabel || translate('close')}
       isDisabled={props.isDisabled}
     />
   );
@@ -64,6 +64,7 @@ class ActionButton extends Component {
     buttonClass += (this.props.moreClass) ? 'inline-button' : '';
     return (
       <button
+        id={this.props.id}
         className={buttonClass}
         onClick={this.props.clickAction}
         disabled={this.props.isDisabled}>{this.props.displayLabel}
