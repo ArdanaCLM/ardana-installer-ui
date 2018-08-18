@@ -288,8 +288,9 @@ class ConnectionCredsInfo extends Component {
 
   handleCloseMessage = (ind) => {
     this.setState((prevState) => {
-      //for some reason eslint flags 'messages' below as unused even though it clearly is used elsewhere
-      messages: prevState.messages.splice(ind, 1); // eslint-disable-line no-unused-labels
+      let msgs = prevState.messages.slice();
+      msgs.splice(ind, 1);
+      return {messages: msgs};
     });
   }
 
