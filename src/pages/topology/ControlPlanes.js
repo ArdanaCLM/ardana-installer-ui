@@ -13,9 +13,9 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { translate } from '../localization/localize.js';
-import '../styles/deployer.less';
-import { fetchJson } from '../utils/RestUtils.js';
+import { translate } from '../../localization/localize.js';
+import '../../styles/deployer.less';
+import { fetchJson } from '../../utils/RestUtils.js';
 
 const Fragment = React.Fragment;
 /*
@@ -23,7 +23,7 @@ const Fragment = React.Fragment;
  * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
  * in the config processor
  */
-class HtmlSummary extends Component {
+class ControlPlanes extends Component {
   constructor(props) {
     super(props);
 
@@ -257,4 +257,4 @@ class HtmlSummary extends Component {
   }
 }
 
-export default HtmlSummary;
+export default ControlPlanes;
