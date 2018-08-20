@@ -294,6 +294,11 @@
     "config.host.name.prefix": "Host Name Prefix",
     "config.host.member.prefix": "Host Member Prefix",
 
+    "control_planes": "Control Planes",
+    "control_plane": "Control Plane: {0}",
+    "clusters": "Clusters",
+    "resources": "Resources",
+    "load_balancers": "Load Balancers",
     "services": "Services",
     "topology": "Topology",
     "regions": "Regions",

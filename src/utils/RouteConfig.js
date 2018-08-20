@@ -22,6 +22,7 @@ import { AlarmDonutTest } from '../pages/AlarmDonutTest';
 import UpdateServers from '../pages/UpdateServers.js';
 import InstallWizard from '../InstallWizard.js';
 import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
+import HtmlSummary from '../pages/HtmlSummary';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -66,8 +67,9 @@ export const routes = [
   },
   { name: translate('topology'), slug: '/topology',
     items: [
-      { name: translate('services'), slug: '/topology/services', component: Example },
+      { name: translate('control_planes'), slug: '/topology/control_planes', component: HtmlSummary },
       { name: translate('regions'), slug: '/topology/regions', component: Example },
+      { name: translate('services'), slug: '/topology/services', component: Example },
       { name: translate('networks'), slug: '/topology/networks', component: Example },
       { name: translate('servers'), slug: '/topology/servers', component: Example },
       { name: translate('server_groups'), slug: '/topology/server-groups', component: Example },
