@@ -258,7 +258,7 @@ class InstallWizard extends Component {
   buildElement() {
     // install
     if (!this.IS_UPDATE && this.state.currentStep === undefined) {
-      return (<div className="loading-message">{translate('wizard.loading.pleasewait')}</div>);
+      return (<div className="loading-message">{translate('loading.pleasewait')}</div>);
     }
 
     let props = {};

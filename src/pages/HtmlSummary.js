@@ -19,13 +19,6 @@ import { fetchJson } from '../utils/RestUtils.js';
 
 const Fragment = React.Fragment;
 /*
- * TODO:
- * x  Use translatable headers
- * x  Fix missing key problem
- *    Create sub-headers in table
- */
-
-/*
  * This class is a JavaScript implementation of the script
  * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
  * in the config processor
@@ -251,7 +244,7 @@ class HtmlSummary extends Component {
       control_planes = Object.keys(this.control_planes).sort().map(name =>
         this.render_control_plane(name, this.control_planes[name]));
     } else {
-      control_planes = 'Loading...';
+      control_planes = translate('loading.pleasewait');
     }
 
     return (

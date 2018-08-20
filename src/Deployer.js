@@ -54,7 +54,7 @@ class Deployer extends Component {
     if (this.state.isSecured === undefined) {
       // If the REST call has not yet completed, then show a loading page (briefly)
       defaultPath = (
-        <div className="loading-message">{translate('wizard.loading.pleasewait')}</div>
+        <div className="loading-message">{translate('loading.pleasewait')}</div>
       );
     } else if (this.state.isSecured) {
       if (! getAuthToken()) {
