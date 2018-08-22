@@ -20,6 +20,7 @@
     "react-collapsible": "^2.0.0",
     "react-dom": "^16.4.1",
     "react-localization": "^0.1.1",
+    "react-router-hash-link": "^1.2.0",
     "showdown": "^1.8.6",
     "socket.io-client": "^2.0.3",
     "universal-cookie": "^2.1.0",

@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
-import { fetchJson } from '../../utils/RestUtils.js';
+import { getInternalModel } from './TopologyUtils.js';
 
 const Fragment = React.Fragment;
 /*
@@ -35,7 +35,6 @@ class ControlPlanes extends Component {
     this.control_planes = undefined;
     this.servers = undefined;
     this.server_by_hostname = {};
-
   }
 
   init = () => {
@@ -53,19 +52,18 @@ class ControlPlanes extends Component {
     }
   }
 
-  componentWillMount() {
-    this.setState({loading: true});
+  componentDidMount() {
 
-    // Load overview for all templates
-    fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml')
+    getInternalModel()
       .then((yml) => {
 
-        // Force a re-render
-        this.setState({
-          model: yml});
+        // Force a re-render if the page is still shown (user may navigate away while waiting)
+        if (this.refs.control_planes)
+          this.setState({
+            model: yml});
       })
       .catch((error) => {
-        // console.log(error);
+        console.log(error); // eslint-disable-line no-console
       });
   }
 
@@ -215,7 +213,7 @@ class ControlPlanes extends Component {
 
     return (
       <div key={cp_name} className='menu-tab-content'>
-        <a name={cp_name} />
+        <a id={cp_name}/>
         <div className='header'>{translate('control_plane', cp_name)}</div>
         <table className='table'>
           <thead><tr>
@@ -248,7 +246,7 @@ class ControlPlanes extends Component {
     }
 
     return (
-      <div className='wizard-page'>
+      <div ref="control_planes" className='wizard-page'>
         <div className='wizard-content'>
           {control_planes}
         </div>
