@@ -202,37 +202,85 @@ p {
 }
 
 .login-page {
-  background-color: @sb-blue-500;
-  height: 100vh;
-  .header {
-    color: #b6c0c6;
-    font-size: 32px;
-    margin-top: 7em;
-    margin-bottom: 24px;
+  background-color: #003258;
+  min-height: 100vh;
+  //height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial;
+  .top-bar {
+    height: 60px;
+    background-color: #00243E;
+    .top-bar-header {
+      display: block;
+      padding: 0 15px 0 5px;
+      margin: 15px auto 0 auto;
+      width: 1170px;
+      font-size: 22px;
+      color: #CCCCCC;
+    }
   }
-  .input-section {
-    display: grid;
-    .password-icon {
-      color: white;
+  .content-container {
+    padding: 112px 0 0 0;
+    margin: 0 auto 0 auto;
+    width: 100%;
+    .content-container-left {
+      font-family: 'Raleway', sans-serif;
+      .upper-left {
+        line-height: 1.1;
+        color: #00C081;
+        font-size: 52px;
+        margin-bottom: 1em;
+        font-weight: 300;
+      }
+      .lower-left {
+        font-size: 16px;
+        color: #CCCCCC;
+      }
     }
-    input {
-      height: 34px;
-      margin-bottom: 1em;
-      width: 360px;
-      padding: 0 12px 0 12px;
-      background-color: #314c5d;
-      color: white;
-    }
-    ::placeholder {
-      color: white;
-    }
-    button {
-      height: 34px;
-      margin-bottom: 1em;
-      width: 360px;
-      background-color: #00c081;
-      border-color: #00c081;
-      color: white;
+    .content-right {
+      //margin-left: 8.333%;
+      padding-left: 10px;
+      padding-right: 20px;
+      .header {
+        color: #CCCCCC;
+        font-size: 32px;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        line-height: 1.1;
+      }
+      .password-icon {
+        color: #A7A9Ac;
+        top: 7px;
+      }
+      .password-container {
+        display: flex;
+        width: 100%;
+      }
+      input {
+        width: 100%;
+        //min-width: 360px;
+        background-color: #002644;
+        border-color: #004981;
+        margin-bottom: 13px;
+        padding: 6px 12px;
+        color: #A7A9Ac;
+      }
+      ::placeholder {
+        color: #A7A9Ac;
+      }
+      button {
+        height: 34px;
+        margin-bottom: 1em;
+        width: 100%;
+        background-color: #00C081;
+        border-color: #00C081;
+        color: white;
+        &:hover {
+          background-color: #008d5f;
+          border-color: #008358;
+        }
+      }
     }
   }
 }
@@ -245,11 +293,12 @@ p {
     font-size: 24px;
     font-weight: 400;
   }
-  .line-break {
-    white-space: pre;
-  }
 }
 
 .capitalize {
   text-transform: capitalize;
+}
+
+.line-break {
+  white-space: pre;
 }
