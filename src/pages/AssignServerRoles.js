@@ -1459,7 +1459,7 @@ class AssignServerRoles extends BaseWizardPage {
   render() {
     let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
     const contentClass =
-      'wizard-content' + (this.props.mode && this.props.mode === 'addserver' ? ' smaller-margin' : '');
+      'wizard-content' + (this.props.mode === 'addserver' ? ' smaller-margin' : '');
     return (
       <div className='wizard-page'>
         {this.props.mode === undefined && this.renderCloudSettings()}
@@ -1472,7 +1472,7 @@ class AssignServerRoles extends BaseWizardPage {
         <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
           yesAction={this.saveImportedServers}
           noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
-          {this.props.mode && this.props.mode === 'addserver' ?
+          {this.props.mode === 'addserver' ?
             translate('server.import.server.confirm.limit.conflict') :
             translate('server.import.server.confirm')}
         </YesNoModal>
