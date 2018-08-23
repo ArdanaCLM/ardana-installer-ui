@@ -70,7 +70,7 @@ export const routes = [
   { name: translate('topology'), slug: '/topology',
     items: [
       { name: translate('control_planes'), slug: '/topology/control_planes', component: ControlPlanes },
-      { name: translate('regions'), slug: '/topology/regions', component: Example },
+      { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Example , unfinished: true },
       { name: translate('networks'), slug: '/topology/networks', component: Example , unfinished: true },
       { name: translate('servers'), slug: '/topology/servers', component: Example , unfinished: true },
