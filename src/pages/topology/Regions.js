@@ -17,6 +17,8 @@ import { HashLink } from 'react-router-hash-link';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
 import { getInternalModel } from './TopologyUtils.js';
+import { ErrorBanner } from '../../components/Messages';
+import { LoadingMask } from '../../components/LoadingMask';
 
 /*
  * This class is a JavaScript implementation of the script
@@ -28,7 +30,8 @@ class Regions extends Component {
     super(props);
 
     this.state = {
-      model: undefined
+      model: undefined,
+      errorMessage: undefined,
     };
 
   }
@@ -44,7 +47,9 @@ class Regions extends Component {
             model: yml});
       })
       .catch((error) => {
-        console.log(error); // eslint-disable-line no-console
+        this.setState({
+          errorMessage: error.toString(),
+        });
       });
   }
 
@@ -124,12 +129,14 @@ class Regions extends Component {
   }
 
   render () {
-    const regions = this.state.model ? this.render_regions() : translate('loading.pleasewait');
-
     return (
       <div ref="regions" className='wizard-page'>
+        <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
-          {regions}
+          {this.state.model && this.render_regions()}
+        </div>
+        <div className='notification-message-container'>
+          <ErrorBanner message={this.state.errorMessage} show={this.state.errorMessage !== undefined} />
         </div>
       </div>
     );
