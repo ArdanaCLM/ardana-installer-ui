@@ -17,6 +17,7 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Link } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
 import { translate } from '../localization/localize.js';
+import { isProduction } from '../utils/ConfigHelper.js';
 
 class NavMenu extends Component {
 
@@ -42,15 +43,17 @@ class NavMenu extends Component {
         key={index}
         path={e.slug}
         render={props => {
-          const items = e.items.map((sub, subidx) => (
-            <Route
-              key={subidx}
-              path={sub.slug}
-              children={({match}) => (
-                <Link className={match ? 'active' : ''} to={sub.slug}>{sub.name}</Link>
-              )}
-            />
-          ));
+          const items = e.items.map((sub, subidx) => {
+            if(!(isProduction() && sub.unfinished)) return (
+              <Route
+                key={subidx}
+                path={sub.slug}
+                children={({match}) => (
+                  <Link className={match ? 'active' : ''} to={sub.slug}>{sub.name}</Link>
+                )}
+              />
+            )
+          });
           return (
             <nav>
               {items}

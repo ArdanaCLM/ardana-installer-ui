@@ -22,7 +22,7 @@ import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
 import { List } from 'immutable';
 import debounce from 'lodash/debounce';
-import { YesNoModal } from '../components/Modals.js';
+import { ConfirmModal, YesNoModal } from '../components/Modals.js';
 
 const PROGRESS_UI_CLASS = {
   NOT_STARTED: 'notstarted',
@@ -75,6 +75,53 @@ class LogViewer extends Component {
   }
 }
 
+class StatusModal extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      action: 'cancel'
+    };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Scroll to the bottom whenever the component updates
+    this.viewer.scrollTop = this.viewer.scrollHeight - this.viewer.clientHeight;
+  }
+
+  handleButton = () => {
+    if (this.state.action === 'close' || this.props.playbooksComplete.length === 1 || this.props.closeModal) {
+      this.props.onHide();
+    } else {
+      this.props.cancelPlaybook();
+      this.setState({action: 'close'}, () => {
+        // reset focus of the close button which for some reason gets focused on after cancel button
+        document.getElementById('closePlaybookStatus').blur();
+      });
+    }
+  }
+
+  render() {
+    // action 'close' is set: a) after user clicks on Cancel button, b) when user clicks on Close button,
+    // and c) when error occurs
+    const label = (this.state.action === 'close' || this.props.playbooksComplete.length === 1 ||
+      this.props.closeModal) ? translate('close') : translate('services.cancel.playbook');
+    const footer = <ActionButton id='closePlaybookStatus' clickAction={this.handleButton} displayLabel={label}/>;
+
+    return (
+      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide} className='status-modal'
+        title={translate('services.status.result', this.props.serviceName)} hideCloseButton
+        footer={footer}>
+        <div className='log-viewer'>
+          <pre ref={(comp) => {this.viewer = comp; }}>
+            {this.props.contents.join('')}
+          </pre>
+        </div>
+      </ConfirmModal>
+    );
+  }
+}
+
 class PlaybookProgress extends Component {
   constructor(props) {
     super(props);
@@ -85,13 +132,14 @@ class PlaybookProgress extends Component {
     this.logsReceived = List();
 
     this.state = {
-      errorMsg: '',                  // error message to display
-      showLog: false,                // controls visibility of log viewer
-      playbooksStarted: [],          // list of playbooks that have started
-      playbooksComplete: [],         // list of playbooks that have completed
-      playbooksError: [],            // list of playbooks that have errored
-      displayedLogs: List(),         // log messages to display in the log viewer
-      showConfirmationDlg: false,    // show the confirmation dialog
+      errorMsg: '',                      // error message to display
+      showLog: false,                    // controls visibility of log viewer
+      playbooksStarted: [],              // list of playbooks that have started
+      playbooksComplete: [],             // list of playbooks that have completed
+      playbooksError: [],                // list of playbooks that have errored
+      displayedLogs: List(),             // log messages to display in the log viewer
+      showConfirmationDlg: false,        // show the confirmation dialog
+      closeStatusPlaybookModal: false,   // set to true to close the Run Status Playbook modal
     };
   }
 
@@ -229,6 +277,13 @@ class PlaybookProgress extends Component {
       else {
         this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
       }
+    } else {
+      // in case of running only one playbook that has no playbook-stop tag
+      if (this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
+        this.setState((prevState) => {
+          return {'playbooksComplete': prevState.playbooksComplete.concat(playbookName + '.yml')};
+        });
+      }
     }
   }
 
@@ -239,7 +294,9 @@ class PlaybookProgress extends Component {
         playbook.playId = playId;
       }
       playbook.status = status;
-      this.props.updateGlobalState('playbookStatus', this.globalPlaybookStatus);
+      if (this.props.updateGlobalState) {
+        this.props.updateGlobalState('playbookStatus', this.globalPlaybookStatus);
+      }
     }
   }
 
@@ -421,11 +478,15 @@ class PlaybookProgress extends Component {
     if (running) {
       deleteJson('/api/v1/clm/plays/' + running.playId)
         .then(response => {
-          // update local this.globalPlaybookStatus and also update global state playbookSatus
-          this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
-          // overall status for caller page
-          this.props.updatePageStatus(STATUS.FAILED);
-          this.showErrorMessage(translate('deploy.cancel.message'));
+          if (this.props.modalMode) {
+            this.logMessage(translate('deploy.cancel.message'));
+          } else {
+            // update local this.globalPlaybookStatus and also update global state playbookSatus
+            this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
+            // overall status for caller page
+            this.props.updatePageStatus(STATUS.FAILED);
+            this.showErrorMessage(translate('deploy.cancel.message'));
+          }
         })
         .catch((error) => {
           // overall status for caller, if failed, just stop
@@ -476,32 +537,53 @@ class PlaybookProgress extends Component {
     );
   }
 
-  render() {
-    const errorDiv = (<div>{translate('progress.failure')}<br/>
-      <pre className='log'>{this.state.errorMsg}</pre></div>);
-
+  renderModal() {
+    if (this.state.errorMsg) {
+      this.logMessage(this.state.errorMsg);
+      this.setState({errorMsg: '', closeStatusPlaybookModal: true});
+    }
     return (
-      <div className='playbook-progress'>
-        <div className='progress-body'>
-          <div className='col-xs-4'>
-            <ul>{this.getProgress()}</ul>
-            <div>
-              {this.renderCancelButton()}
-              {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
-              <YesNoModal show={this.state.showConfirmationDlg}
-                title={translate('warning')}
-                yesAction={this.cancelRunningPlaybook}
-                noAction={() => this.setState({showConfirmationDlg: false})}>
-                {translate('deploy.cancel.confirm')}
-              </YesNoModal>
+      <StatusModal showModal={this.props.showModal} serviceName={this.props.serviceName}
+        onHide={this.props.onHide} contents={this.state.displayedLogs}
+        closeModal={this.state.closeStatusPlaybookModal} cancelPlaybook={this.cancelRunningPlaybook}
+        playbooksComplete={this.state.playbooksComplete}/>
+    );
+  }
+
+  render() {
+    if (this.props.modalMode) {
+      return (
+        <div>
+          {this.renderModal()}
+        </div>
+      );
+    } else {
+      const errorDiv = (<div>{translate('progress.failure')}<br/>
+        <pre className='log'>{this.state.errorMsg}</pre></div>);
+
+      return (
+        <div className='playbook-progress'>
+          <div className='progress-body'>
+            <div className='col-xs-4'>
+              <ul>{this.getProgress()}</ul>
+              <div>
+                {this.renderCancelButton()}
+                {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
+                <YesNoModal show={this.state.showConfirmationDlg}
+                  title={translate('warning')}
+                  yesAction={this.cancelRunningPlaybook}
+                  noAction={() => this.setState({showConfirmationDlg: false})}>
+                  {translate('deploy.cancel.confirm')}
+                </YesNoModal>
+              </div>
+            </div>
+            <div className='col-xs-8'>
+              {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
             </div>
           </div>
-          <div className='col-xs-8'>
-            {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
-          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   componentDidMount() {

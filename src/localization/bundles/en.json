@@ -7,7 +7,7 @@
     "next" : "Next",
     "back" : "Back",
     "cancel" : "Cancel",
-    "common.close": "Close",
+    "close": "Close",
     "common.nodata": "No Data",
     "done" : "Done",
     "none" : "None",
@@ -29,6 +29,9 @@
     "no.options.available": "No options available",
     "no.component.select": "No Component Selected",
     "no.model.select": "No Model Selected",
+    "name": "Name",
+    "description": "Description",
+    "role": "Role",
     "common.details": "Details",
     "common.delete": "Delete",
     "common.activate": "Activate",
@@ -309,6 +312,7 @@
     "configure": "Configure",
     "packages": "Packages",
     "roles": "Roles",
+    "endpoints": "Endpoints",
     "add_server": "Add Server",
 
     "vlanid": "VLAN ID",
@@ -491,10 +495,10 @@
     "tooltip.network.vlanid": "A valid VLAN id is an integer in the range of 1-4094.",
 
     "services.info" : "Service Information",
-    "services.name" : "Name",
-    "services.description" : "Description",
-    "services.regions" : "Regions",
-    "services.endpoints" : "Endpoints",
+    "services.services.per.role" : "Services Per Role",
+    "services.run.status" : "Run Status Playbook",
+    "services.status.result" : "Run Status Playbook - {0}",
+    "services.cancel.playbook" : "Cancel Playbook",
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",
@@ -515,9 +519,5 @@
     "server.replace.complete": "Completed replacing server {0}",
     "server.replace.prepare.failure": "Failed to prepare for replacing server",
     "update.commit.failure": "Failed to commit update changes. {0}",
-    "install.progress.failure": "Failed to install SLES OS",
-
-    "services.services.per.role" : "Services Per Role",
-    "services.role" : "Role"
-
+    "install.progress.failure": "Failed to install SLES OS"
 }
