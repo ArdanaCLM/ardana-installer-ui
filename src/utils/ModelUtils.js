@@ -286,12 +286,9 @@ export function maskPassword(pass) {
   return '*'.repeat(pass.length);
 }
 
-// check theRole for example COMPUTE-ROLE matches rolesLimit for example
-// COMPUTE
+// check theRole for example COMPUTE-ROLE, IRONIC-COMPUTE-ROLE, ESX-COMPUTE-ROLE,
+// or SLES-COMPUTE-ROLE and etc matches rolesLimit for example COMPUTE
 export function matchRolesLimit(theRole, rolesLimit) {
-  let match = rolesLimit.some(
-    role =>
-      theRole.includes(role.toUpperCase()) || theRole.includes(role.toLowerCase())
-  );
+  let match = rolesLimit.some(role => theRole.includes(role));
   return match;
 }

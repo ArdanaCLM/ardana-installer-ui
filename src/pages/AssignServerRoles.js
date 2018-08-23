@@ -295,7 +295,7 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderEditServerAddedManuallyModal = () => {
     let extraProps = {};
-    if(this.props.mode !== undefined && this.props.mode === 'addserver') {
+    if(this.props.mode === 'addserver') {
       extraProps.rolesLimit = this.props.rolesLimit;
     }
     return (
@@ -353,12 +353,15 @@ class AssignServerRoles extends BaseWizardPage {
 
     // if it is update and imported server has the same id or ip-addr or mac-addr or ilo-ip
     // as any server in the model already, it will be ignored
-    if(this.props.mode && this.props.mode === 'addserver') {
+    if(this.props.mode === 'addserver') {
       servers = servers.filter(server => {
         const found = model.getIn(['inputModel', 'servers']).some(svr => {
           return (
             svr.get('id') === server['id'] ||
-            (svr.get('ip-addr') && svr.get('ip-addr') === server['ip-addr']) ||
+            // server['ip-addr'] imported is always defined
+            (svr.get('ip-addr') === server['ip-addr']) ||
+            // svr.get('mac-addr') or svr.get('ilo-ip') could be undefined
+            // if they are undefined in the model, the server is ok to import
             (svr.get('mac-addr') && svr.get('mac-addr') === server['mac-addr']) ||
             (svr.get('ilo-ip') && svr.get('ilo-ip') === server['ilo-ip'])
           );
@@ -458,7 +461,7 @@ class AssignServerRoles extends BaseWizardPage {
         server['uid'] = genUID('import');
       }
 
-      if(this.props.mode && this.props.mode === 'addserver') {
+      if(this.props.mode === 'addserver') {
         // only want to have the roles where it matches rolesLimit
         let matchData = results.data.filter(row =>
           row['role'] === '' || matchRolesLimit(row['role'], this.props.rolesLimit)
