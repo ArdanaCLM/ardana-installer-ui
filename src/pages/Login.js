@@ -104,7 +104,7 @@ class LoginPage extends Component {
   renderErrorMessage() {
     if (this.state.errorMsg) {
       return (
-        <div className='notification-message-container'>
+        <div className='notification-message-container login'>
           <ErrorMessage
             closeAction={() => this.setState({errorMsg: ''})}
             message={this.state.errorMsg}>
