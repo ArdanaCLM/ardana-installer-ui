@@ -22,6 +22,7 @@ import { BaseInputModal, ConfirmModal } from './Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../utils/Sort.js';
 import { getAllOtherServerIds } from '../utils/ModelUtils.js';
+import { isProduction } from '../utils/ConfigHelper.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -105,23 +106,37 @@ class CollapsibleTable extends Component {
     if (role.indexOf('COMPUTE') === -1) { //not compute node
       items = [{
         show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails,
-      }, {
-        show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
       }];
+
+      //if the UI is not in production mode, include menu options that aren't completed yet
+      if(!isProduction()) {
+        items.push({
+          show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
+        });
+      }
     }
     else { //TODO need dynamically show or not show based on the rowData status
-      items = [{
-        show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails
-      }, {
-        show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
-      }, {
-        show: true, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
-      }, {
-        show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
-      }, {
-        show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
-      }];
+      items = [
+        {
+          show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails
+        }
+      ];
+
+      if (!isProduction()) {
+        items.push(
+            {
+              show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
+            }, {
+              show: true, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
+            }, {
+              show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
+            }, {
+              show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
+            }
+        );
+      }
     }
+
     this.setState({
       showMenu: true, activeRowData: rowData, menuItems: items,
       menuLocation: {x: event.pageX, y: event.pageY}
