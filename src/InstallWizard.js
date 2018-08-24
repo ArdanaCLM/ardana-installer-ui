@@ -148,16 +148,29 @@ class InstallWizard extends Component {
     // TODO if refresh with default url or logout due to timeout
     // need to find a way to set the menu from navigation
 
-    // When the update progress starts, it records currentMenuName, steps
+    // When the update process starts, it records currentMenuName, steps
     // and other items related to the update progress in the progress.json.
-    // If both steps and currentMenuName are present, the update progress
-    // is on going, otherwise, no progress.
-    if(responseData && responseData.currentMenuName && responseData.steps) {
-      let steps = responseData.steps;
-      let pages =
-        this.getPages(steps);
+    // When user does discovery, it records currentMenuName and connectionInfo
+    // into the progress.json
+
+    // If currentMenuName is present, it is related to day2UI
+    if(responseData && responseData.currentMenuName) {
       let updateStates = responseData;
-      updateStates.pages = pages;
+
+      // If steps is present, it indicates update process is still going,
+      // existing currentMenuName is from responseData
+      if(responseData.steps) {
+        let steps = responseData.steps;
+        let pages =
+          this.getPages(steps);
+        updateStates.pages = pages;
+      }
+      // If steps is not present, there is no update process is going,
+      // record currentMenuName where user navigates to, for example,
+      // /servers/server-summary or /servers/add-server
+      else {
+        updateStates.currentMenuName = this.props.menuName;
+      }
       this.setState(updateStates, this.persistState);
     }
   }
@@ -433,8 +446,7 @@ class InstallWizard extends Component {
       currentOperation: undefined,
       playbookStatus: undefined,
       operationProps: undefined,
-      pages: undefined,
-      updateUser: undefined
+      pages: undefined
     }, this.persistState);
   }
 
@@ -448,8 +460,7 @@ class InstallWizard extends Component {
       currentOperation: undefined,
       playbookStatus: undefined,
       operationProps: undefined,
-      pages: undefined,
-      updateUser: undefined
+      pages: undefined
     }, this.persistState);
   }
 

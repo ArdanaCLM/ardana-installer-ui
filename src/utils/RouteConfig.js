@@ -25,6 +25,8 @@ import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import { isProduction } from './ConfigHelper.js';
 
+import AddServers from '../pages/AddServers.js';
+
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
 
@@ -54,6 +56,14 @@ class ServerSummary extends  Component {
   }
 }
 
+class AddServersPage extends  Component {
+  render() {
+    return(
+      <InstallWizard menuComponent={AddServers} menuName='/servers/add-server'/>
+    );
+  }
+}
+
 /**
  * Define all fixed entries on the navigation menu
  */
@@ -79,7 +89,7 @@ export const routes = [
   { name: translate('servers'), slug: '/servers',
     items: [
       { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
-      { name: translate('add_server'), slug: '/servers/add-server', component: Example , unfinished: true },
+      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage, unfinished: true}
     ]
   }
 ];
@@ -88,9 +98,9 @@ if(!isProduction()) {
   routes.push(
     // Avoid the hassle of creating translations for this disposable code:
     { name: 'Example', slug: '/example',
-        items: [
-      { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
-      { name: 'Alarm Donut', slug: '/example/alarmdonut', component: AlarmDonutTest },
-    ]
-  });
+      items: [
+        { name: 'Speedometer', slug: '/example/speedometer', component: SpeedometerTest },
+        { name: 'Alarm Donut', slug: '/example/alarmdonut', component: AlarmDonutTest },
+      ]
+    });
 }

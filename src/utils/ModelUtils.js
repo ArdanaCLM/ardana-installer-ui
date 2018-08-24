@@ -171,6 +171,8 @@ export function getCleanedServer(srv, props) {
 }
 
 // Retrieve summarized server role information from the model
+// If there is rolesLimit, only shows the roles that match to
+// the rolesLimit
 // Each element in this list is an object containing:
 // - name        : the displayed name, such as "compute"
 // - serverRole  : the role name, such as "COMPUTE-ROLE"
@@ -179,7 +181,7 @@ export function getCleanedServer(srv, props) {
 //     or
 // - memberCount : exact count of servers in the role
 // - group       : 'clusters' or 'resources' (the type of role)
-export function getServerRoles (model) {
+export function getServerRoles (model, rolesLimit) {
   const servers = model.getIn(['inputModel', 'servers']).toJS();
 
   // TODO: Handle multiple control planes
@@ -209,6 +211,17 @@ export function getServerRoles (model) {
       return role;
     }));
   }
+
+  // if we want to limit the roles to show
+  if(rolesLimit) {
+    results = results.filter(res => {
+      let found = rolesLimit.some(role => {
+        return res['serverRole'].toUpperCase().includes(role.toUpperCase());
+      });
+      return found;
+    });
+  }
+
   // Sort the role list by role name
   return results.sort((a,b) => alphabetically(a['name'],b['name']));
 }
@@ -271,4 +284,11 @@ export function maskPassword(pass) {
   }
 
   return '*'.repeat(pass.length);
+}
+
+// check theRole for example COMPUTE-ROLE, IRONIC-COMPUTE-ROLE, ESX-COMPUTE-ROLE,
+// or SLES-COMPUTE-ROLE and etc matches rolesLimit for example COMPUTE
+export function matchRolesLimit(theRole, rolesLimit) {
+  let match = rolesLimit.some(role => theRole.includes(role));
+  return match;
 }

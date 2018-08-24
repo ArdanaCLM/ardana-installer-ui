@@ -37,7 +37,8 @@ import { isEmpty } from 'lodash';
 import $ from 'jquery';
 import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
-  updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds
+  updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds,
+  matchRolesLimit
 } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 import { YesNoModal } from '../components/Modals.js';
@@ -104,6 +105,13 @@ class AssignServerRoles extends BaseWizardPage {
       // import server confirmation modal
       showImportServerConfirmModal: false,
       importedResults: {}
+    };
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.connections = newProps.connectionInfo ? newProps.connectionInfo : {
+      sm: {checked: false, secured: true},
+      ov: {checked: false, secured: true}
     };
   }
 
@@ -267,6 +275,7 @@ class AssignServerRoles extends BaseWizardPage {
       <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
         closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
         addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
+        rolesLimit={this.props.rolesLimit}
         rawDiscoveredServers={this.state.rawDiscoveredServers}/>
     );
   }
@@ -285,11 +294,17 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderEditServerAddedManuallyModal = () => {
+    let extraProps = {};
+    if(this.props.mode === 'addserver') {
+      extraProps.rolesLimit = this.props.rolesLimit;
+    }
     return (
       <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
         closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
         updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
-        rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}/>
+        rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
+        {...extraProps}
+      />
     );
   }
 
@@ -334,6 +349,25 @@ class AssignServerRoles extends BaseWizardPage {
       this.setState(prev => { return {
         messages: prev.messages.concat([{title: title, msg: details}])
       };});
+    }
+
+    // if it is update and imported server has the same id or ip-addr or mac-addr or ilo-ip
+    // as any server in the model already, it will be ignored
+    if(this.props.mode === 'addserver') {
+      servers = servers.filter(server => {
+        const found = model.getIn(['inputModel', 'servers']).some(svr => {
+          return (
+            svr.get('id') === server['id'] ||
+            // server['ip-addr'] imported is always defined
+            (svr.get('ip-addr') === server['ip-addr']) ||
+            // svr.get('mac-addr') or svr.get('ilo-ip') could be undefined
+            // if they are undefined in the model, the server is ok to import
+            (svr.get('mac-addr') && svr.get('mac-addr') === server['mac-addr']) ||
+            (svr.get('ilo-ip') && svr.get('ilo-ip') === server['ilo-ip'])
+          );
+        });
+        return !found;
+      });
     }
 
     servers.forEach(server => {
@@ -425,6 +459,14 @@ class AssignServerRoles extends BaseWizardPage {
       for (let server of results.data) {
         server['source'] = 'manual';
         server['uid'] = genUID('import');
+      }
+
+      if(this.props.mode === 'addserver') {
+        // only want to have the roles where it matches rolesLimit
+        let matchData = results.data.filter(row =>
+          row['role'] === '' || matchRolesLimit(row['role'], this.props.rolesLimit)
+        );
+        results.data = matchData;
       }
 
       this.setState({showImportServerConfirmModal: true, importedResults: results});
@@ -1155,7 +1197,7 @@ class AssignServerRoles extends BaseWizardPage {
         </div>
       );
     } else {
-      // When there are no servers yet discovered, the tab shows just
+      // When there are no servers yet added, the tab shows just
       // two buttons instead of content
       return (
         <div className='centered'>
@@ -1256,7 +1298,7 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
-  renderServerRolesAccordion(roles) {
+  renderServerRolesAccordion() {
     let serverIds = getModelServerIds(this.props.model);
     //let serverIds = find all serversIds from manual and auto
     let tempDups = serverIds.filter((id, idx) => {
@@ -1267,17 +1309,29 @@ class AssignServerRoles extends BaseWizardPage {
       }
     });
     let dupIds = [...new Set(tempDups)];
+    let extraProps = {};
+    // for install
+    if(this.props.mode === undefined) {
+      extraProps.editAction = this.handleShowEditServer;
+      extraProps.deleteAction = this.handleDeleteServer;
+    }
+    else if (this.props.mode === 'addserver') {
+      // currently don't have editAction and deleteAction
+      // once we figure out how to differentiate deployed servers from
+      // newly added servers then we will add the actions to the newly added
+      // servers
+      extraProps.mode = this.props.mode;
+    }
     return (
       <ServerRolesAccordion
         ondropFunct={this.assignServerToRoleDnD}
         ondragEnterFunct={this.highlightDrop}
         ondragLeaveFunct={this.unHighlightDrop}
         allowDropFunct={this.allowDrop}
-        serverRoles={getServerRoles(this.props.model)}
+        serverRoles={getServerRoles(this.props.model, this.props.rolesLimit)}
         tableId='rightTableId' checkDupIds={dupIds}
-        editAction={this.handleShowEditServer}
         viewAction={this.handleShowServerDetails}
-        deleteAction={this.handleDeleteServer}>
+        {...extraProps}>
       </ServerRolesAccordion>
     );
   }
@@ -1373,50 +1427,67 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
-  render() {
-    let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
+  renderCloudSettings() {
     return (
-      <div className='wizard-page'>
-        <EditCloudSettings
-          show={this.state.showCloudSettings}
-          onHide={() => this.setState({showCloudSettings: false})}
-          model={this.props.model}
-          updateGlobalState={this.props.updateGlobalState}/>
-        <div className='content-header'>
-          <div className='titleBox'>
-            {this.renderHeading(translate('add.server.heading'))}
-          </div>
-          <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
-            yesAction={this.deleteServer}
-            noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
-            {translate('server.delete.server.confirm', serverId)}
-          </YesNoModal>
-          <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
-            yesAction={this.saveImportedServers}
-            noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
-            {translate('server.import.server.confirm')}
-          </YesNoModal>
-          <div className='buttonBox'>
-            <div className='btn-row'>
-              <ActionButton displayLabel={translate('edit.cloud.settings')} type='default'
-                clickAction={() => this.setState({showCloudSettings: true})} />
-              <ActionButton displayLabel={translate('add.server.set.network')} type='default'
-                clickAction={() => this.setState({showBaremetalSettings: true})}/>
-            </div>
+      <EditCloudSettings
+        show={this.state.showCloudSettings}
+        onHide={() => this.setState({showCloudSettings: false})}
+        model={this.props.model}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
+  }
+
+  renderInstallContentHeading() {
+    return (
+      <div className='content-header'>
+        <div className='titleBox'>
+          {this.renderHeading(translate('add.server.heading'))}
+        </div>
+        <div className='buttonBox'>
+          <div className='btn-row'>
+            <ActionButton displayLabel={translate('edit.cloud.settings')} type='default'
+              clickAction={() => this.setState({showCloudSettings: true})} />
+            <ActionButton displayLabel={translate('add.server.set.network')} type='default'
+              clickAction={() => this.setState({showBaremetalSettings: true})}/>
           </div>
         </div>
-        <div id='AssignServerRoleId' className='wizard-content'>
+      </div>
+    );
+  }
+
+  //gloria
+  render() {
+    let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
+    const contentClass =
+      'wizard-content' + (this.props.mode === 'addserver' ? ' smaller-margin' : '');
+    return (
+      <div className='wizard-page'>
+        {this.props.mode === undefined && this.renderCloudSettings()}
+        {this.props.mode === undefined && this.renderInstallContentHeading()}
+        <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
+          yesAction={this.deleteServer}
+          noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
+          {translate('server.delete.server.confirm', serverId)}
+        </YesNoModal>
+        <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
+          yesAction={this.saveImportedServers}
+          noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
+          {this.props.mode === 'addserver' ?
+            translate('server.import.server.confirm.limit.conflict') :
+            translate('server.import.server.confirm')}
+        </YesNoModal>
+        <div id='AssignServerRoleId' className={contentClass}>
           {this.renderServerRoleContent()}
           {this.renderCredsInputModal()}
           {this.renderAddServerManuallyModal()}
           {this.renderEditServerAddedManuallyModal()}
           {this.renderServerDetailsModal()}
-          {this.renderEditServerDetailsModal()}
+          {this.props.mode === undefined && this.renderEditServerDetailsModal()}
           {this.renderLoadingMask()}
           {this.renderErrorMessage()}
-          {this.renderBaremetalSettings()}
+          {this.props.mode === undefined && this.renderBaremetalSettings()}
         </div>
-        {this.renderNavButtons()}
+        {this.props.mode === undefined && this.renderNavButtons()}
       </div>
     );
   }
