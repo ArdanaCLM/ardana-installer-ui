@@ -244,7 +244,7 @@ class ControlPlanes extends Component {
         <div className='wizard-content'>
           {control_planes}
         </div>
-        <div className='notification-message-container'>
+        <div className='banner-container'>
           <ErrorBanner message={this.state.errorMessage} show={this.state.errorMessage !== undefined} />
         </div>
       </div>

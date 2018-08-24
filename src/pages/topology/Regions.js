@@ -135,7 +135,7 @@ class Regions extends Component {
         <div className='wizard-content'>
           {this.state.model && this.render_regions()}
         </div>
-        <div className='notification-message-container'>
+        <div className='banner-container'>
           <ErrorBanner message={this.state.errorMessage} show={this.state.errorMessage !== undefined} />
         </div>
       </div>
