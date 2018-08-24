@@ -18,6 +18,8 @@ import { HashRouter as Router, Link } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
 import { translate } from '../localization/localize.js';
 import { isProduction } from '../utils/ConfigHelper.js';
+import { clearAuthToken } from '../utils/Auth.js';
+import { redirectToLogin } from '../utils/RouteUtils.js';
 
 class NavMenu extends Component {
 
@@ -76,6 +78,11 @@ class NavMenu extends Component {
       });
     });
 
+    let logout = () => {
+      clearAuthToken();
+      redirectToLogin(false);
+    }
+
     return(
       <Router>
         {/* Router requires a single child, so surround everything in a div */}
@@ -85,8 +92,13 @@ class NavMenu extends Component {
             <ul> {leftBarItems} </ul>
           </aside>
           <section className="main-window">
-            <section className="submenu">
-              {topBar}
+            <section className="header">
+              <section className="submenu">
+                {topBar}
+              </section>
+              <section className="header-btns">
+                <i className="logout-btn material-icons" onClick={logout}>exit_to_app</i>
+              </section>
             </section>
             <section className="content">
               {content}

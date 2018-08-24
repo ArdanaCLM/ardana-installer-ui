@@ -40,8 +40,8 @@ export function navigateBack(fallback='/', state) {
   history.goBack();
 }
 
-export function redirectToLogin() {
-  navigateTo('/login', { forcedRedirect: true });
+export function redirectToLogin(forced = true) {
+  navigateTo('/login', { forcedRedirect: forced });
 }
 
 export function wasRedirectedToLogin() {
