@@ -15,7 +15,9 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
-import { fetchJson } from '../../utils/RestUtils.js';
+import { getInternalModel } from './TopologyUtils.js';
+import { ErrorBanner } from '../../components/Messages';
+import { LoadingMask } from '../../components/LoadingMask';
 
 const Fragment = React.Fragment;
 /*
@@ -28,44 +30,28 @@ class ControlPlanes extends Component {
     super(props);
 
     this.state = {
-      model: undefined
+      model: undefined,
+      errorMessage: undefined,
     };
 
-    this.cloud_internal = undefined;
-    this.control_planes = undefined;
-    this.servers = undefined;
     this.server_by_hostname = {};
-
   }
 
-  init = () => {
-    if (this.state.model) {
-      this.cloud_internal = this.state.model['internal'];
-      this.cp_topology = this.cloud_internal['cp-topology'];
-      this.control_planes = this.cp_topology['control_planes'];
-      this.servers = this.cloud_internal['servers'];
+  componentDidMount() {
 
-      for (const s of this.servers) {
-        if (s['hostname']) {
-          this.server_by_hostname[s['hostname']] = s;
-        }
-      }
-    }
-  }
-
-  componentWillMount() {
-    this.setState({loading: true});
-
-    // Load overview for all templates
-    fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml')
+    getInternalModel()
       .then((yml) => {
 
-        // Force a re-render
-        this.setState({
-          model: yml});
+        // Force a re-render if the page is still shown (user may navigate away while waiting)
+        if (this.refs.control_planes)
+          this.setState({
+            model: yml,
+          });
       })
       .catch((error) => {
-        // console.log(error);
+        this.setState({
+          errorMessage: error.toString(),
+        });
       });
   }
 
@@ -215,7 +201,7 @@ class ControlPlanes extends Component {
 
     return (
       <div key={cp_name} className='menu-tab-content'>
-        <a name={cp_name} />
+        <a id={cp_name}/>
         <div className='header'>{translate('control_plane', cp_name)}</div>
         <table className='table'>
           <thead><tr>
@@ -240,17 +226,26 @@ class ControlPlanes extends Component {
 
     let control_planes;
     if (this.state.model) {
-      this.init();
-      control_planes = Object.keys(this.control_planes).sort().map(name =>
-        this.render_control_plane(name, this.control_planes[name]));
-    } else {
-      control_planes = translate('loading.pleasewait');
+      for (const s of this.state.model['internal']['servers']) {
+        if (s['hostname']) {
+          this.server_by_hostname[s['hostname']] = s;
+        }
+      }
+
+      const cps = this.state.model['internal']['cp-topology']['control_planes'];
+      control_planes = Object.keys(cps).sort().map(name =>
+        this.render_control_plane(name, cps[name]));
     }
 
+
     return (
-      <div className='wizard-page'>
+      <div ref="control_planes" className='wizard-page'>
+        <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
           {control_planes}
+        </div>
+        <div className='banner-container'>
+          <ErrorBanner message={this.state.errorMessage} show={this.state.errorMessage !== undefined} />
         </div>
       </div>
     );
