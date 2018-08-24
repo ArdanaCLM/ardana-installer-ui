@@ -140,9 +140,9 @@ class LoginPage extends Component {
                   <input type='password' className='rounded-corner' required='true'
                     autoComplete='current-password' value={this.state.password}
                     placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
-                  <span className='material-icons password-icon'
+                  <i className='material-icons password-icon'
                     onClick={this.toggleShowHidePassword}>{this.state.showPasswordMask ? 'visibility': 'visibility_off'}
-                  </span>
+                  </i>
                 </div>
                 <button className="rounded-corner" type="submit" onClick={this.handleLogin}>{translate('login')}</button>
               </form>
