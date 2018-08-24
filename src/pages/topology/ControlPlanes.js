@@ -13,6 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { HashLink } from 'react-router-hash-link';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
 import { getInternalModel } from './TopologyUtils.js';
@@ -137,17 +138,19 @@ class ControlPlanes extends Component {
     // Generate the rows containing service names
     let service_rows = [];
     for (const service of service_list) {
+      const link = <HashLink to={'/topology/services#'+service}>{service}</HashLink>;
+
       cells = [<td key="x"/>]
         .concat(cluster_names.map(name => {
-          const text = clusters[name]['services'][service] ? service : '';
+          const text = clusters[name]['services'][service] ? link : '';
           return <td key={'c-'+name}>{text}</td>;
         }))
         .concat(resource_names.map(name => {
-          const text = resources[name]['services'][service] ? service : '';
+          const text = resources[name]['services'][service] ? link : '';
           return <td key={'r-'+name}>{text}</td>;
         }))
         .concat(lb_names.map(name => {
-          const text = load_balancers[name]['services'][service] ? service : '';
+          const text = load_balancers[name]['services'][service] ? link : '';
           return <td key={'l-'+name}>{text}</td>;
         }));
 

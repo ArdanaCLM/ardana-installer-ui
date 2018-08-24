@@ -22,7 +22,7 @@ import { LoadingMask } from '../../components/LoadingMask';
 
 /*
  * This class is a JavaScript implementation of the script
- * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
+ * ardana_configurationprocessor/plugins/builders/HTMLDiagram/Regions.py
  * in the config processor
  */
 class Regions extends Component {
@@ -96,11 +96,10 @@ class Regions extends Component {
                 break;
               }
             }
-            if (found) {
-              return <div key={svc}><b>{svc}</b></div>;
-            } else {
-              return <div key={svc}>{svc}</div>;
-            }
+
+            const link = <HashLink to={'/topology/services#'+svc}>{svc}</HashLink>;
+            const cls = found ? 'available' : '';
+            return <div className={cls} key={svc}>{link}</div>;
           });
 
           return (<td key={name}>{service_list}</td>);
