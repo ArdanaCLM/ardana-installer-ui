@@ -55,9 +55,10 @@
     "legend.unknown": "Unknown",
     "legend.ok": "ok",
 
-    "login": "Log In",
-
-    "login.header": "Enter credentials",
+    "day2.product.name": "CLM\nAdmin Console",
+    "day2.product.description": "Manage and configure your OpenStack Cloud via one interface, anytime, anywhere.",
+    "login": "Log in",
+    "login.header": "Sign in",
     "login.placeholder.username": "Enter your username...",
     "login.placeholder.password": "Enter your password...",
     "login.invalid": "Invalid username or password",
