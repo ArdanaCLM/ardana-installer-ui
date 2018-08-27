@@ -119,15 +119,27 @@ class EditServerDetails extends Component {
   }
 
   renderInput(name, type, isRequired, title, validate) {
-    let theProps = {};
+    let extraProps = {};
     if(name === 'id') {
-      theProps.ids = this.props.ids;
+      extraProps.ids = this.props.ids;
     }
+
+    if (name === 'mac-addr') {
+      extraProps['exist_mac_addresses'] = this.props.existMacAddressesModel;
+    }
+    if (name === 'ilo-ip') {
+      extraProps['exist_ip_addresses'] = this.props.existIPMIAddressesModel;
+    }
+    if (name === 'ip-addr') {
+      extraProps['exist_ip_addresses'] = this.props.existIPAddressesModel;
+    }
+
     return (
       <InputLine
-        isRequired={isRequired} inputName={name} inputType={type} label={title} {...theProps}
+        isRequired={isRequired} inputName={name} inputType={type} label={title}
         inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
+        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}
+        {...extraProps}/>
     );
   }
 
@@ -163,6 +175,13 @@ class EditServerDetails extends Component {
     );
   }
 
+  renderButtonForDropDown(addAction, buttonLabel) {
+    return (
+      <ActionButton type={'default'} clickAction={addAction} moreClass={'inline-button'}
+        displayLabel={translate(buttonLabel) + ' ...'}/>
+    );
+  }
+
   renderDropDown(name, list, handler, isRequired, title, buttonLabel, addAction) {
     let emptyOptProps = '';
     if(this.data[name] === '' || this.data[name] === undefined) {
@@ -178,8 +197,7 @@ class EditServerDetails extends Component {
           <div className='input-with-button'>
             <ListDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
               optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
-            <ActionButton type={'default'} clickAction={addAction} moreClass={'inline-button'}
-              displayLabel={translate(buttonLabel) + ' ...'}/>
+            {this.props.mode === undefined && this.renderButtonForDropDown(addAction, buttonLabel)}
           </div>
         </div>
       </div>
@@ -210,7 +228,7 @@ class EditServerDetails extends Component {
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
           {this.renderInput('mac-addr', 'text', false, 'server.mac.prompt', MacAddressValidator)}
-          {this.renderInput('ilo-ip', 'text', false, 'server.ipmi.ip.prompt',IpV4AddressValidator)}
+          {this.renderInput('ilo-ip', 'text', false, 'server.ipmi.ip.prompt', IpV4AddressValidator)}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}
         </div>
@@ -235,8 +253,8 @@ class EditServerDetails extends Component {
       <div className='edit-server-details'>
         {this.renderServerContent()}
         {this.renderFooter()}
-        {this.renderAddServerGroup()}
-        {this.renderAddNicMapping()}
+        {this.props.mode === undefined && this.renderAddServerGroup()}
+        {this.props.mode === undefined && this.renderAddNicMapping()}
       </div>
     );
   }

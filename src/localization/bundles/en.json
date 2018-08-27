@@ -528,5 +528,6 @@
     "server.replace.complete": "Completed replacing server {0}",
     "server.replace.prepare.failure": "Failed to prepare for replacing server",
     "update.commit.failure": "Failed to commit update changes. {0}",
-    "install.progress.failure": "Failed to install SLES OS"
+    "install.progress.failure": "Failed to install SLES OS",
+    "server.addserver.wipedisk.message": "This will set to wipe disk for all newly added servers"
 }

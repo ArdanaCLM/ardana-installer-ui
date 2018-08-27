@@ -18,11 +18,14 @@ import { translate } from '../localization/localize.js';
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
 import AssignServerRoles from './AssignServerRoles.js';
 import { ActionButton } from '../components/Buttons.js';
+import {getServerRoles, isRoleAssignmentValid} from "../utils/ModelUtils";
+
+const ROLE_LIMIT = ['COMPUTE'];
 
 class AddServers extends BaseUpdateWizardPage {
-
   constructor(props) {
     super(props);
+    this.checkInputs = ['nic-mapping', 'server-group'];
     this.state = {
       model: this.props.model
     };
@@ -39,7 +42,8 @@ class AddServers extends BaseUpdateWizardPage {
   renderAddPage() {
     return (
       <AssignServerRoles
-        mode='addserver' rolesLimit={['COMPUTE']} {...this.props}>
+        mode='addserver' rolesLimit={ROLE_LIMIT} checkInputs={this.checkInputs}
+        {...this.props}>
       </AssignServerRoles>
     );
   }
@@ -52,9 +56,16 @@ class AddServers extends BaseUpdateWizardPage {
     //TODO implement
   }
 
+  //check if we can deploy the new servers
   isDeployable = () => {
-    //TODO implement
-    return false;
+    if(this.state.model && this.state.model.size > 0) {
+      return getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
+        return isRoleAssignmentValid(role, this.checkInputs);
+      });
+    }
+    else {
+      return false;
+    }
   }
 
   isInstallable = () => {
@@ -68,7 +79,7 @@ class AddServers extends BaseUpdateWizardPage {
         type='default'
         clickAction={this.installOS}
         displayLabel={translate('common.installos')}
-        isDisabled={this.isInstallable()}/>
+        isDisabled={!this.isInstallable()}/>
     );
   }
 
@@ -77,7 +88,7 @@ class AddServers extends BaseUpdateWizardPage {
       <ActionButton
         clickAction={this.addServers}
         displayLabel={translate('common.deploy')}
-        isDisabled={this.isDeployable()}/>
+        isDisabled={!this.isDeployable()}/>
     );
   }
 
