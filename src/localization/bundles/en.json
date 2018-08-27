@@ -509,6 +509,7 @@
     "services.version" : "Version",
     "services.installed.version" : "Installed Version",
     "services.available.version" : "Available Version",
+    "services.package.unavailable" : "Package information is not available",
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",

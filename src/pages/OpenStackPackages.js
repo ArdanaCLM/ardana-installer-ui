@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import { alphabetically } from '../utils/Sort.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { LoadingMask } from '../components/LoadingMask.js';
+import { ErrorMessage } from '../components/Messages.js';
 
 class OpenStackPackages extends Component {
 
@@ -25,6 +26,7 @@ class OpenStackPackages extends Component {
     super();
     this.state = {
       packages: undefined,
+      error: undefined,
       showLoadingMask: false
     };
   }
@@ -34,7 +36,30 @@ class OpenStackPackages extends Component {
     fetchJson('/api/v1/clm/packages/openstack')
       .then(responseData => {
         this.setState({packages: responseData, showLoadingMask: false});
+      })
+      .catch((error) => {
+        this.setState({
+          error: {
+            title: translate('default.error'),
+            messages: [translate('services.package.unavailable')]
+          },
+          showLoadingMask: false
+        });
       });
+  }
+
+  renderErrorMessage() {
+    if (this.state.error) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage
+            closeAction={() => this.setState({error: undefined})}
+            title={this.state.error.title}
+            message={this.state.error.messages}>
+          </ErrorMessage>
+        </div>
+      );
+    }
   }
 
   render() {
@@ -55,6 +80,7 @@ class OpenStackPackages extends Component {
 
     return (
       <div>
+        {this.renderErrorMessage()}
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
           <div className='header'>{translate('packages.openstack')}</div>
