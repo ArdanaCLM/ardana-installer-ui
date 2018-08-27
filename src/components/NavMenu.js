@@ -84,7 +84,7 @@ class NavMenu extends Component {
       redirectToLogin(false);
     }
 
-    const logout_tooltip = (<Tooltip id='logout' className='tooltip'>{translate('logout')}</Tooltip>);
+    const logout_tooltip = (<Tooltip id='logout'>{translate('logout')}</Tooltip>);
 
     return(
       <Router>
