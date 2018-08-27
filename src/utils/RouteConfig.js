@@ -23,6 +23,7 @@ import UpdateServers from '../pages/UpdateServers.js';
 import InstallWizard from '../InstallWizard.js';
 import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
+import Regions from '../pages/topology/Regions.js';
 import { isProduction } from './ConfigHelper.js';
 
 import AddServers from '../pages/AddServers.js';
@@ -79,7 +80,7 @@ export const routes = [
   { name: translate('topology'), slug: '/topology',
     items: [
       { name: translate('control_planes'), slug: '/topology/control_planes', component: ControlPlanes },
-      { name: translate('regions'), slug: '/topology/regions', component: Example , unfinished: true },
+      { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Example , unfinished: true },
       { name: translate('networks'), slug: '/topology/networks', component: Example , unfinished: true },
       { name: translate('servers'), slug: '/topology/servers', component: Example , unfinished: true },
