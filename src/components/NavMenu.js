@@ -20,6 +20,7 @@ import { translate } from '../localization/localize.js';
 import { isProduction } from '../utils/ConfigHelper.js';
 import { clearAuthToken } from '../utils/Auth.js';
 import { redirectToLogin } from '../utils/RouteUtils.js';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 class NavMenu extends Component {
 
@@ -83,6 +84,8 @@ class NavMenu extends Component {
       redirectToLogin(false);
     }
 
+    const logout_tooltip = (<Tooltip id='logout' className='tooltip'>{translate('logout')}</Tooltip>);
+
     return(
       <Router>
         {/* Router requires a single child, so surround everything in a div */}
@@ -97,7 +100,9 @@ class NavMenu extends Component {
                 {topBar}
               </section>
               <section className="header-btns">
-                <i className="logout-btn material-icons" onClick={logout}>exit_to_app</i>
+                <OverlayTrigger placement='left' overlay={logout_tooltip}>
+                  <i className="logout-btn material-icons" onClick={logout}>exit_to_app</i>
+                </OverlayTrigger>
               </section>
             </section>
             <section className="content">
