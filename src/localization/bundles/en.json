@@ -313,7 +313,6 @@
     "server_groups": "Server Groups",
     "information": "Information",
     "configure": "Configure",
-    "packages": "Packages",
     "roles": "Roles",
     "endpoints": "Endpoints",
     "add_server": "Add Server",
@@ -502,6 +501,14 @@
     "services.run.status" : "Run Status Playbook",
     "services.status.result" : "Run Status Playbook - {0}",
     "services.cancel.playbook" : "Cancel Playbook",
+
+    "packages.openstack": "OpenStack Packages",
+    "packages.ardana": "SUSE Cloud Packages",
+    "services.header.packages.openstack" : "Installed OpenStack Packages",
+    "services.header.packages.ardana" : "Installed SUSE Cloud Packages",
+    "services.version" : "Version",
+    "services.installed.version" : "Installed Version",
+    "services.available.version" : "Available Version",
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",

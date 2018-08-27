@@ -16,6 +16,8 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
+import OpenStackPackages from '../pages/OpenStackPackages';
+import ArdanaPackages from '../pages/ArdanaPackages';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 import { AlarmDonutTest } from '../pages/AlarmDonutTest';
@@ -72,7 +74,8 @@ export const routes = [
   { name: translate('services'), slug: '/services',
     items: [
       { name: translate('information'), slug: '/services/info', component: ServiceInfo },
-      { name: translate('packages'), slug: '/services/packages', component: Example , unfinished: true},
+      { name: translate('packages.openstack'), slug: '/services/openstack-packages', component: OpenStackPackages },
+      { name: translate('packages.ardana'), slug: '/services/openstack-ardana', component: ArdanaPackages },
       { name: translate('configure'), slug: '/services/configure', component: Example , unfinished: true },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
