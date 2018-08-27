@@ -83,16 +83,16 @@ class Services extends Component {
 
     return (
       <table className='table'>
-      <thead><tr>
-        <th>{translate('class')}</th>
-        <th>{translate('description')}</th>
-        <th>{translate('service')}</th>
-      </tr></thead>
-      <tbody>
-        {table_rows}
-      </tbody>
+        <thead><tr>
+          <th>{translate('class')}</th>
+          <th>{translate('description')}</th>
+          <th>{translate('service')}</th>
+        </tr></thead>
+        <tbody>
+          {table_rows}
+        </tbody>
       </table>
-    )
+    );
   }
 
   render_services = () => {
@@ -112,7 +112,7 @@ class Services extends Component {
     for(const service_name of Object.keys(services).sort()) {
       const service_data = services[service_name];
 
-      if (service_data['hidden'] || ! service_data['component-list'] )
+      if (service_data['hidden'] || ! service_data['component-list'])
         continue;
 
       services_details.push(<a key={'a.'+service_name} id={service_name}/>);
@@ -122,7 +122,7 @@ class Services extends Component {
 
       let heading = service_name;
       if (service_data['description']) {
-        heading += " (" + service_data['description'] + ")"
+        heading += ' (' + service_data['description'] + ')';
       }
       services_details.push(<h2 key={'h.'+service_name}>{heading}</h2>);
 
@@ -135,11 +135,12 @@ class Services extends Component {
 
         // Populate control plane column
         let control_planes = [];
-        const svc_topo = this.state.model['internal']['service-topology']['services'][service_name]
+        const svc_topo = this.state.model['internal']['service-topology']['services'][service_name];
         if (svc_topo) {
           const comp_data = svc_topo['components'][comp_name];
           if (comp_data) {
-            control_planes = Object.keys(comp_data['control_planes']).sort().map(cp => <div key={cp}><HashLink to={'/topology/control_planes#'+cp}>{cp}</HashLink></div>);
+            control_planes = Object.keys(comp_data['control_planes']).sort().map(cp =>
+              <div key={cp}><HashLink to={'/topology/control_planes#'+cp}>{cp}</HashLink></div>);
           }
         }
 
@@ -154,9 +155,9 @@ class Services extends Component {
             svc = mnemonic[svc] || svc;
 
             if (consume['optional']) {
-              optional.push(svc)
+              optional.push(svc);
             } else {
-              consumes.push(svc)
+              consumes.push(svc);
             }
           }
 
@@ -179,7 +180,7 @@ class Services extends Component {
               <td key='port' className='port'>{ep['port']}</td>
               <td key='proto' className='proto'>{ep['protocol'] || 'tcp'}</td>
               <td key='vip' className='vip'>{ep['has-vip'] ? 'VIP' : ''}</td>
-            </tr>)
+            </tr>);
           });
 
           endpoints_cell = (<table className='endpoints'><tbody>{rows}</tbody></table>);
@@ -195,16 +196,18 @@ class Services extends Component {
       }
 
       let detail_table = (<table key={'t.'+service_name} className='table'>
-        <thead><tr>
-          <th>{translate('components')}</th>
-          <th>{translate('control_planes')}</th>
-          <th>{translate('consumes')}</th>
-          <th>{translate('endpoints')}</th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th>{translate('components')}</th>
+            <th>{translate('control_planes')}</th>
+            <th>{translate('consumes')}</th>
+            <th>{translate('endpoints')}</th>
+          </tr>
+        </thead>
         <tbody>
           {detail_rows}
         </tbody>
-        </table>);
+      </table>);
 
       services_details.push(detail_table);
     }
