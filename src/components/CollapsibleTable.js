@@ -124,15 +124,15 @@ class CollapsibleTable extends Component {
 
       if (!isProduction()) {
         items.push(
-            {
-              show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
-            }, {
-              show: true, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
-            }, {
-              show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
-            }, {
-              show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
-            }
+          {
+            show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
+          }, {
+            show: true, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
+          }, {
+            show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
+          }, {
+            show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
+          }
         );
       }
     }

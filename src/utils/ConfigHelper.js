@@ -33,8 +33,8 @@ export function getAppConfig(key) {
  * if the app is in production mode, return true, otherwise return false
  * @returns {boolean}
  */
-export function isProduction(){
-  if (PRODUCTION){
+export function isProduction() {
+  if (PRODUCTION) {
     return true;
   }
   return false;

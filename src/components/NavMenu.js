@@ -55,7 +55,7 @@ class NavMenu extends Component {
                   <Link className={match ? 'active' : ''} to={sub.slug}>{sub.name}</Link>
                 )}
               />
-            )
+            );
           });
           return (
             <nav>
@@ -82,7 +82,7 @@ class NavMenu extends Component {
     let logout = () => {
       clearAuthToken();
       redirectToLogin(false);
-    }
+    };
 
     const logout_tooltip = (<Tooltip id='logout'>{translate('logout')}</Tooltip>);
 
