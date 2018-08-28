@@ -505,6 +505,7 @@
 
     "services.info" : "Service Information",
     "services.services.per.role" : "Services Per Role",
+    "services.services.per.role.unavailable" : "Services per role information is not available",
     "services.run.status" : "Run Status Playbook",
     "services.status.result" : "Run Status Playbook - {0}",
     "services.cancel.playbook" : "Cancel Playbook",
