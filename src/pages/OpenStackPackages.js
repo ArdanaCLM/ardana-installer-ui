@@ -67,9 +67,9 @@ class OpenStackPackages extends Component {
     if (this.state.packages) {
       rows = this.state.packages
         .sort((a,b) => alphabetically(a.name, b.name))
-        .map((pkg, idx) => {
+        .map((pkg) => {
           return (
-            <tr key={idx}>
+            <tr key={pkg.name}>
               <td className='capitalize'>{pkg.name}</td>
               <td>{pkg.installed.join(', ')}</td>
               <td>{pkg.available}</td>

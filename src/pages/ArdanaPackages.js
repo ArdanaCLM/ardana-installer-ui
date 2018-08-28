@@ -67,9 +67,9 @@ class ArdanaPackages extends Component {
     if (this.state.packages) {
       rows = this.state.packages
         .sort((a,b) => alphabetically(a.name, b.name))
-        .map((pkg, idx) => {
+        .map((pkg) => {
           return (
-            <tr key={idx}>
+            <tr key={pkg.name}>
               <td>{pkg.name}</td>
               <td>{pkg['version']}</td>
             </tr>
