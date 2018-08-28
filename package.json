@@ -58,7 +58,7 @@
     "lints": "eslint .",
     "protractor-setup": "webdriver-manager update",
     "protractor": "protractor protractor.conf.js",
-    "start": " webpack-dev-server --mode=development --port 3000 --hot --host 0.0.0.0",
+    "start": " webpack-dev-server --mode=development --port 2209 --hot --host 0.0.0.0",
     "dist": "webpack --mode=production -p"
   },
   "description": "The cloud installer that will reside with SUSE Manager",
