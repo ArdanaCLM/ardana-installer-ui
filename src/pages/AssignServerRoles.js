@@ -53,6 +53,9 @@ class AssignServerRoles extends BaseWizardPage {
   constructor(props) {
     super(props);
 
+    this.IS_INSTALLL = this.props.mode ? false : true;
+    this.IS_ADDSERVER = this.props.mode === 'addserver' ? true : false;
+
     this.connections = this.props.connectionInfo ? this.props.connectionInfo : {
       sm: {checked: false, secured: true},
       ov: {checked: false, secured: true}
@@ -122,7 +125,7 @@ class AssignServerRoles extends BaseWizardPage {
     };
 
     // addserver get the saved global wipeDisk
-    if(this.props.mode === 'addserver') {
+    if(this.IS_ADDSERVER) {
       let isChecked = newProps.operationProps && newProps.operationProps.wipeDisk || false;
       this.setState({isWipeDiskChecked : isChecked});
     }
@@ -308,7 +311,7 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderEditServerAddedManuallyModal = () => {
     let extraProps = {};
-    if(this.props.mode === 'addserver') {
+    if(this.IS_ADDSERVER) {
       extraProps.rolesLimit = this.props.rolesLimit;
     }
     return (
@@ -366,7 +369,7 @@ class AssignServerRoles extends BaseWizardPage {
 
     // if it is update and imported server has the same id or ip-addr or mac-addr or ilo-ip
     // as any server in the model already, it will be ignored
-    if(this.props.mode === 'addserver') {
+    if(this.IS_ADDSERVER) {
       servers = servers.filter(server => {
         const found = model.getIn(['inputModel', 'servers']).some(svr => {
           return (
@@ -474,7 +477,7 @@ class AssignServerRoles extends BaseWizardPage {
         server['uid'] = genUID('import');
       }
 
-      if(this.props.mode === 'addserver') {
+      if(this.IS_ADDSERVER) {
         // only want to have the roles where it matches rolesLimit
         let matchData = results.data.filter(row =>
           row['role'] === '' || matchRolesLimit(row['role'], this.props.rolesLimit)
@@ -1340,11 +1343,11 @@ class AssignServerRoles extends BaseWizardPage {
     let dupIds = [...new Set(tempDups)];
     let extraProps = {};
     // for install
-    if(this.props.mode === undefined) {
+    if(this.IS_INSTALLL) {
       extraProps.editAction = this.handleShowEditServer;
       extraProps.deleteAction = this.handleDeleteServer;
     }
-    else if (this.props.mode === 'addserver') {
+    else if (this.IS_ADDSERVER) {
       // currently don't have editAction and deleteAction
       // once we figure out how to differentiate deployed servers from
       // newly added servers then we will add the actions to the newly added
@@ -1398,7 +1401,7 @@ class AssignServerRoles extends BaseWizardPage {
           <div className="server-table-container role-accordion-container rounded-corner">
             {this.renderServerRolesAccordion()}
           </div>
-          {this.props.mode === 'addserver' && this.renderWipeDisk()}
+          {this.IS_ADDSERVER && this.renderWipeDisk()}
         </div>
 
       </div>
@@ -1457,7 +1460,7 @@ class AssignServerRoles extends BaseWizardPage {
           this.state.serversAddedManually, this.state.activeRowData.id);
       extraProps.ids = ids;
 
-      if(this.props.mode === 'addserver') {
+      if(this.IS_ADDSERVER) {
         // check against other existing addresses
         extraProps.mode = this.props.mode;
         extraProps.existMacAddressesModel =
@@ -1519,11 +1522,11 @@ class AssignServerRoles extends BaseWizardPage {
   render() {
     let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
     const contentClass =
-      'wizard-content' + (this.props.mode === 'addserver' ? ' smaller-margin' : '');
+      'wizard-content' + (this.IS_ADDSERVER ? ' smaller-margin' : '');
     return (
       <div className='wizard-page'>
-        {this.props.mode === undefined && this.renderCloudSettings()}
-        {this.props.mode === undefined && this.renderInstallContentHeading()}
+        {this.IS_INSTALLL && this.renderCloudSettings()}
+        {this.IS_INSTALLL && this.renderInstallContentHeading()}
         <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
           yesAction={this.deleteServer}
           noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
@@ -1532,7 +1535,7 @@ class AssignServerRoles extends BaseWizardPage {
         <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
           yesAction={this.saveImportedServers}
           noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
-          {this.props.mode === 'addserver' ?
+          {this.IS_ADDSERVER ?
             translate('server.import.server.confirm.limit.conflict') :
             translate('server.import.server.confirm')}
         </YesNoModal>
@@ -1545,9 +1548,9 @@ class AssignServerRoles extends BaseWizardPage {
           {this.renderEditServerDetailsModal()}
           {this.renderLoadingMask()}
           {this.renderErrorMessage()}
-          {this.props.mode === undefined && this.renderBaremetalSettings()}
+          {this.IS_INSTALLL && this.renderBaremetalSettings()}
         </div>
-        {this.props.mode === undefined && this.renderNavButtons()}
+        {this.IS_INSTALLL && this.renderNavButtons()}
       </div>
     );
   }
