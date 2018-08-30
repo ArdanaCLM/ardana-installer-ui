@@ -14,15 +14,16 @@
 **/
 @import "./../palette.less";
 
-.notification-message {
-  z-index: 1111;
-  min-width: 35em;
-}
 
 .notification-message-container {
   position: absolute;
   top: 1em;
   right: 1em;
+  &.login,
+  .notification-message{
+    z-index: 20;
+    min-width: 35em;
+  }
 }
 
 .loading-message {

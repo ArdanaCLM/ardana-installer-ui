@@ -113,6 +113,7 @@ export class ServerRolesAccordion extends Component {
       let isOpen = (idx === this.state.accordionPosition);
       let valid = isRoleAssignmentValid(role);
       let triggerClass = valid ? '' : 'has-error';
+      let innerClass = this.props.mode  === 'addserver' ? 'addserver': '';
 
       return (
         <div
@@ -126,6 +127,7 @@ export class ServerRolesAccordion extends Component {
             open={isOpen} key={role.name}
             trigger={optionDisplay} triggerClassName={triggerClass}
             triggerOpenedClassName={triggerClass}
+            contentInnerClassName={innerClass}
             handleTriggerClick={() => this.handleTriggerClick(idx, role)}
             value={role.serverRole}>
             {isOpen && this.renderAccordionServerTable()}

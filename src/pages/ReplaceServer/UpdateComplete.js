@@ -17,7 +17,11 @@ import React from 'react';
 import { translate } from '../../localization/localize.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 
-// TODO this is a placeholder
+// TODO this is a placeholder to illustrate
+// how the replace framework can function with multiple
+// pages assembled dynamically. Later when real replace
+// node stories are implemented, either update this
+// page or remove it if it is not used eventually.
 class UpdateComplete extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);

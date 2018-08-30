@@ -38,7 +38,11 @@ const PLAYBOOK_STEPS = [
   }
 ];
 
-// TODO this is a placeholder for now
+// TODO this is a placeholder to illustrate
+// how the replace framework can function with multiple
+// pages assembled dynamically. Later when real replace
+// node stories are implemented, either update this
+// page or remove it if it is not used eventually.
 class PrepareReplace extends BaseUpdateWizardPage {
 
   constructor(props) {

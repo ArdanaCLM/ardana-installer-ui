@@ -28,7 +28,7 @@ const COMMON_GLOBAL_STATES_VARS = [
 
 // global states vars used in update
 const UPDATE_GLOBAL_STATES_VARS = [
-  'currentMenuName', 'currentOperation', 'steps', 'pages', 'operationProps'
+  'currentMenuName', 'currentOperation', 'steps', 'pages', 'operationProps', 'loadingErrors'
 ];
 
 // global persisted states vars used in installation and update
@@ -99,7 +99,9 @@ class InstallWizard extends Component {
       pages: undefined,
       // operationProps record all the bits that need to run to update
       // TODO how to deal with install password
-      operationProps: undefined
+      operationProps: undefined,
+      // errors during wizard loading
+      loadingErrors: undefined
     };
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
@@ -108,7 +110,6 @@ class InstallWizard extends Component {
     if(this.IS_UPDATE) {
       this.globalStateVars = this.globalStateVars.concat(UPDATE_GLOBAL_STATES_VARS);
     }
-
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
     this.persistedStateVars = COMMON_PERSISTED_STATES_VARS;
@@ -147,16 +148,29 @@ class InstallWizard extends Component {
     // TODO if refresh with default url or logout due to timeout
     // need to find a way to set the menu from navigation
 
-    // When the update progress starts, it records currentMenuName, steps
+    // When the update process starts, it records currentMenuName, steps
     // and other items related to the update progress in the progress.json.
-    // If both steps and currentMenuName are present, the update progress
-    // is on going, otherwise, no progress.
-    if(responseData && responseData.currentMenuName && responseData.steps) {
-      let steps = responseData.steps;
-      let pages =
-        this.getPages(steps);
+    // When user does discovery, it records currentMenuName and connectionInfo
+    // into the progress.json
+
+    // If currentMenuName is present, it is related to day2UI
+    if(responseData && responseData.currentMenuName) {
       let updateStates = responseData;
-      updateStates.pages = pages;
+
+      // If steps is present, it indicates update process is still going,
+      // existing currentMenuName is from responseData
+      if(responseData.steps) {
+        let steps = responseData.steps;
+        let pages =
+          this.getPages(steps);
+        updateStates.pages = pages;
+      }
+      // If steps is not present, there is no update process is going,
+      // record currentMenuName where user navigates to, for example,
+      // /servers/server-summary or /servers/add-server
+      else {
+        updateStates.currentMenuName = this.props.menuName;
+      }
       this.setState(updateStates, this.persistState);
     }
   }
@@ -190,7 +204,10 @@ class InstallWizard extends Component {
         this.setState({'model': fromJS(responseData)});
       })
       .catch((error) => {
-        console.log('Unable to retrieve saved model');// eslint-disable-line no-console
+        const ErrorMsg = JSON.stringify(error);
+        // loadingErrors are only handled in update at this point
+        this.setState({loadingErrors: Map({modelError: ErrorMsg})});
+        console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
       })
       .then(() => fetchJson('/api/v1/progress')
         .then((responseData) => {
@@ -203,13 +220,21 @@ class InstallWizard extends Component {
           }
         })
         .catch((error) => {
-          if(this.IS_UPDATE) { //update
-            // load progress error..TODO
+          const errorMsg = JSON.stringify(error);
+          if(this.IS_UPDATE) { // update
+            this.setState(prev => {
+              if (prev.loadingErrors) {
+                return {loadingErrors: prev.loadingErrors.set('progressError', errorMsg)};
+              }
+              else {
+                return {loadingErrors: Map({'progressError': errorMsg})};
+              }
+            });
           }
           else { // install
             this.setState({currentStep: 0}, this.persistState);
           }
-          console.log(JSON.stringify(error)); // eslint-disable-line no-console
+          console.log(errorMsg); // eslint-disable-line no-console
         })
       )
       .then(() => {
@@ -246,7 +271,7 @@ class InstallWizard extends Component {
   buildElement() {
     // install
     if (!this.IS_UPDATE && this.state.currentStep === undefined) {
-      return (<div className="loading-message">{translate('wizard.loading.pleasewait')}</div>);
+      return (<div className="loading-message">{translate('loading.pleasewait')}</div>);
     }
 
     let props = {};
@@ -421,8 +446,7 @@ class InstallWizard extends Component {
       currentOperation: undefined,
       playbookStatus: undefined,
       operationProps: undefined,
-      pages: undefined,
-      updateUser: undefined
+      pages: undefined
     }, this.persistState);
   }
 
@@ -436,8 +460,7 @@ class InstallWizard extends Component {
       currentOperation: undefined,
       playbookStatus: undefined,
       operationProps: undefined,
-      pages: undefined,
-      updateUser: undefined
+      pages: undefined
     }, this.persistState);
   }
 

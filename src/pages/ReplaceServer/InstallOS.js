@@ -41,7 +41,11 @@ const OS_INSTALL_STEPS = [
   }
 ];
 
-// TODO this is a placeholder
+// TODO this is a placeholder to illustrate
+// how the replace framework can function with multiple
+// pages assembled dynamically. Later when real replace
+// node stories are implemented, either update this
+// page or remove it if it is not used eventually.
 class InstallOS extends BaseUpdateWizardPage {
 
   constructor(props) {

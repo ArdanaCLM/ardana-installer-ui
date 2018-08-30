@@ -202,37 +202,90 @@ p {
 }
 
 .login-page {
-  background-color: @sb-blue-500;
+  background-color: #003258;
   height: 100vh;
-  .header {
-    color: #b6c0c6;
-    font-size: 32px;
-    margin-top: 7em;
-    margin-bottom: 24px;
+  display: block;
+  flex-direction: column;
+  font-family: Arial;
+  .top-bar-container {
+    background-color: #00243E;
+    .top-bar {
+      height: 60px;
+      max-width: 1170px;
+      padding: 0 15px 0 0;
+      margin: 0 auto 0 auto;
+      .top-bar-header {
+        margin-left: 12px;
+        display: block;
+        font-size: 22px;
+        color: #CCCCCC;
+        padding-top: 15px;
+      }
+    }
   }
-  .input-section {
-    display: grid;
-    .password-icon {
-      color: white;
-    }
-    input {
-      height: 34px;
-      margin-bottom: 1em;
-      width: 360px;
-      padding: 0 12px 0 12px;
-      background-color: #314c5d;
-      color: white;
-    }
-    ::placeholder {
-      color: white;
-    }
-    button {
-      height: 34px;
-      margin-bottom: 1em;
-      width: 360px;
-      background-color: #00c081;
-      border-color: #00c081;
-      color: white;
+  .login-body {
+    padding: 112px 15px 0 15px;
+    .content-container {
+      max-width: 1170px;
+      margin: 0 auto 0 auto;
+      .content-container-left {
+        font-family: 'Raleway', sans-serif;
+        .upper-left {
+          line-height: 1.1;
+          color: #00C081;
+          font-size: 52px;
+          margin-bottom: 1em;
+          font-weight: 300;
+        }
+        .lower-left {
+          font-size: 16px;
+          color: #CCCCCC;
+        }
+      }
+      .content-right {
+        padding-left: 10px;
+        padding-right: 30px;
+        .header {
+          color: #CCCCCC;
+          font-size: 32px;
+          margin-top: 1em;
+          margin-bottom: 1em;
+          line-height: 1.1;
+        }
+        .password-icon {
+          color: #A7A9Ac;
+          top: -40px;
+          left: -7px;
+          float: right;
+          margin-bottom: -15px;
+        }
+        .password-container {
+          display: block;
+          width: 100%;
+        }
+        input {
+          width: 100%;
+          background-color: #002644;
+          border-color: #004981;
+          margin-bottom: 15px;
+          padding: 6px 12px;
+          color: #A7A9Ac;
+        }
+        ::placeholder {
+          color: #A7A9Ac;
+        }
+        button {
+          height: 34px;
+          width: 100%;
+          background-color: #00C081;
+          border-color: #00C081;
+          color: white;
+          &:hover {
+            background-color: #008d5f;
+            border-color: #008358;
+          }
+        }
+      }
     }
   }
 }
@@ -245,11 +298,12 @@ p {
     font-size: 24px;
     font-weight: 400;
   }
-  .line-break {
-    white-space: pre;
-  }
 }
 
 .capitalize {
   text-transform: capitalize;
+}
+
+.line-break {
+  white-space: pre;
 }

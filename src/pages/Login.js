@@ -104,7 +104,7 @@ class LoginPage extends Component {
   renderErrorMessage() {
     if (this.state.errorMsg) {
       return (
-        <div className='notification-message-container'>
+        <div className='notification-message-container login'>
           <ErrorMessage
             closeAction={() => this.setState({errorMsg: ''})}
             message={this.state.errorMsg}>
@@ -119,23 +119,37 @@ class LoginPage extends Component {
       <div className='login-page'>
         {this.renderErrorMessage()}
         <LoadingMask show={this.state.showLoadMask}></LoadingMask>
-        <div className='col-md-7'/>
-        <div className='col-md-5 input-section'>
-          <div className='header'>{translate('login.header')}</div>
-          <form onSubmit={this.handleLogin}>
-            <input type='text' className='rounded-corner' required='true' autoFocus='true'
-              autoComplete='username' value={this.state.username}
-              placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
-            <div>
-              <input type='password' className='rounded-corner' required='true'
-                autoComplete='current-password' value={this.state.password}
-                placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
-              <span className='material-icons password-icon'
-                onClick={this.toggleShowHidePassword}>{ this.state.showPasswordMask ?  'visibility' : 'visibility_off'}
-              </span>
+        <div className='top-bar-container'>
+          <div className='top-bar'>
+            <div className='top-bar-header'>{translate('day2.product.name')}</div>
+          </div>
+        </div>
+        <div className='login-body'>
+          <div className='content-container'>
+            <div className='content-container-left col-sm-6 hidden-xs'>
+              <div className='upper-left line-break'>{translate('day2.product.name')}</div>
+              <div className='lower-left'>{translate('day2.product.description')}</div>
             </div>
-            <button className="rounded-corner" type="submit" onClick={this.handleLogin}>{translate('login')}</button>
-          </form>
+            <div className='content-right col-sm-4 col-sm-offset-1'>
+              <div className='header'>{translate('login.header')}</div>
+              <form onSubmit={this.handleLogin}>
+                <input type='text' className='rounded-corner' required='true' autoFocus='true'
+                  autoComplete='username' value={this.state.username}
+                  placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
+                <div className='password-container'>
+                  <input type='password' className='rounded-corner' required='true'
+                    autoComplete='current-password' value={this.state.password}
+                    placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
+                  <i className='material-icons password-icon' onClick={this.toggleShowHidePassword}>
+                    {this.state.showPasswordMask ? 'visibility': 'visibility_off'}
+                  </i>
+                </div>
+                <button className="rounded-corner" type="submit" onClick={this.handleLogin}>
+                  {translate('login')}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     );

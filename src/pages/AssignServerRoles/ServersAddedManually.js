@@ -23,8 +23,9 @@ import { postJson, putJson } from '../../utils/RestUtils.js';
 import { INPUT_STATUS } from '../../utils/constants.js';
 import { MODEL_SERVER_PROPS_ALL } from '../../utils/constants.js';
 import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../../utils/InputValidators.js';
-import { genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, getCleanedServer }
-  from '../../utils/ModelUtils.js';
+import {
+  genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, getCleanedServer, matchRolesLimit
+} from '../../utils/ModelUtils.js';
 
 
 class ServersAddedManually extends Component {
@@ -215,6 +216,15 @@ class ServersAddedManually extends Component {
     const nicMappings = getNicMappings(this.props.model);
     let roles = getServerRoles(this.props.model).map(e => e['serverRole']);
     roles.unshift('');
+
+    // for update, if have rolesLimit, only show limited roles
+    if(this.props.rolesLimit) {
+      roles =
+        roles.filter(role => {
+          return (role === '' || matchRolesLimit(role, this.props.rolesLimit));
+        });
+    }
+
     if (!this.newServer.role) {
       this.newServer.role = '';
     }

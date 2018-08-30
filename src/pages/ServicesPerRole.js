@@ -75,7 +75,7 @@ class ServicesPerRole extends Component {
         <table className='table'>
           <thead>
             <tr>
-              <th width="20%">{translate('services.role')}</th>
+              <th width="20%">{translate('role')}</th>
               <th width="35%">{translate('servers')}</th>
               <th width="50%">{translate('services')}</th>
             </tr>

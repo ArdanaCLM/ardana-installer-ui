@@ -27,6 +27,10 @@
 // of the submenu to the right
 @submenu-height: 48px;
 
+//these two values must add up to 100%
+@submenu-width: 90%;
+@header-button-box-width: 10%;
+
 @submenu-text-color: @sb-gray-900;
 @submenu-hr-color: @sb-gray-80;
 @submenu-hover-border-color: @sb-gray-100;
@@ -83,7 +87,7 @@
 
 .submenu {
   border-bottom: 1px solid @submenu-hr-color;
-  width: 100%;
+  width: @submenu-width;
   display: flex;
   align-items: center;
   height: @submenu-height;
@@ -125,4 +129,23 @@
   > .content {
     width: 100%;
   }
+}
+
+.header{
+  width: 100%;
+  display: inline-flex;
+}
+
+.header-btns{
+  width: @header-button-box-width;
+  border-bottom: 1px solid @submenu-hr-color;
+  height: @submenu-height;
+  padding-right: 20px;
+  vertical-align: middle;
+}
+
+.logout-btn {
+  float:right;
+  line-height: @submenu-height;
+  color: @submenu-text-color;
 }

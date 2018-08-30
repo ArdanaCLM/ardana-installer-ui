@@ -12,30 +12,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+import { fetchJson } from '../../utils/RestUtils.js';
 
-// NOTE: The variable PRODUCTION is set by webpack to identify whether
-// we are in a production or development environment.
-import { config as configDev } from '../../config.dev.js';
-import { config as configProd } from '../../config.prod.js';
+// Intead of doing this base-class thing, just use something like ConfigHelper.js used
+// to do for the config promise, which is to always return a promise, which may or may
+// not have been resolved already
+//
+var modelPromise;
 
-var config;
-if (PRODUCTION) {
-  config = configProd;
-} else {
-  config = configDev;
+function loadInternalModel() {
+  return fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml');
 }
 
-export function getAppConfig(key) {
-  return config[key];
-}
-
-/**
- * if the app is in production mode, return true, otherwise return false
- * @returns {boolean}
- */
-export function isProduction() {
-  if (PRODUCTION) {
-    return true;
-  }
-  return false;
+export function getInternalModel() {
+  modelPromise = modelPromise || loadInternalModel();
+  return modelPromise;
 }
