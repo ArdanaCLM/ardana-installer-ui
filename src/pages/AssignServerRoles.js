@@ -53,7 +53,7 @@ class AssignServerRoles extends BaseWizardPage {
   constructor(props) {
     super(props);
 
-    this.IS_INSTALLL = this.props.mode === undefined ? false : true;
+    this.IS_INSTALL = this.props.mode === undefined ? true : false;
     this.IS_ADDSERVER = this.props.mode === 'addserver' ? true : false;
 
     this.connections = this.props.connectionInfo ? this.props.connectionInfo : {
