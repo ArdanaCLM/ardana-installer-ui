@@ -47,3 +47,9 @@ export const IS_MS_EDGE = /Edge/.test(window.navigator.userAgent);
 export const IS_MS_IE = /MSIE\s|Trident\/7\./.test(window.navigator.userAgent);
 
 export const TRUTHY = [true, 'true', 'True', 'yes', 'Yes'];
+
+/** Playbooks **/
+export const INSTALL_PLAYBOOK = 'installui-os-provision';
+export const PRE_DEPLOYMENT_PLAYBOOK = 'installui-pre-deployment';
+export const DAYZERO_SITE_PLAYBOOK = 'installui-wipe-and-site';
+export const SITE_PLAYBOOK = 'site';
