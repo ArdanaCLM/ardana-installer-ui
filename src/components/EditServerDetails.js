@@ -26,7 +26,7 @@ class EditServerDetails extends Component {
   constructor(props) {
     super(props);
 
-    this.IS_INSTALL = this.props.mode ? false : true;
+    this.IS_INSTALL = this.props.mode === undefined ? false : true;
 
     this.allInputsStatus = {
       'id': INPUT_STATUS.UNKNOWN,
