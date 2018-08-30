@@ -1343,7 +1343,7 @@ class AssignServerRoles extends BaseWizardPage {
     let dupIds = [...new Set(tempDups)];
     let extraProps = {};
     // for install
-    if(this.IS_INSTALLL) {
+    if(this.IS_INSTALL) {
       extraProps.editAction = this.handleShowEditServer;
       extraProps.deleteAction = this.handleDeleteServer;
     }
@@ -1525,8 +1525,8 @@ class AssignServerRoles extends BaseWizardPage {
       'wizard-content' + (this.IS_ADDSERVER ? ' smaller-margin' : '');
     return (
       <div className='wizard-page'>
-        {this.IS_INSTALLL && this.renderCloudSettings()}
-        {this.IS_INSTALLL && this.renderInstallContentHeading()}
+        {this.IS_INSTALL && this.renderCloudSettings()}
+        {this.IS_INSTALL && this.renderInstallContentHeading()}
         <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
           yesAction={this.deleteServer}
           noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
@@ -1548,9 +1548,9 @@ class AssignServerRoles extends BaseWizardPage {
           {this.renderEditServerDetailsModal()}
           {this.renderLoadingMask()}
           {this.renderErrorMessage()}
-          {this.IS_INSTALLL && this.renderBaremetalSettings()}
+          {this.IS_INSTALL && this.renderBaremetalSettings()}
         </div>
-        {this.IS_INSTALLL && this.renderNavButtons()}
+        {this.IS_INSTALL && this.renderNavButtons()}
       </div>
     );
   }
