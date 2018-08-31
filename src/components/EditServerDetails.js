@@ -26,8 +26,6 @@ class EditServerDetails extends Component {
   constructor(props) {
     super(props);
 
-    this.IS_INSTALL = this.props.mode === undefined ? true : false;
-
     this.allInputsStatus = {
       'id': INPUT_STATUS.UNKNOWN,
       'ip-addr': INPUT_STATUS.UNKNOWN,
@@ -199,7 +197,7 @@ class EditServerDetails extends Component {
           <div className='input-with-button'>
             <ListDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
               optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
-            {this.IS_INSTALL && this.renderButtonForDropDown(addAction, buttonLabel)}
+            {!this.props.isUpdateMode && this.renderButtonForDropDown(addAction, buttonLabel)}
           </div>
         </div>
       </div>
@@ -255,8 +253,8 @@ class EditServerDetails extends Component {
       <div className='edit-server-details'>
         {this.renderServerContent()}
         {this.renderFooter()}
-        {this.IS_INSTALL && this.renderAddServerGroup()}
-        {this.IS_INSTALL && this.renderAddNicMapping()}
+        {!this.props.isUpdateMode && this.renderAddServerGroup()}
+        {!this.props.isUpdateMode && this.renderAddNicMapping()}
       </div>
     );
   }

@@ -23,7 +23,7 @@ import { fetchJson, postJson, deleteJson } from './utils/RestUtils.js';
 
 // global states vars used in installation and update
 const COMMON_GLOBAL_STATES_VARS = [
-  'playbookStatus', 'model', 'connectionInfo', 'deployConfig'
+  'playbookStatus', 'model', 'connectionInfo', 'deployConfig', 'isUpdateMode'
 ];
 
 // global states vars used in update
@@ -92,6 +92,8 @@ class InstallWizard extends Component {
       // deal with update
       currentMenuName: this.props.menuName,
       currentOperation: undefined,
+      isUpdateMode: this.IS_UPDATE, //global var will be used to detect install or update
+
       // when update, the pages are dynamically assembled based on steps when
       // user startUpdate process. pages include names and page components
       // which are needed when render html pages
