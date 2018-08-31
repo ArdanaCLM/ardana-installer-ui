@@ -105,15 +105,36 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   return retIds;
 }
 
-export function getModelMacAddresses (model) {
+export function getModelMacAddresses (model, excludeMacAddr) {
   let macAddresses = model.getIn(['inputModel','servers'])
     .map(server => server.get('mac-addr')).toJS();
+  if(excludeMacAddr) {
+    macAddresses = macAddresses.filter(addr => {
+      return addr !== excludeMacAddr;
+    });
+  }
   return macAddresses;
 }
 
-export function getModelIPMIAddresses (model) {
+export function getModelIPMIAddresses (model, excludeIPMIAddr) {
   let ipAddresses = model.getIn(['inputModel','servers'])
     .map(server => server.get('ilo-ip')).toJS();
+  if(excludeIPMIAddr) {
+    ipAddresses = ipAddresses.filter(addr => {
+      return addr !== excludeIPMIAddr;
+    });
+  }
+  return ipAddresses;
+}
+
+export function getModelIPAddresses (model, excludeIPAddr) {
+  let ipAddresses = model.getIn(['inputModel','servers'])
+    .map(server => server.get('ip-addr')).toJS();
+  if(excludeIPAddr) {
+    ipAddresses = ipAddresses.filter(addr => {
+      return addr !== excludeIPAddr;
+    });
+  }
   return ipAddresses;
 }
 
