@@ -22,6 +22,7 @@ import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants
 import { fetchJson, putJson } from '../utils/RestUtils.js';
 import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
+import { LoadingMask } from '../components/LoadingMask.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -156,6 +157,15 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.props.startUpdateProcess('ReplaceServer', pages, theProps);
   }
 
+  toShowLoadingMask = () => {
+    return (
+      // show loadingmask when the model is not ready and
+      // no wizard loading errors haven been thrown
+      !(this.state.model && this.state.model.size > 0) &&
+      !this.state.loadingErrors
+    );
+  }
+
   renderCollapsibleTable() {
     let tableConfig = {
       columns: [
@@ -197,6 +207,7 @@ class UpdateServers extends BaseUpdateWizardPage {
   render() {
     return (
       <div className='wizard-page'>
+        <LoadingMask show={this.toShowLoadingMask()}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
