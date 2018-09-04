@@ -17,7 +17,6 @@ import React from 'react';
 import { translate } from '../localization/localize.js';
 import CollapsibleTable from '../components/CollapsibleTable.js';
 import { ActionButton } from '../components/Buttons.js';
-import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
 import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
 import { fetchJson, putJson } from '../utils/RestUtils.js';
@@ -195,36 +194,6 @@ class UpdateServers extends BaseUpdateWizardPage {
     );
   }
 
-  renderWizardLoadingErrors() {
-    // if have modelError and progressError from InstallWizard loading, will block server contents
-    if(this.state.loadingErrors.get('modelError') && this.state.loadingErrors.get('progressError')) {
-      return (
-        <div className='banner-container'>
-          <ErrorBanner message={translate('common.load.modelprogress.error')} show={true}/>
-        </div>
-      );
-    }
-    // if have modelError from InstallWizard loading, will block server contents
-    else if(this.state.loadingErrors.get('modelError')) {
-      return (
-        <div className='banner-container'>
-          <ErrorBanner message={translate('common.load.model.error')} show={true}/>
-        </div>
-      );
-    }
-    // if have progressError from InstallWizard loading, but no model error, will show
-    // an error message
-    else if(this.state.loadingErrors.get('progressError')) {
-      return (
-        <div className='notification-message-container'>
-          <ErrorMessage
-            message={translate('common.load.progress.error')}
-            closeAction={() => this.setState({loadingErrors: undefined})}/>
-        </div>
-      );
-    }
-  }
-
   render() {
     return (
       <div className='wizard-page'>
@@ -236,7 +205,9 @@ class UpdateServers extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content unlimited-height'>
           {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
-          {this.state.loadingErrors && this.renderWizardLoadingErrors()}
+          {this.state.loadingErrors &&
+           this.renderWizardLoadingErrors(
+             this.state.loadingErrors, this.handleCloseLoadingErrorMessage)}
         </div>
       </div>
     );
