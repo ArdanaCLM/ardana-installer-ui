@@ -19,22 +19,51 @@ import ServerRowItem from './ServerRowItem.js';
 class ServerTable extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      deployedServers: this.props.deployedServers
+    };
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({deployedServers: newProps.deployedServers});
   }
 
   renderServerRows() {
     let items =
       this.props.tableData.map((row, index) => {
+        let extraProps = {};
+        extraProps.isDraggable = true;
+        // when it is in addserver mode, if we have a list of deployed servers
+        if(this.props.isUpdateMode &&
+           this.state.deployedServers && this.state.deployedServers.length > 0) {
+          // if the server item is NOT in the deployedServers, will present
+          // editAction and deleteAction
+          if(!this.state.deployedServers.some(server => {
+            return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
+          })) {
+            extraProps.editAction = this.props.editAction;
+            extraProps.deleteAction = this.props.deleteAction;
+          }
+          // if the server item is in the deployedServers, will NOT present
+          // editAction and deleteAction and item is not draggable
+          else {
+            extraProps.isDraggable = false;
+          }
+        }
+        else {
+          extraProps.editAction = this.props.editAction;
+          extraProps.deleteAction = this.props.deleteAction;
+        }
         return (
           <ServerRowItem
             data={row}
             dataDef={this.props.tableConfig.columns}
-            editAction={this.props.editAction}
             viewAction={this.props.viewAction}
-            deleteAction={this.props.deleteAction}
             tableId={this.props.id}
             checkInputs={this.props.checkInputs}
             checkDupIds={this.props.checkDupIds}
-            key={index}>
+            key={index}
+            {...extraProps}>
           </ServerRowItem>
         );
       });

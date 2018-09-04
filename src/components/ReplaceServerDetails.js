@@ -202,26 +202,27 @@ class ReplaceServerDetails extends Component {
   }
 
   renderInput(name, type, isRequired, title, validate) {
-    let theProps = {};
+    let extraProps = {};
     // if user doesn't select the server from available server and enter the same
     // mac-addr or ilo-ip as the one in the available servers
     // show error
     if(!this.state.isUseAvailServersChecked || this.state.selectedServerId === '') {
       if (name === 'mac-addr') {
-        theProps['exist_mac_addresses'] = this.existMacAddressesModel;
-        theProps['exist_availservers_mac_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
+        extraProps['exist_mac_addresses'] = this.existMacAddressesModel;
+        extraProps['exist_availservers_mac_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
       }
       if (name === 'ilo-ip') {
-        theProps['exist_ip_addresses'] = this.existIPMIAddressesModel;
-        theProps['exist_availservers_ip_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
+        extraProps['exist_ip_addresses'] = this.existIPMIAddressesModel;
+        extraProps['exist_availservers_ip_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
       }
     }
     return (
       <InputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title}
-        inputValidate={validate} {...theProps}
+        inputValidate={validate}
         inputValue={this.state.replaceData.get(name) || ''}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
+        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}
+        {...extraProps}/>
     );
   }
 

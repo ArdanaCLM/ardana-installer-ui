@@ -16,6 +16,8 @@
 import React from 'react';
 import BaseWizardPage from './BaseWizardPage.js';
 import { CloseButton, CancelButton } from '../components/Buttons.js';
+import {translate} from "../localization/localize";
+import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 
 /**
  * This base class handles the functions common to update process
@@ -34,6 +36,10 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   cancelUpdateProcess = (e) => {
     e.preventDefault();
     this.props.cancelUpdateProcess();
+  }
+
+  handleCloseLoadingErrorMessage = () => {
+    this.setState({loadingErrors: undefined});
   }
 
   renderCloseButton() {
@@ -60,6 +66,36 @@ class BaseUpdateWizardPage extends BaseWizardPage {
         {this.renderCloseButton()}
       </div>
     );
+  }
+
+  renderWizardLoadingErrors(loadingErrors, callbackSetStateFunc) {
+    // if have modelError and progressError from InstallWizard loading, will block server contents
+    if(loadingErrors.get('modelError') && loadingErrors.get('progressError')) {
+      return (
+        <div className='banner-container'>
+          <ErrorBanner message={translate('common.load.modelprogress.error')} show={true}/>
+        </div>
+      );
+    }
+    // if have modelError from InstallWizard loading, will block server contents
+    else if(loadingErrors.get('modelError')) {
+      return (
+        <div className='banner-container'>
+          <ErrorBanner message={translate('common.load.model.error')} show={true}/>
+        </div>
+      );
+    }
+    // if have progressError from InstallWizard loading, but no model error, will show
+    // an error message
+    else if(loadingErrors.get('progressError')) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage
+            message={translate('common.load.progress.error')}
+            closeAction={() => callbackSetStateFunc()}/>
+        </div>
+      );
+    }
   }
 }
 
