@@ -123,7 +123,7 @@ class ServiceInfo extends Component {
             // capitalize the interface before concat with the url
             const types = ep.interface[0].toUpperCase() + ep.interface.substr(1);
             return types + ' ' + ep.url;
-          }).join('\n');
+          }).sort().join('\n');
 
           return (
             <tr key={srv.name}>
