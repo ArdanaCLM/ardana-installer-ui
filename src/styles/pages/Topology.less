@@ -31,4 +31,44 @@
       width: 100px;
     }
   }
+
+  .label-cell {
+    text-transform: capitalize;
+    &::after {
+      content: ":";
+    }
+  }
+
+  .comp {
+    text-indent: 15px;
+
+  }
+
+  .comp-dtl {
+    text-indent: 110px;
+  }
+
+  // Fix the width of the headers of the leading columns of the nested table 
+  // to force them to line up with the data
+  th .nw-group-addr {
+     float: left;
+     width: 110px;
+  }
+
+  th .nw-group-server {
+     float: left;
+     width: 200px;
+  }
+
+  td .nw-group-addr {
+     width: 110px;
+  }
+
+  td .nw-group-server {
+     width: 200px;
+  }
+
+  .nested-table {
+    padding-left: 0px;
+  }
 }

@@ -13,6 +13,7 @@
 * limitations under the License.
 **/
 import LocalizedStrings from 'react-localization';
+import React from 'react';
 
 
 var supportedLangs = ['en', 'ja'];
@@ -51,11 +52,37 @@ else { //default
 }
 
 export function translate(key, ...args) {
-  // Note!
-  // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
-  // The join() corrects this by joining the elements into a single string.
+
+  const hasReact = args && args.some(arg => React.isValidElement(arg));
+
   try {
-    return strings.formatString(strings[key], ...args).join('');
+    // React components cannot be handled with String.formatString, so if any
+    // args are react components, then manually parse the format string and
+    // build up the result with
+    if (hasReact) {
+      // Find any references in the key (e.g. {0})
+      let matches = strings[key].split(/(\{\d\})/);
+      let pieces = [];
+      for (const piece of matches) {
+        let ref = piece.match(/\{(\d)\}/);
+
+        if (ref) {
+          pieces.push(args[ref[1]]);
+        } else {
+          pieces.push(piece);
+        }
+      }
+
+      // Add a unique key to each part of the translated result.  Symbol() is a JavaScript feature
+      // that will yield unique keys.
+      const keyed = pieces.map((p) => <React.Fragment key={Symbol(p).toString()}>{p}</React.Fragment>);
+      return (<React.Fragment>{keyed}</React.Fragment>);
+    } else {
+      // Note!
+      // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
+      // The join() corrects this by joining the elements into a single string.
+      return strings.formatString(strings[key], ...args).join('');
+    }
   } catch (e) {
     console.error('Unable to translate '+key); // eslint-disable-line no-console
     return key;
