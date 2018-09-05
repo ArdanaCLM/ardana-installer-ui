@@ -19,6 +19,7 @@ import { fetchJson } from '../utils/RestUtils.js';
 import { alphabetically } from '../utils/Sort.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
 import { LoadingMask } from '../components/LoadingMask.js';
+import { ErrorMessage } from '../components/Messages.js';
 import ContextMenu from '../components/ContextMenu.js';
 
 class ServiceInfo extends Component {
@@ -34,6 +35,7 @@ class ServiceInfo extends Component {
       steps: [],
       selectedService: '',
       showLoadingMask: false,
+      error: undefined,
       menuLocation: undefined
     };
   }
@@ -43,7 +45,30 @@ class ServiceInfo extends Component {
     fetchJson('/api/v1/clm/endpoints')
       .then(responseData => {
         this.setState({services: responseData, showLoadingMask: false});
+      })
+      .catch((error) => {
+        this.setState({
+          error: {
+            title: translate('default.error'),
+            messages: [translate('services.info.unavailable')]
+          },
+          showLoadingMask: false
+        });
       });
+  }
+
+  renderErrorMessage() {
+    if (this.state.error) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage
+            closeAction={() => this.setState({error: undefined})}
+            title={this.state.error.title}
+            message={this.state.error.messages}>
+          </ErrorMessage>
+        </div>
+      );
+    }
   }
 
   renderActionMenuIcon = (service) => {
@@ -92,7 +117,7 @@ class ServiceInfo extends Component {
     if (this.state.services) {
       rows = this.state.services
         .sort((a,b) => alphabetically(a.name, b.name))
-        .map((srv, idx) => {
+        .map((srv) => {
           const regions = srv.endpoints.map(ep => {return ep.region;}).join('\n');
           const endpoints = srv.endpoints.map(ep => {
             // capitalize the interface before concat with the url
@@ -101,7 +126,7 @@ class ServiceInfo extends Component {
           }).join('\n');
 
           return (
-            <tr key={idx}>
+            <tr key={srv.name}>
               <td className='capitalize'>{srv.name}</td>
               <td>{srv.description}</td>
               <td className='line-break'>{endpoints}</td>
@@ -125,6 +150,7 @@ class ServiceInfo extends Component {
     return (
       <div>
         {statusModal}
+        {this.renderErrorMessage()}
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
           <div className='header'>{translate('services.info')}</div>

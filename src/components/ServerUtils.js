@@ -50,13 +50,19 @@ export class SearchBar extends Component {
 export class ServerRolesAccordion extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      accordionPosition: 0
+      accordionPosition: 0,
+      deployedServers: this.props.deployedServers //for addserver
     };
   }
 
   handleTriggerClick = (idx, role) => {
     this.setState({accordionPosition: idx});
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({deployedServers: newProps.deployedServers});
   }
 
   renderAccordionServerTable(servers) {
@@ -79,6 +85,12 @@ export class ServerRolesAccordion extends Component {
 
     const serverList = this.props.serverRoles[this.state.accordionPosition].servers;
 
+    let extraProps = {};
+    if(this.props.isUpdateMode) {
+      extraProps.isUpdateMode = this.props.isUpdateMode;
+      extraProps.deployedServers = this.state.deployedServers;
+    }
+
     return (
       <ServerTable
         id={this.props.tableId}
@@ -89,7 +101,8 @@ export class ServerRolesAccordion extends Component {
         tableData={serverList}
         editAction={this.props.editAction}
         viewAction={this.props.viewAction}
-        deleteAction={this.props.deleteAction}/>
+        deleteAction={this.props.deleteAction}
+        {...extraProps}/>
     );
   }
 
@@ -113,7 +126,7 @@ export class ServerRolesAccordion extends Component {
       let isOpen = (idx === this.state.accordionPosition);
       let valid = isRoleAssignmentValid(role);
       let triggerClass = valid ? '' : 'has-error';
-      let innerClass = this.props.mode  === 'addserver' ? 'addserver': '';
+      let innerClass = this.props.isUpdateMode ? 'addserver': '';
 
       return (
         <div

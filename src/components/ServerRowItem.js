@@ -19,6 +19,14 @@ import { IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 class ServerRowItem extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      isDraggable: this.props.isDraggable
+    };
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({isDraggable: newProps.isDraggable});
   }
 
   /**
@@ -98,7 +106,6 @@ class ServerRowItem extends Component {
   }
 
   render() {
-    let cName = 'draggable';
     let requiredUpdate = false;
     let badInput = undefined;
     if(this.props.checkInputs) {
@@ -114,11 +121,23 @@ class ServerRowItem extends Component {
     if(badInput) {
       requiredUpdate = true;
     }
+    let cName = this.state.isDraggable ? 'draggable' : '';
     cName = requiredUpdate ? cName + ' required-update' : cName;
+
+    // if the item is not draggable, we don't present edit and delete
+    // actions, add empty td to push the info button to the last col
+    let emptyCols = [];
+    if(!this.state.isDraggable) {
+      for(let i = 0; i < 2; i++) {
+        emptyCols.push(<td key={i}><p></p></td>);
+      }
+    }
+
     return (
       <tr className={cName}
-        draggable="true" onDragStart={(event) => this.drag(event, this.props.data)}>
+        draggable={this.state.isDraggable} onDragStart={(event) => this.drag(event, this.props.data)}>
         {this.renderServerColumns()}
+        {emptyCols}
         {this.props.viewAction && this.renderInfoRow()}
         {this.props.editAction && this.renderEditRow()}
         {this.props.deleteAction && this.renderDeleteRow()}
