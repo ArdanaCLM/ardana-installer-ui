@@ -175,8 +175,10 @@ class ControlPlanes extends Component {
       .concat(empty_resources)
       .concat(lb_names.map(name => {
         if (load_balancers[name]['address']) {
-          return (<td key={'l-'+name}><a href={'Networks.html#'+load_balancers[name]['network']}>
-            {load_balancers[name]['address']}</a></td>);
+          return (<td key={'l-'+name}>
+            <HashLink to={'/topology/networks#'+load_balancers[name]['network']}>
+              {load_balancers[name]['address']}</HashLink>
+          </td>);
         } else {
           return <td key={'l-'+name} />;
         }
