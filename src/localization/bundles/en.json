@@ -34,6 +34,7 @@
     "class": "Class",
     "service": "Service",
     "role": "Role",
+    "search": "Search...",
     "common.details": "Details",
     "common.delete": "Delete",
     "common.activate": "Activate",
@@ -522,7 +523,8 @@
     "services.info.unavailable" : "Service information is not available",
 
     "packages.openstack": "OpenStack Packages",
-    "packages.ardana": "SUSE Cloud Packages",
+    "packages.ardana": "SUSE OpenStack Cloud Packages",
+    "services.header.packages.installed": "Installed Packages",
     "services.header.packages.openstack" : "Installed OpenStack Packages",
     "services.header.packages.ardana" : "Installed SUSE Cloud Packages",
     "services.version" : "Version",

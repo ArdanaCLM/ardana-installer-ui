@@ -293,10 +293,29 @@ p {
 .menu-tab-content {
   margin: 2em;
   .header {
-    margin: 1em 0;
+    margin: 24px 0;
     color: #686565;
     font-size: 24px;
     font-weight: 400;
+  }
+  .header-row {
+    display: flex;
+    .search-group {
+      margin: 24px 0;
+      min-width: 350px;
+      .search-container {
+        margin-bottom: 0;
+        position: relative;
+        input {
+          background-color: @page-background-color;
+        }
+        .search-icon {
+          position: absolute;
+          top: 5px;
+        }
+      }
+
+    }
   }
 }
 
