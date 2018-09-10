@@ -110,7 +110,7 @@ class ServerGroups extends Component {
         cells = [<td className='sub-heading' key="c1">{translate('network.groups')}</td>]
           .concat(countedGroups.map((g) => <td key={g.name} className='sub-heading' colSpan={g.leafs}>{networks}</td>));
 
-        rows.push(<tr key="nh">{cells}</tr>);
+        rows.push(<tr key={'nh'+groups[0].name}>{cells}</tr>);
         addedHeader = true;
       }
 
@@ -136,7 +136,7 @@ class ServerGroups extends Component {
         cells = [<td className='sub-heading' key="c1">{translate('server_roles')}</td>]
           .concat(countedGroups.map((g) => <td className='sub-heading' key={g.name} colSpan={g.leafs}>{servers}</td>));
 
-        rows.push(<tr key="sh">{cells}</tr>);
+        rows.push(<tr key={'sh'+groups[0].name}>{cells}</tr>);
         addedHeader = true;
       }
 
@@ -157,9 +157,6 @@ class ServerGroups extends Component {
 
       rows.push(<tr key={role}>{cells}</tr>);
     }
-
-    // rowSpan += Object.keys(roles).length() > 0 ? Object.keys(roles).length() + 1 : 0;
-
 
     return rows;
   }
