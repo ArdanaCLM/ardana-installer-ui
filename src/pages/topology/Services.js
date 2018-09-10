@@ -183,7 +183,7 @@ class Services extends Component {
             </tr>);
           });
 
-          endpoints_cell = (<table className='endpoints'><tbody>{rows}</tbody></table>);
+          endpoints_cell = (<table className='endpoints nested-table noborder'><tbody>{rows}</tbody></table>);
         }
 
         let cells = [];

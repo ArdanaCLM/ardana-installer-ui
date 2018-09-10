@@ -306,6 +306,7 @@
 
     "control_planes": "Control Planes",
     "control_plane": "Control Plane: {0}",
+    "control_plane.heading": "Control Plane",
     "clusters": "Clusters",
     "resources": "Resources",
     "load_balancers": "Load Balancers",
@@ -320,6 +321,7 @@
     "information": "Information",
     "configure": "Configure",
     "roles": "Roles",
+    "role": "Role",
     "endpoints": "Endpoints",
     "components": "Components",
     "consumes": "Consumes",
@@ -334,6 +336,9 @@
     "routes": "Routes",
     "vip.for.service": "VIP {0}",
     "vip.address": "{0} (VIP)",
+    "state": "State",
+    "failure_zone": "Failure Zone",
+    "server_roles": "Server Roles",
 
     "vlanid": "VLAN ID",
     "cidr": "CIDR",

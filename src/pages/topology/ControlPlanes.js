@@ -58,7 +58,7 @@ class ControlPlanes extends Component {
 
   render_servers = (servers) => {
     if (servers.length == 0) {
-      return <Fragment> &nbsp; </Fragment>;
+      return <Fragment> </Fragment>;
     }
 
     // Example of creating a link to another page. Probably don't want to do this for real
@@ -140,7 +140,7 @@ class ControlPlanes extends Component {
     for (const service of service_list) {
       const link = <HashLink to={'/topology/services#'+service}>{service}</HashLink>;
 
-      cells = [<td key="x"/>]
+      cells = [<td key="x" className='noborder'/>]
         .concat(cluster_names.map(name => {
           const text = clusters[name]['services'][service] ? link : '';
           return <td key={'c-'+name}>{text}</td>;
@@ -157,20 +157,23 @@ class ControlPlanes extends Component {
       service_rows.push(<tr key={service}>{cells}</tr>);
     }
 
-    const empty_clusters = cluster_names.map((name,idx) => <td key={'c'+idx}/>);
-    const empty_resources = resource_names.map((name,idx) => <td key={'r'+idx}/>);
+    const empty_clusters = cluster_names.map((name,idx) => <td key={'c'+idx} className='noborder'/>);
+    const empty_resources = resource_names.map((name,idx) => <td key={'r'+idx} className='noborder'/>);
 
-    // Generate the rows containing load balancer name/addresses
-    cells = [<td key="x"/>]
-      .concat(empty_clusters)
-      .concat(empty_resources)
-      .concat(lb_names.map(name => {
-        const text = load_balancers[name]['external-name'] || '';
-        return <td key={'l-'+name}>{text}</td>;
-      }));
-    const lb_name_row = (<tr key="lb-name-row">{cells}</tr>);
+    let lb_name_row;
+    if (lb_names.length > 0) {
+      // Generate the rows containing load balancer name/addresses
+      cells = [<td key="x" className='noborder'/>]
+        .concat(empty_clusters)
+        .concat(empty_resources)
+        .concat(lb_names.map(name => {
+          const text = load_balancers[name]['external-name'] || '';
+          return <td key={'l-'+name}>{text}</td>;
+        }));
+      lb_name_row = (<tr key="lb-name-row">{cells}</tr>);
+    }
 
-    cells = [<td key="x"/>]
+    cells = [<td key="x" className='noborder' />]
       .concat(empty_clusters)
       .concat(empty_resources)
       .concat(lb_names.map(name => {
@@ -210,13 +213,13 @@ class ControlPlanes extends Component {
         <div className='header'>{translate('control_plane', cp_name)}</div>
         <table className='table'>
           <thead><tr>
-            <th />
+            <th className='noborder'/>
             <th colSpan={num_clusters}>{translate('clusters')}</th>
             <th colSpan={num_resources}>{translate('resources')}</th>
             <th colSpan={num_load_balancers}>{translate('load_balancers')}</th>
           </tr></thead>
           <tbody>
-            <tr key="header_row"><td>&nbsp;</td>{names}</tr>
+            <tr className='heading' key="header_row"><td className='noborder'/>{names}</tr>
             {service_rows}
             {lb_name_row}
             {lb_address_row}
