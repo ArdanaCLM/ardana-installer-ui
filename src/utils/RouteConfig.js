@@ -28,6 +28,7 @@ import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
+import Network from '../pages/topology/Networks.js';
 import { isProduction } from './ConfigHelper.js';
 
 import AddServers from '../pages/AddServers.js';
@@ -87,7 +88,7 @@ export const routes = [
       { name: translate('control_planes'), slug: '/topology/control_planes', component: ControlPlanes },
       { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Services },
-      { name: translate('networks'), slug: '/topology/networks', component: Example , unfinished: true },
+      { name: translate('networks'), slug: '/topology/networks', component: Network },
       { name: translate('servers'), slug: '/topology/servers', component: Example , unfinished: true },
       { name: translate('server_groups'), slug: '/topology/server-groups', component: Example , unfinished: true },
     ]

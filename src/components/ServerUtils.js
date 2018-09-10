@@ -32,11 +32,12 @@ export class SearchBar extends Component {
   render() {
     let cName = 'search-container ';
     cName = this.props.className ? cName + this.props.className : cName;
+    const placeholderText = this.props.placeholder ? this.props.placeholder : 'placeholder.search.server.text';
     return (
       <div className={cName}>
         <span className='search-bar'>
           <input className='rounded-corner'
-            type="text" placeholder={translate('placeholder.search.server.text')}
+            type="text" placeholder={translate(placeholderText)}
             value={this.props.filterText} onChange={this.handleFilterTextInputChange}/>
         </span>
         <span className='search-icon'>

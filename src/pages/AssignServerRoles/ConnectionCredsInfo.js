@@ -145,7 +145,7 @@ class ConnectionCredsInfo extends Component {
         headers: {
           'Secured': this.state.isSmSecured
         },
-      })
+      }, false)
         .then((responseData) => {
           this.data.sm.sessionKey = responseData;
           let hostport = this.data.sm.creds.host +
@@ -191,7 +191,7 @@ class ConnectionCredsInfo extends Component {
         headers: {
           'Secured': this.state.isOvSecured
         }
-      })
+      }, false)
         .then((responseData) => {
           this.data.ov.sessionKey = responseData.sessionID;
           let msg = translate('server.test.ov.success', this.data.ov.creds.host);
