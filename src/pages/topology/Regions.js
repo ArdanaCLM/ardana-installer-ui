@@ -116,7 +116,7 @@ class Regions extends Component {
 
 
     return (
-      <div className='menu-tab-content'>
+      <div className='menu-tab-content topology'>
         <table className='table'>
           <thead><tr>{header_row}</tr></thead>
           <tbody>

@@ -183,7 +183,7 @@ class Services extends Component {
             </tr>);
           });
 
-          endpoints_cell = (<table className='endpoints'><tbody>{rows}</tbody></table>);
+          endpoints_cell = (<table className='endpoints nested-table noborder'><tbody>{rows}</tbody></table>);
         }
 
         let cells = [];
@@ -220,7 +220,7 @@ class Services extends Component {
       <div ref="services" className='wizard-page'>
         <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
-          <div className='menu-tab-content'>
+          <div className='menu-tab-content topology'>
             {this.state.model && this.render_summary()}
             {this.state.model && this.render_services()}
           </div>

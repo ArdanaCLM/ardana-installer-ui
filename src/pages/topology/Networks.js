@@ -109,8 +109,8 @@ class Networks extends Component {
       </tr>);
     }
 
-    const clusters_hdr = cluster_names.map(e => <th key={e}>{e}</th>);
-    const resources_hdr = resource_names.map(e => <th key={e}>{e}</th>);
+    const clusters_hdr = cluster_names.map(e => <td key={e}>{e}</td>);
+    const resources_hdr = resource_names.map(e => <td key={e}>{e}</td>);
 
     return (
       <Fragment key={cp_name}>
@@ -122,13 +122,13 @@ class Networks extends Component {
               <th colSpan={clusters_hdr.length}>{translate('clusters')}</th>
               <th colSpan={resources_hdr.length}>{translate('resources')}</th>
             </tr>
-            <tr>
-              <th />
+          </thead>
+          <tbody>
+            <tr className='heading'>
+              <td/>
               {clusters_hdr}
               {resources_hdr}
             </tr>
-          </thead>
-          <tbody>
             {table_rows}
           </tbody>
         </table>
@@ -248,7 +248,7 @@ class Networks extends Component {
         }
 
         if (subtable) {
-          network_cell.push(<table key='tbl'><tbody>{subtable}</tbody></table>);
+          network_cell.push(<table className='nested-table noborder' key='tbl'><tbody>{subtable}</tbody></table>);
         }
 
         cells.push(<td key="nets">{network_cell}</td>);
@@ -385,7 +385,7 @@ class Networks extends Component {
       <div ref="networks" className='wizard-page'>
         <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
-          <div className='menu-tab-content'>
+          <div className='menu-tab-content topology'>
             {summaries}
             {this.state.model && this.render_network_groups()}
           </div>
