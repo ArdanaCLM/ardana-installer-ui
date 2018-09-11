@@ -208,7 +208,7 @@ class ControlPlanes extends Component {
     });
 
     return (
-      <div key={cp_name} className='menu-tab-content'>
+      <div key={cp_name} className='menu-tab-content topology'>
         <a id={cp_name}/>
         <div className='header'>{translate('control_plane', cp_name)}</div>
         <table className='table'>

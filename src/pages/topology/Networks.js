@@ -385,7 +385,7 @@ class Networks extends Component {
       <div ref="networks" className='wizard-page'>
         <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
-          <div className='menu-tab-content'>
+          <div className='menu-tab-content topology'>
             {summaries}
             {this.state.model && this.render_network_groups()}
           </div>
