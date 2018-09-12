@@ -101,7 +101,7 @@ p {
       background: linear-gradient(to bottom, @table-header-gradient-color 0%, @table-header-color 100%);
       font-weight: bold;
       line-height: 2.8em;
-      padding: 0 0 0 1em;
+      padding: 0 1em;
     }
   }
   tbody > tr {
@@ -293,10 +293,36 @@ p {
 .menu-tab-content {
   margin: 2em;
   .header {
-    margin: 1em 0;
+    margin: 24px 0;
     color: #686565;
     font-size: 24px;
     font-weight: 400;
+  }
+  .column-layout {
+    display: flex;
+    flex-direction: column;
+    .right-btn-group {
+      margin-left: auto;
+      margin-top: 2em;
+    }
+  }
+  .header-row {
+    display: flex;
+    .search-group {
+      margin: 24px 0;
+      min-width: 350px;
+      .search-container {
+        margin-bottom: 0;
+        position: relative;
+        input {
+          background-color: @page-background-color;
+        }
+        .search-icon {
+          position: absolute;
+          top: 5px;
+        }
+      }
+    }
   }
 }
 

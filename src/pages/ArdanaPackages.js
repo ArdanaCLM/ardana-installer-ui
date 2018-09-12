@@ -19,6 +19,7 @@ import { alphabetically } from '../utils/Sort.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
+import { SearchBar } from '../components/ServerUtils.js';
 
 class ArdanaPackages extends Component {
 
@@ -27,15 +28,16 @@ class ArdanaPackages extends Component {
     this.state = {
       packages: undefined,
       error: undefined,
-      showLoadingMask: false
+      showLoadingMask: false,
+      searchText: ''
     };
   }
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/packages/ardana')
+    fetchJson('/api/v1/clm/packages')
       .then(responseData => {
-        this.setState({packages: responseData, showLoadingMask: false});
+        this.setState({packages: responseData.cloud_installed_packages, showLoadingMask: false});
       })
       .catch((error) => {
         this.setState({
@@ -62,18 +64,24 @@ class ArdanaPackages extends Component {
     }
   }
 
+  handleSearch = (filterText) => {
+    this.setState({searchText: filterText});
+  }
+
   render() {
     let rows = [];
     if (this.state.packages) {
       rows = this.state.packages
         .sort((a,b) => alphabetically(a.name, b.name))
         .map((pkg) => {
-          return (
-            <tr key={pkg.name}>
-              <td>{pkg.name}</td>
-              <td>{pkg['version']}</td>
-            </tr>
-          );
+          if (pkg.name.includes(this.state.searchText) || pkg.versions.join(', ').includes(this.state.searchText)) {
+            return (
+              <tr key={pkg.name}>
+                <td>{pkg.name}</td>
+                <td>{pkg.versions.join(', ')}</td>
+              </tr>
+            );
+          }
         });
     }
 
@@ -82,7 +90,13 @@ class ArdanaPackages extends Component {
         {this.renderErrorMessage()}
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
-          <div className='header'>{translate('packages.ardana')}</div>
+          <div className='header-row'>
+            <div className='header'>{translate('services.header.packages.installed')}</div>
+            <div className='search-group'>
+              <SearchBar filterText={this.state.searchText} filterAction={this.handleSearch}
+                placeholder={'search'}/>
+            </div>
+          </div>
           <table className='table'>
             <thead>
               <tr>

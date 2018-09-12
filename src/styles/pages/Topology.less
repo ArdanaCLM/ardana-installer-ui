@@ -13,7 +13,11 @@
 * limitations under the License.
 **/
 
-.menu-tab-content {
+.noborder {
+  border: none;
+}
+
+.menu-tab-content.topology {
   .available {
     font-weight: bold;
   }
@@ -24,11 +28,101 @@
   }
 
   .endpoints {
+    // Avoid extra level of indentation on the Left of nested endpoints table
+    tbody > tr > td:first-child {
+      padding-left: 0px;
+    }
     .role {
       width: 150px;
     }
     .port {
       width: 100px;
+    }
+  }
+
+  table {
+      border:1px solid @sb-gray-200;
+      padding:5;
+      border-spacing:5;
+      width: inherit;
+  }
+
+  td,th {
+      border:1px solid @sb-gray-200;
+      padding:5;
+      border-spacing:5;
+
+      &.noborder {
+        .noborder;
+      }
+  }
+
+
+  .title {
+      border:0px ;
+      padding:0;
+      margin-left:10;
+      font-weight:bold;
+  }
+
+  .label-cell {
+    text-transform: capitalize;
+    &::after {
+      content: ":";
+    }
+  }
+
+  .comp {
+    text-indent: 15px;
+
+  }
+
+  .comp-dtl {
+    text-indent: 25px;
+  }
+
+  .heading {
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  .sub-heading {
+    font-style: italic;
+    padding-top: 1em;
+  }
+
+  // Fix the width of the headers of the leading columns of the nested table 
+  // to force them to line up with the data
+  th .nw-group-addr {
+     float: left;
+     width: 110px;
+  }
+
+  th .nw-group-server {
+     float: left;
+     width: 200px;
+  }
+
+  td .nw-group-addr {
+     width: 110px;
+  }
+
+  td .nw-group-server {
+     width: 200px;
+  }
+
+  .nested-table {
+    &.noborder {
+      .noborder;
+    }
+
+    table {
+      border: none;
+    }
+
+    padding-left: 0px;
+    td {
+      border: none
     }
   }
 }

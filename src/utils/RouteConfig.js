@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
 import OpenStackPackages from '../pages/OpenStackPackages';
 import ArdanaPackages from '../pages/ArdanaPackages';
+import ServiceConfiguration from '../pages/ServiceConfiguration';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 import { AlarmDonutTest } from '../pages/AlarmDonutTest';
@@ -27,6 +28,8 @@ import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
+import Network from '../pages/topology/Networks.js';
+import ServerGroups from '../pages/topology/ServerGroups.js';
 import { isProduction } from './ConfigHelper.js';
 
 import AddServers from '../pages/AddServers.js';
@@ -77,7 +80,7 @@ export const routes = [
       { name: translate('information'), slug: '/services/info', component: ServiceInfo },
       { name: translate('packages.openstack'), slug: '/services/openstack-packages', component: OpenStackPackages },
       { name: translate('packages.ardana'), slug: '/services/openstack-ardana', component: ArdanaPackages },
-      { name: translate('configure'), slug: '/services/configure', component: Example , unfinished: true },
+      { name: translate('configuration'), slug: '/services/configuration', component: ServiceConfiguration },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
   },
@@ -86,9 +89,9 @@ export const routes = [
       { name: translate('control_planes'), slug: '/topology/control_planes', component: ControlPlanes },
       { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Services },
-      { name: translate('networks'), slug: '/topology/networks', component: Example , unfinished: true },
-      { name: translate('servers'), slug: '/topology/servers', component: Example , unfinished: true },
-      { name: translate('server_groups'), slug: '/topology/server-groups', component: Example , unfinished: true },
+      { name: translate('networks'), slug: '/topology/networks', component: Network },
+      { name: translate('server_groups'), slug: '/topology/server-groups', component: ServerGroups , unfinished: true },
+      { name: translate('roles'), slug: '/topology/roles', component: Example , unfinished: true },
     ]
   },
   { name: translate('servers'), slug: '/servers',

@@ -16,28 +16,51 @@ import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
-import { fetchJson, postJson } from '../../utils/RestUtils.js';
+import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { ErrorMessage, InfoBanner } from '../../components/Messages.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 
 class EditTemplateFile extends Component {
   constructor(props) {
     super(props);
-    this.state = { contents : ''};
+    this.state = {original: '', contents: ''};
   }
 
   componentWillMount() {
     fetchJson('/api/v1/clm/service/files/' +  this.props.editFile)
       .then((response) => {
-        this.setState({contents: response});
+        this.setState({original: response, contents: response});
+        fetchJson('/api/v1/clm/service/files/' +  this.props.editFile + '.bak')
+          .then((response) => {
+            this.setState({original: response});
+          })
+          .catch((error) => {
+            // it's ok to not have the original file
+          });
       });
   }
 
   handleSaveEdit = () => {
-    postJson(
-      '/api/v1/clm/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
-
-    this.props.closeAction(this.props.editFile);
+    if (this.props.revertable) {
+      const origFile = this.props.editFile + '.bak';
+      if (this.state.original !== this.state.contents) {
+        // preserve original content into a backup file (only once) for a reversion later on
+        fetchJson('/api/v1/clm/service/files/' +  origFile)
+          .catch((error) => {
+            postJson('/api/v1/clm/service/files/' + origFile, JSON.stringify(this.state.original));
+          });
+        postJson('/api/v1/clm/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
+        this.props.changeAction(true);
+      } else {
+        // update the file and remove backup file if new content is the same as original content
+        postJson('/api/v1/clm/service/files/' +  this.props.editFile, JSON.stringify(this.state.original))
+          .then(() => {deleteJson('/api/v1/clm/service/files/' +  origFile);});
+        this.props.changeAction(false);
+      }
+    } else {
+      postJson('/api/v1/clm/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
+    }
+    this.props.closeAction();
   }
 
   handleChange = (event) => {
@@ -111,13 +134,57 @@ class ServiceTemplatesTab extends Component {
   }
 
   handleEditFile = (seviceName, file) => {
-    this.setState ({editServiceName: seviceName, editFile: file});
+    this.setState({editServiceName: seviceName, editFile: file});
     this.props.showNavButtons(false);
     this.props.disableTab(true);
   }
 
+  recordChangedFile = (contentChanged) => {
+    var updatedList = this.state.serviceFiles.map((val) => {
+      if (val.service === this.state.editServiceName) {
+        const newChangedFiles = val.changedFiles ? val.changedFiles.slice() : [];
+        val.files.map((file) => {
+          if (file === this.state.editFile) {
+            if (contentChanged) {
+              newChangedFiles.push(file);
+            } else {
+              newChangedFiles.splice(newChangedFiles.indexOf(file), 1);
+            }
+          }
+        });
+
+        if (newChangedFiles.length > 0) {
+          val.changedFiles = newChangedFiles;
+        } else {
+          delete val.changedFiles;
+        }
+      }
+      return val;
+    });
+    this.setState({serviceFiles: updatedList});
+  }
+
+  revertChanges = () => {
+    var revertedList = this.state.serviceFiles.map((val) => {
+      if (val.changedFiles) {
+        val.changedFiles.map((file) => {
+          const filename = val.service + '/' + file;
+          // fetch original content, write it out to the current file, then remove the original copy
+          fetchJson('/api/v1/clm/service/files/' +  filename + '.bak')
+            .then((response) => {
+              postJson('/api/v1/clm/service/files/' + filename, JSON.stringify(response))
+                .then(() => {deleteJson('/api/v1/clm/service/files/' +  filename + '.bak');});
+            });
+        });
+        delete val.changedFiles;
+      }
+      return val;
+    });
+    this.setState({serviceFiles: revertedList});
+  }
+
   handleCloseEdit = () => {
-    this.setState ({editFile: undefined, editServiceName: undefined});
+    this.setState({editFile: undefined, editServiceName: undefined});
     this.props.showNavButtons(true);
     this.props.disableTab(false);
   }
@@ -157,8 +224,9 @@ class ServiceTemplatesTab extends Component {
       return (
         <div>
           <h3>{this.state.editServiceName + ' - ' + this.state.editFile}</h3>
-          <EditTemplateFile closeAction={this.handleCloseEdit}
-            editFile={this.state.editServiceName + '/' + this.state.editFile}/>
+          <EditTemplateFile closeAction={this.handleCloseEdit} changeAction={this.recordChangedFile}
+            editFile={this.state.editServiceName + '/' + this.state.editFile}
+            revertable={this.props.revertable}/>
         </div>
       );
     }
@@ -174,9 +242,14 @@ class ServiceTemplatesTab extends Component {
       item.files
         .sort((a, b) => alphabetically(a, b))
         .map((file, idx) => {
+          let isChanged = false;
+          if (item.changedFiles) {
+            isChanged = item.changedFiles.indexOf(file) !== -1;
+          }
           fileList.push(
             <li key={idx}>
-              <a href="#" onClick={() => this.handleEditFile(item.service, file)}>{file}</a>
+              <ActionButton type='clickable' clickAction={() => this.handleEditFile(item.service, file)}
+                displayLabel={file + (isChanged ? ' *' : '')}/>
             </li>
           );
         });
