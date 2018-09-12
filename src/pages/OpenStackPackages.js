@@ -33,9 +33,9 @@ class OpenStackPackages extends Component {
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/packages/openstack')
+    fetchJson('/api/v1/clm/packages')
       .then(responseData => {
-        this.setState({packages: responseData, showLoadingMask: false});
+        this.setState({packages: responseData.openstack_venv_packages, showLoadingMask: false});
       })
       .catch((error) => {
         this.setState({
@@ -71,7 +71,7 @@ class OpenStackPackages extends Component {
           return (
             <tr key={pkg.name}>
               <td className='capitalize'>{pkg.name}</td>
-              <td>{pkg.installed.join(', ')}</td>
+              <td>{pkg.installed.length > 0 ? pkg.installed.join(', ') : '-'}</td>
               <td>{pkg.available}</td>
             </tr>
           );

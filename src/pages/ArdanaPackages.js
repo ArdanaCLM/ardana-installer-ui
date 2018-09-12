@@ -35,9 +35,9 @@ class ArdanaPackages extends Component {
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/packages/ardana')
+    fetchJson('/api/v1/clm/packages')
       .then(responseData => {
-        this.setState({packages: responseData, showLoadingMask: false});
+        this.setState({packages: responseData.cloud_installed_packages, showLoadingMask: false});
       })
       .catch((error) => {
         this.setState({
@@ -74,11 +74,11 @@ class ArdanaPackages extends Component {
       rows = this.state.packages
         .sort((a,b) => alphabetically(a.name, b.name))
         .map((pkg) => {
-          if (pkg.name.includes(this.state.searchText) || pkg['version'].includes(this.state.searchText)) {
+          if (pkg.name.includes(this.state.searchText) || pkg.versions.join(', ').includes(this.state.searchText)) {
             return (
               <tr key={pkg.name}>
                 <td>{pkg.name}</td>
-                <td>{pkg['version']}</td>
+                <td>{pkg.versions.join(', ')}</td>
               </tr>
             );
           }
