@@ -29,8 +29,8 @@ import { ErrorBanner } from '../components/Messages.js';
   The play id is kept in the global state, and its absence indicates
   that the playbook should be launched.
 */
-const PRE_DEPLOYMENT_PLAYBOOK = 'dayzero-pre-deployment';
-const DAYZERO_SITE_PLAYBOOK = 'dayzero-site';
+const PRE_DEPLOYMENT_PLAYBOOK = 'installui-pre-deployment';
+const DAYZERO_SITE_PLAYBOOK = 'installui-wipe-and-site';
 const SITE_PLAYBOOK = 'site';
 
 const PLAYBOOK_STEPS = [
@@ -44,7 +44,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.predeployment'),
-    playbooks: ['dayzero-pre-deployment.yml', ]
+    playbooks: ['installui-pre-deployment.yml', ]
   },
   {
     label: translate('deploy.progress.step1'),
@@ -68,7 +68,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.step6'),
-    playbooks: ['site.yml', 'dayzero-site.yml'], //either site.yml or dayzero-site.yml
+    playbooks: ['site.yml', 'installui-wipe-and-site.yml'], //either site.yml or installui-wipe-and-site.yml
     orCondition: true
   }
 ];
@@ -125,7 +125,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   render() {
-    // choose between site or site with wipedisks (dayzero-site)
+    // choose between site or site with wipedisks (installui-wipe-and-site)
     let sitePlaybook = SITE_PLAYBOOK;
 
     // Build the payload from the deployment configuration page options

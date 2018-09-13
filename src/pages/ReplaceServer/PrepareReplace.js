@@ -21,7 +21,7 @@ import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import {postJson} from '../../utils/RestUtils.js';
 
-const PRE_DEPLOYMENT_PLAYBOOK = 'dayzero-pre-deployment';
+const PRE_DEPLOYMENT_PLAYBOOK = 'installui-pre-deployment';
 
 const PLAYBOOK_STEPS = [
   {
@@ -34,7 +34,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.predeployment'),
-    playbooks: ['dayzero-pre-deployment.yml', ]
+    playbooks: ['installui-pre-deployment.yml', ]
   }
 ];
 
