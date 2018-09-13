@@ -77,11 +77,11 @@ class InstallWizard extends Component {
       //   not be duplicated here since it is already being persisted in the model
       // playbookStatus structure example is like
       // [{
-      //  name: 'dayzero-os-provision', status: '', playId: ''
+      //  name: 'installui-os-provision', status: '', playId: ''
       // }, {
-      //  name: 'dayzero-pre-deployment', status: '', playId: ''
+      //  name: 'installui-pre-deployment', status: '', playId: ''
       // }, {
-      //  name: 'dayzero-site', status: '', playId: ''
+      //  name: 'installui-wipe-and-site', status: '', playId: ''
       // }]
       //
       playbookStatus: undefined,

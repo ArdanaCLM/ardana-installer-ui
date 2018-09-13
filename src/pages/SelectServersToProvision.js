@@ -25,7 +25,7 @@ import { InputLine } from '../components/InputLine.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
 import { fetchJson } from '../utils/RestUtils.js';
 
-const INSTALL_PLAYBOOK = 'dayzero-os-provision';
+const INSTALL_PLAYBOOK = 'installui-os-provision';
 
 const OS_INSTALL_STEPS = [
   {
@@ -42,7 +42,7 @@ const OS_INSTALL_STEPS = [
   },
   {
     label: translate('install.progress.step4'),
-    playbooks: ['dayzero-os-provision.yml']
+    playbooks: ['installui-os-provision.yml']
   }
 ];
 
