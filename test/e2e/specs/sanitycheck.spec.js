@@ -16,7 +16,7 @@
 describe('basic sanity tests', function() {
 
   beforeAll(function() {
-    browser.get('localhost:3000?installreset=true');
+    browser.get('localhost:2209?installreset=true');
     browser.sleep(1000);
   });
 
