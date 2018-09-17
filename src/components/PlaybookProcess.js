@@ -187,7 +187,7 @@ class PlaybookProgress extends Component {
         let stepCompletedPlaybooks = this.getStepCompletedPlaybooks(step);
 
         // if there is an or condition, it means one of the playbooks completes, the
-        // step completes. For example site.yml or installui-wipe-and-site.yml
+        // step completes. For example site.yml or dayzero-site.yml
         if (step.orCondition && stepCompletedPlaybooks.length > 0) {
           status = STATUS.COMPLETE;
         }

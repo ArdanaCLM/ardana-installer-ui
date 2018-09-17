@@ -12,7 +12,7 @@ install any dependencies
 After that, run `npm start` which will bundle the react app and start
 the express server
 
-You will get the express server (UI) running on `localhost:2209`.
+You will get the express server (UI) running on `localhost:3000`.
 
 To run the selenium tests:
 1. perform initial setup `npm run protractor-setup` (once, does not

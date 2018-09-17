@@ -15,12 +15,13 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import { PRE_DEPLOYMENT_PLAYBOOK, STATUS } from '../../utils/constants.js';
+import { STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import {postJson} from '../../utils/RestUtils.js';
 
+const PRE_DEPLOYMENT_PLAYBOOK = 'dayzero-pre-deployment';
 
 const PLAYBOOK_STEPS = [
   {
@@ -33,7 +34,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.predeployment'),
-    playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+    playbooks: ['dayzero-pre-deployment.yml', ]
   }
 ];
 

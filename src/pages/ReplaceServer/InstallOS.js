@@ -15,10 +15,12 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import { INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
+import { STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
+
+const INSTALL_PLAYBOOK = 'dayzero-os-provision';
 
 const OS_INSTALL_STEPS = [
   {
@@ -35,7 +37,7 @@ const OS_INSTALL_STEPS = [
   },
   {
     label: translate('install.progress.step4'),
-    playbooks: [INSTALL_PLAYBOOK + '.yml']
+    playbooks: ['dayzero-os-provision.yml']
   }
 ];
 

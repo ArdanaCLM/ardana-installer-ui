@@ -15,7 +15,7 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import { INSTALL_PLAYBOOK, STATUS } from '../utils/constants.js';
+import { STATUS } from '../utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import { YesNoModal } from '../components/Modals.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -24,6 +24,8 @@ import TransferTable from '../components/TransferTable.js';
 import { InputLine } from '../components/InputLine.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
 import { fetchJson } from '../utils/RestUtils.js';
+
+const INSTALL_PLAYBOOK = 'dayzero-os-provision';
 
 const OS_INSTALL_STEPS = [
   {
@@ -40,7 +42,7 @@ const OS_INSTALL_STEPS = [
   },
   {
     label: translate('install.progress.step4'),
-    playbooks: [INSTALL_PLAYBOOK + '.yml']
+    playbooks: ['dayzero-os-provision.yml']
   }
 ];
 

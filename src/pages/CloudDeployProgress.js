@@ -15,8 +15,7 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import { PRE_DEPLOYMENT_PLAYBOOK, DAYZERO_SITE_PLAYBOOK,
-  SITE_PLAYBOOK, STATUS } from '../utils/constants.js';
+import { STATUS } from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -30,6 +29,9 @@ import { ErrorBanner } from '../components/Messages.js';
   The play id is kept in the global state, and its absence indicates
   that the playbook should be launched.
 */
+const PRE_DEPLOYMENT_PLAYBOOK = 'dayzero-pre-deployment';
+const DAYZERO_SITE_PLAYBOOK = 'dayzero-site';
+const SITE_PLAYBOOK = 'site';
 
 const PLAYBOOK_STEPS = [
   {
@@ -42,7 +44,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.predeployment'),
-    playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+    playbooks: ['dayzero-pre-deployment.yml', ]
   },
   {
     label: translate('deploy.progress.step1'),
@@ -66,7 +68,7 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.step6'),
-    playbooks: ['site.yml', DAYZERO_SITE_PLAYBOOK + '.yml'], //either site.yml or installui-wipe-and-site.yml
+    playbooks: ['site.yml', 'dayzero-site.yml'], //either site.yml or dayzero-site.yml
     orCondition: true
   }
 ];
@@ -123,7 +125,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   render() {
-    // choose between site or site with wipedisks (installui-wipe-and-site)
+    // choose between site or site with wipedisks (dayzero-site)
     let sitePlaybook = SITE_PLAYBOOK;
 
     // Build the payload from the deployment configuration page options
