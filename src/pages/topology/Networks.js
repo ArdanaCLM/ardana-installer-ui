@@ -323,7 +323,7 @@ class Networks extends Component {
 
               let if_link;
               if (e.if_model) {
-                if_link = <HashLink to={'/topology/interfaces#'+e.if_model}>{e.if_model}</HashLink>;
+                if_link = <HashLink to={'/topology/roles#'+e.if_model}>{e.if_model}</HashLink>;
               }
 
               return (<tr key={e.addr || e.server}>
