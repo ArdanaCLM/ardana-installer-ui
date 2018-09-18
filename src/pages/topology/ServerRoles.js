@@ -238,7 +238,8 @@ class ServerRoles extends Component {
 
 
         // Insert interface title into the first row of the table
-        ifRows.unshift([<td className='details' colSpan={4} key='v'>{role['interface-model']}</td>]);
+        ifRows.unshift([<td className='details' colSpan={4} key='v'>
+          <a id={role['interface-model']}/>{role['interface-model']}</td>]);
 
 
         // If there are more disk rows than interface rows, then add extra disk rows as needed.  This avoids
