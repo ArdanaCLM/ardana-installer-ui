@@ -91,8 +91,30 @@ class ServiceInfo extends Component {
     this.setState({showActionMenu: false});
   }
 
+  getPlaybookName = () => {
+    let name;
+    switch(this.state.selectedService) {
+    case 'ardana':
+      name = 'ardana-service';
+      break;
+    case 'cinderv2':
+    case 'cinderv3':
+      name = 'cinder';
+      break;
+    case 'kronos':
+      name = 'logging';
+      break;
+    case 'opsconsole':
+      name = 'ops-console';
+      break;
+    default:
+      name = this.state.selectedService;
+    }
+    return name + '-status';
+  }
+
   showRunStatusPlaybookModal = () => {
-    const playbookName = this.state.selectedService + '-status';
+    const playbookName = this.getPlaybookName();
     this.setState({
       showActionMenu: false,
       showRunStatusPlaybookModal: true,
