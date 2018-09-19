@@ -16,8 +16,8 @@
 import React from 'react';
 import BaseWizardPage from './BaseWizardPage.js';
 import { CloseButton, CancelButton } from '../components/Buttons.js';
-import {translate} from "../localization/localize";
 import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
+import {translate} from '../localization/localize.js';
 
 /**
  * This base class handles the functions common to update process
@@ -26,6 +26,12 @@ class BaseUpdateWizardPage extends BaseWizardPage {
 
   constructor(props) {
     super(props);
+  }
+
+  goForward(e) {
+    e.preventDefault();
+    this.props.updateGlobalState('playbookStatus', undefined); //clean up playbook status
+    super.goForward(e);
   }
 
   closeUpdateProcess = (e) => {

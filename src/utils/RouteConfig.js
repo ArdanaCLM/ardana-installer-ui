@@ -22,9 +22,11 @@ import ServiceConfiguration from '../pages/ServiceConfiguration';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 import { AlarmDonutTest } from '../pages/AlarmDonutTest';
+import AddServers from '../pages/AddServers.js';
+import { AddServersPages } from '../pages/AddServers/AddServersPages.js';
 import UpdateServers from '../pages/UpdateServers.js';
+import { UpdateServerPages } from '../pages/ReplaceServer/UpdateServerPages.js';
 import InstallWizard from '../InstallWizard.js';
-import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
@@ -32,8 +34,6 @@ import Network from '../pages/topology/Networks.js';
 import ServerGroups from '../pages/topology/ServerGroups.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
 import { isProduction } from './ConfigHelper.js';
-
-import AddServers from '../pages/AddServers.js';
 
 // TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
 class Example extends Component {
@@ -67,7 +67,7 @@ class ServerSummary extends  Component {
 class AddServersPage extends  Component {
   render() {
     return(
-      <InstallWizard menuComponent={AddServers} menuName='/servers/add-server'/>
+      <InstallWizard pageSet={AddServersPages} menuComponent={AddServers} menuName='/servers/add-server'/>
     );
   }
 }

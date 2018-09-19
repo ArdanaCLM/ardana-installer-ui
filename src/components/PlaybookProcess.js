@@ -258,10 +258,14 @@ class PlaybookProgress extends Component {
   findNextPlaybook = (lastCompletedPlaybookName) => {
     // Find the next playbook in sequence after the given one.  Note that if the completed
     // playbook is not found, indexOf() will return -1, so next will be 0 (the first playbook)
-    const next = this.props.playbooks.indexOf(lastCompletedPlaybookName) + 1;
+    let thePlaybooks = this.props.playbooks;
+    if (this.props.isUpdateMode) {
+      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
+    }
+    const next = thePlaybooks.indexOf(lastCompletedPlaybookName) + 1;
 
-    if (next < this.props.playbooks.length) {
-      return this.props.playbooks[next];
+    if (next < thePlaybooks.length) {
+      return thePlaybooks[next];
     }
   }
 
@@ -279,7 +283,7 @@ class PlaybookProgress extends Component {
       }
     } else {
       // in case of running only one playbook that has no playbook-stop tag
-      if (this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
+      if (thisPlaybook && this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
         this.setState((prevState) => {
           return {'playbooksComplete': prevState.playbooksComplete.concat(playbookName + '.yml')};
         });
@@ -305,16 +309,20 @@ class PlaybookProgress extends Component {
   getGlobalPlaybookStatus = () => {
     let retStatus = this.props.playbookStatus; //passed global in InstallWizards
     // don't have playbookStatus, initialize it based on current playbooks
+    let thePlaybooks = this.props.playbooks;
+    if (this.props.isUpdateMode) {
+      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
+    }
     if (!retStatus) {
-      retStatus = this.props.playbooks.map((playbookName) => {
+      retStatus = thePlaybooks.map((playbookName) => {
         return {name: playbookName, status: undefined, playId: undefined};
       });
     }
     else { // have playbook status
-      let exitStatus = retStatus.find((play) => this.props.playbooks.includes(play.name));
+      let exitStatus = retStatus.find((play) => thePlaybooks.includes(play.name));
       if (!exitStatus) {
         //need init for this.props.playbooks
-        let initPlayStatus = this.props.playbooks.map((playbookName) => {
+        let initPlayStatus =thePlaybooks.map((playbookName) => {
           return {name: playbookName, status: undefined, playId: undefined};
         });
         retStatus = retStatus.concat(initPlayStatus);
@@ -330,8 +338,13 @@ class PlaybookProgress extends Component {
       return [];
     }
 
+    let thePlaybooks = this.props.playbooks;
+    if (this.props.isUpdateMode) {
+      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
+    }
+
     return this.globalPlaybookStatus.filter(play =>
-      (this.props.playbooks.includes(play.name) && play.playId && play.status === status));
+      (thePlaybooks.includes(play.name) && play.playId && play.status === status));
   }
 
   processAlreadyDonePlaybook = (playbook) => {
@@ -439,7 +452,10 @@ class PlaybookProgress extends Component {
 
       const lastCompleted = completePlaybooks.pop();  // returns undefined if none have completed
 
-      let nextPlaybookName = this.findNextPlaybook(lastCompleted);
+      // if have lastCompleted, use last completed playbook name otherwise
+      // leave it undefined
+      let lastCompletedName = lastCompleted ? lastCompleted.name : undefined;
+      let nextPlaybookName = this.findNextPlaybook(lastCompletedName);
       if (nextPlaybookName) {
         // launch the next playbook if there is more to run
         this.launchPlaybook(nextPlaybookName);
@@ -452,8 +468,24 @@ class PlaybookProgress extends Component {
   }
 
   launchPlaybook = (playbookName) => {
-    postJson('/api/v1/clm/playbooks/' + playbookName,
-      JSON.stringify(this.props.payload || ''))
+    // install
+    let payload =  JSON.stringify(this.props.payload || '');
+
+    // update, could have different payload for each playbook
+    if (this.props.isUpdateMode) {
+      let book = this.props.playbooks.find(playbook => {
+        return playbook.name === playbookName;
+      });
+      // TODO need handle extraVars for day2
+      // for now hardcode default
+      let temp = {extraVars: {automate: 'true', encrypt: '', rekey: ''}};
+      if(book.payload) {
+        Object.keys(book.payload).forEach(key => temp[key] = book.payload[key]);
+      }
+      payload = JSON.stringify(temp);
+    }
+
+    postJson('/api/v1/clm/playbooks/' + playbookName, payload)
       .then(response => {
         const playId = response['id'];
         this.monitorSocket(playbookName, playId);
