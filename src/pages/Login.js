@@ -133,11 +133,11 @@ class LoginPage extends Component {
             <div className='content-right col-sm-4 col-sm-offset-1'>
               <div className='header'>{translate('login.header')}</div>
               <form onSubmit={this.handleLogin}>
-                <input type='text' className='rounded-corner' required='true' autoFocus='true'
+                <input type='text' className='rounded-corner' required={true} autoFocus={true}
                   autoComplete='username' value={this.state.username}
                   placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
                 <div className='password-container'>
-                  <input type='password' className='rounded-corner' required='true'
+                  <input type='password' className='rounded-corner' required={true}
                     autoComplete='current-password' value={this.state.password}
                     placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
                   <i className='material-icons password-icon' onClick={this.toggleShowHidePassword}>

@@ -42,6 +42,8 @@ const PLAYBOOK_STEPS = [
 // pages assembled dynamically. Later when real replace
 // node stories are implemented, either update this
 // page or remove it if it is not used eventually.
+// Please refer to pages/AddServers where it has the latest
+// framework process handling
 class PrepareReplace extends BaseUpdateWizardPage {
 
   constructor(props) {
@@ -55,6 +57,7 @@ class PrepareReplace extends BaseUpdateWizardPage {
       invalidMsg: '',
     };
   }
+
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
 
   componentDidMount() {

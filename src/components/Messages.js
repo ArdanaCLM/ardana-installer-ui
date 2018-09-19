@@ -68,6 +68,17 @@ function SuccessMessage(props) {
   );
 }
 
+function WarningMessage(props) {
+  return (
+    <NotificationMessage
+      title={props.title || translate('default.warning')}
+      message={props.message}
+      type='warning'
+      closeAction={props.closeAction}>
+    </NotificationMessage>
+  );
+}
+
 function InfoBanner(props) {
   return (
     <Alert><span className='info-banner'>
@@ -89,4 +100,4 @@ function ErrorBanner(props) {
   return banner;
 }
 
-export {ErrorMessage, SuccessMessage, InfoBanner, ErrorBanner};
+export {ErrorMessage, SuccessMessage, WarningMessage, InfoBanner, ErrorBanner};

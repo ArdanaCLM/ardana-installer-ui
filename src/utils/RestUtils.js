@@ -30,7 +30,7 @@ function mergeInits(...inits) {
   return Object.assign({}, ...inits, {'headers': mergedHeaders});
 }
 
-function doJson(url, method, body, init, forceLogin=true) {
+function doJson(url, method, body, init, forceLogin=true, noCache=false) {
 
   let myInit = {
     method: method,
@@ -39,6 +39,11 @@ function doJson(url, method, body, init, forceLogin=true) {
       'Content-Type': 'application/json'
     }
   };
+
+  if(noCache) {
+    myInit.headers['pragma'] = 'no-cache';
+    myInit.headers['cache-control'] = 'no-cache';
+  }
 
   const token = getAuthToken();
   if (token) {
@@ -73,13 +78,14 @@ function doJson(url, method, body, init, forceLogin=true) {
  *                       is received the request will be directed to the "shim".
  * @param {Object} init - optional argument that will be passed to the fetch() function.  It often
  *                       will contain HTTP headers when supplied.
- * @param {Object} forceLogin - optional argument that indicates that requests that are rejected
+ * @param {boolean} forceLogin - optional argument that indicates that requests that are rejected
  *                        with auth errors (401, 403) should cause UI to navigate to the login page. This
  *                        will normally be true, but in some corner cases (like the login page itself) it
  *                        will be set to false.
+ * @param {boolean} noCache - optional argument that indicates whether the query will load from cache
  */
-export function fetchJson(url, init, forceLogin=true) {
-  return doJson(url, 'GET', undefined, init, forceLogin);
+export function fetchJson(url, init, forceLogin=true, noCache=false) {
+  return doJson(url, 'GET', undefined, init, forceLogin, noCache);
 }
 
 

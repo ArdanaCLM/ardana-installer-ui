@@ -1367,9 +1367,12 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderWipeDisk() {
+    let className =
+      'addserver-options' + (!this.props.processOperation ? '' : ' disabled');
     return (
-      <div className='addserver-options'>
-        <input className='wipe-disk-option' type='checkbox' value='wipedisk'
+      <div className={className}>
+        <input diabled={this.props.processOperation} className='wipe-disk-option'
+          type='checkbox' value='wipedisk'
           checked={this.state.isWipeDiskChecked} onChange={this.handleWipeDiskCheck}/>
         {translate('common.wipedisk')}
         <HelpText tooltipText={translate('server.addserver.wipedisk.message')}/>

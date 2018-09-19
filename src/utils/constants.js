@@ -53,3 +53,6 @@ export const INSTALL_PLAYBOOK = 'installui-os-provision';
 export const PRE_DEPLOYMENT_PLAYBOOK = 'installui-pre-deployment';
 export const DAYZERO_SITE_PLAYBOOK = 'installui-wipe-and-site';
 export const SITE_PLAYBOOK = 'site';
+export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
+export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
+export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';

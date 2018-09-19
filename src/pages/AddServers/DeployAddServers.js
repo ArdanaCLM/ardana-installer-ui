@@ -1,0 +1,253 @@
+// (c) Copyright 2018 SUSE LLC
+/**
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+import React from 'react';
+import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
+import { LoadingMask } from '../../components/LoadingMask.js';
+import { ErrorBanner, WarningMessage } from '../../components/Messages.js';
+import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { translate } from '../../localization/localize.js';
+import {
+  STATUS, WIPE_DISKS_PLAYBOOK, ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
+  SITE_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK
+} from '../../utils/constants.js';
+import { fetchJson } from '../../utils/RestUtils.js';
+
+
+//ansible-playbook -i hosts/verb_hosts wipe_disks.yml --limit <hostname,hostname,hostname>
+//ansible-playbook -i hosts/verb_hosts ardana-gen-hosts-file.yml"
+//ansible-playbook -i hosts/verb_hosts site.yml --limit <hostname, hostname, hostname>
+//ansible-playbook -i hosts/verb_hosts monasca-deploy.yml --tags "active_ping_checks"
+
+let PLAYBOOK_POSSIBLE_STEPS = [
+  {
+    name: WIPE_DISKS_PLAYBOOK,
+    label: translate('server.deploy.progress.wipe-disks'),
+    playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
+    payload: {limit: {}}
+  },
+  {
+    name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
+    label: translate('server.deploy.progress.gen-hosts-file'),
+    playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
+  },
+  {
+    name: SITE_PLAYBOOK,
+    label: translate('server.deploy.progress.addserver.deploy'),
+    playbooks: [SITE_PLAYBOOK + '.yml'],
+    payload: {limit: {}}
+  },
+  {
+    name: MONASCA_DEPLOY_PLAYBOOK,
+    label: translate('server.deploy.progress.update-monasca'),
+    playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
+    payload: {tags: 'active_ping_checks'}
+  }
+];
+
+class DeployAddServers extends BaseUpdateWizardPage {
+
+  constructor(props) {
+    super(props);
+
+    this.playbooks = [];
+    this.steps = [];
+
+    this.state = {
+      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
+      processErrorBanner: '',
+      newHosts: this.getNewHosts(),
+      // loading errors from wizard model or progress loading
+      wizardLoadingErrors: this.props.wizardLoadingErrors,
+      // loading indicator from wizard
+      wizardLoading: this.props.wizardLoading,
+      // this loading indicator
+      loading: false,
+      // warning message
+      warningMessage: undefined
+    };
+  }
+
+  getNewHosts = () => {
+    return (
+      this.props.operationProps && this.props.operationProps.newHosts ?
+        this.props.operationProps.newHosts : []
+    );
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      wizardLoadingErrors: newProps.wizardLoadingErrors,
+      wizardLoading: newProps.wizardLoading,
+      newHosts: newProps.operationProps.newHosts
+    });
+  }
+
+  componentDidMount() {
+    // go get hostnames, if there are no recorded found
+    // this will take some time
+    // will request with no-cache
+    if(!this.props.operationProps.newHosts) {
+      this.setState({loading: true});
+      fetchJson(
+        '/api/v1/clm/model/cp_internal/CloudModel.yaml', undefined, true, true
+      )
+        .then((cloudModel) => {
+          let newHosts = this.getAddedComputeHosts(cloudModel);
+          let cleanedHosts = newHosts.filter(host => host['hostname'] !== undefined);
+          // if added host in wrong nic-mapping, validation passes, but could generate
+          // a server with empty hostname or ardana-ansible_host
+          // need filter the one without hostname to continue processing
+          if (cleanedHosts.length < newHosts.length) {
+            let allIds = newHosts.map(host => host.id);
+            let cleanedIds = cleanedHosts.map(host => host.id);
+            let skipIds = allIds.filter(id => !cleanedIds.includes(id));
+            this.setState({
+              warningMessage: translate('server.addserver.skip.emptyhostnames', skipIds.join(','))
+            });
+          }
+          this.setState({newHosts: cleanedHosts});
+          // at this point we should have some operationProps
+          let opProps = Object.assign({}, this.props.operationProps);
+          opProps.newHosts = cleanedHosts; // need for complete message
+          this.props.updateGlobalState('operationProps', opProps);
+          this.setState({loading: false});
+        })
+        .catch((error) => {
+          this.setState({
+            processErrorBanner: error.toString(), overallStatus: STATUS.FAILED, loading: false
+          });
+        });
+    }
+  }
+
+  getAddedComputeHosts = (cloudModel) => {
+    let deployedServerIds =
+      this.props.operationProps && this.props.operationProps.deployedServers ?
+        this.props.operationProps.deployedServers.map(server => server.id) : [];
+
+    // get new hostnames for compute nodes
+    let hosts = cloudModel['internal']['servers'];
+    hosts = hosts.filter(host => {
+      return !deployedServerIds.includes(host.id) && host['role'].includes('COMPUTE');
+    });
+
+    let  newServers = hosts.map(host => {
+      return {
+        hostname: host['ardana_ansible_host'],
+        id: host['id'],
+        ip: host['addr']
+      };
+    });
+
+    return newServers;
+  }
+
+  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+
+  updatePageStatus = (status) => {
+    this.setState({overallStatus: status});
+    if (status === STATUS.FAILED) {
+      this.setState({
+        processErrorBanner: translate('server.addserver.deploy.failure')});
+    }
+  }
+
+  getPlaybooksAndSteps = () => {
+    this.steps = PLAYBOOK_POSSIBLE_STEPS.filter((step) => {
+      if(!this.props.operationProps.wipeDisk) {
+        return step.name !== 'wipe_disks';
+      }
+      else {
+        return true;
+      }
+    });
+
+    this.playbooks = this.steps.map(step => {
+      let retBook = {name: step.name};
+      let newHostNames = this.state.newHosts.map(host => host['ardana_ansible_host']);
+      if (step.payload) {
+        if(step.payload.limit) {
+          step.payload.limit = newHostNames.join(',');
+        }
+        retBook.payload = step.payload;
+      }
+      return retBook;
+    });
+  }
+
+  toShowLoadingMask = () => {
+    return this.state.wizardLoading || this.state.loading;
+  }
+
+  isValidToRenderPlaybookProgress = (cancel) => {
+    return (
+      !cancel && !this.state.wizardLoading && !this.state.loading &&
+      this.state.newHosts && this.state.newHosts.length > 0
+    );
+  }
+
+  renderPlaybookProgress () {
+    this.getPlaybooksAndSteps();
+    return (
+      <PlaybookProgress
+        updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
+        playbookStatus = {this.props.playbookStatus} steps = {this.steps}
+        playbooks = {this.playbooks} isUpdateMode = {true}/>
+    );
+  }
+
+  renderProcessError () {
+    return (
+      <div className='banner-container'>
+        <ErrorBanner message={this.state.processErrorBanner}
+          show={this.state.overallStatus === STATUS.FAILED}/>
+      </div>
+    );
+  }
+
+  renderSkipWarning () {
+    return (
+      <div className='notification-message-container'>
+        <WarningMessage
+          message={this.state.warningMessage}
+          closeAction={() => this.setState({warningMessage: undefined})}/>
+      </div>
+    );
+  }
+  render() {
+    //if error happens, cancel button shows up
+    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    return (
+      <div className='wizard-page'>
+        <LoadingMask show={this.toShowLoadingMask()}/>
+        <div className='content-header'>
+          {this.renderHeading(translate('server.addserver.compute.deploy'))}
+        </div>
+        <div className='wizard-content'>
+          {this.isValidToRenderPlaybookProgress(cancel) && this.renderPlaybookProgress()}
+          {cancel && this.renderProcessError()}
+          {this.state.warningMessage && this.renderSkipWarning()}
+          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
+            this.renderWizardLoadingErrors(
+              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
+        </div>
+        {this.renderNavButtons(cancel)}
+      </div>
+    );
+  }
+}
+
+export default DeployAddServers;
