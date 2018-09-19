@@ -242,16 +242,20 @@ class ServerRoles extends Component {
           <a id={role['interface-model']}/>{role['interface-model']}</td>]);
 
 
-        // If there are more disk rows than interface rows, then add extra disk rows as needed.  This avoids
+        // If there are more disk rows than interface rows, then add a large empty cell as needed.  This avoids
         // inteface information being shoved to the left.
-        while (diskRows.length < ifRows.length) {
-          diskRows.push([<td key='x' colSpan={6}/>]);
+        let roleLen;
+        if (diskRows.length >= ifRows.length) {
+          roleLen = diskRows.length;
+        } else {
+          roleLen = ifRows.length;
+          diskRows.push([<td key='x' rowSpan={ifRows.length-diskRows.length} colSpan={6}/>]);
         }
 
-        for(let i=0; i<diskRows.length; i++) {
+        for(let i=0; i<roleLen; i++) {
           rows.push(
             <tr key={role.name+i}>
-              {(i === 0) ? <td rowSpan={diskRows.length} key="r"><a id={role.name}/>{role.name}</td> : undefined}
+              {(i === 0) ? <td rowSpan={roleLen} key="r"><a id={role.name}/>{role.name}</td> : undefined}
               {diskRows[i]}
               {ifRows[i]}
             </tr>
@@ -270,7 +274,7 @@ class ServerRoles extends Component {
             <tr key='h2'>
               <th>{translate('volume.group')}</th>
               <th>{translate('logical.volume.mount')}</th>
-              <th>{translate('size')}size</th>
+              <th>{translate('size')}</th>
               <th>{translate('filesystem.type')}</th>
               <th>{translate('options')}</th>
               <th>{translate('physical.volumes')}</th>
