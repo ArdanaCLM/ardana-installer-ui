@@ -52,6 +52,7 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   componentWillMount() {
+    // fetchJson(url, init, forceLogin, noCache)
     fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
       .then((servers) => {
         if (servers) {
@@ -116,7 +117,7 @@ class AddServers extends BaseUpdateWizardPage {
       })
       .catch((error) => {
         this.setState({validating: false});
-        this.setState({validationError: error.value? error.value.log : error.toString()});
+        this.setState({validationError: error.value ? error.value.log : error.toString()});
       });
   }
 
@@ -212,7 +213,7 @@ class AddServers extends BaseUpdateWizardPage {
     );
   }
 
-  renderGetDeployedServerErrorBanner() {
+  renderGetDeployedSrvsError() {
     return (
       <div className='banner-container'>
         <ErrorBanner
@@ -259,7 +260,7 @@ class AddServers extends BaseUpdateWizardPage {
         </div>
         {this.renderDeployConfirmModal()}
         {this.renderValidationErrorModal()}
-        {this.state.errorBanner && this.renderGetDeployedServerErrorBanner()}
+        {this.state.errorBanner && this.renderGetDeployedSrvsError()}
         {this.isValidToRenderServerContent() && this.renderFooterButtons()}
         {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
           this.renderWizardLoadingErrors(

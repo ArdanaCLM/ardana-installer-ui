@@ -38,6 +38,9 @@ const PLAYBOOK_STEPS = [
   }
 ];
 
+// This is the prepare page for adding compute servers
+// process. It will first commit the model changes and start
+// the playbook to do pre-deployment.
 class PrepareAddServers extends BaseUpdateWizardPage {
 
   constructor(props) {

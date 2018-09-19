@@ -25,12 +25,6 @@ import {
 } from '../../utils/constants.js';
 import { fetchJson } from '../../utils/RestUtils.js';
 
-
-//ansible-playbook -i hosts/verb_hosts wipe_disks.yml --limit <hostname,hostname,hostname>
-//ansible-playbook -i hosts/verb_hosts ardana-gen-hosts-file.yml"
-//ansible-playbook -i hosts/verb_hosts site.yml --limit <hostname, hostname, hostname>
-//ansible-playbook -i hosts/verb_hosts monasca-deploy.yml --tags "active_ping_checks"
-
 let PLAYBOOK_POSSIBLE_STEPS = [
   {
     name: WIPE_DISKS_PLAYBOOK,
@@ -57,6 +51,15 @@ let PLAYBOOK_POSSIBLE_STEPS = [
   }
 ];
 
+// This is the deployment page for adding compute servers
+// process. If newHosts are not recorded in progress.json,
+// it will first get newHosts and save it the progress.json.
+// Once newHosts are available, it will launch the following
+// playbooks to finish up deploying newly added compute servers.
+// ansible-playbook -i hosts/verb_hosts wipe_disks.yml --limit <hostname,hostname,hostname>
+// ansible-playbook -i hosts/verb_hosts ardana-gen-hosts-file.yml"
+// ansible-playbook -i hosts/verb_hosts site.yml --limit <hostname, hostname, hostname>
+// ansible-playbook -i hosts/verb_hosts monasca-deploy.yml --tags "active_ping_checks"
 class DeployAddServers extends BaseUpdateWizardPage {
 
   constructor(props) {
@@ -107,8 +110,9 @@ class DeployAddServers extends BaseUpdateWizardPage {
         .then((cloudModel) => {
           let newHosts = this.getAddedComputeHosts(cloudModel);
           let cleanedHosts = newHosts.filter(host => host['hostname'] !== undefined);
-          // if added host in wrong nic-mapping, validation passes, but could generate
-          // a server with empty hostname or ardana-ansible_host
+          // https://bugzilla.novell.com/show_bug.cgi?id=1109043
+          // If added hosts are all in the same nic-mapping, validation passes,
+          // but could generate some servers without hostname or ardana-ansible_host
           // need filter the one without hostname to continue processing
           if (cleanedHosts.length < newHosts.length) {
             let allIds = newHosts.map(host => host.id);

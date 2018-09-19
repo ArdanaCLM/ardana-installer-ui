@@ -19,6 +19,9 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 
+// This is the complete page for adding compute servers
+// process. It will display newly deployed server hostname,
+// server ID and IP.
 class CompleteAddServers extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
