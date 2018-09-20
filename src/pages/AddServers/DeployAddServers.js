@@ -21,7 +21,7 @@ import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { translate } from '../../localization/localize.js';
 import {
   STATUS, WIPE_DISKS_PLAYBOOK, ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
-  SITE_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK
+  SITE_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK, ARDANA_START_PLAYBOOK
 } from '../../utils/constants.js';
 import { fetchJson } from '../../utils/RestUtils.js';
 
@@ -48,6 +48,12 @@ let PLAYBOOK_POSSIBLE_STEPS = [
     label: translate('server.deploy.progress.update-monasca'),
     playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
     payload: {tags: 'active_ping_checks'}
+  },
+  {
+    name: ARDANA_START_PLAYBOOK,
+    label: translate('server.deploy.progress.activate'),
+    playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
+    payload: {limit: {}}
   }
 ];
 
@@ -69,7 +75,8 @@ class DeployAddServers extends BaseUpdateWizardPage {
     this.steps = [];
 
     this.state = {
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
+      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      showPlabybookProcess: false,
       processErrorBanner: '',
       newHosts: this.getNewHosts(),
       // loading errors from wizard model or progress loading
@@ -110,30 +117,42 @@ class DeployAddServers extends BaseUpdateWizardPage {
         .then((cloudModel) => {
           let newHosts = this.getAddedComputeHosts(cloudModel);
           let cleanedHosts = newHosts.filter(host => host['hostname'] !== undefined);
-          // https://bugzilla.novell.com/show_bug.cgi?id=1109043
-          // If added hosts are all in the same nic-mapping, validation passes,
-          // but could generate some servers without hostname or ardana-ansible_host
-          // need filter the one without hostname to continue processing
-          if (cleanedHosts.length < newHosts.length) {
-            let allIds = newHosts.map(host => host.id);
-            let cleanedIds = cleanedHosts.map(host => host.id);
-            let skipIds = allIds.filter(id => !cleanedIds.includes(id));
+          this.setState({loading: false});
+          if(cleanedHosts.length > 0) {
+            // https://bugzilla.novell.com/show_bug.cgi?id=1109043
+            // If added hosts are all in the same nic-mapping, validation passes,
+            // but could generate some servers without hostname or ardana-ansible_host
+            // need filter the one without hostname to continue processing
+            if (cleanedHosts.length < newHosts.length) {
+              let allIds = newHosts.map(host => host.id);
+              let cleanedIds = cleanedHosts.map(host => host.id);
+              let skipIds = allIds.filter(id => !cleanedIds.includes(id));
+              this.setState({
+                warningMessage: translate('server.addserver.skip.emptyhostnames', skipIds.join(','))
+              });
+            }
+            this.setState({newHosts: cleanedHosts});
+            // at this point we should have some operationProps
+            let opProps = Object.assign({}, this.props.operationProps);
+            opProps.newHosts = cleanedHosts; // need for complete message
+            this.props.updateGlobalState('operationProps', opProps);
+            this.setState({showPlabybookProcess: true});
+          }
+          else { //no new hostnames, show not happen just in case
             this.setState({
-              warningMessage: translate('server.addserver.skip.emptyhostnames', skipIds.join(','))
+              processErrorBanner: translate('server.addserver.emptyhostnames'),
+              overallStatus: STATUS.FAILED
             });
           }
-          this.setState({newHosts: cleanedHosts});
-          // at this point we should have some operationProps
-          let opProps = Object.assign({}, this.props.operationProps);
-          opProps.newHosts = cleanedHosts; // need for complete message
-          this.props.updateGlobalState('operationProps', opProps);
-          this.setState({loading: false});
         })
         .catch((error) => {
           this.setState({
             processErrorBanner: error.toString(), overallStatus: STATUS.FAILED, loading: false
           });
         });
+    }
+    else {
+      this.setState({showPlabybookProcess: true});
     }
   }
 
@@ -171,8 +190,15 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
   getPlaybooksAndSteps = () => {
     this.steps = PLAYBOOK_POSSIBLE_STEPS.filter((step) => {
-      if(!this.props.operationProps.wipeDisk) {
-        return step.name !== 'wipe_disks';
+      if(!this.props.operationProps.wipeDisk &&
+        !this.props.operationProps.activate) {
+        return step.name !== WIPE_DISKS_PLAYBOOK && step.name !== ARDANA_START_PLAYBOOK;
+      }
+      else if(!this.props.operationProps.wipeDisk) {
+        return step.name !== WIPE_DISKS_PLAYBOOK;
+      }
+      else if(!this.props.operationProps.activate) {
+        return step.name !== ARDANA_START_PLAYBOOK;
       }
       else {
         return true;
@@ -196,9 +222,9 @@ class DeployAddServers extends BaseUpdateWizardPage {
     return this.state.wizardLoading || this.state.loading;
   }
 
-  isValidToRenderPlaybookProgress = (cancel) => {
+  isValidToRenderPlaybookProgress = () => {
     return (
-      !cancel && !this.state.wizardLoading && !this.state.loading &&
+      this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading &&
       this.state.newHosts && this.state.newHosts.length > 0
     );
   }
@@ -241,7 +267,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
           {this.renderHeading(translate('server.addserver.compute.deploy'))}
         </div>
         <div className='wizard-content'>
-          {this.isValidToRenderPlaybookProgress(cancel) && this.renderPlaybookProgress()}
+          {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
           {this.state.warningMessage && this.renderSkipWarning()}
           {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
