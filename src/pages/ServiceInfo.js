@@ -70,20 +70,51 @@ class ServiceDetails extends Component {
     };
   }
 
+  getServiceName() {
+    let name = this.props.service.name.toLowerCase();
+    let packageToCheck = 'openstack_venv_packages';
+    switch(this.props.service.name.toLowerCase()) {
+    case 'ardana':
+      name = 'ardana-service';
+      packageToCheck = 'cloud_installed_packages';
+      break;
+    case 'cinderv2':
+    case 'cinderv3':
+      name = 'cinder';
+      break;
+    case 'kronos':
+      name = 'python-monasca-log-api';
+      packageToCheck = 'cloud_installed_packages';
+      break;
+    case 'opsconsole':
+      name = 'python-ardana-opsconsole-server';
+      packageToCheck = 'cloud_installed_packages';
+      break;
+    }
+    return {name: name, packageToCheck: packageToCheck};
+  }
+
+  getVersion(responseData, serviceNameObj) {
+    const serviceName = serviceNameObj.name;
+    const packageToCheck = responseData[serviceNameObj.packageToCheck];
+    const selectedPkg = packageToCheck.find((pkg) => {return pkg.name === serviceName;});
+    let version = translate('unavailable');
+    if (selectedPkg) {
+      version = (serviceNameObj.packageToCheck === 'cloud_installed_packages') ?
+        selectedPkg.versions.join(', ') : selectedPkg.installed.join(', ');
+      if (version === '') {
+        version='-';
+      }
+    }
+    return version;
+  }
+
   componentWillMount() {
     this.props.setLoadingMask(true);
-    const serviceName = this.props.service.name.toLowerCase();
+    let serviceNameObj = this.getServiceName();
     fetchJson('/api/v1/clm/packages')
       .then(responseData => {
-        const packageToCheck = (serviceName === 'ardana') ? responseData.cloud_installed_packages :
-          responseData.openstack_venv_packages;
-        const selectedPkg = packageToCheck.find((pkg) => {return pkg.name === serviceName;});
-        let version = (typeof(selectedPkg) === 'undefined') ? translate('unavailable') :
-          serviceName === 'ardana' ? selectedPkg.versions.join(', ') : selectedPkg.installed.join(', ');
-        if (version === '') {
-          version = '-';
-        }
-        this.setState({version: version, packageDataLoaded: true});
+        this.setState({version: this.getVersion(responseData, serviceNameObj), packageDataLoaded: true});
         this.checkLoadingMask();
       })
       .catch((error) => {
@@ -91,7 +122,7 @@ class ServiceDetails extends Component {
         this.checkLoadingMask();
       });
 
-    const lookupName =  MONASCA_SERVICES_MAP[serviceName];
+    const lookupName =  MONASCA_SERVICES_MAP[this.props.service.name.toLowerCase()];
     if (lookupName) {
       const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
       fetchJson('/api/v1/clm/monasca/passthru/alarms/count?' + query)
