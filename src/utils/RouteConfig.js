@@ -35,27 +35,6 @@ import ServerGroups from '../pages/topology/ServerGroups.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
 import { isProduction } from './ConfigHelper.js';
 
-// TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
-class Example extends Component {
-
-  render() {
-    const foo = this.props.match.path;
-    // use an inline style to avoid polluting css with entries for this disposable Example
-    const style = {
-      alignItems: 'center',
-      display: 'flex',
-      flexDirection: 'column'
-    };
-
-    return (
-      <div style={style}>
-        <h3>Content</h3>
-        <div>Example: {foo}</div>
-      </div>
-    );
-  }
-}
-
 class ServerSummary extends  Component {
   render() {
     return(
