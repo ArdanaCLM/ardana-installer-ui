@@ -52,10 +52,13 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   componentWillMount() {
-    // if we have the process started already, should have
-    // deployedServers recorded
-    // if don't have process started, then need to fetch deployedServers
-    if(!this.props.processOperation) {
+    // If the AddServer operation process has started already, should have
+    // deployedServers recorded, and it will move to the progress pages.
+    // Add the condition to avoid setState on unmounted component when
+    // the page replaced by process pages.
+    // If don't have the operation process started, then need to fetch
+    // deployedServers
+    if(this.props.processOperation !== 'AddServer') {
       // fetchJson(url, init, forceLogin, noCache)
       fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
         .then((servers) => {
