@@ -52,16 +52,25 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   componentWillMount() {
-    // fetchJson(url, init, forceLogin, noCache)
-    fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
-      .then((servers) => {
-        if (servers) {
-          this.setState({deployedServers: servers, loading: false});
-        }
-      })
-      .catch(error => {
-        this.setState({errorBanner: error.toString(), loading: false});
-      });
+    // if we have the process started already, should have
+    // deployedServers recorded
+    // if don't have process started, then need to fetch deployedServers
+    if(!this.props.processOperation) {
+      // fetchJson(url, init, forceLogin, noCache)
+      fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
+        .then((servers) => {
+          if (servers) {
+            if (!this.componentWillUnmount) {
+              this.setState({deployedServers: servers, loading: false});
+            }
+          }
+        })
+        .catch(error => {
+          if (!this.componentWillUnmount) {
+            this.setState({errorBanner: error.toString(), loading: false});
+          }
+        });
+    }
   }
 
   componentWillReceiveProps(newProps) {
