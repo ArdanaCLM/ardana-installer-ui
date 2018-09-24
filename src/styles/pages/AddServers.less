@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2018 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -12,25 +12,26 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import React from 'react';
-import { ThreeBounce } from 'better-react-spinkit';
-import '../styles/deployer.less';
 
-export function LoadingMask(props) {
-  if (! props.show)
-    return null;
+.addservers-page {
+  .complete-servernames-list {
+    margin-top: 1em;
+    font-size: 1.5em;
+    max-height: 40em;
+    overflow: auto;
+  }
 
+  .complete-serverdetails {
+    list-style-type: none;
+    font-size: 0.8em;
+  }
+  .log {
+    min-height: 55em;
+    max-height: 55em;
+    overflow: auto;
+  }
+}
 
-  let text = props.text ?
-    <div className='spinners-text'>{props.text}</div> : '';
-
-  return (
-    <div className={'spinners-container ' + (props.className || '')}>
-      {text}
-      <ThreeBounce
-        className='spinners'
-        size={props.size || 25}
-        color='#00C081'/>
-    </div>
-  );
+.addserver-log-dialog {
+  min-width: 60em;
 }

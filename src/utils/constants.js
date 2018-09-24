@@ -53,3 +53,6 @@ export const INSTALL_PLAYBOOK = 'dayzero-os-provision';
 export const PRE_DEPLOYMENT_PLAYBOOK = 'dayzero-pre-deployment';
 export const DAYZERO_SITE_PLAYBOOK = 'dayzero-wipe-and-site';
 export const SITE_PLAYBOOK = 'site';
+export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
+export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
+export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';

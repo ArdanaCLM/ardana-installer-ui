@@ -123,7 +123,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   render() {
-    // choose between site or site with wipedisks (dayzero-site)
+    // choose between site or site with wipedisks (installui-wipe-and-site)
     let sitePlaybook = SITE_PLAYBOOK;
 
     // Build the payload from the deployment configuration page options

@@ -14,15 +14,17 @@
 **/
 
 import React from 'react';
-import { translate } from '../localization/localize.js';
-import CollapsibleTable from '../components/CollapsibleTable.js';
-import { ActionButton } from '../components/Buttons.js';
-import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
-import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
-import { fetchJson, putJson } from '../utils/RestUtils.js';
-import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
+
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
+import { ActionButton } from '../components/Buttons.js';
+import CollapsibleTable from '../components/CollapsibleTable.js';
 import { LoadingMask } from '../components/LoadingMask.js';
+import { ErrorMessage } from '../components/Messages.js';
+import { translate } from '../localization/localize.js';
+import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
+import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
+import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
+import { fetchJson, putJson } from '../utils/RestUtils.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -31,7 +33,12 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.state = {
       model: this.props.model,
       // loading errors from wizard model or progress loading
-      loadingErrors: this.props.loadingErrors
+      wizardLoadingErrors: this.props.wizardLoadingErrors,
+      // loading indicator from wizard
+      wizardLoading: this.props.wizardLoading,
+      // this loading indicator
+      loading: true,
+      errorMessages: []
     };
   }
 
@@ -40,7 +47,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     // slow, need to update once they are there
     this.setState({
       model: newProps.model,
-      loadingErrors: newProps.loadingErrors
+      wizardLoadingErrors: newProps.wizardLoadingErrors,
+      wizardLoading: newProps.wizardLoading
     });
     if(newProps.model.getIn(['inputModel', 'server-roles'])) {
       const allGroups =
@@ -54,20 +62,37 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   componentWillMount() {
-
     fetchJson('/api/v1/server?source=sm,ov')
       .then((rawServerData) => {
         if(rawServerData) {
-          this.setState({autoServers : rawServerData});
+          this.setState({autoServers : rawServerData, loading: false});
         }
+      })
+      .catch(error => {
+        let msg = translate('server.retrieve.discovered.servers.error', error.toString());
+        this.setState(prev => {
+          return {
+            errorMessages: prev.errorMessages.concat([msg]),
+            loading: false
+          };
+        });
       });
 
     // get manually added servers
     fetchJson('/api/v1/server?source=manual')
       .then((responseData) => {
         if (responseData.length > 0) {
-          this.setState({manualServers : responseData});
+          this.setState({manualServers : responseData, loading: false});
         }
+      })
+      .catch(error => {
+        let msg = translate('server.retrieve.manual.servers.error', error.toString());
+        this.setState(prev => {
+          return {
+            errorMessages: prev.errorMessages.concat([msg]),
+            loading: false
+          };
+        });
       });
   }
 
@@ -103,7 +128,16 @@ class UpdateServers extends BaseUpdateWizardPage {
       if(this.state[list]) {
         this.state[list].filter(s => server.uid === s.uid).forEach(match => {
           const updated_server = getMergedServer(match, server, REPLACE_SERVER_PROPS);
-          putJson('/api/v1/server', JSON.stringify(updated_server));
+          putJson('/api/v1/server', JSON.stringify(updated_server))
+            .then((responseData) => {})
+            .catch(error => {
+              let msg = translate('server.save.error', error.toString());
+              this.setState(prev => {
+                return {
+                  errorMessages: prev.errorMessages.concat([msg])
+                };
+              });
+            });
         });
       }
     }
@@ -159,11 +193,26 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   toShowLoadingMask = () => {
     return (
-      // show loadingmask when the model is not ready and
-      // no wizard loading errors haven been thrown
-      !(this.state.model && this.state.model.size > 0) &&
-      !this.state.loadingErrors
+      this.state.wizardLoading || this.state.loading
     );
+  }
+
+  handleCloseMessage = (idx) => {
+    this.setState((prevState) => {
+      let msgs = prevState.errorMessages.slice();
+      msgs.splice(idx, 1);
+      return {errorMessages: msgs};
+    });
+  }
+
+  renderMessages() {
+    let msgList = this.state.errorMessages.map((msg, idx) => {
+      return (
+        <ErrorMessage key={idx} closeAction={() => this.handleCloseMessage(idx)}
+          message={msg}/>
+      );
+    });
+    return (<div className='notification-message-container'>{msgList}</div>);
   }
 
   renderCollapsibleTable() {
@@ -187,7 +236,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.state.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         replaceServer={this.replaceServer} updateGlobalState={this.props.updateGlobalState}
-        autoServers={this.state.autoServers} manualServers={this.state.manualServers}/>
+        autoServers={this.state.autoServers} manualServers={this.state.manualServers}
+        processOperation={this.props.processOperation}/>
     );
   }
 
@@ -216,9 +266,10 @@ class UpdateServers extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content unlimited-height'>
           {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
-          {this.state.loadingErrors &&
+          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
            this.renderWizardLoadingErrors(
-             this.state.loadingErrors, this.handleCloseLoadingErrorMessage)}
+             this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
+          {this.state.errorMessages.length > 0 && this.renderMessages()}
         </div>
       </div>
     );
