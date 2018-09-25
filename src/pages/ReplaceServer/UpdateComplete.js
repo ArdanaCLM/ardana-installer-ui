@@ -22,6 +22,8 @@ import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 // pages assembled dynamically. Later when real replace
 // node stories are implemented, either update this
 // page or remove it if it is not used eventually.
+// Please refer to pages/AddServers where it has the latest
+// framework process handling
 class UpdateComplete extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);

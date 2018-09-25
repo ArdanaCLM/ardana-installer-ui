@@ -45,6 +45,12 @@
       padding:5;
       border-spacing:5;
       width: inherit;
+
+      // Table headers that span multiple rows should be top-aligned in order to
+      // match the formatting of the data rows (which are also top-aligned)
+      thead > tr > th {
+        vertical-align: top;
+      }
   }
 
   td,th {

@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2018 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -12,25 +12,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import React from 'react';
-import { ThreeBounce } from 'better-react-spinkit';
-import '../styles/deployer.less';
 
-export function LoadingMask(props) {
-  if (! props.show)
-    return null;
+import CompleteAddServers from './CompleteAddServers.js';
+import DeployAddServers from './DeployAddServers.js';
+import PrepareAddServers from './PrepareAddServers.js';
 
-
-  let text = props.text ?
-    <div className='spinners-text'>{props.text}</div> : '';
-
-  return (
-    <div className={'spinners-container ' + (props.className || '')}>
-      {text}
-      <ThreeBounce
-        className='spinners'
-        size={props.size || 25}
-        color='#00C081'/>
-    </div>
-  );
-}
+export const AddServersPages = {
+  'PrepareAddServers': PrepareAddServers,
+  'DeployAddServers': DeployAddServers,
+  'CompleteAddServers': CompleteAddServers
+};

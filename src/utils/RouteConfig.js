@@ -22,38 +22,18 @@ import ServiceConfiguration from '../pages/ServiceConfiguration';
 import ServicesPerRole from '../pages/ServicesPerRole';
 import { SpeedometerTest } from '../pages/SpeedometerTest';
 import { AlarmDonutTest } from '../pages/AlarmDonutTest';
+import AddServers from '../pages/AddServers.js';
+import { AddServersPages } from '../pages/AddServers/AddServersPages.js';
 import UpdateServers from '../pages/UpdateServers.js';
+import { UpdateServerPages } from '../pages/ReplaceServer/UpdateServerPages.js';
 import InstallWizard from '../InstallWizard.js';
-import {UpdateServerPages} from '../pages/ReplaceServer/UpdateServerPages.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
 import Network from '../pages/topology/Networks.js';
 import ServerGroups from '../pages/topology/ServerGroups.js';
+import ServerRoles from '../pages/topology/ServerRoles.js';
 import { isProduction } from './ConfigHelper.js';
-
-import AddServers from '../pages/AddServers.js';
-
-// TODO: Remove this after implementing the *real* content. (It is just a placeholder for now)
-class Example extends Component {
-
-  render() {
-    const foo = this.props.match.path;
-    // use an inline style to avoid polluting css with entries for this disposable Example
-    const style = {
-      alignItems: 'center',
-      display: 'flex',
-      flexDirection: 'column'
-    };
-
-    return (
-      <div style={style}>
-        <h3>Content</h3>
-        <div>Example: {foo}</div>
-      </div>
-    );
-  }
-}
 
 class ServerSummary extends  Component {
   render() {
@@ -66,7 +46,7 @@ class ServerSummary extends  Component {
 class AddServersPage extends  Component {
   render() {
     return(
-      <InstallWizard menuComponent={AddServers} menuName='/servers/add-server'/>
+      <InstallWizard pageSet={AddServersPages} menuComponent={AddServers} menuName='/servers/add-server'/>
     );
   }
 }
@@ -90,8 +70,8 @@ export const routes = [
       { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Services },
       { name: translate('networks'), slug: '/topology/networks', component: Network },
-      { name: translate('server_groups'), slug: '/topology/server-groups', component: ServerGroups , unfinished: true },
-      { name: translate('roles'), slug: '/topology/roles', component: Example , unfinished: true },
+      { name: translate('server_groups'), slug: '/topology/server-groups', component: ServerGroups },
+      { name: translate('roles'), slug: '/topology/roles', component: ServerRoles },
     ]
   },
   { name: translate('servers'), slug: '/servers',
