@@ -45,34 +45,18 @@ class AddServers extends BaseUpdateWizardPage {
       // error message show as a popup modal for validation errors
       validationError: undefined,
       // indicator of this loading
-      loading: true,
+      loading: false,
       // show confirm dialog when user clicks Deploy
       showDeployConfirmModal: false
     };
   }
 
-  componentWillMount() {
-    // If the AddServer operation process has started already, should have
-    // deployedServers recorded, and it will move to the progress pages.
-    // Add the condition to avoid setState on unmounted component when
-    // the page replaced by process pages.
-    // If don't have the operation process started, then need to fetch
-    // deployedServers
-    if(this.props.processOperation !== 'AddServer') {
-      // fetchJson(url, init, forceLogin, noCache)
-      fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
-        .then((servers) => {
-          if (servers) {
-            if (!this.componentWillUnmount) {
-              this.setState({deployedServers: servers, loading: false});
-            }
-          }
-        })
-        .catch(error => {
-          if (!this.componentWillUnmount) {
-            this.setState({errorBanner: error.toString(), loading: false});
-          }
-        });
+  componentDidMount() {
+    // If wizard is not loading then getDeployedServers,
+    // otherwise delay it when wizardLoading is done.
+    if(!this.props.wizardLoading) {
+      this.setState({loading: true});
+      this.getDeployedServers();
     }
   }
 
@@ -82,6 +66,25 @@ class AddServers extends BaseUpdateWizardPage {
       wizardLoadingErrors: newProps.wizardLoadingErrors,
       wizardLoading: newProps.wizardLoading
     });
+
+    // When wizardLoading is done will getDeployedServers
+    if(!newProps.wizardLoading) {
+      this.setState({loading: true});
+      this.getDeployedServers();
+    }
+  }
+
+  getDeployedServers = () => {
+    // fetchJson(url, init, forceLogin, noCache)
+    fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
+      .then((servers) => {
+        if (servers) {
+          this.setState({deployedServers: servers, loading: false});
+        }
+      })
+      .catch(error => {
+        this.setState({errorBanner: error.toString(), loading: false});
+      });
   }
 
   assembleProcessPages = () => {
