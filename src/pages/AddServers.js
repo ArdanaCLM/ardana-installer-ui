@@ -55,7 +55,6 @@ class AddServers extends BaseUpdateWizardPage {
     // If wizard is not loading then getDeployedServers,
     // otherwise delay it when wizardLoading is done.
     if(!this.props.wizardLoading) {
-      this.setState({loading: true});
       this.getDeployedServers();
     }
   }
@@ -69,12 +68,12 @@ class AddServers extends BaseUpdateWizardPage {
 
     // When wizardLoading is done will getDeployedServers
     if(!newProps.wizardLoading) {
-      this.setState({loading: true});
       this.getDeployedServers();
     }
   }
 
   getDeployedServers = () => {
+    this.setState({loading: true});
     // fetchJson(url, init, forceLogin, noCache)
     fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
       .then((servers) => {
