@@ -19,14 +19,15 @@ import '../../styles/deployer.less';
 import { getInternalModel } from './TopologyUtils.js';
 import { ErrorBanner } from '../../components/Messages';
 import { LoadingMask } from '../../components/LoadingMask';
-import { byProperty } from '../../utils/Sort.js';
+import { byProperty, byEntry } from '../../utils/Sort.js';
 
 /*
  * This class is a JavaScript implementation of the script
- * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ServerGroups.py
+ * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ServerGroups.py and
+ * ardana_configurationprocessor/plugins/builders/HTMLDiagram/Servers.py
  * in the config processor
  */
-class ServerGroups extends Component {
+class Servers extends Component {
   constructor(props) {
     super(props);
 
@@ -149,7 +150,7 @@ class ServerGroups extends Component {
               .filter(s => s.role === role)
               .sort()
               .map(s => (
-                <div key={s.id}><HashLink to={'/topology/servers#'+s.id}>{s.id}</HashLink> ({s.hostname})</div>));
+                <div key={s.id}><HashLink to={'#'+s.id}>{s.id}</HashLink> ({s.hostname})</div>));
           }
 
           return <td key={g.name} colSpan={g.leafs}>{contents}</td>;
@@ -161,58 +162,123 @@ class ServerGroups extends Component {
     return rows;
   }
 
+  renderGroupTable = () => {
+    const serverGroups = this.state.model['internal']['server-groups'];
+
+    // Server groups are structured like a tree, with possibly many
+    // levels of nesting, but the model does not plainly identify which
+    // server group(s) is at the top of the tree. In order to determine
+    // this, all server groups are searched, and any server group that
+    // does not appear as a child to some other server group must be
+    // at the top of the tree.
+
+    // Find all server groups that are children of other group(s)
+    let childGroups = new Set();
+    for (const group of Object.values(serverGroups)) {
+      for (const child of group['server-groups'] || []) {
+        childGroups.add(child);
+      }
+    }
+
+    // The top-level groups are all groups that do not appear in childGroups
+    const topGroups = Object.values(serverGroups)
+      .filter(group => ! childGroups.has(group.name))
+      .sort(byProperty('name'));
+
+    // Table rows to put into the groupTable
+    let rows = [];
+
+    // Repeatedly descend into each level of the tree and generate table rows
+    let groups = topGroups;
+    while(groups.length > 0) {
+      rows = rows.concat(this.renderServerGroups(groups));
+
+      let next_generation = [];
+      for (const group of groups) {
+        let subgroups = group['groups'] || [];
+        subgroups.sort(byProperty('name'));
+        next_generation = next_generation.concat(subgroups);
+      }
+
+      groups = next_generation;
+    }
+
+    return (
+      <table className='table'>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
+    );
+  }
+
+  renderServers = () => {
+
+    const servers = this.state.model['internal']['servers'];
+    const rows = servers.sort(byProperty('id')).map(s => {
+      let control_plane;
+
+      // If the state is still 'available' (unallocated), then the control_plane is missing
+      if (s.state !== 'available') {
+        control_plane = (<HashLink to={'/topology/control_planes#'+s['control-plane-name']}>
+          {s['control-plane-name']}</HashLink>);
+      }
+
+      const service_rows = Object.entries(s.services).sort(byEntry).map(e => {
+        const [service_group, component] = e;
+        const services = component.sort().join(', ');
+
+        return (<tr key={service_group}>
+          <td><HashLink to={'/topology/services#'+service_group}>{service_group}</HashLink></td>
+          <td>{services}</td>
+        </tr>);
+      });
+
+      let nic_mapping;
+      if (s.nic_map) {
+        nic_mapping = s.nic_map['physical-ports'].map(e => (
+          <tr key={e['bus-address']}>
+            <td key='b'>{e['bus-address']}</td>
+            <td key='n'>{e['logical-name']}</td>
+            <td key='t' className='map-type'>{e['type']}</td>
+          </tr>
+        ));
+      }
+
+      // TODO:
+      //   Add NIC mapping page like in the original, since it has concrete IP addresses
+
+      return (<tr key={s.id}>
+        <td key='id'><a id={s.id}/>{s.id}</td>
+        <td key='n'>{s.name}</td>
+        <td key='r'><HashLink to={'/topology/roles#'+s.role}>{s.role}</HashLink></td>
+        <td key='s'>{s.state}</td>
+        <td key='cp'>{control_plane}</td>
+        <td key='sv' className='nested-table'><table className='nested-table'><tbody>{service_rows}</tbody></table></td>
+        <td key='nm' className='nested-table'><table className='nested-table'><tbody>{nic_mapping}</tbody></table></td>
+      </tr>);
+    });
+
+    const headings = ['server.id.prompt','name','role','state','control_plane.heading', 'services',
+      'server.nicmapping.prompt'].map((h,idx) => <th key={idx}>{translate(h)}</th>);
+
+    if (rows.length > 0) {
+      return (
+        <table className='table'>
+          <thead><tr>{headings}</tr></thead>
+          <tbody>{rows}</tbody>
+        </table>
+      );
+    }
+  }
+
   render () {
 
     let groupTable;
+    let servers;
     if (this.state.model) {
-
-      const serverGroups = this.state.model['internal']['server-groups'];
-
-      // Server groups are structured like a tree, with possibly many
-      // levels of nesting, but the model does not plainly identify which
-      // server group(s) is at the top of the tree. In order to determine
-      // this, all server groups are searched, and any server group that
-      // does not appear as a child to some other server group must be
-      // at the top of the tree.
-
-      // Find all server groups that are children of other group(s)
-      let childGroups = new Set();
-      for (const group of Object.values(serverGroups)) {
-        for (const child of group['server-groups'] || []) {
-          childGroups.add(child);
-        }
-      }
-
-      // The top-level groups are all groups that do not appear in childGroups
-      const topGroups = Object.values(serverGroups)
-        .filter(group => ! childGroups.has(group.name))
-        .sort(byProperty('name'));
-
-      // Table rows to put into the groupTable
-      let rows = [];
-
-      // Repeatedly descend into each level of the tree and generate table rows
-      let groups = topGroups;
-      while(groups.length > 0) {
-        rows = rows.concat(this.renderServerGroups(groups));
-
-        let next_generation = [];
-        for (const group of groups) {
-          let subgroups = group['groups'] || [];
-          subgroups.sort(byProperty('name'));
-          next_generation = next_generation.concat(subgroups);
-        }
-
-        groups = next_generation;
-      }
-
-      groupTable = (
-        <table className='table'>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
-      );
+      groupTable = this.renderGroupTable();
+      servers = this.renderServers();
     }
 
     return (
@@ -220,7 +286,10 @@ class ServerGroups extends Component {
         <LoadingMask show={!this.state.model && !this.state.errorMessage}/>
         <div className='wizard-content'>
           <div className='menu-tab-content topology'>
+            <div className='header'>{translate('server_groups')}</div>
             {groupTable}
+            <div className='header'>{translate('servers')}</div>
+            {servers}
           </div>
         </div>
         <div className='banner-container'>
@@ -231,4 +300,4 @@ class ServerGroups extends Component {
   }
 }
 
-export default ServerGroups;
+export default Servers;
