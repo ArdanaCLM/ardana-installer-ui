@@ -39,7 +39,7 @@ module.exports = (env, argv) => {
       // automatically populating with a link to the script generated in the
       // output filename defined a couple lines above. The
       new HtmlWebpackPlugin({
-        title: 'SUSE Openstack Cloud Deployer',
+        title: 'SUSE Openstack Cloud',
         favicon: 'src/images/favicon.ico',
         meta: {
           viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
