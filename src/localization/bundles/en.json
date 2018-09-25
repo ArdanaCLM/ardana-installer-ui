@@ -591,5 +591,6 @@
     "server.addserver.wipedisk.message": "Setting this will wipe the data disks of newly added servers",
     "server.deploy.progress.activate": "Activate New Servers",
     "server.deploy.activate.addserver.complete": "Successfully Added and Activate Compute Servers",
-    "server.addserver.activate.message": "Setting this will activate all newly added servers"
+    "server.addserver.activate.message": "Setting this will activate all newly added servers",
+    "server.addserver.empty.computeroles.info": "There are no compute roles available"
 }

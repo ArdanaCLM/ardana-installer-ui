@@ -24,7 +24,7 @@ import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import ConnectionCredsInfo from './AssignServerRoles/ConnectionCredsInfo.js';
 import ServersAddedManually from './AssignServerRoles/ServersAddedManually.js';
-import { ErrorMessage } from '../components/Messages.js';
+import { ErrorMessage, InfoBanner } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import ServerTable from '../components/ServerTable.js';
 import ViewServerDetails from '../components/ViewServerDetails.js';
@@ -1354,7 +1354,7 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
-  renderServerRolesAccordion() {
+  renderServerRolesAccordion(serverRoles) {
     let serverIds = getModelServerIds(this.props.model);
     //let serverIds = find all serversIds from manual and auto
     let tempDups = serverIds.filter((id, idx) => {
@@ -1378,7 +1378,7 @@ class AssignServerRoles extends BaseWizardPage {
         ondragEnterFunct={this.highlightDrop}
         ondragLeaveFunct={this.unHighlightDrop}
         allowDropFunct={this.allowDrop}
-        serverRoles={getServerRoles(this.props.model, this.props.rolesLimit)}
+        serverRoles={serverRoles}
         tableId='rightTableId' checkDupIds={dupIds}
         viewAction={this.handleShowServerDetails}
         editAction={this.handleShowEditServer}
@@ -1416,8 +1416,18 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
+  renderEmptyRolesInfo() {
+    return (
+      <div className='banner-container'>
+        <InfoBanner
+          message={translate('server.addserver.empty.computeroles.info')} show={true}/>
+      </div>
+    );
+  }
 
   renderServerRoleContent() {
+    let serverRoles = getServerRoles(this.props.model, this.props.rolesLimit);
+    let isValidToRenderAccordion = serverRoles && serverRoles.length > 0;
     return (
       <div className='assign-server-role body-container'>
         <div className='server-container'>
@@ -1432,10 +1442,11 @@ class AssignServerRoles extends BaseWizardPage {
         </div>
         <div className="server-container right-col">
           <div className="server-table-container role-accordion-container rounded-corner">
-            {this.renderServerRolesAccordion()}
+            {isValidToRenderAccordion && this.renderServerRolesAccordion(serverRoles)}
+            {this.props.isUpdateMode && !isValidToRenderAccordion && this.renderEmptyRolesInfo()}
           </div>
-          {this.props.isUpdateMode && this.renderWipeDisk()}
-          {this.props.isUpdateMode && this.renderActivate()}
+          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderWipeDisk()}
+          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderActivate()}
         </div>
 
       </div>
