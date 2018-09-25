@@ -1150,7 +1150,7 @@ class AssignServerRoles extends BaseWizardPage {
 
       return {isActivateChecked: isChecked};
     });
-   }
+  }
 
   renderErrorMessage() {
     if (!isEmpty(this.state.messages)) {

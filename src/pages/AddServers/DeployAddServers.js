@@ -204,10 +204,10 @@ class DeployAddServers extends BaseUpdateWizardPage {
         return true;
       }
     });
-
+    
+    let newHostNames = this.state.newHosts.map(host => host['hostname']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
-      let newHostNames = this.state.newHosts.map(host => host['ardana_ansible_host']);
       if (step.payload) {
         if(step.payload.limit) {
           step.payload.limit = newHostNames.join(',');
