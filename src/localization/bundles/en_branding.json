@@ -1,4 +1,5 @@
 {
-    "openstack.cloud.deployer.title": "SUSE OpenStack Cloud Deployer",
-    "openstack.cloud.deployer.title.version": "SUSE OpenStack Cloud 8"
+    "openstack.cloud.deployer.title": "SUSE OpenStack Cloud Installer",
+    "openstack.cloud.deployer.title.version": "SUSE OpenStack Cloud 8",
+    "day2.product.title": "CLM Admin Console"
 }

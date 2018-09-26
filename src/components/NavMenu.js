@@ -86,12 +86,15 @@ class NavMenu extends Component {
 
     const logout_tooltip = (<Tooltip id='logout'>{translate('logout')}</Tooltip>);
 
+    // overwrite default tab title to use branding title
+    document.title = translate('day2.product.title');
+
     return(
       <Router>
         {/* Router requires a single child, so surround everything in a div */}
         <div>
           <aside className="main-menu">
-            <header>{translate('openstack.cloud.deployer.title.version')}</header>
+            <header>{translate('day2.product.title')}</header>
             <ul> {leftBarItems} </ul>
           </aside>
           <section className="main-window">
