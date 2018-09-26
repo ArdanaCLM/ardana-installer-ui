@@ -62,12 +62,13 @@ class CompleteAddServers extends BaseUpdateWizardPage {
   }
 
   render() {
+    let heading =
+      this.props.operationProps.activate ?
+        translate('server.deploy.activate.addserver.complete') : translate('server.deploy.addserver.complete');
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.state.wizardLoading}/>
-        <div className='content-header'>
-          {this.renderHeading(translate('server.deploy.addserver.complete'))}
-        </div>
+        <div className='content-header'>{this.renderHeading(heading)}</div>
         <div className='wizard-content'>
           {this.renderServerList()}
           {!this.state.wizardLoading && this.state.wizardLoadingErrors &&

@@ -45,13 +45,36 @@ class AddServers extends BaseUpdateWizardPage {
       // error message show as a popup modal for validation errors
       validationError: undefined,
       // indicator of this loading
-      loading: true,
+      loading: false,
       // show confirm dialog when user clicks Deploy
       showDeployConfirmModal: false
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    // If wizard is not loading then getDeployedServers,
+    // otherwise delay it when wizardLoading is done.
+    if(!this.props.wizardLoading) {
+      this.getDeployedServers();
+    }
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      model : newProps.model,
+      wizardLoadingErrors: newProps.wizardLoadingErrors,
+      wizardLoading: newProps.wizardLoading
+    });
+
+    // if wizardLoading was going and now it is done
+    // getDeployedServers
+    if(this.state.wizardLoading && !newProps.wizardLoading) {
+      this.getDeployedServers();
+    }
+  }
+
+  getDeployedServers = () => {
+    this.setState({loading: true});
     // fetchJson(url, init, forceLogin, noCache)
     fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
       .then((servers) => {
@@ -62,14 +85,6 @@ class AddServers extends BaseUpdateWizardPage {
       .catch(error => {
         this.setState({errorBanner: error.toString(), loading: false});
       });
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      model : newProps.model,
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
   }
 
   assembleProcessPages = () => {

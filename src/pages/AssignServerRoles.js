@@ -24,7 +24,7 @@ import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import ConnectionCredsInfo from './AssignServerRoles/ConnectionCredsInfo.js';
 import ServersAddedManually from './AssignServerRoles/ServersAddedManually.js';
-import { ErrorMessage } from '../components/Messages.js';
+import { ErrorMessage, InfoBanner } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import ServerTable from '../components/ServerTable.js';
 import ViewServerDetails from '../components/ViewServerDetails.js';
@@ -113,6 +113,9 @@ class AssignServerRoles extends BaseWizardPage {
       // add server, wipedisk for all newly added servers
       isWipeDiskChecked: this.props.operationProps && this.props.operationProps.wipeDisk || false,
 
+      // add server, activate for all newly added servers
+      isActivateChecked: this.props.operationProps && this.props.operationProps.activate || false,
+
       // relatively reliable deployed servers list
       deployedServers: this.props.deployedServers
     };
@@ -124,11 +127,14 @@ class AssignServerRoles extends BaseWizardPage {
       ov: {checked: false, secured: true}
     };
 
-    // addserver get the saved global wipeDisk
+    // addserver get the saved global operationProps wipeDisk, activate and deployedServers
     if(this.props.isUpdateMode) {
       let isChecked = newProps.operationProps && newProps.operationProps.wipeDisk || false;
+      let isChecked2 = newProps.operationProps && newProps.operationProps.activate || false;
       this.setState({
-        isWipeDiskChecked : isChecked, deployedServers : newProps.deployedServers
+        isWipeDiskChecked : isChecked,
+        isActivateChecked: isChecked2,
+        deployedServers : newProps.deployedServers
       });
     }
   }
@@ -1130,6 +1136,22 @@ class AssignServerRoles extends BaseWizardPage {
     });
   }
 
+  handleActivateCheck = () => {
+    this.setState(prev => {
+      let isChecked = !prev.isActivateChecked;
+      let opProps = {};
+      //retain all other operationProps if there are any
+      if (this.props.operationProps) {
+        opProps = Object.assign({}, this.props.operationProps);
+      }
+      opProps['activate'] = isChecked;
+      // save to the global
+      this.props.updateGlobalState('operationProps', opProps);
+
+      return {isActivateChecked: isChecked};
+    });
+  }
+
   renderErrorMessage() {
     if (!isEmpty(this.state.messages)) {
       let msgList = [];
@@ -1332,7 +1354,7 @@ class AssignServerRoles extends BaseWizardPage {
     }
   }
 
-  renderServerRolesAccordion() {
+  renderServerRolesAccordion(serverRoles) {
     let serverIds = getModelServerIds(this.props.model);
     //let serverIds = find all serversIds from manual and auto
     let tempDups = serverIds.filter((id, idx) => {
@@ -1356,7 +1378,7 @@ class AssignServerRoles extends BaseWizardPage {
         ondragEnterFunct={this.highlightDrop}
         ondragLeaveFunct={this.unHighlightDrop}
         allowDropFunct={this.allowDrop}
-        serverRoles={getServerRoles(this.props.model, this.props.rolesLimit)}
+        serverRoles={serverRoles}
         tableId='rightTableId' checkDupIds={dupIds}
         viewAction={this.handleShowServerDetails}
         editAction={this.handleShowEditServer}
@@ -1380,8 +1402,32 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
+  renderActivate() {
+    let className =
+      'addserver-options' + (!this.props.processOperation ? '' : ' disabled');
+    return (
+      <div className={className}>
+        <input diabled={this.props.processOperation} className='wipe-disk-option'
+          type='checkbox' value='activate'
+          checked={this.state.isActivateChecked} onChange={this.handleActivateCheck}/>
+        {translate('common.activate')}
+        <HelpText tooltipText={translate('server.addserver.activate.message')}/>
+      </div>
+    );
+  }
+
+  renderEmptyRolesInfo() {
+    return (
+      <div className='banner-container'>
+        <InfoBanner
+          message={translate('server.addserver.empty.computeroles.info')} show={true}/>
+      </div>
+    );
+  }
 
   renderServerRoleContent() {
+    let serverRoles = getServerRoles(this.props.model, this.props.rolesLimit);
+    let isValidToRenderAccordion = serverRoles && serverRoles.length > 0;
     return (
       <div className='assign-server-role body-container'>
         <div className='server-container'>
@@ -1396,9 +1442,11 @@ class AssignServerRoles extends BaseWizardPage {
         </div>
         <div className="server-container right-col">
           <div className="server-table-container role-accordion-container rounded-corner">
-            {this.renderServerRolesAccordion()}
+            {isValidToRenderAccordion && this.renderServerRolesAccordion(serverRoles)}
+            {this.props.isUpdateMode && !isValidToRenderAccordion && this.renderEmptyRolesInfo()}
           </div>
-          {this.props.isUpdateMode && this.renderWipeDisk()}
+          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderWipeDisk()}
+          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderActivate()}
         </div>
 
       </div>

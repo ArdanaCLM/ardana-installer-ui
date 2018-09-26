@@ -109,9 +109,9 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     return this.state.wizardLoading || this.state.loading;
   }
 
-  isValidToRenderPlaybookProgress = (cancel) => {
+  isValidToRenderPlaybookProgress = () => {
     return (
-      !cancel && this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading
+      this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading
     );
   }
 
@@ -144,7 +144,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
           {this.renderHeading(translate('server.addserver.prepare'))}
         </div>
         <div className='wizard-content'>
-          {this.isValidToRenderPlaybookProgress(cancel) && this.renderPlaybookProgress()}
+          {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
           {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
             this.renderWizardLoadingErrors(
