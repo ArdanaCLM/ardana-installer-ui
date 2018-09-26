@@ -63,8 +63,9 @@ class ControlPlanes extends Component {
 
     // Example of creating a link to another page. Probably don't want to do this for real
     const hosts = servers.map(server => {
-      return (<div key={server}><a href={'Servers/' + this.server_by_hostname[server]['id'] + '.html'}>
-        {server}</a></div>);
+      return (<div key={server}>
+        <HashLink to={'/topology/servers#'+this.server_by_hostname[server]['id']}>{server}</HashLink>
+      </div>);
     });
     return (<Fragment>{hosts}</Fragment>);
   }
