@@ -136,6 +136,56 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
+  hasDuplicates = (list) => {
+    return (new Set(list)).size !== list.length;
+  }
+
+  hasAddressesConflicts = () => {
+    let hasConflicts = false;
+    let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
+    let deployedServerIds =
+      this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
+    let newServers = allSevers.filter(server => {
+      return !deployedServerIds.includes(server.id);
+    });
+    let modelDeployedServers = allSevers.filter(server => {
+      return deployedServerIds.includes(server.id);
+    });
+
+    // check if newly added servers have addresses conflicts with any deployed servers
+    for (let i = 0; i < newServers.length; i++) {
+      let newServer = newServers[i];
+      hasConflicts = modelDeployedServers.some(deployedServer => {
+        return (
+          newServer['ip-addr'] === deployedServer['ip-addr'] ||
+          newServer['mac-addr'] === deployedServer['mac-addr'] ||
+          newServer['ilo-ip']  === deployedServer['ilo-ip']
+        );
+      });
+      if (hasConflicts) {
+        break;
+      }
+    }
+
+    // check if have duplicates within the newly added servers
+    if (!hasConflicts) {
+      let addresses = newServers.map(server => server['mac-addr']);
+      hasConflicts = this.hasDuplicates(addresses);
+
+      if(!hasConflicts) {
+        addresses = newServers.map(server => server['ip-addr']);
+        hasConflicts = this.hasDuplicates(addresses);
+      }
+
+      if(!hasConflicts) {
+        addresses = newServers.map(server => server['ilo-ip']);
+        hasConflicts = this.hasDuplicates(addresses);
+      }
+    }
+
+    return hasConflicts;
+  }
+
   installOS = () => {
     //TODO implement
   }
@@ -149,6 +199,7 @@ class AddServers extends BaseUpdateWizardPage {
       // going on
       return (
         newIds && newIds.length > 0 && !this.props.processOperation &&
+        !this.hasAddressesConflicts() &&
         getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })

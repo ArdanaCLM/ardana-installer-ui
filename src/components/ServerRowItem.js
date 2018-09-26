@@ -118,6 +118,23 @@ class ServerRowItem extends Component {
         return id === this.props.data.id;
       });
     }
+    // check if newly added servers has duplicate ip-addr, mac-addr, ilo-ip
+    if(!badInput && this.props.checkNewDupAddresses) {
+      if(!this.props.checkNewDupAddresses.deployedServerIds.includes(this.props.data.id)) {
+        let otherServerAddresses =
+          this.props.checkNewDupAddresses.modelServerAddresses.filter(server => {
+            return server.id !== this.props.data.id;
+          });
+
+        badInput = otherServerAddresses.some(server => {
+          return (
+            this.props.data['ip-addr'] === server['ip-addr'] ||
+            this.props.data['mac-addr'] === server['mac-addr'] ||
+            this.props.data['ilo-ip']  === server['ilo-ip']
+          );
+        });
+      }
+    }
     if(badInput) {
       requiredUpdate = true;
     }

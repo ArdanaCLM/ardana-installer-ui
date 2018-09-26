@@ -1371,6 +1371,16 @@ class AssignServerRoles extends BaseWizardPage {
       extraProps.isUpdateMode = this.props.isUpdateMode;
       extraProps.deployedServers = this.state.deployedServers;
       extraProps.checkInputs = this.checkInputs;
+      let modelServerAddresses =
+        this.props.model.getIn(['inputModel','servers']).map(server => {
+          return {
+            'id': server.get('id'), 'ip-addr': server.get('ip-addr'), 'mac-addr': server.get('mac-addr'),
+            'ilo-ip': server.get('ilo-ip')
+          };
+        }).toJS();
+      extraProps.checkNewDupAddresses = {
+        modelServerAddresses: modelServerAddresses
+      };
     }
     return (
       <ServerRolesAccordion

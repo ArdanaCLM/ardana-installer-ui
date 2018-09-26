@@ -49,6 +49,11 @@ class ServerTable extends Component {
           else {
             extraProps.isDraggable = false;
           }
+
+          // check if any newly added servers have duplicate addresses
+          extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
+          extraProps.checkNewDupAddresses['deployedServerIds'] =
+            this.state.deployedServers.map(server => server.id);
         }
         else {
           extraProps.editAction = this.props.editAction;
