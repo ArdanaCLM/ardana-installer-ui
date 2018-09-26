@@ -66,8 +66,9 @@ class AddServers extends BaseUpdateWizardPage {
       wizardLoading: newProps.wizardLoading
     });
 
-    // When wizardLoading is done will getDeployedServers
-    if(!newProps.wizardLoading) {
+    // if wizardLoading was going and now it is done
+    // getDeployedServers
+    if(this.state.wizardLoading && !newProps.wizardLoading) {
       this.getDeployedServers();
     }
   }
