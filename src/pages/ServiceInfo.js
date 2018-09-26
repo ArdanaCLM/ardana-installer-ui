@@ -323,7 +323,7 @@ class ServiceInfo extends Component {
       name = 'ops-console';
       break;
     default:
-      name = this.state.selectedService;
+      name = this.state.selectedService.name.toLowerCase();
     }
     return name + '-status';
   }
