@@ -204,7 +204,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
         return true;
       }
     });
-    
+
     let newHostNames = this.state.newHosts.map(host => host['hostname']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
@@ -257,6 +257,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
       </div>
     );
   }
+
   render() {
     //if error happens, cancel button shows up
     let cancel =  this.state.overallStatus === STATUS.FAILED;
