@@ -313,3 +313,16 @@ export function matchRolesLimit(theRole, rolesLimit) {
   let match = rolesLimit.some(role => theRole.includes(role));
   return match;
 }
+
+// check if theServer contains any conflict addresses,
+// either ip-addr, mac-addr or ilo-ip address against the
+// serverList. Return true if there is a conflict.
+export function hasConflictAddresses(theServer, serverList) {
+  return  serverList.some(server => {
+    return (
+      (theServer['ip-addr'] && theServer['ip-addr'] === server['ip-addr']) ||
+      (theServer['mac-addr'] && theServer['mac-addr'] === server['mac-addr']) ||
+      (theServer['ilo-ip'] && theServer['ilo-ip']  === server['ilo-ip'])
+    );
+  });
+}

@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import { EditPencilForTableRow , InfoForTableRow, DeleteForTableRow } from './Buttons.js';
 import { IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
+import { hasConflictAddresses } from '../utils/ModelUtils.js';
 
 class ServerRowItem extends Component {
   constructor(props) {
@@ -126,13 +127,7 @@ class ServerRowItem extends Component {
             return server.id !== this.props.data.id;
           });
 
-        badInput = otherServerAddresses.some(server => {
-          return (
-            this.props.data['ip-addr'] === server['ip-addr'] ||
-            this.props.data['mac-addr'] === server['mac-addr'] ||
-            this.props.data['ilo-ip']  === server['ilo-ip']
-          );
-        });
+        badInput = hasConflictAddresses (this.props.data, otherServerAddresses);
       }
     }
     if(badInput) {

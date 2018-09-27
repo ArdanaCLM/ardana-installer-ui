@@ -22,7 +22,7 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { BaseInputModal, YesNoModal } from '../components/Modals.js';
 import { translate } from '../localization/localize.js';
-import { getServerRoles, isRoleAssignmentValid } from '../utils/ModelUtils.js';
+import { getServerRoles, isRoleAssignmentValid, hasConflictAddresses } from '../utils/ModelUtils.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 
 const ROLE_LIMIT = ['COMPUTE'];
@@ -136,8 +136,13 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
-  hasDuplicates = (list) => {
-    return (new Set(list)).size !== list.length;
+  // Check the array list has duplicate values.
+  // Convert an array list to be a set which only contains
+  // unique values. If array list doesn't contain duplicate
+  // values, then set size is the same as the array list length,
+  // otherwise the list contains duplicate values.
+  hasDuplicates = (arrayList) => {
+    return (new Set(arrayList)).size !== arrayList.length;
   }
 
   hasAddressesConflicts = () => {
@@ -155,13 +160,7 @@ class AddServers extends BaseUpdateWizardPage {
     // check if newly added servers have addresses conflicts with any deployed servers
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
-      hasConflicts = modelDeployedServers.some(deployedServer => {
-        return (
-          newServer['ip-addr'] === deployedServer['ip-addr'] ||
-          newServer['mac-addr'] === deployedServer['mac-addr'] ||
-          newServer['ilo-ip']  === deployedServer['ilo-ip']
-        );
-      });
+      hasConflicts = hasConflictAddresses(newServer, modelDeployedServers);
       if (hasConflicts) {
         break;
       }
