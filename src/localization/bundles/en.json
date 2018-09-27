@@ -356,6 +356,8 @@
     "options": "Options",
     "physical.volumes": "PVol(s)",
     "interface.options": "Interface / Options",
+    "service.groups.components": "Service Groups, Components",
+    "network.devices.routes": "Network Devices, Routes",
 
     "vlanid": "VLAN ID",
     "cidr": "CIDR",

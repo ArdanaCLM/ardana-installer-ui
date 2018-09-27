@@ -97,24 +97,20 @@
     padding-top: 1em;
   }
 
-  // Fix the width of the headers of the leading columns of the nested table 
-  // to force them to line up with the data
-  th .nw-group-addr {
-     float: left;
-     width: 110px;
+  // Any titles appearing above these nested tables should float left to
+  // force them to line up with the data
+  th {
+    .nw-group-server,.nw-group-addr{
+      float: left;
+    }
   }
 
-  th .nw-group-server {
-     float: left;
+  .nw-group-server {
      width: 200px;
   }
 
-  td .nw-group-addr {
+  .nw-group-addr {
      width: 110px;
-  }
-
-  td .nw-group-server {
-     width: 200px;
   }
 
   .nested-table {
@@ -128,7 +124,12 @@
 
     padding-left: 0px;
     td {
-      border: none
+      border: none;
+      vertical-align: top;
+    }
+
+    &.nw-interfaces td {
+      padding-bottom: 1em;
     }
   }
 }
