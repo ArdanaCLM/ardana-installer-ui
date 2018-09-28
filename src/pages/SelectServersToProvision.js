@@ -22,8 +22,10 @@ import { ErrorBanner } from '../components/Messages.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import TransferTable from '../components/TransferTable.js';
 import { InputLine } from '../components/InputLine.js';
+import { ValidatingInput } from '../components/ValidatingInput.js';
+import HelpText from '../components/HelpText.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
-import { fetchJson } from '../utils/RestUtils.js';
+import { fetchJson, postJson } from '../utils/RestUtils.js';
 
 const OS_INSTALL_STEPS = [
   {
@@ -58,6 +60,10 @@ class SelectServersToProvision extends BaseWizardPage {
       installing: false,
       showModal: false,
       overallStatus: STATUS.UNKNOWN, // overall status of install playbook
+      requiresPassword: false,
+      sshPassphrase: '',
+      hasError: false,
+      errorMsg: ''
     };
 
     this.ips = [];
@@ -110,6 +116,13 @@ class SelectServersToProvision extends BaseWizardPage {
           osInstallUsername: responseData['username']
         });
       });
+
+    fetchJson('/api/v1/clm/sshagent/requires_password')
+      .then((responseData) => {
+        this.setState({
+          requiresPassword: responseData['requires_password']
+        });
+      });
   }
 
   getPlaybookProgress = () => {
@@ -143,6 +156,52 @@ class SelectServersToProvision extends BaseWizardPage {
     this.setState({overallStatus: status});
   }
 
+  renderSshPassphraseInputLine() {
+    if (this.state.requiresPassword) {
+      return (
+        <div className='detail-line'>
+          <div className='detail-heading'>
+            {translate('validate.config.sshPassphrase') + '*'}
+            <HelpText tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
+          </div>
+          <div className='input-body'>
+            <ValidatingInput isRequired='true' inputName='sshPassphrase'
+              inputType='password' inputValue={this.state.sshPassphrase}
+              inputAction={(e) => {this.setState({sshPassphrase: e.target.value});}}/>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  startInstalling = () => {
+    if (this.state.requiresPassword) {
+      let password = {'password': this.state.sshPassphrase};
+      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+        .then(() => {
+          this.setState({
+            requiresPassword: false, showModal: false, hasError: false, errorMsg: '', installing: true
+          });
+        })
+        .catch((error) => {
+          this.setState({
+            hasError: true, errorMsg: error.value['error_msg'], showModal: false, sshPassphrase: ''
+          });
+        });
+    } else {
+      this.setState({installing: true, showModal: false});
+    }
+  }
+
+  showErrorBanner = () => {
+    return (
+      <div className='banner-container no-margin-bottom'>
+        <ErrorBanner message={translate('validate.config.sshPassphrase.error', this.state.errorMsg)}
+          show={this.state.hasError}/>
+      </div>
+    );
+  }
+
   renderTransferTable() {
     return (
       <div>
@@ -163,6 +222,7 @@ class SelectServersToProvision extends BaseWizardPage {
                 inputType='password'
                 inputValue={this.state.osInstallPassword}
                 inputAction={this.handleOsInstallPassword}/>
+              {this.renderSshPassphraseInputLine()}
             </div>
 
             <TransferTable
@@ -172,15 +232,17 @@ class SelectServersToProvision extends BaseWizardPage {
               updateRightList={(list) => this.setState({rightList: list})}
               leftTableHeader={translate('provision.server.left.table')}
               rightTableHeader={translate('provision.server.right.table')}/>
+            {this.state.hasError && this.showErrorBanner()}
             <div className='button-container'>
               <ActionButton
                 displayLabel={translate('provision.server.install')}
                 clickAction={() => this.setState({showModal: true})}
-                isDisabled={this.state.rightList.length == 0 || this.state.osInstallPassword === ''}/>
+                isDisabled={this.state.rightList.length == 0 || this.state.osInstallPassword === ''
+                  || (this.state.requiresPassword && this.state.sshPassphrase === '')}/>
             </div>
             <YesNoModal show={this.state.showModal}
               title={translate('warning')}
-              yesAction={() => this.setState({installing: true, showModal: false})}
+              yesAction={this.startInstalling}
               noAction={() => this.setState({showModal: false})}>
               {translate('provision.server.confirm.body', this.state.rightList.length)}
             </YesNoModal>
