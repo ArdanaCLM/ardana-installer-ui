@@ -28,6 +28,8 @@ import HelpText from '../components/HelpText.js';
 import { Map, fromJS } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
 
+const Fragment = React.Fragment;
+
 class ReplaceServerDetails extends Component {
   constructor(props) {
     super(props);
@@ -226,25 +228,6 @@ class ReplaceServerDetails extends Component {
     );
   }
 
-  renderText(title, value) {
-    return (
-      <div className='detail-line'>
-        <div className='detail-heading'>{translate(title)}</div>
-        <div className='info-body'>{value}</div>
-      </div>
-    );
-  }
-
-  renderOsPasswordInput() {
-    return (
-      <InputLine
-        isRequired={this.state.isInstallOsChecked} inputName={'osInstallPassword'}
-        inputType={'password'} label={'server.pass.prompt'}
-        inputValue={this.state.osInstallPassword || ''}
-        inputAction={this.handleOsPasswordChange}/>
-    );
-  }
-
   renderAvailableServersDropDown() {
     let emptyOptProps = {
       label: translate('server.please.select'),
@@ -301,6 +284,24 @@ class ReplaceServerDetails extends Component {
     );
   }
 
+  renderOSUserPass() {
+    if (this.state.isInstallOsChecked) {
+      return (
+        <Fragment>
+          <div className='detail-line'>
+            <div className='detail-heading'>{translate('server.user.prompt')}</div>
+            <div className='info-body'>{this.state.osInstallUsername}</div>
+          </div>
+          <InputLine
+            isRequired={this.state.isInstallOsChecked} inputName={'osInstallPassword'}
+            inputType={'password'} label={'server.pass.prompt'}
+            inputValue={this.state.osInstallPassword || ''}
+            inputAction={this.handleOsPasswordChange}/>
+        </Fragment>);
+    }
+  }
+
+
   renderServerContent() {
     return (
       <div>
@@ -319,9 +320,7 @@ class ReplaceServerDetails extends Component {
           <input className='replace-options' type='checkbox' value='installos'
             checked={this.state.isInstallOsChecked} onChange={this.handleInstallOsCheck}/>
           {translate('common.installos')}
-          {this.state.isInstallOsChecked &&
-            this.renderText('server.user.prompt', this.state.osInstallUsername)}
-          {this.state.isInstallOsChecked && this.renderOsPasswordInput()}
+          {this.renderOSUserPass()}
         </div>
         <div className='server-details-container'>
           <input className='replace-options' type='checkbox' value='wipedisk'
