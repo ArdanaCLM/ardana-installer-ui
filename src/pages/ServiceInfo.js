@@ -230,8 +230,6 @@ class ServiceInfo extends Component {
       selectedService: '',
       statusList: undefined,
       showLoadingMask: false,
-      endpointsLoaded: false,
-      statusLoaded: false,
       error: undefined,
       menuLocation: undefined
     };
@@ -241,8 +239,7 @@ class ServiceInfo extends Component {
     this.setState({showLoadingMask: true});
     fetchJson('/api/v1/clm/endpoints')
       .then(responseData => {
-        this.setState({services: responseData, endpointsLoaded: true});
-        this.checkLoadingMask();
+        this.setState({services: responseData, showLoadingMask: false});
       })
       .catch((error) => {
         this.setState({
@@ -252,24 +249,15 @@ class ServiceInfo extends Component {
           },
           showLoadingMask: false
         });
-        this.checkLoadingMask();
       });
 
     fetchJson('/api/v1/clm/monasca/service_status')
       .then(responseData => {
-        this.setState({statusList: responseData, statusLoaded: true});
-        this.checkLoadingMask();
+        this.setState({statusList: responseData});
       })
       .catch((error) => {
-        this.setState({statusLoaded: true});
-        this.checkLoadingMask();
+        // no need to show error for this case
       });
-  }
-
-  checkLoadingMask = () => {
-    if (this.state.endpointsLoaded && this.state.statusLoaded) {
-      this.setState({showLoadingMask: false});
-    }
   }
 
   renderErrorMessage() {
