@@ -1225,6 +1225,12 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
+  toDisableCheckboxes = () => {
+    return (
+      this.props.processOperation || this.props.wizardLoading || this.props.wizardLoadingErrors
+    );
+  }
+
   renderAutoDiscoverContent() {
     //only render when don't have any raw discovered data or not suse manager embedded
     if(this.state.rawDiscoveredServers.length === 0) {
@@ -1400,10 +1406,10 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderWipeDisk() {
     let className =
-      'addserver-options' + (!this.props.processOperation ? '' : ' disabled');
+      'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
       <div className={className}>
-        <input diabled={this.props.processOperation} className='wipe-disk-option'
+        <input disabled={this.toDisableCheckboxes()} className='wipe-disk-option'
           type='checkbox' value='wipedisk'
           checked={this.state.isWipeDiskChecked} onChange={this.handleWipeDiskCheck}/>
         {translate('common.wipedisk')}
@@ -1414,11 +1420,11 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderActivate() {
     let className =
-      'addserver-options' + (!this.props.processOperation ? '' : ' disabled');
+      'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
       <div className={className}>
-        <input diabled={this.props.processOperation} className='wipe-disk-option'
-          type='checkbox' value='activate'
+        <input disabled={this.toDisableCheckboxes()}
+          className='wipe-disk-option' type='checkbox' value='activate'
           checked={this.state.isActivateChecked} onChange={this.handleActivateCheck}/>
         {translate('common.activate')}
         <HelpText tooltipText={translate('server.addserver.activate.message')}/>

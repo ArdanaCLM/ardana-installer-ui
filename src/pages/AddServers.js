@@ -87,7 +87,28 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
-  assembleProcessPages = () => {
+  assembleInstallProcessPages = () => {
+    let pages = [];
+
+    pages.push({
+      name: 'SelectInstallOS',
+      component: AddServersPages.SelectInstallOS
+    });
+
+    pages.push({
+      name: 'ProcessInstallOS',
+      component: AddServersPages.ProcessInstallOS
+    });
+
+    pages.push({
+      name: 'CompleteInstallOS',
+      component: AddServersPages.CompleteInstallOS
+    });
+
+    return pages;
+  }
+
+  assembleDeployProcessPages = () => {
     let pages = [];
 
     pages.push({
@@ -126,7 +147,7 @@ class AddServers extends BaseUpdateWizardPage {
     postJson('/api/v1/clm/config_processor')
       .then(() => {
         this.setState({validating: false});
-        let pages = this.assembleProcessPages();
+        let pages = this.assembleDeployProcessPages();
         let opProps = {'deployedServers': this.state.deployedServers};
         this.props.startUpdateProcess('AddServer', pages, opProps);
       })
@@ -186,7 +207,10 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   installOS = () => {
-    //TODO implement
+    let pages = this.assembleInstallProcessPages();
+    let newIds = this.getAddedServerIds();
+    let opProps = {'newServerIds': newIds};
+    this.props.startUpdateProcess('AddServer-InstallOS', pages, opProps);
   }
 
   //check if we can deploy the new servers
@@ -197,6 +221,7 @@ class AddServers extends BaseUpdateWizardPage {
       // and have new servers added and do not have existing processOperation
       // going on
       return (
+        !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
         !this.hasAddressesConflicts() &&
         getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
@@ -210,8 +235,7 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    //TODO implement
-    return false;
+    return this.isDeployable();
   }
 
   isValidToRenderServerContent = () => {
