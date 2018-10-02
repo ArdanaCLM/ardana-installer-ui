@@ -40,16 +40,6 @@ class Complete extends BaseWizardPage {
       .catch((error) => {
         console.log('Unable to retrieve external URLs');// eslint-disable-line no-console
       });
-
-    fetchJson('/api/v1/user')
-      .then(responseData => {
-        if (responseData.username) {
-          this.setState({userName: responseData.username});
-        }
-      })
-      .catch((error) => {
-        console.log('Unable to retrieve user name');// eslint-disable-line no-console
-      });
   }
 
   render() {
