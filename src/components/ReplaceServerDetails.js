@@ -21,11 +21,11 @@ import { ListDropdown } from '../components/ListDropdown.js';
 import { IpV4AddressValidator, MacAddressValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
 import {
-  genUID, getAvailableServerIds, maskPassword, getModelMacAddresses,
+  genUID, maskPassword, getModelMacAddresses,
   getModelIPMIAddresses, getMacIPMIAddrObjs }
   from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
-import { Map, fromJS } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
 
 const Fragment = React.Fragment;
@@ -54,8 +54,6 @@ class ReplaceServerDetails extends Component {
 
   componentWillMount() {
     if(this.props.data) {
-      this.availableServerIds =
-        getAvailableServerIds(this.props.model, this.props.autoServers, this.props.manualServers);
       // the original data
       this.data = JSON.parse(JSON.stringify(this.props.data));
 
@@ -177,6 +175,8 @@ class ReplaceServerDetails extends Component {
   }
 
   handleSelectAvailableServer = (serverId) => {
+
+
     //TODO need to find a way to show the details of the available server
     //selected
     this.setState({selectedServerId: serverId});
@@ -228,25 +228,6 @@ class ReplaceServerDetails extends Component {
     );
   }
 
-  renderAvailableServersDropDown() {
-    let emptyOptProps = {
-      label: translate('server.please.select'),
-      value: 'noopt'
-    };
-
-    return (
-      <div className='detail-line'>
-        <div className='detail-heading'>{translate('server.available.prompt')}
-        </div>
-        <div className='input-body'>
-          <ListDropdown name='id' value={this.state.selectedServerId || ''}
-            optionList={this.availableServerIds} emptyOption={emptyOptProps}
-            selectAction={this.handleSelectAvailableServer}/>
-        </div>
-      </div>
-    );
-  }
-
   renderDetailsTable() {
     let rows = [];
     let sections = [
@@ -272,16 +253,50 @@ class ReplaceServerDetails extends Component {
     );
   }
 
+  // If there are servers that have been discovered (or manually added) which have not yet
+  // been assigned into the model, then give the user the opportunity to select one of those
   renderAvailableServers() {
-    return (
-      <div className='server-details-container'>
-        <input className='replace-options' type='checkbox' value='availservers'
-          checked={this.state.isUseAvailServersChecked} onChange={this.handleUseAvailServersCheck}/>
-        {translate('replace.server.details.use.availservers')}
-        <HelpText tooltipText={translate('server.replace.details.select.message')}/>
-        {this.state.isUseAvailServersChecked && this.renderAvailableServersDropDown()}
-      </div>
-    );
+    const allServerIds = List(this.props.autoServers).concat(List(this.props.manualServers))
+      .map(server => server.id);
+
+    const modelIds = this.props.model.getIn(['inputModel','servers'])
+      .map(server => server.get('uid') || server.get('id'));
+
+    const availableServerIds = allServerIds.filterNot(id => modelIds.includes(id));
+
+    if (! availableServerIds.isEmpty()) {
+
+      let dropDown;
+      if (this.state.isUseAvailServersChecked) {
+
+        let emptyOptProps = {
+          label: translate('server.please.select'),
+          value: 'noopt'
+        };
+
+        dropDown = (
+          <div className='detail-line'>
+            <div className='detail-heading'>{translate('server.available.prompt')}
+            </div>
+            <div className='input-body'>
+              <ListDropdown name='id' value={this.state.selectedServerId || ''}
+                optionList={availableServerIds} emptyOption={emptyOptProps}
+                selectAction={this.handleSelectAvailableServer}/>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className='server-details-container'>
+          <input className='replace-options' type='checkbox' value='availservers'
+            checked={this.state.isUseAvailServersChecked} onChange={this.handleUseAvailServersCheck}/>
+          {translate('replace.server.details.use.availservers')}
+          <HelpText tooltipText={translate('server.replace.details.select.message')}/>
+          {dropDown}
+        </div>
+      );
+    }
   }
 
   renderOSUserPass() {
@@ -315,7 +330,7 @@ class ReplaceServerDetails extends Component {
           {this.renderInput('ilo-user', 'text', true, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', true, 'server.ipmi.password.prompt')}
         </div>
-        {this.availableServerIds && this.availableServerIds.length > 0 && this.renderAvailableServers()}
+        {this.renderAvailableServers()}
         <div className='server-details-container'>
           <input className='replace-options' type='checkbox' value='installos'
             checked={this.state.isInstallOsChecked} onChange={this.handleInstallOsCheck}/>
