@@ -62,23 +62,6 @@ class Complete extends BaseWizardPage {
         {translate('complete.message.body3', modelName)}</div>);
     }
 
-    let commandLines = [];
-    if (this.state.userName) {
-      commandLines.push(<div className='body-header' key='commandLine1'>
-        {translate('complete.message.body4', this.state.userName)}</div>);
-      commandLines.push(<div className='body-line' key='commandLine2'>
-        {translate('complete.message.body5')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine3'>
-        {translate('complete.message.body6')}</div>);
-    } else {
-      commandLines.push(<div className='body-header' key='commandLine1'>
-        {translate('complete.message.body4a')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine2'>
-        {translate('complete.message.body5')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine3'>
-        {translate('complete.message.body6')}</div>);
-    }
-
     let linkSection = '';
     if (this.state.horizon !== '' || this.state.opsconsole !== '') {
       let links = [];
@@ -109,7 +92,7 @@ class Complete extends BaseWizardPage {
         </Modal.Header>
         <Modal.Body>
           {modelLines}
-          {commandLines}
+          <div className='body-header'>{translate('complete.message.refresh')}</div>
           {linkSection}
         </Modal.Body>
       </Modal>
