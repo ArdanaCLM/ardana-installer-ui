@@ -63,26 +63,10 @@ class SelectServersToProvision extends BaseWizardPage {
       requiresPassword: false,
       sshPassphrase: '',
       hasError: false,
-      errorMsg: '',
-      newServerIds: this.getNewServerIds()
+      errorMsg: ''
     };
 
     this.ips = [];
-  }
-
-  getNewServerIds = () => {
-    if (this.props.isUpdateMode && this.props.operationProps &&
-        this.props.operationProps.newServerIds) {
-      return this.props.operationProps.newServerIds;
-    }
-    return [];
-  }
-
-  componentWillReceiveProps(newProps) {
-    if(this.props.isUpdateMode) {
-      let newIds = newProps.operationProps && newProps.operationProps.newServerIds || [];
-      this.setState({newServerIds : newIds});
-    }
   }
 
   // Clear out the global playbookStatus entry for INSTALL_PLAYBOOK,
@@ -120,9 +104,9 @@ class SelectServersToProvision extends BaseWizardPage {
       .then(responseData => {
         let allServers = responseData;
         if(this.props.isUpdateMode) {
-          if(this.state.newServerIds.length > 0) {
+          if(this.props.operationProps.newServerIds.length > 0) {
             allServers = responseData.filter(server => {
-              return this.state.newServerIds.includes(server.id);
+              return this.props.operationProps.newServerIds.includes(server.id);
             });
           }
         }
