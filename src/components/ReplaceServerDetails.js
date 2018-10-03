@@ -115,10 +115,6 @@ class ReplaceServerDetails extends Component {
     this.props.doneAction(this.data, theProps);
   }
 
-  handleCancel = () => {
-    this.props.cancelAction();
-  }
-
   handleInputChange = (e, isValid, props) => {
     this.updateFormValidity(props, isValid);
     let value = e.target.value;
@@ -226,27 +222,26 @@ class ReplaceServerDetails extends Component {
     );
   }
 
-  renderDetailsTable() {
-    let rows = [];
-    let sections = [
-      {'role': this.data.role, 'ip-addr': this.data['ip-addr']},
-      {'server-group': this.data['server-group'], 'nic-mapping': this.data['nic-mapping']},
-      {'mac-addr': this.data['mac-addr'], 'ilo-ip': this.data['ilo-ip']},
-      {'ilo-user': this.data['ilo-user'], 'ilo-password': this.data['ilo-password']},
-    ];
-    sections.forEach((section, idx) => {
-      let keys = Object.keys(section);
-      rows.push(
-        <tr key={idx}>
-          <th>{translate('replace.server.details.' + keys[0])}</th>
-          <td>{keys[0].indexOf('password') !== -1  ? maskPassword(section[keys[0]]) : section[keys[0]]}</td>
-          <th>{translate('replace.server.details.' + keys[1])}</th>
-          <td>{keys[1].indexOf('password') !== -1 ? maskPassword(section[keys[1]]) : section[keys[1]]}</td>
-        </tr>);
-    });
+  // Helper function to create a pair of th and td entries with the given name
+  labelField = (name) => {
+    return (
+      <Fragment>
+        <th>{translate('replace.server.details.'+name)}</th>
+        <td>{this.props.data[name]}</td>
+      </Fragment>);
+  }
+  renderDetailsTable = () => {
     return (
       <table className='table table-condensed'>
-        <tbody>{rows}</tbody>
+        <tbody>
+          <tr>{this.labelField('role')}{this.labelField('ip-addr')}</tr>
+          <tr>{this.labelField('server-group')}{this.labelField('nic-mapping')}</tr>
+          <tr>{this.labelField('mac-addr')}{this.labelField('ip-addr')}</tr>
+          <tr>{this.labelField('ilo-user')}
+            <th>{translate('replace.server.details.ilo-password')}</th>
+            <td>{maskPassword(this.props.data['ilo-password'])}</td>
+          </tr>
+        </tbody>
       </table>
     );
   }
@@ -347,7 +342,7 @@ class ReplaceServerDetails extends Component {
     return (
       <div className='btn-row input-button-container'>
         <ActionButton type='default'
-          clickAction={this.handleCancel} displayLabel={translate('cancel')}/>
+          clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
           isDisabled={!this.isFormInputValid()}
           clickAction={this.handleDone} displayLabel={translate('common.replace')}/>
