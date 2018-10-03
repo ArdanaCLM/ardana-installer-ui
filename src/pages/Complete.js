@@ -40,16 +40,6 @@ class Complete extends BaseWizardPage {
       .catch((error) => {
         console.log('Unable to retrieve external URLs');// eslint-disable-line no-console
       });
-
-    fetchJson('/api/v1/user')
-      .then(responseData => {
-        if (responseData.username) {
-          this.setState({userName: responseData.username});
-        }
-      })
-      .catch((error) => {
-        console.log('Unable to retrieve user name');// eslint-disable-line no-console
-      });
   }
 
   render() {
@@ -60,23 +50,6 @@ class Complete extends BaseWizardPage {
         {translate('complete.message.body2')}</div>);
       modelLines.push(<div className='body-line' key='modelLine2'>
         {translate('complete.message.body3', modelName)}</div>);
-    }
-
-    let commandLines = [];
-    if (this.state.userName) {
-      commandLines.push(<div className='body-header' key='commandLine1'>
-        {translate('complete.message.body4', this.state.userName)}</div>);
-      commandLines.push(<div className='body-line' key='commandLine2'>
-        {translate('complete.message.body5')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine3'>
-        {translate('complete.message.body6')}</div>);
-    } else {
-      commandLines.push(<div className='body-header' key='commandLine1'>
-        {translate('complete.message.body4a')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine2'>
-        {translate('complete.message.body5')}</div>);
-      commandLines.push(<div className='body-line' key='commandLine3'>
-        {translate('complete.message.body6')}</div>);
     }
 
     let linkSection = '';
@@ -109,7 +82,7 @@ class Complete extends BaseWizardPage {
         </Modal.Header>
         <Modal.Body>
           {modelLines}
-          {commandLines}
+          <div className='body-header'>{translate('complete.message.refresh')}</div>
           {linkSection}
         </Modal.Body>
       </Modal>
