@@ -20,10 +20,7 @@ import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
 import { IpV4AddressValidator, MacAddressValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
-import {
-  genUID, maskPassword, getModelMacAddresses,
-  getModelIPMIAddresses, getMacIPMIAddrObjs }
-  from '../utils/ModelUtils.js';
+import { genUID, maskPassword } from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List, fromJS } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
@@ -52,15 +49,12 @@ class ReplaceServerDetails extends Component {
     };
   }
 
+  // This should be componentDidMOunt, since reactjs has deprecated ComponentWillMount
   componentWillMount() {
     if(this.props.data) {
       // the original data
       this.data = JSON.parse(JSON.stringify(this.props.data));
 
-      this.existMacAddressesModel = getModelMacAddresses(this.props.model);
-      this.existIPMIAddressesModel = getModelIPMIAddresses(this.props.model);
-      this.existMacIPMIAddrObjAvailServers =
-        getMacIPMIAddrObjs(this.props.autoServers, this.props.manualServers);
     }
 
     fetchJson('/api/v1/clm/user')
@@ -176,21 +170,12 @@ class ReplaceServerDetails extends Component {
 
   handleSelectAvailableServer = (serverId) => {
 
-
     //TODO need to find a way to show the details of the available server
     //selected
     this.setState({selectedServerId: serverId});
-    let allAvailableServers = [];
-    if(this.props.autoServers && this.props.autoServers.length > 0) {
-      allAvailableServers = this.props.autoServers;
-    }
-    if(this.props.manualServers && this.props.manualServers.length > 0) {
-      allAvailableServers = allAvailableServers.concat(this.props.manualServers);
-    }
-
-    let theServer = allAvailableServers.find(server => server.id === serverId);
-    let newJSData = {};
+    let theServer = this.props.knownServers.find(server => server.id === serverId);
     if(theServer) {
+      let newJSData = {};
       newJSData['ilo-ip'] = theServer['ilo-ip'] || '';
       newJSData['ilo-user'] = theServer['ilo-user'] || '';
       newJSData['ilo-password'] = theServer['ilo-password'] || '';
@@ -205,17 +190,30 @@ class ReplaceServerDetails extends Component {
 
   renderInput(name, type, isRequired, title, validate) {
     let extraProps = {};
+
+    const existMacIPMIAddrObjAvailServers = this.props.knownServers.map(server => ({
+      'serverId': server.id,
+      'mac-addr': server['mac-addr'],
+      'ilo-ip': server['ilo-ip']
+    }));
+
+    const existMacAddressesModel = this.props.model.getIn(['inputModel','servers'])
+      .map(server => server.get('mac-addr'));
+
+    const existIPMIAddressesModel = this.props.model.getIn(['inputModel','servers'])
+      .map(server => server.get('ilo-ip'));
+
     // if user doesn't select the server from available server and enter the same
     // mac-addr or ilo-ip as the one in the available servers
     // show error
     if(!this.state.isUseAvailServersChecked || this.state.selectedServerId === '') {
       if (name === 'mac-addr') {
-        extraProps['exist_mac_addresses'] = this.existMacAddressesModel;
-        extraProps['exist_availservers_mac_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
+        extraProps['exist_mac_addresses'] = existMacAddressesModel;
+        extraProps['exist_availservers_mac_addr_objs'] = existMacIPMIAddrObjAvailServers;
       }
       if (name === 'ilo-ip') {
-        extraProps['exist_ip_addresses'] = this.existIPMIAddressesModel;
-        extraProps['exist_availservers_ip_addr_objs'] = this.existMacIPMIAddrObjAvailServers;
+        extraProps['exist_ip_addresses'] = existIPMIAddressesModel;
+        extraProps['exist_availservers_ip_addr_objs'] = existMacIPMIAddrObjAvailServers;
       }
     }
     return (
@@ -253,16 +251,15 @@ class ReplaceServerDetails extends Component {
     );
   }
 
-  // If there are servers that have been discovered (or manually added) which have not yet
+  // If there are known servers (that have been discovered or manually added) which have not yet
   // been assigned into the model, then give the user the opportunity to select one of those
   renderAvailableServers() {
-    const allServerIds = List(this.props.autoServers).concat(List(this.props.manualServers))
-      .map(server => server.id);
+    const knownServerIds = List(this.props.knownServers.map(server => server.id));
 
     const modelIds = this.props.model.getIn(['inputModel','servers'])
       .map(server => server.get('uid') || server.get('id'));
 
-    const availableServerIds = allServerIds.filterNot(id => modelIds.includes(id));
+    const availableServerIds = knownServerIds.filterNot(id => modelIds.includes(id));
 
     if (! availableServerIds.isEmpty()) {
 
