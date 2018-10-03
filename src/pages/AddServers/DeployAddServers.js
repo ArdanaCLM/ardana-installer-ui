@@ -79,10 +79,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
       showPlabybookProcess: false,
       processErrorBanner: '',
       newHosts: this.getNewHosts(),
-      // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
       // this loading indicator
       loading: false,
       // warning message
@@ -99,8 +95,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
   componentWillReceiveProps(newProps) {
     this.setState({
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading,
       newHosts: newProps.operationProps.newHosts
     });
   }
@@ -219,12 +213,12 @@ class DeployAddServers extends BaseUpdateWizardPage {
   }
 
   toShowLoadingMask = () => {
-    return this.state.wizardLoading || this.state.loading;
+    return this.props.wizardLoading || this.state.loading;
   }
 
   isValidToRenderPlaybookProgress = () => {
     return (
-      this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading &&
+      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading &&
       this.state.newHosts && this.state.newHosts.length > 0
     );
   }
@@ -271,9 +265,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
           {this.state.warningMessage && this.renderSkipWarning()}
-          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
-            this.renderWizardLoadingErrors(
-              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
         </div>
         {this.renderNavButtons(cancel)}
       </div>
