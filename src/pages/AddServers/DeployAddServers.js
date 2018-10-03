@@ -78,25 +78,11 @@ class DeployAddServers extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
       showPlabybookProcess: false,
       processErrorBanner: '',
-      newHosts: this.getNewHosts(),
       // this loading indicator
       loading: false,
       // warning message
       warningMessage: undefined
     };
-  }
-
-  getNewHosts = () => {
-    return (
-      this.props.operationProps && this.props.operationProps.newHosts ?
-        this.props.operationProps.newHosts : []
-    );
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      newHosts: newProps.operationProps.newHosts
-    });
   }
 
   componentDidMount() {
@@ -125,7 +111,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
                 warningMessage: translate('server.addserver.skip.emptyhostnames', skipIds.join(','))
               });
             }
-            this.setState({newHosts: cleanedHosts});
             // at this point we should have some operationProps
             let opProps = Object.assign({}, this.props.operationProps);
             opProps.newHosts = cleanedHosts; // need for complete message
@@ -199,7 +184,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
       }
     });
 
-    let newHostNames = this.state.newHosts.map(host => host['hostname']);
+    let newHostNames = this.props.operationProps.newHosts.map(host => host['hostname']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
       if (step.payload) {
@@ -219,7 +204,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
   isValidToRenderPlaybookProgress = () => {
     return (
       this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading &&
-      this.state.newHosts && this.state.newHosts.length > 0
+      this.props.operationProps.newHosts && this.props.operationProps.newHosts.length > 0
     );
   }
 
