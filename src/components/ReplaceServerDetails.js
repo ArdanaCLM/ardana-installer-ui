@@ -51,12 +51,6 @@ class ReplaceServerDetails extends Component {
 
   // This should be componentDidMOunt, since reactjs has deprecated ComponentWillMount
   componentWillMount() {
-    if(this.props.data) {
-      // the original data
-      this.data = JSON.parse(JSON.stringify(this.props.data));
-
-    }
-
     fetchJson('/api/v1/clm/user')
       .then(responseData => {
         this.setState({
@@ -84,10 +78,13 @@ class ReplaceServerDetails extends Component {
   }
 
   handleDone = () => {
-    this.data['mac-addr'] = this.state.replaceData.get('mac-addr');
-    this.data['ilo-ip'] = this.state.replaceData.get('ilo-ip');
-    this.data['ilo-user'] = this.state.replaceData.get('ilo-user');
-    this.data['ilo-password'] = this.state.replaceData.get('ilo-password');
+
+    let data = {};
+
+    data['mac-addr'] = this.state.replaceData.get('mac-addr');
+    data['ilo-ip'] = this.state.replaceData.get('ilo-ip');
+    data['ilo-user'] = this.state.replaceData.get('ilo-user');
+    data['ilo-password'] = this.state.replaceData.get('ilo-password');
 
     let theProps = {
       wipeDisk : this.state.isWipeDiskChecked,
@@ -104,15 +101,15 @@ class ReplaceServerDetails extends Component {
     if(this.state.selectedServerId) {
       theProps.selectedServerId = this.state.selectedServerId;
       // if it is an existing server discovered or added, use its uid
-      this.data['uid'] = this.state.replaceData.get('uid');
+      data['uid'] = this.state.replaceData.get('uid');
     }
     else {
       // user input new mac-addr and ilo info
       // generate a new uid
-      this.data.uid = genUID();
+      data.uid = genUID();
     }
 
-    this.props.doneAction(this.data, theProps);
+    this.props.doneAction(data, theProps);
   }
 
   handleInputChange = (e, isValid, props) => {
