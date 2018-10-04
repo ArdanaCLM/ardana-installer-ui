@@ -78,31 +78,11 @@ class DeployAddServers extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
       showPlabybookProcess: false,
       processErrorBanner: '',
-      newHosts: this.getNewHosts(),
-      // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
       // this loading indicator
       loading: false,
       // warning message
       warningMessage: undefined
     };
-  }
-
-  getNewHosts = () => {
-    return (
-      this.props.operationProps && this.props.operationProps.newHosts ?
-        this.props.operationProps.newHosts : []
-    );
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading,
-      newHosts: newProps.operationProps.newHosts
-    });
   }
 
   componentDidMount() {
@@ -131,7 +111,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
                 warningMessage: translate('server.addserver.skip.emptyhostnames', skipIds.join(','))
               });
             }
-            this.setState({newHosts: cleanedHosts});
             // at this point we should have some operationProps
             let opProps = Object.assign({}, this.props.operationProps);
             opProps.newHosts = cleanedHosts; // need for complete message
@@ -205,7 +184,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
       }
     });
 
-    let newHostNames = this.state.newHosts.map(host => host['hostname']);
+    let newHostNames = this.props.operationProps.newHosts.map(host => host['hostname']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
       if (step.payload) {
@@ -219,13 +198,13 @@ class DeployAddServers extends BaseUpdateWizardPage {
   }
 
   toShowLoadingMask = () => {
-    return this.state.wizardLoading || this.state.loading;
+    return this.props.wizardLoading || this.state.loading;
   }
 
   isValidToRenderPlaybookProgress = () => {
     return (
-      this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading &&
-      this.state.newHosts && this.state.newHosts.length > 0
+      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading &&
+      this.props.operationProps.newHosts && this.props.operationProps.newHosts.length > 0
     );
   }
 
@@ -271,9 +250,6 @@ class DeployAddServers extends BaseUpdateWizardPage {
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
           {this.state.warningMessage && this.renderSkipWarning()}
-          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
-            this.renderWizardLoadingErrors(
-              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
         </div>
         {this.renderNavButtons(cancel)}
       </div>

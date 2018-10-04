@@ -25,19 +25,6 @@ import { alphabetically } from '../../utils/Sort.js';
 class CompleteAddServers extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
-    this.state = {
-      // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
   }
 
   renderServerList() {
@@ -67,13 +54,10 @@ class CompleteAddServers extends BaseUpdateWizardPage {
         translate('server.deploy.activate.addserver.complete') : translate('server.deploy.addserver.complete');
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.state.wizardLoading}/>
+        <LoadingMask show={this.props.wizardLoading}/>
         <div className='content-header'>{this.renderHeading(heading)}</div>
         <div className='wizard-content'>
           {this.renderServerList()}
-          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
-            this.renderWizardLoadingErrors(
-              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
         </div>
         {this.renderNavButtons()}
       </div>
