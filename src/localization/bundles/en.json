@@ -559,7 +559,6 @@
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",
-    "server.replace.installos": "Install OS",
     "server.replace.details.message": "Please provide MAC address and IPMI information for the replacement server.",
     "replace.server.details.role": "Role",
     "replace.server.details.ip-addr": "IP Address",
@@ -582,7 +581,7 @@
     "server.validating": "Validating Changes...",
     "server.addserver.skip.emptyhostnames": "The following hosts are skipped for further processes because of empty hostname \n {0}",
     "server.addserver.emptyhostnames": "There are no valid servers with hostnames to run deployement",
-    "server.addserver.prepare": "Preparing Adding Servers in Progress",
+    "server.addserver.prepare": "Preparing Servers",
     "server.addserver.prepare.failure": "Failed to prepare for adding servers",
     "server.addserver.deploy.failure": "Failed to deploy newly added servers",
     "server.addserver.compute.deploy": "Deploying Compute Servers",
@@ -598,5 +597,8 @@
     "server.deploy.progress.activate": "Activate New Servers",
     "server.deploy.activate.addserver.complete": "Successfully Added and Activate Compute Servers",
     "server.addserver.activate.message": "Setting this will activate all newly added servers",
-    "server.addserver.empty.computeroles.info": "There are no compute roles available"
+    "server.addserver.empty.computeroles.info": "There are no compute roles available",
+    "server.addserver.installos.passphrase.error": "Passphrase Error",
+    "server.addserver.compute.installos": "Installing SLES OS",
+    "server.addserver.compute.installos.complete": "Successfully Installed SLES OS on Compute Servers"
 }

@@ -19,23 +19,23 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 
-// This is the complete page for adding compute servers
-// process. It will display newly deployed server hostname,
-// server ID and IP.
-class CompleteAddServers extends BaseUpdateWizardPage {
+// This is the complete page for installing SLES OS on compute servers
+// It will display server ID, IP, mac-addr and ilo-ip
+class CompleteInstallOS extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
   }
 
   renderServerList() {
-    let serverList = this.props.operationProps.newHosts.sort((a, b) => {
-      return alphabetically(a['hostname'],b['hostname']);
-    }).map((host,idx) => {
+    let serverList = this.props.operationProps.selectedToInstallOS.sort((a, b) => {
+      return alphabetically(a['id'], b['id']);
+    }).map((host, idx) => {
       return (
-        <li key={idx}>{host['hostname']}
+        <li key={idx}>{host['id']}
           <ul className='complete-serverdetails'>
-            <li key={1}> {translate('server.id.prompt') + ': ' + host['id']} </li>
-            <li key={2}> {translate('server.details.ip') + ' ' + host['ip']} </li>
+            <li key={1}> {translate('server.details.ip') + ' ' + host['ip-addr']} </li>
+            <li key={2}> {translate('server.mac.prompt') + ' ' + host['mac-addr']} </li>
+            <li key={3}> {translate('server.ipmi.ip.prompt') + ' ' + host['ilo-ip']} </li>
           </ul>
         </li>
       );
@@ -49,13 +49,12 @@ class CompleteAddServers extends BaseUpdateWizardPage {
   }
 
   render() {
-    let heading =
-      this.props.operationProps.activate ?
-        translate('server.deploy.activate.addserver.complete') : translate('server.deploy.addserver.complete');
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
-        <div className='content-header'>{this.renderHeading(heading)}</div>
+        <div className='content-header'>
+          {this.renderHeading(translate('server.addserver.compute.installos.complete'))}
+        </div>
         <div className='wizard-content'>
           {this.renderServerList()}
         </div>
@@ -65,4 +64,4 @@ class CompleteAddServers extends BaseUpdateWizardPage {
   }
 }
 
-export default CompleteAddServers;
+export default CompleteInstallOS;

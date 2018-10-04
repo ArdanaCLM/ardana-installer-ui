@@ -562,7 +562,8 @@ class InstallWizard extends Component {
   toShowProgressBar = () => {
     if(this.IS_UPDATE) { //update
       if(this.state.processMenuName === this.props.menuName &&
-         this.state.currentStep !== undefined  && this.state.steps) {
+         this.state.currentStep !== undefined  &&
+         this.state.steps && this.state.steps.length > 1) {
         return true;
       }
       else {

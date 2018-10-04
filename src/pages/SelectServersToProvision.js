@@ -102,9 +102,17 @@ class SelectServersToProvision extends BaseWizardPage {
     // retrieve a list of servers that have roles
     fetchJson('/api/v1/clm/model/entities/servers')
       .then(responseData => {
+        let allServers = responseData;
+        if(this.props.isUpdateMode) {
+          if(this.props.operationProps.newServerIds.length > 0) {
+            allServers = responseData.filter(server => {
+              return this.props.operationProps.newServerIds.includes(server.id);
+            });
+          }
+        }
         this.setState({
-          allServers: responseData,
-          leftList: responseData.map(svr => svr.name || svr.id).sort()
+          allServers: allServers,
+          leftList: allServers.map(svr => svr.id).sort()
         });
       })
       .then(() => fetchJson('/api/v1/ips'))
@@ -119,9 +127,21 @@ class SelectServersToProvision extends BaseWizardPage {
 
     fetchJson('/api/v1/clm/sshagent/requires_password')
       .then((responseData) => {
+        let passRequired = responseData['requires_password'];
         this.setState({
-          requiresPassword: responseData['requires_password']
+          requiresPassword: passRequired
         });
+        // in update, save for later use and clean up
+        // last save
+        if(this.props.isUpdateMode) {
+          let opProps = Object.assign({}, this.props.operationProps);
+          opProps.sshPassphraseRequired = passRequired;
+          //clean up
+          opProps.sshPassphrase = '';
+          opProps.osInstallPassword = '';
+          opProps.selectedToInstallOS = undefined;
+          this.props.updateGlobalState('operationProps', opProps);
+        }
       });
   }
 
@@ -147,9 +167,28 @@ class SelectServersToProvision extends BaseWizardPage {
     }
   }
 
-  handleOsInstallPassword = (e, valid, props) => {
+  handleOsInstallPassword = (e) => {
     const password = e.target.value;
     this.setState({osInstallPassword: password});
+
+    // in update, will save for later use
+    if(this.props.isUpdateMode) {
+      let opProps = Object.assign({}, this.props.operationProps);
+      opProps.osInstallPassword = password;
+      this.props.updateGlobalState('operationProps', opProps);
+    }
+  }
+
+  handleSshPassphrase = (e) => {
+    const password = e.target.value;
+    this.setState({sshPassphrase: password});
+
+    // in update, will save for later use
+    if(this.props.isUpdateMode) {
+      let opProps = Object.assign({}, this.props.operationProps);
+      opProps.sshPassphrase = password;
+      this.props.updateGlobalState('operationProps', opProps);
+    }
   }
 
   updatePageStatus = (status) => {
@@ -167,7 +206,7 @@ class SelectServersToProvision extends BaseWizardPage {
           <div className='input-body'>
             <ValidatingInput isRequired='true' inputName='sshPassphrase'
               inputType='password' inputValue={this.state.sshPassphrase}
-              inputAction={(e) => {this.setState({sshPassphrase: e.target.value});}}/>
+              inputAction={this.handleSshPassphrase}/>
           </div>
         </div>
       );
@@ -202,13 +241,61 @@ class SelectServersToProvision extends BaseWizardPage {
     );
   }
 
+  getServerToProvision = (rList) => {
+    let rightList = rList || this.state.rightList;
+    let provisionServers =
+      this.state.allServers.filter(e =>
+        rightList.includes(e.name || e.id) && ! this.ips.includes(e['ip-addr']));
+    return provisionServers;
+  }
+
+  handleUpdateLeftTable = (list) => {
+    this.setState({leftList: list});
+  }
+
+  handleUpdateRightTable = (list) => {
+    this.setState({rightList: list});
+
+    // in update, will save only for later process use.
+    // When user refresh the seleted server to install
+    // OS  page, it doesn't pick up from saved
+    // info, user has to reselect
+    if(this.props.isUpdateMode) {
+      let provisionServers = this.getServerToProvision(list);
+      //save or remove selected in the progress.json
+      let opProps = Object.assign({}, this.props.operationProps);
+      opProps.selectedToInstallOS = provisionServers;
+      this.props.updateGlobalState('operationProps', opProps);
+    }
+  }
+
+  renderInstallButton() {
+    return (
+      <div className='button-container'>
+        <ActionButton
+          displayLabel={translate('provision.server.install')}
+          clickAction={() => this.setState({showModal: true})}
+          isDisabled={this.state.rightList.length == 0 || this.state.osInstallPassword === ''
+          || (this.state.requiresPassword && this.state.sshPassphrase === '')}/>
+      </div>
+    );
+  }
+
+  renderProvisionHeading() {
+    return (
+      <div className='content-header'>
+        {this.renderHeading(translate('provision.server.heading'))}
+      </div>
+    );
+  }
+
   renderTransferTable() {
+    const contentClass =
+      'wizard-content' + (this.props.isUpdateMode ? ' smaller-margin' : '');
     return (
       <div>
-        <div className='content-header'>
-          {this.renderHeading(translate('provision.server.heading'))}
-        </div>
-        <div className='wizard-content'>
+        {!this.props.isUpdateMode && this.renderProvisionHeading()}
+        <div className= {contentClass}>
           <div className='server-provision'>
             <div className='password-container'>
               <div className='detail-line'>
@@ -228,18 +315,12 @@ class SelectServersToProvision extends BaseWizardPage {
             <TransferTable
               leftList={this.state.leftList}
               rightList={this.state.rightList}
-              updateLeftList={(list) => this.setState({leftList: list})}
-              updateRightList={(list) => this.setState({rightList: list})}
+              updateLeftList={this.handleUpdateLeftTable}
+              updateRightList={this.handleUpdateRightTable}
               leftTableHeader={translate('provision.server.left.table')}
               rightTableHeader={translate('provision.server.right.table')}/>
             {this.state.hasError && this.showErrorBanner()}
-            <div className='button-container'>
-              <ActionButton
-                displayLabel={translate('provision.server.install')}
-                clickAction={() => this.setState({showModal: true})}
-                isDisabled={this.state.rightList.length == 0 || this.state.osInstallPassword === ''
-                  || (this.state.requiresPassword && this.state.sshPassphrase === '')}/>
-            </div>
+            {!this.props.isUpdateMode && this.renderInstallButton()}
             <YesNoModal show={this.state.showModal}
               title={translate('warning')}
               yesAction={this.startInstalling}
@@ -254,10 +335,8 @@ class SelectServersToProvision extends BaseWizardPage {
 
   renderBody() {
     // To show PlaybookProgress UI or not
-    if (this.state.installing || this.getPlaybookProgress()) {
-      const serversToProvision = this.state.allServers.filter(e =>
-        this.state.rightList.includes(e.name || e.id) && ! this.ips.includes(e['ip-addr']));
-
+    if ((this.state.installing || this.getPlaybookProgress()) && !this.props.isUpdateMode) {
+      const serversToProvision = this.getServerToProvision();
       const payload = {
         'extra-vars': {
           'nodelist': serversToProvision.map(e => e.id).join(','),
@@ -273,7 +352,7 @@ class SelectServersToProvision extends BaseWizardPage {
             <PlaybookProgress
               updatePageStatus={this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
               playbookStatus={this.props.playbookStatus} steps={OS_INSTALL_STEPS}
-              playbooks={[INSTALL_PLAYBOOK]} payload={payload} />
+              playbooks={[INSTALL_PLAYBOOK]} payload={payload} isUpdateMode = {this.props.isUpdateMode} />
             <div className='banner-container'>
               <ErrorBanner message={translate('provision.server.failure')}
                 show={this.state.overallStatus === STATUS.FAILED}/>
@@ -289,7 +368,7 @@ class SelectServersToProvision extends BaseWizardPage {
     return (
       <div className='wizard-page'>
         {this.renderBody()}
-        {this.renderNavButtons()}
+        {!this.props.isUpdateMode && this.renderNavButtons()}
       </div>
     );
   }
