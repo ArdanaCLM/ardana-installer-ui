@@ -138,29 +138,6 @@ export function getModelIPAddresses (model, excludeIPAddr) {
   return ipAddresses;
 }
 
-// get all available server ids which are not in the model
-export function getAvailableServerIds (model, autoServers, manualServers) {
-  let modelUids= model.getIn(['inputModel','servers'])
-    .map(server => server.get('uid') || server.get('id')).toJS();
-
-  let allAvailableServers = [];
-  if (autoServers && autoServers.length > 0) {
-    allAvailableServers = allAvailableServers.concat(autoServers);
-  }
-  if(manualServers && manualServers.length > 0) {
-    allAvailableServers = allAvailableServers.concat(manualServers);
-  }
-
-  // all the servers that don't belong to model
-  let servers = allAvailableServers.filter((server) => {
-    return (!modelUids.includes(server.uid));
-  });
-
-  let retServerIds = servers.map(server => server.id);
-
-  return retServerIds;
-}
-
 export function getMacIPMIAddrObjs(autoServers, manualServers) {
   let allAvailableServers = [];
   if (autoServers && autoServers.length > 0) {

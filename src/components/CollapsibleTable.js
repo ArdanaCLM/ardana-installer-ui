@@ -309,13 +309,16 @@ class CollapsibleTable extends Component {
 
   renderReplaceServerModal() {
     let title = translate('server.replace.heading', this.state.activeRowData.id);
+    let newProps = { ...this.props };
+    newProps.knownServers = [].concat(this.props.manualServers || []).concat(this.props.autoServers || []);
+
     return (
       <BaseInputModal
         show={this.state.showReplaceServerModal} className='edit-details-dialog'
         onHide={this.handleCancelReplaceServer} title={title}>
         <ReplaceServerDetails
           cancelAction={this.handleCancelReplaceServer} doneAction={this.handleDoneReplaceServer}
-          data={this.state.activeRowData} {...this.props}>
+          data={this.state.activeRowData} { ...newProps }>
         </ReplaceServerDetails>
       </BaseInputModal>
     );
