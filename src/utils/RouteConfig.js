@@ -77,7 +77,7 @@ export const routes = [
   { name: translate('servers'), slug: '/servers',
     items: [
       { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
-      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage, unfinished: true}
+      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage }
     ]
   }
 ];

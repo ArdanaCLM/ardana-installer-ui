@@ -33,9 +33,9 @@ class CompleteInstallOS extends BaseUpdateWizardPage {
       return (
         <li key={idx}>{host['id']}
           <ul className='complete-serverdetails'>
-            <li key={idx + '_1'}> {translate('server.details.ip') + ' ' + host['ip-addr']} </li>
-            <li key={idx + '_2'}> {translate('server.mac.prompt') + ' ' + host['mac-addr']} </li>
-            <li key={idx + '_3'}> {translate('server.ipmi.ip.prompt') + ' ' + host['ilo-ip']} </li>
+            <li key={1}> {translate('server.details.ip') + ' ' + host['ip-addr']} </li>
+            <li key={2}> {translate('server.mac.prompt') + ' ' + host['mac-addr']} </li>
+            <li key={3}> {translate('server.ipmi.ip.prompt') + ' ' + host['ilo-ip']} </li>
           </ul>
         </li>
       );

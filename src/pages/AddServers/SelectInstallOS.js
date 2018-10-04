@@ -14,6 +14,7 @@
 **/
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { translate } from '../../localization/localize.js';
@@ -41,13 +42,10 @@ class SelectInstallOS extends BaseUpdateWizardPage {
 
   componentWillReceiveProps(newProps) {
     let isInvalid =
-      !newProps.operationProps.selectedToInstallOS ||
-       newProps.operationProps.selectedToInstallOS.length === 0 ||
-      !newProps.operationProps.osInstallPassword ||
-       newProps.operationProps.osInstallPassword.length === 0 ||
+      isEmpty(newProps.operationProps.selectedToInstallOS) ||
+      isEmpty(newProps.operationProps.osInstallPassword) ||
       (newProps.operationProps.sshPassphraseRequired &&
-        (!newProps.operationProps.sshPassphrase ||
-          newProps.operationProps.sshPassphrase.length === 0));
+        isEmpty(newProps.operationProps.sshPassphrase));
     this.setState({isInvalid: isInvalid});
   }
 

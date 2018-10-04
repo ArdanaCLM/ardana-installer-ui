@@ -88,44 +88,31 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   assembleInstallProcessPages = () => {
-    let pages = [];
 
-    pages.push({
+    return [{
       name: 'SelectInstallOS',
       component: AddServersPages.SelectInstallOS
-    });
-
-    pages.push({
+    }, {
       name: 'ProcessInstallOS',
       component: AddServersPages.ProcessInstallOS
-    });
-
-    pages.push({
+    }, {
       name: 'CompleteInstallOS',
       component: AddServersPages.CompleteInstallOS
-    });
-
-    return pages;
+    }];
   }
 
   assembleDeployProcessPages = () => {
-    let pages = [];
 
-    pages.push({
+    return [{
       name: 'PrepareAddServers',
       component: AddServersPages.PrepareAddServers
-    });
-
-    pages.push({
+    }, {
       name: 'DeployAddServers',
       component: AddServersPages.DeployAddServers
-    });
-
-    pages.push({
+    }, {
       name: 'CompleteAddServers',
       component: AddServersPages.CompleteAddServers
-    });
-    return pages;
+    }];
   }
 
   getAddedServerIds = () => {
