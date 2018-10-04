@@ -22,7 +22,7 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { BaseInputModal, YesNoModal } from '../components/Modals.js';
 import { translate } from '../localization/localize.js';
-import { getServerRoles, isRoleAssignmentValid } from '../utils/ModelUtils.js';
+import { getServerRoles, isRoleAssignmentValid, hasConflictAddresses } from '../utils/ModelUtils.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 
 const ROLE_LIMIT = ['COMPUTE'];
@@ -45,13 +45,36 @@ class AddServers extends BaseUpdateWizardPage {
       // error message show as a popup modal for validation errors
       validationError: undefined,
       // indicator of this loading
-      loading: true,
+      loading: false,
       // show confirm dialog when user clicks Deploy
       showDeployConfirmModal: false
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    // If wizard is not loading then getDeployedServers,
+    // otherwise delay it when wizardLoading is done.
+    if(!this.props.wizardLoading) {
+      this.getDeployedServers();
+    }
+  }
+
+  componentWillReceiveProps(newProps) {
+    this.setState({
+      model : newProps.model,
+      wizardLoadingErrors: newProps.wizardLoadingErrors,
+      wizardLoading: newProps.wizardLoading
+    });
+
+    // if wizardLoading was going and now it is done
+    // getDeployedServers
+    if(this.state.wizardLoading && !newProps.wizardLoading) {
+      this.getDeployedServers();
+    }
+  }
+
+  getDeployedServers = () => {
+    this.setState({loading: true});
     // fetchJson(url, init, forceLogin, noCache)
     fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
       .then((servers) => {
@@ -64,32 +87,32 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      model : newProps.model,
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
+  assembleInstallProcessPages = () => {
+
+    return [{
+      name: 'SelectInstallOS',
+      component: AddServersPages.SelectInstallOS
+    }, {
+      name: 'ProcessInstallOS',
+      component: AddServersPages.ProcessInstallOS
+    }, {
+      name: 'CompleteInstallOS',
+      component: AddServersPages.CompleteInstallOS
+    }];
   }
 
-  assembleProcessPages = () => {
-    let pages = [];
+  assembleDeployProcessPages = () => {
 
-    pages.push({
+    return [{
       name: 'PrepareAddServers',
       component: AddServersPages.PrepareAddServers
-    });
-
-    pages.push({
+    }, {
       name: 'DeployAddServers',
       component: AddServersPages.DeployAddServers
-    });
-
-    pages.push({
+    }, {
       name: 'CompleteAddServers',
       component: AddServersPages.CompleteAddServers
-    });
-    return pages;
+    }];
   }
 
   getAddedServerIds = () => {
@@ -111,7 +134,7 @@ class AddServers extends BaseUpdateWizardPage {
     postJson('/api/v1/clm/config_processor')
       .then(() => {
         this.setState({validating: false});
-        let pages = this.assembleProcessPages();
+        let pages = this.assembleDeployProcessPages();
         let opProps = {'deployedServers': this.state.deployedServers};
         this.props.startUpdateProcess('AddServer', pages, opProps);
       })
@@ -121,8 +144,60 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
+  // Check the array list has duplicate values.
+  // Convert an array list to be a set which only contains
+  // unique values. If array list doesn't contain duplicate
+  // values, then set size is the same as the array list length,
+  // otherwise the list contains duplicate values.
+  hasDuplicates = (arrayList) => {
+    return (new Set(arrayList)).size !== arrayList.length;
+  }
+
+  hasAddressesConflicts = () => {
+    let hasConflicts = false;
+    let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
+    let deployedServerIds =
+      this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
+    let newServers = allSevers.filter(server => {
+      return !deployedServerIds.includes(server.id);
+    });
+    let modelDeployedServers = allSevers.filter(server => {
+      return deployedServerIds.includes(server.id);
+    });
+
+    // check if newly added servers have addresses conflicts with any deployed servers
+    for (let i = 0; i < newServers.length; i++) {
+      let newServer = newServers[i];
+      hasConflicts = hasConflictAddresses(newServer, modelDeployedServers);
+      if (hasConflicts) {
+        break;
+      }
+    }
+
+    // check if have duplicates within the newly added servers
+    if (!hasConflicts) {
+      let addresses = newServers.map(server => server['mac-addr']);
+      hasConflicts = this.hasDuplicates(addresses);
+
+      if(!hasConflicts) {
+        addresses = newServers.map(server => server['ip-addr']);
+        hasConflicts = this.hasDuplicates(addresses);
+      }
+
+      if(!hasConflicts) {
+        addresses = newServers.map(server => server['ilo-ip']);
+        hasConflicts = this.hasDuplicates(addresses);
+      }
+    }
+
+    return hasConflicts;
+  }
+
   installOS = () => {
-    //TODO implement
+    let pages = this.assembleInstallProcessPages();
+    let newIds = this.getAddedServerIds();
+    let opProps = {'newServerIds': newIds};
+    this.props.startUpdateProcess('AddServer-InstallOS', pages, opProps);
   }
 
   //check if we can deploy the new servers
@@ -133,7 +208,9 @@ class AddServers extends BaseUpdateWizardPage {
       // and have new servers added and do not have existing processOperation
       // going on
       return (
+        !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
+        !this.hasAddressesConflicts() &&
         getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })
@@ -145,8 +222,7 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    //TODO implement
-    return false;
+    return this.isDeployable();
   }
 
   isValidToRenderServerContent = () => {

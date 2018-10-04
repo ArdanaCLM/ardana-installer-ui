@@ -56,3 +56,4 @@ export const SITE_PLAYBOOK = 'site';
 export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
 export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
 export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';
+export const ARDANA_START_PLAYBOOK = 'ardana-start';

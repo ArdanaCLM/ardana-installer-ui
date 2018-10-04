@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { HashLink } from 'react-router-hash-link';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
-import { getInternalModel } from './TopologyUtils.js';
+import { getInternalModel, noHyphenWrap } from './TopologyUtils.js';
 import { ErrorBanner } from '../../components/Messages';
 import { LoadingMask } from '../../components/LoadingMask';
 import { byEntry, byProperty } from '../../utils/Sort.js';
@@ -77,7 +77,8 @@ class Networks extends Component {
           }
         }
 
-        const sorted_list = net_list.sort().map(n => <div key={n}><HashLink to={'#'+n}>{n}</HashLink></div>);
+        const sorted_list = net_list.sort().map(n => (
+          <div key={n}><HashLink to={'#'+n}>{noHyphenWrap(n)}</HashLink></div>));
 
         cells.push(
           <td key={cluster_name}>{sorted_list}</td>
@@ -95,7 +96,8 @@ class Networks extends Component {
           }
         }
 
-        const sorted_list = net_list.sort().map(n => <div key={n}><HashLink to={'#'+n}>{n}</HashLink></div>);
+        const sorted_list = net_list.sort().map(n => (
+          <div key={n}><HashLink to={'#'+n}>{noHyphenWrap(n)}</HashLink></div>));
 
         cells.push(
           <td key={resource_name}>{sorted_list}</td>
@@ -104,7 +106,7 @@ class Networks extends Component {
 
       // build row, which has nw_name, all cluster cells, and all resource cells
       table_rows.push(<tr key={nw_group_name}>
-        <td key="group_name"><HashLink to={'#' + nw_group_name}>{nw_group_name}</HashLink></td>
+        <td key="group_name"><HashLink to={'#' + nw_group_name}>{noHyphenWrap(nw_group_name)}</HashLink></td>
         {cells}
       </tr>);
     }
@@ -323,13 +325,13 @@ class Networks extends Component {
 
               let if_link;
               if (e.if_model) {
-                if_link = <HashLink to={'/topology/roles#'+e.if_model}>{e.if_model}</HashLink>;
+                if_link = <HashLink to={'/topology/roles#'+e.if_model}>{noHyphenWrap(e.if_model)}</HashLink>;
               }
 
               return (<tr key={e.addr || e.server}>
                 <td key='a' className='nw-group-addr'>{e.addr || ''}</td>
                 <td key='s' className='nw-group-server'>{server_link}</td>
-                <td key='m' className='nw-group-if-model'>{if_link}</td>
+                <td key='m'>{if_link}</td>
               </tr>);
             });
 
@@ -352,7 +354,7 @@ class Networks extends Component {
                 <th>
                   <span className='nw-group-addr'>{translate('address')}</span>
                   <span className='nw-group-server'>{translate('server')}</span>
-                  <span className='nw-group-if-model'>{translate('interface.model')}</span>
+                  <span>{translate('interface.model')}</span>
                 </th>
               </tr>
             </thead>

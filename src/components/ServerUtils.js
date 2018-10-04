@@ -90,6 +90,7 @@ export class ServerRolesAccordion extends Component {
     if(this.props.isUpdateMode) {
       extraProps.isUpdateMode = this.props.isUpdateMode;
       extraProps.deployedServers = this.state.deployedServers;
+      extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
     }
 
     return (

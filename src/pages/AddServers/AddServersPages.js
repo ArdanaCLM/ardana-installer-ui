@@ -16,9 +16,15 @@
 import CompleteAddServers from './CompleteAddServers.js';
 import DeployAddServers from './DeployAddServers.js';
 import PrepareAddServers from './PrepareAddServers.js';
+import CompleteInstallOS from './CompleteInstallOS.js';
+import ProcessInstallOS from './ProcessInstallOS.js';
+import SelectInstallOS from './SelectInstallOS.js';
 
 export const AddServersPages = {
   'PrepareAddServers': PrepareAddServers,
   'DeployAddServers': DeployAddServers,
-  'CompleteAddServers': CompleteAddServers
+  'CompleteAddServers': CompleteAddServers,
+  'SelectInstallOS': SelectInstallOS,
+  'ProcessInstallOS': ProcessInstallOS,
+  'CompleteInstallOS': CompleteInstallOS
 };

@@ -264,6 +264,14 @@ class ServiceInfo extends Component {
         this.setState({statusLoaded: true});
         this.checkLoadingMask();
       });
+
+    fetchJson('/api/v1/clm/monasca/service_status')
+      .then(responseData => {
+        this.setState({statusList: responseData});
+      })
+      .catch((error) => {
+        // no need to show error for this case
+      });
   }
 
   checkLoadingMask = () => {
@@ -323,7 +331,7 @@ class ServiceInfo extends Component {
       name = 'ops-console';
       break;
     default:
-      name = this.state.selectedService;
+      name = this.state.selectedService.name.toLowerCase();
     }
     return name + '-status';
   }
