@@ -89,6 +89,8 @@ class LoginPage extends Component {
           this.setState({errorMsg: translate('login.invalid')});
         } else if (error.status == 403) {
           this.setState({errorMsg: translate('login.unprivileged')});
+        } else if (error.status == 503) {
+          this.setState({errorMsg: translate('login.keystone.error')});
         } else {
           this.setState({errorMsg: translate('login.error', error)});
         }
