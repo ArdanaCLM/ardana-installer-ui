@@ -477,10 +477,21 @@ class PlaybookProgress extends Component {
         return playbook.name === playbookName;
       });
       // TODO need handle extraVars for day2
-      // for now hardcode default
-      let temp = {extraVars: {automate: 'true', encrypt: '', rekey: ''}};
+      // for now hardcode some global extraVars until those can be
+      // set by user
+      let temp = { extraVars: {automate: 'true', encrypt: '', rekey: ''}};
       if(book.payload) {
-        Object.keys(book.payload).forEach(key => temp[key] = book.payload[key]);
+        Object.keys(book.payload).forEach(key => {
+          if(key !== 'extraVars') {
+            temp[key] = book.payload[key];
+          }
+          else {
+            // merge extraVars with defaults extraVars
+            Object.keys(book.payload[key]).forEach(varKey => {
+              temp[key][varKey] = book.payload[key][varKey];
+            });
+          }
+        });
       }
       payload = JSON.stringify(temp);
     }

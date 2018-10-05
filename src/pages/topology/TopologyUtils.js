@@ -24,6 +24,11 @@ function loadInternalModel() {
   return fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml');
 }
 
+// Prevent wrapping on hyphens by replacing normal hyphen characters with the non-wrapping-hyphen character
+export function noHyphenWrap(s) {
+  return s.replace(/-/g, '\u2011');
+}
+
 export function getInternalModel() {
   modelPromise = modelPromise || loadInternalModel();
   return modelPromise;

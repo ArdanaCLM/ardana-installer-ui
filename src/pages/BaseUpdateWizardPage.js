@@ -17,7 +17,7 @@ import React from 'react';
 import BaseWizardPage from './BaseWizardPage.js';
 import { CloseButton, CancelButton } from '../components/Buttons.js';
 import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
-import {translate} from '../localization/localize.js';
+import { translate } from '../localization/localize.js';
 
 /**
  * This base class handles the functions common to update process
@@ -45,7 +45,7 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   }
 
   handleCloseLoadingErrorMessage = () => {
-    this.setState({loadingErrors: undefined});
+    this.setState({wizardLoadingErrors: undefined});
   }
 
   renderCloseButton() {

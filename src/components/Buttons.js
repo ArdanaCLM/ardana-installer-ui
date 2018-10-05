@@ -48,7 +48,7 @@ function CloseButton(props) {
 
 function CancelButton(props) {
   return (
-    <ActionButton
+    <ActionButton type='default'
       clickAction={props.clickAction}
       displayLabel={props.displayLabel || translate('cancel')}
       isDisabled={props.isDisabled}

@@ -52,20 +52,9 @@ class PrepareAddServers extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       showPlabybookProcess: false,
       processErrorBanner: '',
-      // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
       // this loading indicator
       loading: false
     };
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
@@ -106,12 +95,12 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   }
 
   toShowLoadingMask = () => {
-    return this.state.wizardLoading || this.state.loading;
+    return this.props.wizardLoading || this.state.loading;
   }
 
-  isValidToRenderPlaybookProgress = (cancel) => {
+  isValidToRenderPlaybookProgress = () => {
     return (
-      !cancel && this.state.showPlabybookProcess && !this.state.wizardLoading && !this.state.loading
+      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading
     );
   }
 
@@ -144,11 +133,8 @@ class PrepareAddServers extends BaseUpdateWizardPage {
           {this.renderHeading(translate('server.addserver.prepare'))}
         </div>
         <div className='wizard-content'>
-          {this.isValidToRenderPlaybookProgress(cancel) && this.renderPlaybookProgress()}
+          {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
-          {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
-            this.renderWizardLoadingErrors(
-              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
         </div>
         {this.renderNavButtons(cancel)}
       </div>

@@ -31,7 +31,7 @@ import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
 import Network from '../pages/topology/Networks.js';
-import ServerGroups from '../pages/topology/ServerGroups.js';
+import Servers from '../pages/topology/Servers.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
 import { isProduction } from './ConfigHelper.js';
 
@@ -70,14 +70,14 @@ export const routes = [
       { name: translate('regions'), slug: '/topology/regions', component: Regions },
       { name: translate('services'), slug: '/topology/services', component: Services },
       { name: translate('networks'), slug: '/topology/networks', component: Network },
-      { name: translate('server_groups'), slug: '/topology/server-groups', component: ServerGroups },
+      { name: translate('servers'), slug: '/topology/servers', component: Servers },
       { name: translate('roles'), slug: '/topology/roles', component: ServerRoles },
     ]
   },
   { name: translate('servers'), slug: '/servers',
     items: [
       { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
-      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage, unfinished: true}
+      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage }
     ]
   }
 ];

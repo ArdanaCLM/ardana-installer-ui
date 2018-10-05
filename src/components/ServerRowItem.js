@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import { EditPencilForTableRow , InfoForTableRow, DeleteForTableRow } from './Buttons.js';
 import { IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
+import { hasConflictAddresses } from '../utils/ModelUtils.js';
 
 class ServerRowItem extends Component {
   constructor(props) {
@@ -117,6 +118,17 @@ class ServerRowItem extends Component {
       badInput = this.props.checkDupIds.find(id => {
         return id === this.props.data.id;
       });
+    }
+    // check if newly added servers has duplicate ip-addr, mac-addr, ilo-ip
+    if(!badInput && this.props.checkNewDupAddresses) {
+      if(!this.props.checkNewDupAddresses.deployedServerIds.includes(this.props.data.id)) {
+        let otherServerAddresses =
+          this.props.checkNewDupAddresses.modelServerAddresses.filter(server => {
+            return server.id !== this.props.data.id;
+          });
+
+        badInput = hasConflictAddresses (this.props.data, otherServerAddresses);
+      }
     }
     if(badInput) {
       requiredUpdate = true;
