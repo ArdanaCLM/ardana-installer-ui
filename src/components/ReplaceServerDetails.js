@@ -18,7 +18,8 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
-import { IpV4AddressValidator, MacAddressValidator } from '../utils/InputValidators.js';
+import { IpV4AddressValidator, MacAddressValidator, createExcludesValidator, chainValidators }
+  from '../utils/InputValidators.js';
 import { genUID, maskPassword } from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
@@ -96,8 +97,8 @@ class ReplaceServerDetails extends Component {
     // update the available servers or manual servers list
     if(this.state.selectedServerId) {
       theProps.selectedServerId = this.state.selectedServerId;
-      // TODO if it is an existing server discovered or added, get its ID from knownServers
-      // this.props.knownServers.find(server => server.id === this.state.selectedServerId);
+      // TODO if it is an existing server discovered or added, get its ID from availableServers
+      // this.props.availableServers.find(server => server.id === this.state.selectedServerId);
       // was: data['uid'] = this.state.inputValue.get('uid');
     }
     else {
@@ -165,7 +166,7 @@ class ReplaceServerDetails extends Component {
   }
 
   handleSelectAvailableServer = (serverId) => {
-    const server = this.props.knownServers.find(server => server.id === serverId);
+    const server = this.props.availableServers.find(server => server.id === serverId);
     if (server) {
       this.setState((prev) => {
         let inputValue = prev.inputValue;
@@ -214,14 +215,9 @@ class ReplaceServerDetails extends Component {
   // If there are known servers (that have been discovered or manually added) which have not yet
   // been assigned into the model, then give the user the opportunity to select one of those
   renderAvailableServers() {
-    const knownServerIds = List(this.props.knownServers.map(server => server.id));
 
-    const modelIds = this.props.model.getIn(['inputModel','servers'])
-      .map(server => server.get('uid') || server.get('id'));
-
-    const availableServerIds = knownServerIds.filterNot(id => modelIds.includes(id));
-
-    if (! availableServerIds.isEmpty()) {
+    if (this.props.availableServers.length > 0) {
+      const availableServerIds = List(this.props.availableServers.map(server => server.id));
 
       let dropDown;
       if (this.state.isUseAvailServersSelected) {
@@ -273,19 +269,14 @@ class ReplaceServerDetails extends Component {
     }
   }
 
-
   renderServerContent() {
-    const existMacIPMIAddrObjAvailServers = this.props.knownServers.map(server => ({
-      'serverId': server.id,
-      'mac-addr': server['mac-addr'],
-      'ilo-ip': server['ilo-ip']
-    }));
+    const modelServers = this.props.model.getIn(['inputModel','servers']);
 
-    const existMacAddressesModel = this.props.model.getIn(['inputModel','servers'])
-      .map(server => server.get('mac-addr'));
+    const existingMacAddreses = modelServers.map(server => server.get('mac-addr'));
 
-    const existIPMIAddressesModel = this.props.model.getIn(['inputModel','servers'])
-      .map(server => server.get('ilo-ip'));
+    // Avoid re-using any existing IP addresses
+    const existingIpAddresses = modelServers.map(server => server.get('ilo-ip'))
+      .concat(modelServers.map(server => server.get('ip-addr')));
 
     return (
       <div>
@@ -296,18 +287,14 @@ class ReplaceServerDetails extends Component {
         <div className='server-details-container'>
           <InputLine
             isRequired={true} inputName='mac-addr' label='server.mac.prompt'
-            inputValidate={MacAddressValidator}
+            inputValidate={chainValidators(MacAddressValidator, createExcludesValidator(existingMacAddreses))}
             inputValue={this.state.inputValue.get('mac-addr')}
-            inputAction={this.handleInputChange}
-            exist_mac_addresses={existMacAddressesModel}
-            exist_availservers_mac_addr_objs={existMacIPMIAddrObjAvailServers} />
+            inputAction={this.handleInputChange} />
           <InputLine
             isRequired={true} inputName='ilo-ip' label='server.ipmi.ip.prompt'
-            inputValidate={IpV4AddressValidator}
+            inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
             inputValue={this.state.inputValue.get('ilo-ip')}
-            inputAction={this.handleInputChange}u
-            exist_ip_addresses={existIPMIAddressesModel}
-            exist_availservers_ip_addr_objs={existMacIPMIAddrObjAvailServers} />
+            inputAction={this.handleInputChange} />
           <InputLine
             isRequired={true} inputName='ilo-user' label='server.ipmi.username.prompt'
             inputValue={this.state.inputValue.get('ilo-user')}

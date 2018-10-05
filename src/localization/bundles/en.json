@@ -423,6 +423,7 @@
     "network.groups": "Network Groups",
     "forced.network.groups": "Forced Network Groups",
 
+    "duplicate.error": "Already in use",
     "complete.heading": "Cloud Deployment Successful",
     "complete.message.body1": "Congratulations! You've successfully deployed your cloud.",
     "complete.message.body2": "This is the information about your cloud:",
