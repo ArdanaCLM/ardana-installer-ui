@@ -149,11 +149,6 @@ class AddServers extends BaseUpdateWizardPage {
   hasDuplicates = (arrayList) => {
     // filter out empty items
     let cleanList = arrayList.filter(item => !isEmpty(item));
-    if(isEmpty(cleanList)) {
-      // all items in the arrayList are empty, don't consider they
-      // are duplicates.
-      return false;
-    }
 
     // Check the cleanList has duplicate values.
     // Convert a list to be a set which only contains
