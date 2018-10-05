@@ -164,7 +164,6 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   hasInvalidNewServers = (checkForInstall) => {
-    let isServersInvalid = false;
     let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
       this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
@@ -178,9 +177,8 @@ class AddServers extends BaseUpdateWizardPage {
     // check if newly added servers have addresses conflicts with any deployed servers
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
-      isServersInvalid = hasConflictAddresses(newServer, modelDeployedServers);
-      if (isServersInvalid) {
-        return isServersInvalid;
+      if (hasConflictAddresses(newServer, modelDeployedServers)) {
+        return true;
       }
     }
 
@@ -190,29 +188,24 @@ class AddServers extends BaseUpdateWizardPage {
       let hasOne = newServers.some(server =>
         !isEmpty(server['mac-addr']) && !isEmpty(server['ilo-ip']) &&
         !isEmpty(server['ilo-user']) && !isEmpty(server['ilo-password']));
-      isServersInvalid = !hasOne;
-      if(isServersInvalid) {
-        return isServersInvalid;
+      if(!hasOne) {
+        return true;
       }
     }
 
     // check if have duplicates within the newly added servers
     let addresses = newServers.map(server => server['mac-addr']);
-    isServersInvalid = this.hasDuplicates(addresses);
-    if(isServersInvalid) {
-      return isServersInvalid;
+    if(this.hasDuplicates(addresses)) {
+      return true;
     }
 
     addresses = newServers.map(server => server['ip-addr']);
-    isServersInvalid = this.hasDuplicates(addresses);
-    if(isServersInvalid) {
-      return isServersInvalid;
+    if(this.hasDuplicates(addresses)) {
+      return true;
     }
 
     addresses = newServers.map(server => server['ilo-ip']);
-    isServersInvalid = this.hasDuplicates(addresses);
-
-    return isServersInvalid;
+    return this.hasDuplicates(addresses);
   }
 
   installOS = () => {
