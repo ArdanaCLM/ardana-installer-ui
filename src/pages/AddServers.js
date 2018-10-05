@@ -14,6 +14,7 @@
 **/
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { AddServersPages } from './AddServers/AddServersPages.js';
 import AssignServerRoles from './AssignServerRoles.js';
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
@@ -150,11 +151,20 @@ class AddServers extends BaseUpdateWizardPage {
   // values, then set size is the same as the array list length,
   // otherwise the list contains duplicate values.
   hasDuplicates = (arrayList) => {
-    return (new Set(arrayList)).size !== arrayList.length;
+    if(isEmpty(arrayList)) {
+      return false;
+    }
+    // filter out empty items
+    let cleanList = arrayList.filter(item => !isEmpty(item));
+    if(isEmpty(cleanList)) {
+      return false;
+    }
+
+    return (new Set(cleanList)).size !== cleanList.length;
   }
 
-  hasAddressesConflicts = () => {
-    let hasConflicts = false;
+  hasInvalidNewServers = (checkForInstall) => {
+    let hasInvalid = false;
     let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
       this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
@@ -168,29 +178,38 @@ class AddServers extends BaseUpdateWizardPage {
     // check if newly added servers have addresses conflicts with any deployed servers
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
-      hasConflicts = hasConflictAddresses(newServer, modelDeployedServers);
-      if (hasConflicts) {
+      hasInvalid = hasConflictAddresses(newServer, modelDeployedServers);
+      if (hasInvalid) {
         break;
       }
     }
 
-    // check if have duplicates within the newly added servers
-    if (!hasConflicts) {
-      let addresses = newServers.map(server => server['mac-addr']);
-      hasConflicts = this.hasDuplicates(addresses);
+    // for install check at least one server has all the information to
+    // run install
+    if(!hasInvalid && checkForInstall) {
+      let hasOne = newServers.some(server =>
+        !isEmpty(server['mac-addr']) && !isEmpty(server['ilo-ip']) &&
+        !isEmpty(server['ilo-user']) && !isEmpty(server['ilo-password']));
+      hasInvalid = !hasOne;
+    }
 
-      if(!hasConflicts) {
+    // check if have duplicates within the newly added servers
+    if (!hasInvalid) {
+      let addresses = newServers.map(server => server['mac-addr']);
+      hasInvalid = this.hasDuplicates(addresses);
+
+      if(!hasInvalid) {
         addresses = newServers.map(server => server['ip-addr']);
-        hasConflicts = this.hasDuplicates(addresses);
+        hasInvalid = this.hasDuplicates(addresses);
       }
 
-      if(!hasConflicts) {
+      if(!hasInvalid) {
         addresses = newServers.map(server => server['ilo-ip']);
-        hasConflicts = this.hasDuplicates(addresses);
+        hasInvalid = this.hasDuplicates(addresses);
       }
     }
 
-    return hasConflicts;
+    return hasInvalid;
   }
 
   installOS = () => {
@@ -210,7 +229,7 @@ class AddServers extends BaseUpdateWizardPage {
       return (
         !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
-        !this.hasAddressesConflicts() &&
+        !this.hasInvalidNewServers() &&
         getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })
@@ -222,7 +241,20 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    return this.isDeployable();
+    if(this.state.model && this.state.model.size > 0) {
+      let newIds = this.getAddedServerIds();
+      // turn on the install button when all servers are valid for installing os
+      // and have new servers added and do not have existing processOperation
+      // going on
+      return (
+        !this.props.wizardLoadingErrors &&
+        newIds && newIds.length > 0 && !this.props.processOperation &&
+        !this.hasInvalidNewServers(true)
+      );
+    }
+    else {
+      return false;
+    }
   }
 
   isValidToRenderServerContent = () => {
