@@ -145,26 +145,26 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
-  // Check the array list has duplicate values.
-  // Convert an array list to be a set which only contains
-  // unique values. If array list doesn't contain duplicate
-  // values, then set size is the same as the array list length,
-  // otherwise the list contains duplicate values.
+
   hasDuplicates = (arrayList) => {
-    if(isEmpty(arrayList)) {
-      return false;
-    }
     // filter out empty items
     let cleanList = arrayList.filter(item => !isEmpty(item));
     if(isEmpty(cleanList)) {
+      // all items in the arrayList are empty, don't consider they
+      // are duplicates.
       return false;
     }
 
+    // Check the cleanList has duplicate values.
+    // Convert a list to be a set which only contains
+    // unique values. If list doesn't contain duplicate
+    // values, then set size is the same as the list length,
+    // otherwise the list contains duplicate values.
     return (new Set(cleanList)).size !== cleanList.length;
   }
 
   hasInvalidNewServers = (checkForInstall) => {
-    let hasInvalid = false;
+    let isServersInvalid = false;
     let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
       this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
@@ -178,38 +178,41 @@ class AddServers extends BaseUpdateWizardPage {
     // check if newly added servers have addresses conflicts with any deployed servers
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
-      hasInvalid = hasConflictAddresses(newServer, modelDeployedServers);
-      if (hasInvalid) {
-        break;
+      isServersInvalid = hasConflictAddresses(newServer, modelDeployedServers);
+      if (isServersInvalid) {
+        return isServersInvalid;
       }
     }
 
     // for install check at least one server has all the information to
     // run install
-    if(!hasInvalid && checkForInstall) {
+    if(checkForInstall) {
       let hasOne = newServers.some(server =>
         !isEmpty(server['mac-addr']) && !isEmpty(server['ilo-ip']) &&
         !isEmpty(server['ilo-user']) && !isEmpty(server['ilo-password']));
-      hasInvalid = !hasOne;
+      isServersInvalid = !hasOne;
+      if(isServersInvalid) {
+        return isServersInvalid;
+      }
     }
 
     // check if have duplicates within the newly added servers
-    if (!hasInvalid) {
-      let addresses = newServers.map(server => server['mac-addr']);
-      hasInvalid = this.hasDuplicates(addresses);
-
-      if(!hasInvalid) {
-        addresses = newServers.map(server => server['ip-addr']);
-        hasInvalid = this.hasDuplicates(addresses);
-      }
-
-      if(!hasInvalid) {
-        addresses = newServers.map(server => server['ilo-ip']);
-        hasInvalid = this.hasDuplicates(addresses);
-      }
+    let addresses = newServers.map(server => server['mac-addr']);
+    isServersInvalid = this.hasDuplicates(addresses);
+    if(isServersInvalid) {
+      return isServersInvalid;
     }
 
-    return hasInvalid;
+    addresses = newServers.map(server => server['ip-addr']);
+    isServersInvalid = this.hasDuplicates(addresses);
+    if(isServersInvalid) {
+      return isServersInvalid;
+    }
+
+    addresses = newServers.map(server => server['ilo-ip']);
+    isServersInvalid = this.hasDuplicates(addresses);
+
+    return isServersInvalid;
   }
 
   installOS = () => {
