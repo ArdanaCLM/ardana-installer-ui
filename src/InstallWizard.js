@@ -586,7 +586,7 @@ class InstallWizard extends Component {
   }
 
   renderProgressBar() {
-    return (<WizardProgress steps={this.state.steps} isUpdate={this.IS_UPDATE}/>);
+    return (<WizardProgress steps={this.state.steps}/>);
   }
 
   /**

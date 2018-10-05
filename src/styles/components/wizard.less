@@ -14,16 +14,19 @@
 **/
 @import "./../palette.less";
 
+// When contained within the navigation menu, restrict the width of the progress bar
+.content {
+  .wizard-progress-container {
+    width: 60%;
+  }
+}
+
 .wizard-progress-container {
   height: 2em;
   margin: 3.5em 0 2.5em;
   background-image: url(../../images/dot.png);
   display: flex;
   justify-content: space-between;
-
-  &.update {
-    width: 60%;
-  }
 
   > span:before {
     font-weight: bold;
