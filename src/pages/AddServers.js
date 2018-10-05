@@ -158,7 +158,7 @@ class AddServers extends BaseUpdateWizardPage {
     return (new Set(cleanList)).size !== cleanList.length;
   }
 
-  hasInvalidNewServers = (checkForInstall) => {
+  hasValidNewServers = (checkForInstall) => {
     let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
       this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
@@ -173,7 +173,7 @@ class AddServers extends BaseUpdateWizardPage {
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
       if (hasConflictAddresses(newServer, modelDeployedServers)) {
-        return true;
+        return false;
       }
     }
 
@@ -184,23 +184,23 @@ class AddServers extends BaseUpdateWizardPage {
         !isEmpty(server['mac-addr']) && !isEmpty(server['ilo-ip']) &&
         !isEmpty(server['ilo-user']) && !isEmpty(server['ilo-password']));
       if(!hasOne) {
-        return true;
+        return false;
       }
     }
 
     // check if have duplicates within the newly added servers
     let addresses = newServers.map(server => server['mac-addr']);
     if(this.hasDuplicates(addresses)) {
-      return true;
+      return false;
     }
 
     addresses = newServers.map(server => server['ip-addr']);
     if(this.hasDuplicates(addresses)) {
-      return true;
+      return false;
     }
 
     addresses = newServers.map(server => server['ilo-ip']);
-    return this.hasDuplicates(addresses);
+    return !this.hasDuplicates(addresses);
   }
 
   installOS = () => {
@@ -220,7 +220,7 @@ class AddServers extends BaseUpdateWizardPage {
       return (
         !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
-        !this.hasInvalidNewServers() &&
+        this.hasValidNewServers() &&
         getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })
@@ -240,7 +240,7 @@ class AddServers extends BaseUpdateWizardPage {
       return (
         !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
-        !this.hasInvalidNewServers(true)
+        this.hasValidNewServers(true)
       );
     }
     else {
