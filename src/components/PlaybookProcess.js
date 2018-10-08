@@ -18,6 +18,7 @@ import { translate } from '../localization/localize.js';
 import { getAppConfig } from '../utils/ConfigHelper.js';
 import { fetchJson, postJson, deleteJson } from '../utils/RestUtils.js';
 import { STATUS } from '../utils/constants.js';
+import { sleep } from '../utils/MiscUtils.js';
 import { ActionButton } from '../components/Buttons.js';
 import io from 'socket.io-client';
 import { List } from 'immutable';
@@ -270,23 +271,25 @@ class PlaybookProgress extends Component {
   }
 
   processEndMonitorPlaybook = (playbookName) => {
-    this.socket.disconnect();
-    const thisPlaybook = this.globalPlaybookStatus.find(e => e.name === playbookName);
-    // the global playbookStatus should be updated in playbookError or playbookStopped
-    if(thisPlaybook && thisPlaybook.status === STATUS.COMPLETE) {
-      let nextPlaybookName = this.findNextPlaybook(thisPlaybook.name);
-      if (nextPlaybookName) {
-        this.launchPlaybook(nextPlaybookName);
-      }
-      else {
-        this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
-      }
-    } else {
-      // in case of running only one playbook that has no playbook-stop tag
-      if (thisPlaybook && this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
-        this.setState((prevState) => {
-          return {'playbooksComplete': prevState.playbooksComplete.concat(playbookName + '.yml')};
-        });
+    if (this.socket.connected) {
+      this.socket.disconnect();
+      const thisPlaybook = this.globalPlaybookStatus.find(e => e.name === playbookName);
+      // the global playbookStatus should be updated in playbookError or playbookStopped
+      if(thisPlaybook && thisPlaybook.status === STATUS.COMPLETE) {
+        let nextPlaybookName = this.findNextPlaybook(thisPlaybook.name);
+        if (nextPlaybookName) {
+          this.launchPlaybook(nextPlaybookName);
+        }
+        else {
+          this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
+        }
+      } else {
+        // in case of running only one playbook that has no playbook-stop tag
+        if (thisPlaybook && this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
+          this.setState((prevState) => {
+            return {'playbooksComplete': prevState.playbooksComplete.concat(playbookName + '.yml')};
+          });
+        }
       }
     }
   }
@@ -681,7 +684,7 @@ class PlaybookProgress extends Component {
       // handle the case when can not receive end event for playbook
       let lastStepPlaybooks = this.props.steps[this.props.steps.length - 1].playbooks;
       if(lastStepPlaybooks.indexOf(playbookName + '.yml') !== -1) {
-        this.processEndMonitorPlaybook(playbookName);
+        sleep(2000).then(() => {this.processEndMonitorPlaybook(playbookName);});
       }
     }
   }
