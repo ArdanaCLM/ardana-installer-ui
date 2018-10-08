@@ -148,9 +148,15 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
     let  newServers = hosts.map(host => {
       return {
+        // generated hostname by ardana, this will be used
+        // to set --limit during deployment
+        // for example, ardana-cp1-comp0004
         hostname: host['ardana_ansible_host'],
         id: host['id'],
-        ip: host['addr']
+        ip: host['addr'],
+        // generated display hostname , for example, ardana-cp1-comp0004-mgmt
+        // this will be used for complete message
+        display_hostname: host['hostname']
       };
     });
 
