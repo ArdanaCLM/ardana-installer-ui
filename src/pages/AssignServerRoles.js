@@ -115,9 +115,6 @@ class AssignServerRoles extends BaseWizardPage {
 
       // add server, activate for all newly added servers
       isActivateChecked: this.props.operationProps && this.props.operationProps.activate || false,
-
-      // relatively reliable deployed servers list
-      deployedServers: this.props.deployedServers
     };
   }
 
@@ -127,14 +124,13 @@ class AssignServerRoles extends BaseWizardPage {
       ov: {checked: false, secured: true}
     };
 
-    // addserver get the saved global operationProps wipeDisk, activate and deployedServers
+    // addserver get the saved global operationProps wipeDisk, activate
     if(this.props.isUpdateMode) {
       let isChecked = newProps.operationProps && newProps.operationProps.wipeDisk || false;
       let isChecked2 = newProps.operationProps && newProps.operationProps.activate || false;
       this.setState({
         isWipeDiskChecked : isChecked,
-        isActivateChecked: isChecked2,
-        deployedServers : newProps.deployedServers
+        isActivateChecked: isChecked2
       });
     }
   }
@@ -635,7 +631,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   // get model object and saved servers before render UI
-  componentWillMount() {
+  componentDidMount() {
     try {
       //global suse manager token when embedded
       this.smApiToken = apiToken; // eslint-disable-line no-undef
@@ -1375,7 +1371,7 @@ class AssignServerRoles extends BaseWizardPage {
     let extraProps = {};
     if (this.props.isUpdateMode) {
       extraProps.isUpdateMode = this.props.isUpdateMode;
-      extraProps.deployedServers = this.state.deployedServers;
+      extraProps.deployedServers = this.props.deployedServers;
       extraProps.checkInputs = this.checkInputs;
       let modelServerAddresses =
         this.props.model.getIn(['inputModel','servers']).map(server => {

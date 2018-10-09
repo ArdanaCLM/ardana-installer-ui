@@ -53,17 +53,12 @@ export class ServerRolesAccordion extends Component {
     super(props);
 
     this.state = {
-      accordionPosition: 0,
-      deployedServers: this.props.deployedServers //for addserver
+      accordionPosition: 0
     };
   }
 
   handleTriggerClick = (idx, role) => {
     this.setState({accordionPosition: idx});
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({deployedServers: newProps.deployedServers});
   }
 
   renderAccordionServerTable(servers) {
@@ -89,7 +84,7 @@ export class ServerRolesAccordion extends Component {
     let extraProps = {};
     if(this.props.isUpdateMode) {
       extraProps.isUpdateMode = this.props.isUpdateMode;
-      extraProps.deployedServers = this.state.deployedServers;
+      extraProps.deployedServers = this.props.deployedServers;
       extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
     }
 
