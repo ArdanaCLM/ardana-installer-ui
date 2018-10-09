@@ -30,13 +30,15 @@ class EditTemplateFile extends Component {
     fetchJson('/api/v1/clm/service/files/' +  this.props.editFile)
       .then((response) => {
         this.setState({original: response, contents: response});
-        fetchJson('/api/v1/clm/service/files/' +  this.props.editFile + '.bak')
-          .then((response) => {
-            this.setState({original: response});
-          })
-          .catch((error) => {
-            // it's ok to not have the original file
-          });
+        if (this.props.revertable) {
+          fetchJson('/api/v1/clm/service/files/' +  this.props.editFile + '.bak')
+            .then((response) => {
+              this.setState({original: response});
+            })
+            .catch((error) => {
+              // it's ok to not have the original file
+            });
+        }
       });
   }
 
@@ -139,8 +141,18 @@ class ServiceTemplatesTab extends Component {
     this.props.disableTab(true);
   }
 
+  hasChange = (list) => {
+    let count = 0;
+    list.map((l) => {
+      if (l.changedFiles) {
+        count += l.changedFiles.length;
+      }
+    });
+    return count > 0;
+  }
+
   recordChangedFile = (contentChanged) => {
-    var updatedList = this.state.serviceFiles.map((val) => {
+    const updatedList = this.state.serviceFiles.map((val) => {
       if (val.service === this.state.editServiceName) {
         const newChangedFiles = val.changedFiles ? val.changedFiles.slice() : [];
         val.files.map((file) => {
@@ -162,10 +174,22 @@ class ServiceTemplatesTab extends Component {
       return val;
     });
     this.setState({serviceFiles: updatedList});
+    this.props.hasChange(this.hasChange(updatedList));
+  }
+
+  removeOrigFiles = () => {
+    this.state.serviceFiles.map((val) => {
+      if (val.changedFiles) {
+        val.changedFiles.map((file) => {
+          const filename = val.service + '/' + file + '.bak';
+          deleteJson('/api/v1/clm/service/files/' +  filename);
+        });
+      }
+    });
   }
 
   revertChanges = () => {
-    var revertedList = this.state.serviceFiles.map((val) => {
+    const revertedList = this.state.serviceFiles.map((val) => {
       if (val.changedFiles) {
         val.changedFiles.map((file) => {
           const filename = val.service + '/' + file;
@@ -181,6 +205,7 @@ class ServiceTemplatesTab extends Component {
       return val;
     });
     this.setState({serviceFiles: revertedList});
+    this.props.hasChange(false);
   }
 
   handleCloseEdit = () => {
