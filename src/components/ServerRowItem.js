@@ -20,14 +20,6 @@ import { hasConflictAddresses } from '../utils/ModelUtils.js';
 class ServerRowItem extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      isDraggable: this.props.isDraggable
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({isDraggable: newProps.isDraggable});
   }
 
   /**
@@ -133,13 +125,13 @@ class ServerRowItem extends Component {
     if(badInput) {
       requiredUpdate = true;
     }
-    let cName = this.state.isDraggable ? 'draggable' : '';
+    let cName = this.props.isDraggable ? 'draggable' : '';
     cName = requiredUpdate ? cName + ' required-update' : cName;
 
     // if the item is not draggable, we don't present edit and delete
     // actions, add empty td to push the info button to the last col
     let emptyCols = [];
-    if(!this.state.isDraggable) {
+    if(!this.props.isDraggable) {
       for(let i = 0; i < 2; i++) {
         emptyCols.push(<td key={i}><p></p></td>);
       }
@@ -147,7 +139,7 @@ class ServerRowItem extends Component {
 
     return (
       <tr className={cName}
-        draggable={this.state.isDraggable} onDragStart={(event) => this.drag(event, this.props.data)}>
+        draggable={this.props.isDraggable} onDragStart={(event) => this.drag(event, this.props.data)}>
         {this.renderServerColumns()}
         {emptyCols}
         {this.props.viewAction && this.renderInfoRow()}

@@ -33,13 +33,10 @@ class AddServers extends BaseUpdateWizardPage {
     super(props);
     this.checkInputs = ['nic-mapping', 'server-group'];
     this.state = {
-      model: this.props.model,
       deployedServers: undefined,
       validating: false,
       // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
+      wizardLoadingErrors: props.wizardLoadingErrors,
       // errors from getting deployed servers
       // it is fatal so it shows as error banner across the page
       errorBanner: undefined,
@@ -55,22 +52,25 @@ class AddServers extends BaseUpdateWizardPage {
   componentDidMount() {
     // If wizard is not loading then getDeployedServers,
     // otherwise delay it when wizardLoading is done.
-    if(!this.props.wizardLoading) {
+    if(this.props.wizardLoading === false) {
       this.getDeployedServers();
     }
   }
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      model : newProps.model,
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
+  componentDidUpdate(prevProps, prevState, snapshot) {
 
-    // if wizardLoading was going and now it is done
-    // getDeployedServers
-    if(this.state.wizardLoading && !newProps.wizardLoading) {
-      this.getDeployedServers();
+    if (this.props.wizardLoadingErrors !== prevProps.wizardLoadingErrors) {
+      this.setState({
+        wizardLoadingErrors: this.props.wizardLoadingErrors
+      });
+    }
+
+    if (this.props.wizardLoading !== prevProps.wizardLoading) {
+      // if wizardLoading was going and now it is done
+      // getDeployedServers
+      if(prevProps.wizardLoading && !this.props.wizardLoading) {
+        this.getDeployedServers();
+      }
     }
   }
 
@@ -159,9 +159,9 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   hasValidNewServers = (checkForInstall) => {
-    let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
+    let allSevers = this.props.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
-      this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
+      this.state.deployedServers ? this.state.deployedServers.map(server => server.id) : [];
     let newServers = allSevers.filter(server => {
       return !deployedServerIds.includes(server.id);
     });
@@ -212,7 +212,7 @@ class AddServers extends BaseUpdateWizardPage {
 
   //check if we can deploy the new servers
   isDeployable = () => {
-    if(this.state.model && this.state.model.size > 0) {
+    if(this.props.model && this.props.model.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the deploy button when all servers are valid
       // and have new servers added and do not have existing processOperation
@@ -221,7 +221,7 @@ class AddServers extends BaseUpdateWizardPage {
         !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers() &&
-        getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
+        getServerRoles(this.props.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })
       );
@@ -232,7 +232,7 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    if(this.state.model && this.state.model.size > 0) {
+    if(this.props.model && this.props.model.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the install button when all servers are valid for installing os
       // and have new servers added and do not have existing processOperation
@@ -252,15 +252,15 @@ class AddServers extends BaseUpdateWizardPage {
     return (
       // render the servers content when  model loaded, have no errors of deployed servers
       // and have no model loading errors and wizard loading is done
-      this.state.model && this.state.model.size > 0 && !this.state.errorBanner &&
+      this.props.model && this.props.model.size > 0 && !this.state.errorBanner &&
       (!this.state.wizardLoadingErrors || !this.state.wizardLoadingErrors.get('modelError')) &&
-      !this.state.wizardLoading
+      !this.props.wizardLoading
     );
   }
 
   toShowLoadingMask = () => {
     return (
-      this.state.loading || this.state.validating || this.state.wizardLoading
+      this.state.loading || this.state.validating || this.props.wizardLoading
     );
   }
 
@@ -273,13 +273,13 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   // reuse assignServerRole page for update
-  // this.props contains all the global props from InstallWizard
+  // this.props contains all the global props from UpdateWizard
   renderAddPage() {
     return (
       <AssignServerRoles
         rolesLimit={ROLE_LIMIT} checkInputs={this.checkInputs}
         deployedServers={this.state.deployedServers}
-        {...this.props}>
+        isUpdateMode={true} {...this.props}>
       </AssignServerRoles>
     );
   }
@@ -361,7 +361,7 @@ class AddServers extends BaseUpdateWizardPage {
         {this.renderValidationErrorModal()}
         {this.state.errorBanner && this.renderGetDeployedSrvsError()}
         {this.isValidToRenderServerContent() && this.renderFooterButtons()}
-        {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
+        {!this.props.wizardLoading && this.state.wizardLoadingErrors &&
           this.renderWizardLoadingErrors(
             this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
       </div>

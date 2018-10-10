@@ -36,21 +36,24 @@ class SelectInstallOS extends BaseUpdateWizardPage {
       // error msg
       passphraseError: undefined,
       // disable the next button when it is not valid
-      isInvalid: true
+      isValid: false
     };
   }
 
-  componentWillReceiveProps(newProps) {
-    let isInvalid =
-      isEmpty(newProps.operationProps.selectedToInstallOS) ||
-      isEmpty(newProps.operationProps.osInstallPassword) ||
-      (newProps.operationProps.sshPassphraseRequired &&
-        isEmpty(newProps.operationProps.sshPassphrase));
-    this.setState({isInvalid: isInvalid});
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if(this.props.operationProps !== prevProps.operationProps) {
+      let isValid =
+      !isEmpty(this.props.operationProps.selectedToInstallOS) &&
+      !isEmpty(this.props.operationProps.osInstallPassword) &&
+      (!this.props.operationProps.sshPassphraseRequired ||
+        (this.props.operationProps.sshPassphraseRequired &&
+        !isEmpty(this.props.operationProps.sshPassphrase)));
+      this.setState({isValid: isValid});
+    }
   }
 
   setNextButtonDisabled = () => {
-    return this.state.isInvalid;
+    return !this.state.isValid;
   }
 
   goForward(e) {
@@ -87,7 +90,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
 
   renderInstallSelectPage() {
     return (
-      <SelectServersToProvision {...this.props} />
+      <SelectServersToProvision isUpdateMode={true} {...this.props} />
     );
   }
 
@@ -112,7 +115,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
         <div className='wizard-content'>
           {!this.props.wizardLoading && this.renderInstallSelectPage()}
         </div>
-        {!this.state.isInvalid && this.renderInstallConfirmModal()}
+        {this.state.isValid && this.renderInstallConfirmModal()}
         {this.state.passphraseError && this.renderPassphraseErrorMsg()}
         {this.renderNavButtons(true)}
       </div>
