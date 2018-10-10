@@ -44,7 +44,7 @@ class UpdateWizard extends InstallWizard {
 
       // the current page where user is at hopefully, in the future it can be
       // used to return to the page where user gets session timeout
-      currentMenuName: this.props.menuName,
+      currentMenuName: props.menuName,
 
       // the menu name that has process in progress, this can be different from
       // currentMenuName
