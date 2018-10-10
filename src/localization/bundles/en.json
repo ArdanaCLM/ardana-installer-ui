@@ -558,6 +558,8 @@
     "services.available.version" : "Available Version",
     "services.package.unavailable" : "Package information is not available",
     "services.configuration.update": "Update Service Configuration",
+    "services.configuration.update.progress": "Update Service Configuration In Progress",
+    "services.configuration.update.commit.failure": "Failed to commit configuration changes - {0}",
 
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",
