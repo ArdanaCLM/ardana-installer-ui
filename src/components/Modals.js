@@ -19,6 +19,9 @@ import { translate } from '../localization/localize.js';
 import { InputLine } from '../components/InputLine.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { getAuthToken, setAuthToken, clearAuthToken } from '../utils/Auth.js';
+import { ErrorMessage } from '../components/Messages.js';
+import { ValidatingInput } from '../components/ValidatingInput.js';
+import HelpText from '../components/HelpText.js';
 import '../styles/deployer.less';
 
 function ConfirmModal(props) {
@@ -80,6 +83,81 @@ function BaseInputModal(props) {
       </Modal.Body>
     </Modal>
   );
+}
+
+class GetSshPassphraseModal extends Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      passphrase: '',
+      error: ''
+    };
+  }
+
+  setPassphrase = () => {
+    let password = {'password': this.state.passphrase};
+    postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+      .then(this.props.doneAction)
+      .catch((error) => {
+        this.props.cancelAction();
+        if (error.status === 401) {
+          this.setState({error: translate('get.passphrase.invalid'), passphrase: ''});
+        } else {
+          this.setState({error: translate('get.passphrase.error', error.value['error_msg']), passphrase: ''});
+        }
+      });
+  }
+
+  isValidPassphrase = () => {
+    if (this.state.passphrase) {
+      return true;
+    }
+    return false;
+  }
+
+  renderErrorMessage = () => {
+    if (this.state.error) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage closeAction={() => this.setState({error: ''})} title={this.state.error.title}
+            message={this.state.error}/>
+        </div>
+      );
+    }
+  }
+
+  render() {
+    const footer = (
+      <div className="btn-row">
+        <ActionButton type='default' clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
+        <ActionButton clickAction={this.setPassphrase} displayLabel={translate('ok')}
+          isDisabled={!this.isValidPassphrase()}/>
+      </div>
+    );
+
+    return (
+      <div>
+        {this.renderErrorMessage()}
+        <ConfirmModal show={this.props.show} title={translate('get.passphrase')}
+          onHide={this.props.cancelAction} footer={footer}>
+          <div>{translate('get.passphrase.description')}</div>
+          <div className='passphrase-line'>
+            <div className='passphrase-heading'>
+              {translate('validate.config.sshPassphrase') + '*'}
+              <HelpText tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
+            </div>
+            <div className='passphrase-input'>
+              <ValidatingInput isRequired='true' inputName='sshPassphrase'
+                inputType='password' inputValue={this.state.passphrase}
+                inputAction={(e) => {this.setState({passphrase: e.target.value});}}/>
+            </div>
+          </div>
+        </ConfirmModal>
+      </div>
+    );
+  }
 }
 
 class LoginModal extends Component {
@@ -194,4 +272,4 @@ class LoginModal extends Component {
   }
 }
 
-export { ConfirmModal, YesNoModal, BaseInputModal, LoginModal };
+export { ConfirmModal, YesNoModal, BaseInputModal, LoginModal, GetSshPassphraseModal };

@@ -62,6 +62,10 @@
     "legend.warning": "Warning",
     "legend.unknown": "Unknown",
     "legend.ok": "ok",
+    "get.passphrase": "Provide SSH Passphrase",
+    "get.passphrase.description": "The operation you are about to perform requires the SSH passphrase. Please provide the SSH passphrase or select the Cancel button to abort the operation.",
+    "get.passphrase.invalid": "SSH passphrase provided is incorrect. Please provide the correct SSH passphrase.",
+    "get.passphrase.error": "Unable to use the provided SSH passphrase: {0}.\nPlease correct the problem and try again.",
 
     "day2.product.name": "CLM\nAdmin Console",
     "day2.product.description": "Manage and configure your OpenStack cloud via one interface, anytime, anywhere.",
