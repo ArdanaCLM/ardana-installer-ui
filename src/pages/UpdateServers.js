@@ -30,63 +30,54 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      model: this.props.model,
       // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
+      wizardLoadingErrors: props.wizardLoadingErrors,
       // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
+      wizardLoading: props.wizardLoading,
       // this loading indicator
       loading: true,
-      errorMessages: []
+      errorMessages: [],
+
+      // Track which groups the user has expanded
+      expandedGroup: [],
+
+      // servers that were discovered or manually entered
+      servers: [],
     };
   }
 
-  componentWillReceiveProps(newProps) {
-    // depends on the backend, sometimes it could be
-    // slow, need to update once they are there
-    this.setState({
-      model: newProps.model,
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
-    if(newProps.model.getIn(['inputModel', 'server-roles'])) {
-      const allGroups =
-        newProps.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name')).toJS();
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.model !== prevProps.model)
+    {
+      const allGroups = this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
       if (allGroups.includes('COMPUTE-ROLE')) {
         this.setState({expandedGroup: ['COMPUTE-ROLE']});
-      } else {
-        this.setState({expandedGroup: [allGroups[0]]});
+      } else if (allGroups.size > 0) {
+        this.setState({expandedGroup: [allGroups.sort().first()]});
       }
+    }
+
+    if (this.props.wizardLoadingErrors !== prevProps.wizardLoadingErrors ||
+      this.props.wizardLoading !== prevProps.wizardLoading)
+    {
+      this.setState({
+        wizardLoadingErrors: this.props.wizardLoadingErrors,
+        wizardLoading: this.props.wizardLoading
+      });
     }
   }
 
-  componentWillMount() {
-    fetchJson('/api/v1/server?source=sm,ov')
-      .then((rawServerData) => {
-        if(rawServerData) {
-          this.setState({autoServers : rawServerData, loading: false});
-        }
+  componentDidMount() {
+    fetchJson('/api/v1/server?source=sm,ov,manual')
+      .then(servers => {
+        this.setState({
+          servers: servers,
+          loading: false});
       })
       .catch(error => {
         let msg = translate('server.retrieve.discovered.servers.error', error.toString());
-        this.setState(prev => {
-          return {
-            errorMessages: prev.errorMessages.concat([msg]),
-            loading: false
-          };
-        });
-      });
-
-    // get manually added servers
-    fetchJson('/api/v1/server?source=manual')
-      .then((responseData) => {
-        if (responseData.length > 0) {
-          this.setState({manualServers : responseData, loading: false});
-        }
-      })
-      .catch(error => {
-        let msg = translate('server.retrieve.manual.servers.error', error.toString());
         this.setState(prev => {
           return {
             errorMessages: prev.errorMessages.concat([msg]),
@@ -98,7 +89,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   expandAll() {
     const allGroups =
-      this.state.model.getIn(['inputModel','server-roles']).map(e => e.get('name'));
+      this.props.model.getIn(['inputModel','server-roles']).map(e => e.get('name'));
     this.setState({expandedGroup: allGroups});
   }
 
@@ -113,33 +104,18 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   addExpandedGroup = (groupName) => {
-    this.setState((prevState) => {
-      if(prevState.expandedGroup) {
-        return {'expandedGroup': prevState.expandedGroup.concat(groupName)};
-      }
-      else {
-        return {'expandedGroup': [groupName]};
-      }
-    });
+    this.setState(prevState => ({'expandedGroup': prevState.expandedGroup.concat(groupName)}));
   }
 
   updateServerForReplaceServer = (server) => {
-    for (let list of ['autoServers', 'manualServers']) {
-      if(this.state[list]) {
-        this.state[list].filter(s => server.uid === s.uid).forEach(match => {
-          const updated_server = getMergedServer(match, server, REPLACE_SERVER_PROPS);
-          putJson('/api/v1/server', JSON.stringify(updated_server))
-            .then((responseData) => {})
-            .catch(error => {
-              let msg = translate('server.save.error', error.toString());
-              this.setState(prev => {
-                return {
-                  errorMessages: prev.errorMessages.concat([msg])
-                };
-              });
-            });
+    let old = this.state.servers.find(s => server.uid === s.uid);
+    if (old) {
+      const updated_server = getMergedServer(old, server, REPLACE_SERVER_PROPS);
+      putJson('/api/v1/server', updated_server)
+        .catch(error => {
+          let msg = translate('server.save.error', error.toString());
+          this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
         });
-      }
     }
   }
 
@@ -170,7 +146,7 @@ class UpdateServers extends BaseUpdateWizardPage {
   replaceServer = (server, theProps) =>  {
     // update model
     let model =
-      updateServersInModel(server, this.state.model, MODEL_SERVER_PROPS_ALL, server.id);
+      updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL, server.id);
     this.props.updateGlobalState('model', model);
 
     // the new server is from discovered servers or manual servers
@@ -189,12 +165,6 @@ class UpdateServers extends BaseUpdateWizardPage {
     // trigger update process to start which calls the startUpdate in
     // InstallWizard
     this.props.startUpdateProcess('ReplaceServer', pages, theProps);
-  }
-
-  toShowLoadingMask = () => {
-    return (
-      this.state.wizardLoading || this.state.loading
-    );
   }
 
   handleCloseMessage = (idx) => {
@@ -231,12 +201,15 @@ class UpdateServers extends BaseUpdateWizardPage {
       ]
     };
 
+    const autoServers = this.state.servers.filter(s => s.source !== 'manual');
+    const manualServers = this.state.servers.filter(s => s.source === 'manual');
+
     return (
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
-        model={this.state.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
+        model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         replaceServer={this.replaceServer} updateGlobalState={this.props.updateGlobalState}
-        autoServers={this.state.autoServers} manualServers={this.state.manualServers}
+        autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation}/>
     );
   }
@@ -257,15 +230,15 @@ class UpdateServers extends BaseUpdateWizardPage {
   render() {
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.toShowLoadingMask()}/>
+        <LoadingMask show={this.state.wizardLoading || this.state.loading}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
           </div>
-          {this.state.model && this.state.model.size > 0 && this.renderGlobalButtons()}
+          {this.props.model && this.props.model.size > 0 && this.renderGlobalButtons()}
         </div>
         <div className='wizard-content unlimited-height'>
-          {this.state.model && this.state.model.size > 0 && this.renderCollapsibleTable()}
+          {this.props.model && this.props.model.size > 0 && this.renderCollapsibleTable()}
           {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
            this.renderWizardLoadingErrors(
              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}

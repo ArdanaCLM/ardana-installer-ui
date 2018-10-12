@@ -230,7 +230,7 @@ class CollapsibleTable extends Component {
   renderMenuAction = (server) => {
     return (
       <span className='menu-icon' onClick={(event) => this.handleShowMenu(event, server)}>
-        <i className='material-icons'>more_vert</i>
+        <i className='material-icons'>more_horiz</i>
       </span>
     );
   }
@@ -310,7 +310,16 @@ class CollapsibleTable extends Component {
   renderReplaceServerModal() {
     let title = translate('server.replace.heading', this.state.activeRowData.id);
     let newProps = { ...this.props };
-    newProps.knownServers = [].concat(this.props.manualServers || []).concat(this.props.autoServers || []);
+
+    const modelIds = this.props.model.getIn(['inputModel','servers'])
+      .map(server => server.get('uid') || server.get('id'));
+
+    // The servers that can be used for possible replacements are all of those discovered servers (either
+    //   manually or automatic) that are *not* already assigned somewhere in the model
+    const available = [].concat(this.props.manualServers || []).concat(this.props.autoServers || [])
+      .filter(server => ! modelIds.includes(server.uid));
+
+    newProps.availableServers = available;
 
     return (
       <BaseInputModal

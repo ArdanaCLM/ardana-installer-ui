@@ -24,6 +24,7 @@ import { AlarmDonut } from '../components/Graph';
 import { ErrorMessage } from '../components/Messages.js';
 import ContextMenu from '../components/ContextMenu.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { GetSshPassphraseModal } from '../components/Modals.js';
 
 const MONASCA_SERVICES_MAP = {
   ardana: 'ardana',
@@ -233,7 +234,9 @@ class ServiceInfo extends Component {
       endpointsLoaded: false,
       statusLoaded: false,
       error: undefined,
-      menuLocation: undefined
+      menuLocation: undefined,
+      showGetPassphraseModal: false,
+      requiresPassphrase: true
     };
   }
 
@@ -271,6 +274,13 @@ class ServiceInfo extends Component {
       })
       .catch((error) => {
         // no need to show error for this case
+      });
+
+    fetchJson('/api/v1/clm/sshagent/requires_password')
+      .then((responseData) => {
+        this.setState({
+          requiresPassphrase: responseData['requires_password']
+        });
       });
   }
 
@@ -337,13 +347,22 @@ class ServiceInfo extends Component {
   }
 
   showRunStatusPlaybookModal = () => {
-    const playbookName = this.getPlaybookName();
-    this.setState({
-      showActionMenu: false,
-      showRunStatusPlaybookModal: true,
-      playbooks: [playbookName],
-      steps: [{label: 'status', playbooks: [playbookName + '.yml']}],
-    });
+    if (this.state.requiresPassphrase) {
+      this.setState({showGetPassphraseModal: true});
+    } else {
+      const playbookName = this.getPlaybookName();
+      this.setState({
+        showActionMenu: false,
+        showRunStatusPlaybookModal: true,
+        playbooks: [playbookName],
+        steps: [{label: 'status', playbooks: [playbookName + '.yml']}],
+      });
+    }
+  }
+
+  handlePassphrase = () => {
+    this.setState({showGetPassphraseModal: false, requiresPassphrase: false});
+    this.showRunStatusPlaybookModal();
   }
 
   renderMenuItems = () => {
@@ -417,6 +436,11 @@ class ServiceInfo extends Component {
         });
     }
 
+    const passPhraseModal = (
+      <GetSshPassphraseModal show={this.state.showGetPassphraseModal} doneAction={this.handlePassphrase}
+        cancelAction={() => this.setState({showGetPassphraseModal: false})}/>
+    );
+
     let statusModal;
     if (this.state.showRunStatusPlaybookModal) {
       statusModal = (
@@ -438,6 +462,7 @@ class ServiceInfo extends Component {
 
     return (
       <div>
+        {passPhraseModal}
         {statusModal}
         {detailsModal}
         {this.renderErrorMessage()}

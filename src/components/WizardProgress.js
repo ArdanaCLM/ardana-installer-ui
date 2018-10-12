@@ -42,9 +42,9 @@ class WizardProgress extends Component {
         );
       }
     });
-    let cls = 'wizard-progress-container' + (this.props.isUpdate ? ' update' : '');
+
     return(
-      <div className={cls}>
+      <div className="wizard-progress-container">
         {stateBubbles}
       </div>
     );

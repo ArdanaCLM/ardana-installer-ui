@@ -26,7 +26,7 @@ import AddServers from '../pages/AddServers.js';
 import { AddServersPages } from '../pages/AddServers/AddServersPages.js';
 import UpdateServers from '../pages/UpdateServers.js';
 import { UpdateServerPages } from '../pages/ReplaceServer/UpdateServerPages.js';
-import InstallWizard from '../InstallWizard.js';
+import UpdateWizard from '../UpdateWizard.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
 import Services from '../pages/topology/Services.js';
@@ -38,7 +38,7 @@ import { isProduction } from './ConfigHelper.js';
 class ServerSummary extends  Component {
   render() {
     return(
-      <InstallWizard pageSet={UpdateServerPages} menuComponent={UpdateServers} menuName='/servers/server-summary'/>
+      <UpdateWizard pageSet={UpdateServerPages} menuComponent={UpdateServers} menuName='/servers/server-summary'/>
     );
   }
 }
@@ -46,7 +46,7 @@ class ServerSummary extends  Component {
 class AddServersPage extends  Component {
   render() {
     return(
-      <InstallWizard pageSet={AddServersPages} menuComponent={AddServers} menuName='/servers/add-server'/>
+      <UpdateWizard pageSet={AddServersPages} menuComponent={AddServers} menuName='/servers/add-server'/>
     );
   }
 }
