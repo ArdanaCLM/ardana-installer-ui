@@ -14,6 +14,7 @@
 **/
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { AddServersPages } from './AddServers/AddServersPages.js';
 import AssignServerRoles from './AssignServerRoles.js';
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
@@ -32,13 +33,10 @@ class AddServers extends BaseUpdateWizardPage {
     super(props);
     this.checkInputs = ['nic-mapping', 'server-group'];
     this.state = {
-      model: this.props.model,
       deployedServers: undefined,
       validating: false,
       // loading errors from wizard model or progress loading
-      wizardLoadingErrors: this.props.wizardLoadingErrors,
-      // loading indicator from wizard
-      wizardLoading: this.props.wizardLoading,
+      wizardLoadingErrors: props.wizardLoadingErrors,
       // errors from getting deployed servers
       // it is fatal so it shows as error banner across the page
       errorBanner: undefined,
@@ -54,22 +52,25 @@ class AddServers extends BaseUpdateWizardPage {
   componentDidMount() {
     // If wizard is not loading then getDeployedServers,
     // otherwise delay it when wizardLoading is done.
-    if(!this.props.wizardLoading) {
+    if(this.props.wizardLoading === false) {
       this.getDeployedServers();
     }
   }
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      model : newProps.model,
-      wizardLoadingErrors: newProps.wizardLoadingErrors,
-      wizardLoading: newProps.wizardLoading
-    });
+  componentDidUpdate(prevProps, prevState, snapshot) {
 
-    // if wizardLoading was going and now it is done
-    // getDeployedServers
-    if(this.state.wizardLoading && !newProps.wizardLoading) {
-      this.getDeployedServers();
+    if (this.props.wizardLoadingErrors !== prevProps.wizardLoadingErrors) {
+      this.setState({
+        wizardLoadingErrors: this.props.wizardLoadingErrors
+      });
+    }
+
+    if (this.props.wizardLoading !== prevProps.wizardLoading) {
+      // if wizardLoading was going and now it is done
+      // getDeployedServers
+      if(prevProps.wizardLoading && !this.props.wizardLoading) {
+        this.getDeployedServers();
+      }
     }
   }
 
@@ -144,20 +145,23 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
-  // Check the array list has duplicate values.
-  // Convert an array list to be a set which only contains
-  // unique values. If array list doesn't contain duplicate
-  // values, then set size is the same as the array list length,
-  // otherwise the list contains duplicate values.
+
   hasDuplicates = (arrayList) => {
-    return (new Set(arrayList)).size !== arrayList.length;
+    // filter out empty items
+    let cleanList = arrayList.filter(item => !isEmpty(item));
+
+    // Check the cleanList has duplicate values.
+    // Convert a list to be a set which only contains
+    // unique values. If list doesn't contain duplicate
+    // values, then set size is the same as the list length,
+    // otherwise the list contains duplicate values.
+    return (new Set(cleanList)).size !== cleanList.length;
   }
 
-  hasAddressesConflicts = () => {
-    let hasConflicts = false;
-    let allSevers = this.state.model.getIn(['inputModel','servers']).toJS();
+  hasValidNewServers = (checkForInstall) => {
+    let allSevers = this.props.model.getIn(['inputModel','servers']).toJS();
     let deployedServerIds =
-      this.state.deployedServers ?  this.state.deployedServers.map(server => server.id) : [];
+      this.state.deployedServers ? this.state.deployedServers.map(server => server.id) : [];
     let newServers = allSevers.filter(server => {
       return !deployedServerIds.includes(server.id);
     });
@@ -168,29 +172,35 @@ class AddServers extends BaseUpdateWizardPage {
     // check if newly added servers have addresses conflicts with any deployed servers
     for (let i = 0; i < newServers.length; i++) {
       let newServer = newServers[i];
-      hasConflicts = hasConflictAddresses(newServer, modelDeployedServers);
-      if (hasConflicts) {
-        break;
+      if (hasConflictAddresses(newServer, modelDeployedServers)) {
+        return false;
+      }
+    }
+
+    // for install check at least one server has all the information to
+    // run install
+    if(checkForInstall) {
+      let hasOne = newServers.some(server =>
+        !isEmpty(server['mac-addr']) && !isEmpty(server['ilo-ip']) &&
+        !isEmpty(server['ilo-user']) && !isEmpty(server['ilo-password']));
+      if(!hasOne) {
+        return false;
       }
     }
 
     // check if have duplicates within the newly added servers
-    if (!hasConflicts) {
-      let addresses = newServers.map(server => server['mac-addr']);
-      hasConflicts = this.hasDuplicates(addresses);
-
-      if(!hasConflicts) {
-        addresses = newServers.map(server => server['ip-addr']);
-        hasConflicts = this.hasDuplicates(addresses);
-      }
-
-      if(!hasConflicts) {
-        addresses = newServers.map(server => server['ilo-ip']);
-        hasConflicts = this.hasDuplicates(addresses);
-      }
+    let addresses = newServers.map(server => server['mac-addr']);
+    if(this.hasDuplicates(addresses)) {
+      return false;
     }
 
-    return hasConflicts;
+    addresses = newServers.map(server => server['ip-addr']);
+    if(this.hasDuplicates(addresses)) {
+      return false;
+    }
+
+    addresses = newServers.map(server => server['ilo-ip']);
+    return !this.hasDuplicates(addresses);
   }
 
   installOS = () => {
@@ -202,7 +212,7 @@ class AddServers extends BaseUpdateWizardPage {
 
   //check if we can deploy the new servers
   isDeployable = () => {
-    if(this.state.model && this.state.model.size > 0) {
+    if(this.props.model && this.props.model.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the deploy button when all servers are valid
       // and have new servers added and do not have existing processOperation
@@ -210,8 +220,8 @@ class AddServers extends BaseUpdateWizardPage {
       return (
         !this.props.wizardLoadingErrors &&
         newIds && newIds.length > 0 && !this.props.processOperation &&
-        !this.hasAddressesConflicts() &&
-        getServerRoles(this.state.model, ROLE_LIMIT).every(role => {
+        this.hasValidNewServers() &&
+        getServerRoles(this.props.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
         })
       );
@@ -222,22 +232,35 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    return this.isDeployable();
+    if(this.props.model && this.props.model.size > 0) {
+      let newIds = this.getAddedServerIds();
+      // turn on the install button when all servers are valid for installing os
+      // and have new servers added and do not have existing processOperation
+      // going on
+      return (
+        !this.props.wizardLoadingErrors &&
+        newIds && newIds.length > 0 && !this.props.processOperation &&
+        this.hasValidNewServers(true)
+      );
+    }
+    else {
+      return false;
+    }
   }
 
   isValidToRenderServerContent = () => {
     return (
       // render the servers content when  model loaded, have no errors of deployed servers
       // and have no model loading errors and wizard loading is done
-      this.state.model && this.state.model.size > 0 && !this.state.errorBanner &&
+      this.props.model && this.props.model.size > 0 && !this.state.errorBanner &&
       (!this.state.wizardLoadingErrors || !this.state.wizardLoadingErrors.get('modelError')) &&
-      !this.state.wizardLoading
+      !this.props.wizardLoading
     );
   }
 
   toShowLoadingMask = () => {
     return (
-      this.state.loading || this.state.validating || this.state.wizardLoading
+      this.state.loading || this.state.validating || this.props.wizardLoading
     );
   }
 
@@ -250,13 +273,13 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   // reuse assignServerRole page for update
-  // this.props contains all the global props from InstallWizard
+  // this.props contains all the global props from UpdateWizard
   renderAddPage() {
     return (
       <AssignServerRoles
         rolesLimit={ROLE_LIMIT} checkInputs={this.checkInputs}
         deployedServers={this.state.deployedServers}
-        {...this.props}>
+        isUpdateMode={true} {...this.props}>
       </AssignServerRoles>
     );
   }
@@ -338,7 +361,7 @@ class AddServers extends BaseUpdateWizardPage {
         {this.renderValidationErrorModal()}
         {this.state.errorBanner && this.renderGetDeployedSrvsError()}
         {this.isValidToRenderServerContent() && this.renderFooterButtons()}
-        {!this.state.wizardLoading && this.state.wizardLoadingErrors &&
+        {!this.props.wizardLoading && this.state.wizardLoadingErrors &&
           this.renderWizardLoadingErrors(
             this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
       </div>

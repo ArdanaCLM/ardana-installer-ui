@@ -316,3 +316,54 @@ export function IpInNetmaskValidator(ip, netmask) {
   const netmaskInt = ipAddrToInt(netmask);
   return (ipInt & netmaskInt) >>> 0 === ipInt;
 }
+
+// Return a validator that requires the entered value to
+// NOT be in the given list or set.
+//
+// Note that the counterpart to this validator, createIncludesValidator,
+// is generally unnecessary, since a pulldown list would normally
+// be used in the situation where there is a fixed set of valid inputs.
+export function createExcludesValidator(values) {
+
+  function validator(value) {
+
+    let exists;
+    if (typeof(values) === 'object' && values instanceof Set) {
+      exists = values.has(value);
+    } else {
+      exists = values.includes(value);
+    }
+
+    if (exists) {
+      return {
+        isValid: false,
+        errorMsg: translate('duplicate.error', value)
+      };
+    } else {
+      return { isValid: true };
+    }
+  }
+
+  return validator;
+}
+
+// Return a single validator function that in turn invokes multiple validators, and
+// returning the result if any fail.
+// This permits checking against multiple criteria simply; without this, checking
+// against multiple criteria requires either creating a single function that has multiple
+// ways of using it (depending on which criteria are to be enforced), or it requires
+// a writing a combinatorial number of functions depending on the criteria
+export function chainValidators(...validators) {
+
+  function chained(value) {
+    for (let validator of validators) {
+      const result = validator(value);
+      if (! result.isValid) {
+        return result;
+      }
+    }
+    return { isValid: true };
+  }
+
+  return chained;
+}

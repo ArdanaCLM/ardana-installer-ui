@@ -15,49 +15,140 @@
 
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
-import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import { ActionButton } from '../components/Buttons.js';
+import { postJson } from '../utils/RestUtils.js';
+import { ErrorMessage } from '../components/Messages.js';
+import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { STATUS } from '../utils/constants.js';
+import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
+
+const PLAYBOOKS = ['installui-pre-deployment', 'site'];
+const PLAYBOOK_STEPS = [
+  {
+    label: translate('deploy.progress.config-processor-run'),
+    playbooks: ['config-processor-run.yml']
+  },
+  {
+    label: translate('deploy.progress.ready-deployment'),
+    playbooks: ['ready-deployment.yml']
+  },
+  {
+    label: translate('deploy.progress.step6'),
+    playbooks: ['site.yml'],
+  }
+];
 
 class ServiceConfiguration extends Component {
 
   constructor() {
     super();
     this.state = {
-      showActionButtons: true
+      showActionButtons: true,
+      showUpdateProgress: false,
+      isChanged: false,
+      updateCompleted: false,
+      error: undefined
     };
   }
 
-  handleUpdateConfig() {
+  startConfigUpdate = () => {
+    // remove original files and commit configuration changes
+    this.serviceTemplatesTab.removeOrigFiles();
+    const commitMessage = {'message': 'Committed via CLM Admin Console'};
+    postJson('/api/v1/clm/model/commit', commitMessage)
+      .then(() => {
+        this.setState({showUpdateProgress: true, updateCompleted: false});
+      })
+      .catch((error) => {
+        this.setState({
+          error: {
+            title: translate('default.error'),
+            messages: [translate('service.configuration.update.commit.failure', error.toString())]
+          }
+        });
+      });
+  }
+
+  renderErrorMessage() {
+    if (this.state.error) {
+      return (
+        <div className='notification-message-container'>
+          <ErrorMessage
+            closeAction={() => this.setState({error: undefined})}
+            title={this.state.error.title}
+            message={this.state.error.messages}>
+          </ErrorMessage>
+        </div>
+      );
+    }
   }
 
   showActionButtons = (show) => {
     this.setState({showActionButtons: show});
   }
 
+  handleChange = (change) => {
+    this.setState({isChanged: change});
+  }
+
+  updateProgressStatus = (msg, playbooks) => {
+    const done = playbooks.every((playbook) => {
+      return typeof(playbook.status) !== 'undefined' && playbook.status !== STATUS.IN_PROGRESS;
+    });
+    if (done) {
+      this.setState({updateCompleted: true, isChanged: false});
+    }
+  }
+
+  renderContent = () => {
+    if (this.state.showUpdateProgress) {
+      const payload = {extraVars: {automate: 'true', encrypt: '', rekey: ''}};
+      return (
+        <div className='column-layout'>
+          <div className='header'>{translate('services.configuration.update.progress')}</div>
+          <PlaybookProgress steps={PLAYBOOK_STEPS} playbooks={PLAYBOOKS} payload={payload}
+            updatePageStatus={() => {}} updateGlobalState={this.updateProgressStatus}/>
+          {this.state.showActionButtons ? this.renderActionButtons() : ''}
+        </div>
+      );
+    } else {
+      return (
+        <div className='column-layout'>
+          <div className='header'>{translate('services.configuration.update')}</div>
+          <ServiceTemplatesTab revertable disableTab={() => {}}
+            showNavButtons={this.showActionButtons} hasChange={this.handleChange}
+            ref={instance => {this.serviceTemplatesTab = instance;}}/>
+          {this.state.showActionButtons ? this.renderActionButtons() : ''}
+        </div>
+      );
+    }
+  }
+
   renderActionButtons = () => {
-    return (
-      <div className='btn-row right-btn-group'>
-        <ActionButton type='default'
-          displayLabel={translate('cancel')}
-          clickAction={() => this.serviceTemplatesTab.revertChanges()}/>
-        <ActionButton
-          displayLabel={translate('update')}
-          clickAction={() => this.handleUpdateConfig()}/>
-      </div>
-    );
+    if (this.state.showUpdateProgress) {
+      return (
+        <div className='btn-row right-btn-group'>
+          <ActionButton displayLabel={translate('back')} isDisabled={!this.state.updateCompleted}
+            clickAction={() => this.setState({showUpdateProgress: false})}/>
+        </div>
+      );
+    } else {
+      return (
+        <div className='btn-row right-btn-group'>
+          <ActionButton type='default' displayLabel={translate('cancel')} isDisabled={!this.state.isChanged}
+            clickAction={() => this.serviceTemplatesTab.revertChanges()}/>
+          <ActionButton displayLabel={translate('update')} isDisabled={!this.state.isChanged}
+            clickAction={() => this.startConfigUpdate()}/>
+        </div>
+      );
+    }
   }
 
   render() {
     return (
       <div>
         <div className='menu-tab-content'>
-          <div className='column-layout'>
-            <div className='header'>{translate('services.configuration.update')}</div>
-            <ServiceTemplatesTab revertable disableTab={() => {}}
-              showNavButtons={this.showActionButtons}
-              ref={instance => {this.serviceTemplatesTab = instance;}}/>
-            {this.state.showActionButtons ? this.renderActionButtons() : ''}
-          </div>
+          {this.renderContent()}
         </div>
       </div>
     );

@@ -53,7 +53,7 @@ class AssignServerRoles extends BaseWizardPage {
   constructor(props) {
     super(props);
 
-    this.connections = this.props.connectionInfo ? this.props.connectionInfo : {
+    this.connections = props.connectionInfo ? props.connectionInfo : {
       sm: {checked: false, secured: true},
       ov: {checked: false, secured: true}
     };
@@ -62,7 +62,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.ovSessionKey = undefined;
 
     // addserver check inputs
-    this.checkInputs = this.props.checkInputs || undefined;
+    this.checkInputs = props.checkInputs || undefined;
 
     this.state = {
       //server list on the available servers side
@@ -111,32 +111,11 @@ class AssignServerRoles extends BaseWizardPage {
       importedResults: {},
 
       // add server, wipedisk for all newly added servers
-      isWipeDiskChecked: this.props.operationProps && this.props.operationProps.wipeDisk || false,
+      isWipeDiskChecked: props.operationProps && props.operationProps.wipeDisk || false,
 
       // add server, activate for all newly added servers
-      isActivateChecked: this.props.operationProps && this.props.operationProps.activate || false,
-
-      // relatively reliable deployed servers list
-      deployedServers: this.props.deployedServers
+      isActivateChecked: props.operationProps && props.operationProps.activate || false,
     };
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.connections = newProps.connectionInfo ? newProps.connectionInfo : {
-      sm: {checked: false, secured: true},
-      ov: {checked: false, secured: true}
-    };
-
-    // addserver get the saved global operationProps wipeDisk, activate and deployedServers
-    if(this.props.isUpdateMode) {
-      let isChecked = newProps.operationProps && newProps.operationProps.wipeDisk || false;
-      let isChecked2 = newProps.operationProps && newProps.operationProps.activate || false;
-      this.setState({
-        isWipeDiskChecked : isChecked,
-        isActivateChecked: isChecked2,
-        deployedServers : newProps.deployedServers
-      });
-    }
   }
 
   getSmServersData(tokenKey, smUrl, secured) {
@@ -635,7 +614,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   // get model object and saved servers before render UI
-  componentWillMount() {
+  componentDidMount() {
     try {
       //global suse manager token when embedded
       this.smApiToken = apiToken; // eslint-disable-line no-undef
@@ -1375,7 +1354,7 @@ class AssignServerRoles extends BaseWizardPage {
     let extraProps = {};
     if (this.props.isUpdateMode) {
       extraProps.isUpdateMode = this.props.isUpdateMode;
-      extraProps.deployedServers = this.state.deployedServers;
+      extraProps.deployedServers = this.props.deployedServers;
       extraProps.checkInputs = this.checkInputs;
       let modelServerAddresses =
         this.props.model.getIn(['inputModel','servers']).map(server => {

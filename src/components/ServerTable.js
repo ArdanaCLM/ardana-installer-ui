@@ -19,13 +19,6 @@ import ServerRowItem from './ServerRowItem.js';
 class ServerTable extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      deployedServers: this.props.deployedServers
-    };
-  }
-
-  componentWillReceiveProps(newProps) {
-    this.setState({deployedServers: newProps.deployedServers});
   }
 
   renderServerRows() {
@@ -35,10 +28,10 @@ class ServerTable extends Component {
         extraProps.isDraggable = true;
         // when it is in addserver mode, if we have a list of deployed servers
         if(this.props.isUpdateMode &&
-           this.state.deployedServers && this.state.deployedServers.length > 0) {
+           this.props.deployedServers && this.props.deployedServers.length > 0) {
           // if the server item is NOT in the deployedServers, will present
           // editAction and deleteAction
-          if(!this.state.deployedServers.some(server => {
+          if(!this.props.deployedServers.some(server => {
             return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
           })) {
             extraProps.editAction = this.props.editAction;
@@ -53,7 +46,7 @@ class ServerTable extends Component {
           // check if any newly added servers have duplicate addresses
           extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
           extraProps.checkNewDupAddresses['deployedServerIds'] =
-            this.state.deployedServers.map(server => server.id);
+            this.props.deployedServers.map(server => server.id);
         }
         else {
           extraProps.editAction = this.props.editAction;
