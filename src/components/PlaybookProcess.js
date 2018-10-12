@@ -285,7 +285,7 @@ class PlaybookProgress extends Component {
         }
       } else {
         // in case of running only one playbook that has no playbook-stop tag
-        if (thisPlaybook && this.globalPlaybookStatus.length === 1 && thisPlaybook.status === STATUS.IN_PROGRESS) {
+        if (thisPlaybook && this.globalPlaybookStatus.length === 1) {
           this.setState((prevState) => {
             return {'playbooksComplete': prevState.playbooksComplete.concat(playbookName + '.yml')};
           });

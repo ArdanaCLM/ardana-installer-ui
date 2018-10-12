@@ -230,7 +230,7 @@ class CollapsibleTable extends Component {
   renderMenuAction = (server) => {
     return (
       <span className='menu-icon' onClick={(event) => this.handleShowMenu(event, server)}>
-        <i className='material-icons'>more_vert</i>
+        <i className='material-icons'>more_horiz</i>
       </span>
     );
   }
