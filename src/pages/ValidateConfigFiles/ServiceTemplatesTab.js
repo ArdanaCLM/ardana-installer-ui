@@ -177,6 +177,12 @@ class ServiceTemplatesTab extends Component {
     this.props.hasChange(this.hasChange(updatedList));
   }
 
+  getChangedServices = () => {
+    const changedServices = this.state.serviceFiles.filter(srv => srv.changedFiles !== undefined)
+      .map(srv => srv.service);
+    return changedServices;
+  }
+
   removeOrigFiles = () => {
     this.state.serviceFiles.map((val) => {
       if (val.changedFiles) {

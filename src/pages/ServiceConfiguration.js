@@ -19,23 +19,14 @@ import { ActionButton } from '../components/Buttons.js';
 import { postJson } from '../utils/RestUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { PlaybookProgress } from '../components/PlaybookProcess.js';
-import { STATUS } from '../utils/constants.js';
+import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../utils/constants.js';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 
-const PLAYBOOKS = ['installui-pre-deployment', 'site'];
-const PLAYBOOK_STEPS = [
-  {
-    label: translate('deploy.progress.config-processor-run'),
-    playbooks: ['config-processor-run.yml']
-  },
-  {
-    label: translate('deploy.progress.ready-deployment'),
-    playbooks: ['ready-deployment.yml']
-  },
-  {
-    label: translate('deploy.progress.step6'),
-    playbooks: ['site.yml'],
-  }
+// services that have corresponding -reconfigure.yml and -status.yml files
+const UPDATEABLE_SERVICES = [
+  'barbican', 'bind', 'cassandra', 'ceilometer', 'cinder', 'designate', 'freezer', 'glance', 'heat',
+  'ironic', 'keystone', 'magnum', 'manila', 'monasca', 'monasca-transform', 'neutron', 'nova',
+  'octavia', 'percona', 'powerdns', 'rabbitmq', 'ses', 'spark', 'swift', 'zookeeper'
 ];
 
 class ServiceConfiguration extends Component {
@@ -49,6 +40,7 @@ class ServiceConfiguration extends Component {
       updateCompleted: false,
       error: undefined
     };
+    this.playbooksToRun = undefined;
   }
 
   startConfigUpdate = () => {
@@ -92,22 +84,68 @@ class ServiceConfiguration extends Component {
   }
 
   updateProgressStatus = (msg, playbooks) => {
-    const done = playbooks.every((playbook) => {
-      return typeof(playbook.status) !== 'undefined' && playbook.status !== STATUS.IN_PROGRESS;
-    });
+    let done = true;
+    for (const playbook of playbooks) {
+      if (playbook.status) {
+        if (playbook.status === STATUS.FAILED) {
+          done = true;
+          break;
+        } else {
+          done = done && (playbook.status === STATUS.COMPLETE);
+        }
+      } else {
+        done = false;
+      }
+    }
+
     if (done) {
       this.setState({updateCompleted: true, isChanged: false});
     }
   }
 
+  getPlaybooks = () => {
+    let playbooksToRun = {};
+    const changedServices = this.serviceTemplatesTab.getChangedServices();
+    if (changedServices && changedServices.length > 0) {
+      playbooksToRun.steps = [{
+        label: translate('deploy.progress.config-processor-run'),
+        playbooks: ['config-processor-run.yml']
+      }, {
+        label: translate('deploy.progress.ready-deployment'),
+        playbooks: ['ready-deployment.yml']
+      }];
+      const serviceName = changedServices[0];
+      if (changedServices.length === 1 && UPDATEABLE_SERVICES.includes(serviceName)) {
+        playbooksToRun.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, serviceName + '-reconfigure', serviceName + '-status'];
+        playbooksToRun.steps.push({
+          label: translate('deploy.progress.update'),
+          playbooks: [serviceName + '-reconfigure.yml']
+        }, {
+          label: translate('deploy.progress.run.status'),
+          playbooks: [serviceName + '-status.yml']
+        });
+      } else {
+        playbooksToRun.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, 'ardana-reconfigure'];
+        playbooksToRun.steps.push({
+          label: translate('deploy.progress.update'),
+          playbooks: ['ardana-reconfigure.yml']
+        });
+      }
+    }
+    return playbooksToRun;
+  }
+
   renderContent = () => {
     if (this.state.showUpdateProgress) {
+      if (!this.playbooksToRun) {
+        this.playbooksToRun = this.getPlaybooks();
+      }
       const payload = {extraVars: {automate: 'true', encrypt: '', rekey: ''}};
       return (
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update.progress')}</div>
-          <PlaybookProgress steps={PLAYBOOK_STEPS} playbooks={PLAYBOOKS} payload={payload}
-            updatePageStatus={() => {}} updateGlobalState={this.updateProgressStatus}/>
+          <PlaybookProgress steps={this.playbooksToRun.steps} playbooks={this.playbooksToRun.playbooks}
+            payload={payload} updatePageStatus={() => {}} updateGlobalState={this.updateProgressStatus}/>
           {this.state.showActionButtons ? this.renderActionButtons() : ''}
         </div>
       );
