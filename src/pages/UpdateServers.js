@@ -25,6 +25,8 @@ import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
 import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
 import { fetchJson, putJson } from '../utils/RestUtils.js';
+import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
+import { BaseInputModal } from '../components/Modals.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -45,6 +47,10 @@ class UpdateServers extends BaseUpdateWizardPage {
 
       // servers that were discovered or manually entered
       servers: [],
+
+      showReplaceModal: false,
+
+      serverToReplace: undefined,
     };
   }
 
@@ -185,6 +191,49 @@ class UpdateServers extends BaseUpdateWizardPage {
     return (<div className='notification-message-container'>{msgList}</div>);
   }
 
+  handleShowMenuReplaceServer = (server) => {
+    this.setState({
+      showReplaceModal: true,
+      serverToReplace: server
+    });
+  }
+
+  handleCancelReplaceServer = () => {
+    this.setState({showReplaceModal: false, serverToReplace: undefined});
+  }
+
+  handleDoneReplaceServer = (server, wipeDisk, installOS) => {
+    this.replaceServer(server, wipeDisk, installOS);
+    this.handleCancelReplaceServer();
+  }
+
+  renderReplaceServerModal() {
+    if (! this.state.serverToReplace) {
+      return;
+    }
+
+    let title = translate('server.replace.heading', this.state.serverToReplace.id);
+    let newProps = { ...this.props };
+
+    const modelIds = this.props.model.getIn(['inputModel','servers'])
+      .map(server => server.get('uid') || server.get('id'));
+
+    newProps.availableServers = this.state.servers.filter(server => ! modelIds.includes(server.uid));
+
+    return (
+      <BaseInputModal
+        show={true} className='edit-details-dialog'
+        onHide={this.handleCancelReplaceServer} title={title}>
+        <ReplaceServerDetails
+          cancelAction={this.handleCancelReplaceServer}
+          doneAction={this.handleDoneReplaceServer}
+          data={this.state.serverToReplace}
+          { ...newProps }>
+        </ReplaceServerDetails>
+      </BaseInputModal>
+    );
+  }
+
   renderCollapsibleTable() {
     let tableConfig = {
       columns: [
@@ -204,11 +253,12 @@ class UpdateServers extends BaseUpdateWizardPage {
     const autoServers = this.state.servers.filter(s => s.source !== 'manual');
     const manualServers = this.state.servers.filter(s => s.source === 'manual');
 
+    // TODO: pass in array of menu items and callbacks
     return (
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
-        replaceServer={this.replaceServer} updateGlobalState={this.props.updateGlobalState}
+        replaceServer={this.handleShowMenuReplaceServer} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation}/>
     );
@@ -244,6 +294,7 @@ class UpdateServers extends BaseUpdateWizardPage {
              this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
           {this.state.errorMessages.length > 0 && this.renderMessages()}
         </div>
+        {this.state.showReplaceModal && this.renderReplaceServerModal()}
       </div>
     );
   }
