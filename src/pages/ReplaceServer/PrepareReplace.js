@@ -31,7 +31,9 @@ const PLAYBOOK_STEPS = [
     label: translate('deploy.progress.ready-deployment'),
     playbooks: ['ready-deployment.yml']
   },
-  // TODO: Remove this. It is just confusing
+  // TODO: This is very confusing. The below playbook basically
+  // runs the config-process and ready-deploymet.  Why is this
+  // in here effectively twice? This should be cleaned up.
   {
     label: translate('deploy.progress.predeployment'),
     playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
