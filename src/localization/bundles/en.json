@@ -575,6 +575,7 @@
     "replace.server.details.ilo-user": "IPMI Username",
     "replace.server.details.ilo-password": "IPMI Password",
     "replace.server.details.use.availservers": "Use Available Servers",
+    "replace.server.shared.warning": "Controller nodes that also host the deployer cannot be replaced through the user interface.\nPlease consult the operations manual for detailed instructions.",
     "server.replace.details.select.message": "Check and select from the available servers to fill out inputs.",
     "server.replace.prepare": "Preparing Replace Server in Progress",
     "server.replace.complete.heading": "Completed Server Replacement",

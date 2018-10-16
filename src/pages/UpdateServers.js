@@ -26,7 +26,7 @@ import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants
 import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
 import { fetchJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
-import { BaseInputModal } from '../components/Modals.js';
+import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -49,6 +49,8 @@ class UpdateServers extends BaseUpdateWizardPage {
       servers: [],
 
       showReplaceModal: false,
+
+      showSharedWarning: false,
 
       serverToReplace: undefined,
     };
@@ -191,12 +193,21 @@ class UpdateServers extends BaseUpdateWizardPage {
     return (<div className='notification-message-container'>{msgList}</div>);
   }
 
-  handleShowMenuReplaceServer = (server) => {
-    this.setState({
-      showReplaceModal: true,
-      serverToReplace: server
-    });
+  checkSharedControllerDeployer = (server) => {
+    fetchJson('api/v1/ips')
+      .then(ips => {
+        if (ips.includes(server['ip-addr'])) {
+          this.setState({showSharedWarning: true});
+        }
+        else {
+          this.setState({
+            showReplaceModal: true,
+            serverToReplace: server
+          });
+        }
+      });
   }
+
 
   handleCancelReplaceServer = () => {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
@@ -205,6 +216,21 @@ class UpdateServers extends BaseUpdateWizardPage {
   handleDoneReplaceServer = (server, wipeDisk, installOS) => {
     this.replaceServer(server, wipeDisk, installOS);
     this.handleCancelReplaceServer();
+  }
+
+  renderSharedWarning() {
+    if (this.state.showSharedWarning) {
+      return (
+        <ConfirmModal
+          show={true}
+          title={translate('warning')}
+          onHide={() => this.setState({showSharedWarning: false})}>
+          <div>{translate('replace.server.shared.warning')}</div>
+        </ConfirmModal>
+      );
+    } else {
+      return null;
+    }
   }
 
   renderReplaceServerModal() {
@@ -258,7 +284,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
-        replaceServer={this.handleShowMenuReplaceServer} updateGlobalState={this.props.updateGlobalState}
+        replaceServer={this.checkSharedControllerDeployer} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation}/>
     );
@@ -295,6 +321,7 @@ class UpdateServers extends BaseUpdateWizardPage {
           {this.state.errorMessages.length > 0 && this.renderMessages()}
         </div>
         {this.state.showReplaceModal && this.renderReplaceServerModal()}
+        {this.renderSharedWarning()}
       </div>
     );
   }
