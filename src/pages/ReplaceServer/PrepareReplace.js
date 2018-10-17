@@ -31,6 +31,9 @@ const PLAYBOOK_STEPS = [
     label: translate('deploy.progress.ready-deployment'),
     playbooks: ['ready-deployment.yml']
   },
+  // TODO: This is very confusing. The below playbook basically
+  // runs the config-process and ready-deploymet.  Why is this
+  // in here effectively twice? This should be cleaned up.
   {
     label: translate('deploy.progress.predeployment'),
     playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
@@ -49,8 +52,6 @@ class PrepareReplace extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
 
-    this.playbooks = [];
-
     this.state = {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       startPlayBook: false,
@@ -61,7 +62,7 @@ class PrepareReplace extends BaseUpdateWizardPage {
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
 
   componentDidMount() {
-    //go commit model changes
+    // commit model changes
     const commitMessage = {'message': 'Committed via Ardana DayTwo Installer'};
     postJson('/api/v1/clm/model/commit', commitMessage)
       .then((response) => {
@@ -89,12 +90,13 @@ class PrepareReplace extends BaseUpdateWizardPage {
   }
 
   renderPlaybookProgress () {
-    this.playbooks = [PRE_DEPLOYMENT_PLAYBOOK];
     return (
       <PlaybookProgress
-        updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-        playbookStatus = {this.props.playbookStatus} steps = {PLAYBOOK_STEPS}
-        playbooks = {this.playbooks}/>
+        updatePageStatus={this.updatePageStatus}
+        updateGlobalState={this.props.updateGlobalState}
+        playbookStatus={this.props.playbookStatus}
+        steps={PLAYBOOK_STEPS}
+        playbooks={[PRE_DEPLOYMENT_PLAYBOOK]}/>
     );
   }
 

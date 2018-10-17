@@ -21,60 +21,45 @@ import { translate } from '../localization/localize.js';
 class ContextMenu extends Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      show: this.props.show,
-      location: this.props.location
-    };
   }
 
   componentDidMount() {
     // add a listener for clicking outside menu area
     // when user clicks outside menu area, the menu will be closed
-    document.addEventListener('click', this.handleCloseMenu);
+    document.addEventListener('click', this.handleClick);
   }
 
   componentWillUnmount() {
     // remove the listener for clicking outside menu area
-    document.removeEventListener('click', this.handleCloseMenu);
+    document.removeEventListener('click', this.handleClick);
   }
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      show : newProps.show,
-      location: newProps.location
-    });
+  handleClick = (event) => {
+    // remove the listener for clicking outside menu area
+    document.removeEventListener('click', this.handleClick);
+    // Inform the parent to close (and stop rendering) this menu
+    this.props.close();
   }
 
-  handleCloseMenu = (event) => {
-    if (!this.dropdownMenu.contains(event.target)) {
-      this.props.close();
-    }
-  }
-
-  renderMenuItems() {
-    let items = this.props.items.filter(item => item.show).map((item => {
+  render() {
+    const items = this.props.items.map((item => {
       return (
-        <div className='menu-item' key={item.key} onClick={item.handleShowModal}>
+        <div className='menu-item' key={item.key} onClick={() => {item.action(item.callbackData);}}>
           {translate(item.key)}
         </div>
       );
     }));
-    return items;
-  }
 
-  render() {
     let cName = 'context-menu-container rounded-corner shadowed-border';
     let locStyle = {
-      left: this.state.location ? (this.state.location.x -100) : 0,
-      top:  this.state.location ? this.state.location.y : 0
+      left: this.props.location.x - 100,
+      top:  this.props.location.y
     };
 
     return (
-      this.state.show ?
-        <div ref={(element) => this.dropdownMenu = element} className={cName} style={locStyle}>
-          {this.renderMenuItems()}
-        </div> : null
+      <div ref={(element) => this.dropdownMenu = element} className={cName} style={locStyle}>
+        {items}
+      </div>
     );
   }
 }
