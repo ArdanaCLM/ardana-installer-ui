@@ -214,6 +214,9 @@ class UpdateServers extends BaseUpdateWizardPage {
             })
             .catch(error => {
               if (error.status == 404) {
+                console.log(   // eslint-disable-line no-console
+                  'The 404 immediately preceding this message is expected, '+
+                  'and it means that the server is in the correct state (powered off)');
                 // 404 means the server is not found, which is the state that we *want* to be in.
                 // Proceed with the modal for entering the replacement info.
                 this.setState({
