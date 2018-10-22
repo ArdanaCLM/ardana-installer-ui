@@ -347,8 +347,8 @@ class ServiceInfo extends Component {
 
   renderMenuItems = () => {
     const menuItems = [
-      {show: true, key: 'common.details', handleShowModal: this.showDetailsModal},
-      {show: true, key: 'services.run.status', handleShowModal: this.showRunStatusPlaybookModal},
+      {show: true, key: 'common.details', action: this.showDetailsModal},
+      {show: true, key: 'services.run.status', action: this.showRunStatusPlaybookModal},
     ];
     return (
       <ContextMenu show={this.state.showActionMenu} items={menuItems} location={this.state.menuLocation}
