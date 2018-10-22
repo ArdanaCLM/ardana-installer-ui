@@ -233,11 +233,6 @@ class UpdateServers extends BaseUpdateWizardPage {
       });
   }
 
-  enforcePowerOff = (server) => {
-  }
-
-
-
   handleCancelReplaceServer = () => {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
   }
