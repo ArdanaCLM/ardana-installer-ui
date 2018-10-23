@@ -24,7 +24,7 @@ import { translate } from '../localization/localize.js';
 import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
 import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
-import { fetchJson, putJson } from '../utils/RestUtils.js';
+import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
 
@@ -193,21 +193,48 @@ class UpdateServers extends BaseUpdateWizardPage {
     return (<div className='notification-message-container'>{msgList}</div>);
   }
 
-  checkSharedControllerDeployer = (server) => {
+  checkPrereqs = (server) => {
+    // Verify the prerequisites before prompting for replacement information:
+    // - the selected controller node is not shared with the deployer
+    // - the selected node is no longer reachable (via ssh)
     fetchJson('api/v1/ips')
       .then(ips => {
         if (ips.includes(server['ip-addr'])) {
           this.setState({showSharedWarning: true});
         }
         else {
-          this.setState({
-            showReplaceModal: true,
-            serverToReplace: server
-          });
+          // Display the load mask
+          this.setState({loading: true});
+
+          postJson('api/v1/connection_test', {host: server['ip-addr']})
+            .then(result => {
+              // If the node is still reachable, then display a message to the user to have them
+              // power it down.
+              this.setState({loading: false, showPowerOffWarning: true});
+            })
+            .catch(error => {
+              if (error.status == 404) {
+                console.log(   // eslint-disable-line no-console
+                  'The 404 immediately preceding this message is expected, '+
+                  'and it means that the server is in the correct state (powered off)');
+                // 404 means the server is not found, which is the state that we *want* to be in.
+                // Proceed with the modal for entering the replacement info.
+                this.setState({
+                  loading: false,
+                  showReplaceModal: true,
+                  serverToReplace: server
+                });
+              } else {
+                let msg = translate('server.save.error', error.toString());
+                this.setState(prev => ({
+                  errorMessages: prev.errorMessages.concat(msg),
+                  loading: false
+                }));
+              }
+            });
         }
       });
   }
-
 
   handleCancelReplaceServer = () => {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
@@ -226,6 +253,20 @@ class UpdateServers extends BaseUpdateWizardPage {
           title={translate('warning')}
           onHide={() => this.setState({showSharedWarning: false})}>
           <div>{translate('replace.server.shared.warning')}</div>
+        </ConfirmModal>
+      );
+    } else {
+      return null;
+    }
+  }
+  renderPowerOffWarning() {
+    if (this.state.showPowerOffWarning) {
+      return (
+        <ConfirmModal
+          show={true}
+          title={translate('warning')}
+          onHide={() => this.setState({showPowerOffWarning: false})}>
+          <div>{translate('replace.server.poweroff.warning')}</div>
         </ConfirmModal>
       );
     } else {
@@ -284,7 +325,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
-        replaceServer={this.checkSharedControllerDeployer} updateGlobalState={this.props.updateGlobalState}
+        replaceServer={this.checkPrereqs} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation}/>
     );
@@ -322,6 +363,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         </div>
         {this.state.showReplaceModal && this.renderReplaceServerModal()}
         {this.renderSharedWarning()}
+        {this.renderPowerOffWarning()}
       </div>
     );
   }
