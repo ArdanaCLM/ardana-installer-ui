@@ -274,13 +274,15 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderAddServerManuallyModal = () => {
-    return (
-      <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
-        closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
-        addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
-        rolesLimit={this.props.rolesLimit}
-        rawDiscoveredServers={this.state.rawDiscoveredServers}/>
-    );
+    if (this.state.showAddServerManuallyModal) {
+      return (
+        <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
+          closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
+          addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
+          rolesLimit={this.props.rolesLimit}
+          rawDiscoveredServers={this.state.rawDiscoveredServers}/>
+      );
+    }
   }
 
   closeAddServerManuallyModal = () => {
@@ -301,14 +303,16 @@ class AssignServerRoles extends BaseWizardPage {
     if(this.props.isUpdateMode) {
       extraProps.rolesLimit = this.props.rolesLimit;
     }
-    return (
-      <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
-        closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
-        updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
-        rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
-        {...extraProps}
-      />
-    );
+    if (this.state.showEditServerAddedManuallyModal) {
+      return (
+        <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
+          closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
+          updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
+          rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
+          {...extraProps}
+        />
+      );
+    }
   }
 
   closeEditServerAddedManuallyModal = () => {
