@@ -13,18 +13,18 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { fromJS } from 'immutable';
+import { Map } from 'immutable';
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { LabeledDropdown } from '../../components/LabeledDropdown.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import { InputLine } from '../../components/InputLine.js';
 import { postJson, putJson } from '../../utils/RestUtils.js';
-import { INPUT_STATUS } from '../../utils/constants.js';
 import { MODEL_SERVER_PROPS_ALL } from '../../utils/constants.js';
-import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../../utils/InputValidators.js';
+import { isEmpty } from 'lodash';
+import { IpV4AddressValidator, MacAddressValidator, createExcludesValidator } from '../../utils/InputValidators.js';
 import {
-  genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, getCleanedServer, matchRolesLimit
+  genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, matchRolesLimit
 } from '../../utils/ModelUtils.js';
 
 
@@ -32,236 +32,174 @@ class ServersAddedManually extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      validAddServerManuallyForm: false
-    };
-
-    this.newServer = {
-      'source': 'manual',
-      'id': '',
-      'uid': genUID('manual'),
-      'ip-addr': '',
-      'server-group': '',
-      'nic-mapping': '',
-      'role': '',
-      'ilo-ip': '',
-      'ilo-user': '',
-      'ilo-password': '',
-      'mac-addr': ''
-    };
-
-    this.allManualInputsStatus = {
-      'id': INPUT_STATUS.UNKNOWN,
-      'ip-addr': INPUT_STATUS.UNKNOWN,
-      'ilo-user': INPUT_STATUS.UNKNOWN,
-      'ilo-password': INPUT_STATUS.UNKNOWN,
-      'ilo-ip': INPUT_STATUS.UNKNOWN,
-      'mac-addr': INPUT_STATUS.UNKNOWN
-    };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // set server info in edit mode
-    if (nextProps.server) {
-      this.setNewServer(nextProps.server);
+    // Use the values from the server given in props, if passed
+    if (props.server) {
+      this.state = {
+        inputValue: Map({
+          'source': props.server.source || 'manual',
+          'id': props.server.id || '',
+          'uid': props.server.uid || genUID('manual'),
+          'ip-addr': props.server['ip-addr'] || '',
+          'server-group': props.server['server-group'] || '',
+          'nic-mapping': props.server['nic-mapping'] || '',
+          'role': props.server['role'] || '',
+          'ilo-user': props.server['ilo-user'] || '',
+          'ilo-password': props.server['ilo-password'] || '',
+          'ilo-ip': props.server['ilo-ip'] || '',
+          'mac-addr': props.server['mac-addr'] || '',
+        }),
+        isValid: Map({
+          'id': !isEmpty(props.server.id),
+          'ip-addr': !isEmpty(props.server['ip-addr']),
+          'ilo-user': !isEmpty(props.server['ilo-user']) ? true : undefined,
+          'ilo-password': !isEmpty(props.server['ilo-password']) ? true : undefined,
+          'ilo-ip': !isEmpty(props.server['ilo-ip']) ? true : undefined,
+          'mac-addr': !isEmpty(props.server['mac-addr']) ? true : undefined,
+        })
+      };
+    } else {
+      this.state = this.getNewServer(props.model);
     }
   }
 
-  isManualFormTextInputValid = () => {
-    let isAllValid = true;
-    let keys = Object.keys(this.allManualInputsStatus);
-    keys.forEach(key => {
-      let isValid = (this.allManualInputsStatus[key] === INPUT_STATUS.VALID) ||
-        // force id and ip-addr to be filled for new server
-        (key !== 'id' && key !== 'ip-addr' && this.allManualInputsStatus[key] === INPUT_STATUS.UNKNOWN);
-      isAllValid = isAllValid && isValid;
-    });
+  // Return new server state variables with appropriate defaults
+  getNewServer = (model) => {
+    const serverGroups = getServerGroups(model);
+    const nicMappings = getNicMappings(model);
 
-    return isAllValid;
-  }
-
-  isServerInfoChanged = () => {
-    const changedList = [];
-    for (let key in this.props.server) {
-      changedList.push(this.props.server[key] !== this.newServer[key]);
-    }
-    const changed = changedList.filter(change => change === true);
-    return changed.length > 0;
-  }
-
-  updateManualFormValidity = (props, isValid) => {
-    this.allManualInputsStatus[props.inputName] = isValid ? INPUT_STATUS.VALID : INPUT_STATUS.INVALID;
-    this.setState({validAddServerManuallyForm: this.isManualFormTextInputValid()});
-  }
-
-  resetNewServer = () => {
-    this.newServer = {
-      'source': 'manual',
-      'id': '',
-      'uid': genUID('manual'),
-      'ip-addr': '',
-      'server-group': '',
-      'nic-mapping': '',
-      'role': '',
-      'ilo-ip': '',
-      'ilo-user': '',
-      'ilo-password': '',
-      'mac-addr': ''
-    };
-    this.setState({validAddServerManuallyForm: false});
-  }
-
-  setNewServer(server) {
-    this.newServer = {
-      'source': 'manual',
-      'id': server.id,
-      'uid': server.uid,
-      'ip-addr': server['ip-addr'],
-      'server-group': server['server-group'],
-      'nic-mapping': server['nic-mapping'],
-      'role': server.role,
-      'ilo-ip': server['ilo-ip'],
-      'ilo-user': server['ilo-user'],
-      'ilo-password': server['ilo-password'],
-      'mac-addr': server['mac-addr']
+    return {
+      inputValue: Map({
+        'source': 'manual',
+        'id': '',
+        'uid': genUID('manual'),
+        'ip-addr': '',
+        'server-group': serverGroups[0],
+        'nic-mapping': nicMappings[0],
+        'role': '',
+        'ilo-user': '',
+        'ilo-password': '',
+        'ilo-ip': '',
+        'mac-addr': '',
+      }),
+      isValid: Map({
+        'id': undefined,
+        'ip-addr': undefined,
+        'ilo-user': undefined,
+        'ilo-password': undefined,
+        'ilo-ip': undefined,
+        'mac-addr': undefined,
+      })
     };
   }
 
-  cancelAddServerManuallyModal = () => {
-    this.resetNewServer();
-    this.props.closeAction();
+  isFormInputValid = () => {
+    return this.state.isValid.every((value, key) => value === true || (value === undefined &&
+      key !== 'id' && key !== 'ip-addr'));
   }
 
-  saveServersAddedManually = (serverList) => {
+  saveServer = () => {
     // if role is provided, add server to the model
     let model = this.props.model;
 
-    serverList.forEach(server => {
-      if (server.role) {
-        // empty value can cause validation problem
-        let modelServer = getCleanedServer(server, MODEL_SERVER_PROPS_ALL);
-        model = model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(modelServer)));
-      }
-    });
-    this.props.updateGlobalState('model', model);
+    let server = this.state.inputValue;
+    if (server.get('role')) {
+      // if role is set, then the server should be updated in the model
+      let modelServer = server.filter((v,k) => MODEL_SERVER_PROPS_ALL.includes(k) && !isEmpty(v));
+      model = model.updateIn(['inputModel', 'servers'], list => list.push(modelServer));
+      this.props.updateGlobalState('model', model);
+    }
 
+    // Call the callback props and update the server list in the shim
     if (this.props.addAction) {
-      postJson('/api/v1/server', JSON.stringify(serverList));
-      this.props.addAction(serverList);
+      postJson('/api/v1/server', [server])
+        .then(() =>
+          this.props.addAction(server.toJS())
+        );
     } else {
-      const server = serverList[0];
-      putJson('/api/v1/server', JSON.stringify(server));
-      this.props.updateAction(server);
+      putJson('/api/v1/server', server)
+        .then(() =>
+          this.props.updateAction(server.toJS())
+        );
     }
-
-    this.resetNewServer();
   }
 
-  addOneServer = () => {
-    this.saveServersAddedManually([this.newServer]);
+  saveAndClose = () => {
+    this.saveServer();
     this.props.closeAction();
   }
 
-  addMoreServer = () => {
-    this.saveServersAddedManually([this.newServer]);
+  saveAndClear = () => {
+    this.saveServer();
+    this.setState(this.getNewServer(this.props.model));
   }
 
-  updateServer = () => {
-    this.saveServersAddedManually([this.newServer]);
-    this.props.closeAction();
-  }
-
-  updateNewServer = (value, key) => {
-    this.newServer[key] = value;
-    if (this.props.updateAction) {
-      this.setState({validAddServerManuallyForm: this.isServerInfoChanged()});
-    }
-  }
-
-  handleInputLine = (e, valid, props) => {
-    let value = e.target.value;
-    this.updateManualFormValidity(props, valid);
-    if (valid) {
-      this.updateNewServer(value, props.inputName);
-    }
+  handleInputChange = (value, valid, name) => {
+    this.setState((prev) => ({
+      isValid: prev.isValid.set(name, valid),
+      inputValue: prev.inputValue.set(name, value)
+    }));
   }
 
   renderInputLine = (required, title, name, type, validator) => {
-    let theProps = {};
-    if (name === 'id' && this.props.show) {
-      theProps.ids =
-        getAllOtherServerIds(
-          this.props.model, this.props.rawDiscoveredServers,
-          this.props.serversAddedManually, this.newServer['id']
-        );
-    }
-
     return (
-      <InputLine isRequired={required} label={title} inputName={name} {...theProps}
-        inputType={type} inputValidate={validator} inputAction={this.handleInputLine}
-        inputValue={this.newServer[name]}/>
+      <InputLine isRequired={required} label={title} inputName={name}
+        inputType={type} inputValidate={validator}
+        inputAction={(e, valid) => this.handleInputChange(e.target.value, valid, name)}
+        inputValue={this.state.inputValue.get(name)}/>
     );
   }
 
   renderDropdownLine(required, title, name, list, defaultOption) {
     return (
-      <LabeledDropdown label={title} name={name} value={this.newServer[name]} optionList={list}
-        isRequired={required} selectAction={(value) => this.updateNewServer(value, name)}
+      <LabeledDropdown label={title} name={name} value={this.state.inputValue.get(name)} optionList={list}
+        isRequired={required} selectAction={(value) => this.handleInputChange(value, true, name)}
         defaultOption={defaultOption}/>
     );
   }
 
   render() {
+    const isValid = this.isFormInputValid();
     const serverGroups = getServerGroups(this.props.model);
     const nicMappings = getNicMappings(this.props.model);
     let roles = getServerRoles(this.props.model).map(e => e['serverRole']);
-    roles.unshift('');
-
     // for update, if have rolesLimit, only show limited roles
     if(this.props.rolesLimit) {
-      roles =
-        roles.filter(role => {
-          return (role === '' || matchRolesLimit(role, this.props.rolesLimit));
-        });
+      roles = roles.filter(role => matchRolesLimit(role, this.props.rolesLimit));
     }
+    roles.unshift('');
 
-    if (!this.newServer.role) {
-      this.newServer.role = '';
-    }
-    if (!this.newServer['server-group']) {
-      this.newServer['server-group'] = serverGroups[0];
-    }
-    if (!this.newServer['nic-mapping']) {
-      this.newServer['nic-mapping'] = nicMappings[0];
-    }
     let defaultOption = {
       label: translate('server.none.prompt'),
       value: ''
     };
 
-    const footer = this.props.addAction ?
-      (<div className='btn-row'>
-        <ActionButton type={'default'} clickAction={this.cancelAddServerManuallyModal}
-          displayLabel={translate('cancel')}/>
-        <ActionButton type={'default'} clickAction={this.addMoreServer} displayLabel={translate('add.more')}
-          isDisabled={!this.state.validAddServerManuallyForm}/>
-        <ActionButton clickAction={this.addOneServer} displayLabel={translate('save')}
-          isDisabled={!this.state.validAddServerManuallyForm}/>
-      </div>) :
-      (<div className='btn-row'>
-        <ActionButton type={'default'} clickAction={this.cancelAddServerManuallyModal}
-          displayLabel={translate('cancel')}/>
-        <ActionButton clickAction={this.updateServer} displayLabel={translate('save')}
-          isDisabled={!this.state.validAddServerManuallyForm}/>
-      </div>);
+    let addOnlyButton;
+    if (this.props.addAction) {
+      addOnlyButton = (<ActionButton type={'default'} clickAction={this.saveAndClear}
+        displayLabel={translate('add.more')} isDisabled={!isValid}/>);
+    }
+
+    const footer = (
+      <div className='btn-row'>
+        <ActionButton type={'default'} clickAction={this.props.closeAction} displayLabel={translate('cancel')}/>
+        {addOnlyButton}
+        <ActionButton clickAction={this.saveAndClose} displayLabel={translate('save')} isDisabled={!isValid}/>
+      </div>
+    );
+
+    // Avoid re-using any existing server ids
+    const existingIds = getAllOtherServerIds(
+      this.props.model, this.props.rawDiscoveredServers,
+      this.props.serversAddedManually, this.state.inputValue.get('id')
+    );
 
     return (
       <ConfirmModal show={this.props.show} className={'manual-discover-modal'}
         title={this.props.addAction ? translate('add.server.add') : translate('edit.server')}
-        onHide={this.cancelAddServerManuallyModal} footer={footer}>
+        onHide={this.props.closeAction} footer={footer}>
 
         <div className='server-details-container'>
-          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', UniqueIdValidator)}
+          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
           {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
           {this.renderDropdownLine(true, 'server.group.prompt', 'server-group', serverGroups)}
           {this.renderDropdownLine(true, 'server.nicmapping.prompt', 'nic-mapping', nicMappings)}
@@ -278,7 +216,6 @@ class ServersAddedManually extends Component {
       </ConfirmModal>
     );
   }
-
 }
 
 export default ServersAddedManually;
