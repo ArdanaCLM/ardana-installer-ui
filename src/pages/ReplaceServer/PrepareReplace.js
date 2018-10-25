@@ -19,10 +19,14 @@ import { PRE_DEPLOYMENT_PLAYBOOK, STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
-import {postJson} from '../../utils/RestUtils.js';
+import { fetchJson, postJson } from '../../utils/RestUtils.js';
 
 
 const PLAYBOOK_STEPS = [
+  {
+    label: 'Check version',
+    playbooks: ['version']
+  },
   {
     label: translate('deploy.progress.config-processor-run'),
     playbooks: ['config-processor-run.yml']
@@ -90,13 +94,29 @@ class PrepareReplace extends BaseUpdateWizardPage {
   }
 
   renderPlaybookProgress () {
+    const playbooks = [
+      {
+        // TODO: Replace this demo function with *real* functionality
+        name: 'version',
+        action: ((logger) => {
+          return fetchJson('/api/v1/clm/version')
+            .then((response) => {
+              logger('ardana-service version: '+response);
+            });
+        }),
+      },
+      {
+        name: PRE_DEPLOYMENT_PLAYBOOK,
+      }
+    ];
+
     return (
       <PlaybookProgress
         updatePageStatus={this.updatePageStatus}
         updateGlobalState={this.props.updateGlobalState}
         playbookStatus={this.props.playbookStatus}
         steps={PLAYBOOK_STEPS}
-        playbooks={[PRE_DEPLOYMENT_PLAYBOOK]}/>
+        playbooks={playbooks}/>
     );
   }
 

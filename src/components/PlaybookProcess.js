@@ -142,6 +142,47 @@ class PlaybookProgress extends Component {
       showConfirmationDlg: false,        // show the confirmation dialog
       closeStatusPlaybookModal: false,   // set to true to close the Run Status Playbook modal
     };
+
+    // This component expects the following values to be passed in props:
+    //   updatePageStatus - function to be called whenever a playbook starts, completes, or fails
+    //                      Used by callers to show an error dialog or enable navigation buttons
+    //                      (sometimes an empty function is passed)
+    //
+    //   updateGlobalState - function (usually in the installWizard) for updating the global state. Used in this class
+    //                       for updating playbookStatus, which in turn is received separately as a prop.
+    //
+    //   playbookStatus - array of playbooks, playIdsm, and statuses.  Used to track status of all playbooks
+    //
+    //   playbooks - EITHER:
+    //       - array of playbook names to invoke (without the .yml suffix)
+    //          OR
+    //       - array of objects, containing:
+    //            name - name of the playbook
+    //            payload - payload specific to *this* playbook. This enables passing a specific payload
+    //                      to this playbook
+    //            action - when this is supplied, it should be a function that returns a promise, and it will
+    //                     be executed instead of calling ansible to run the playbook.  In this case, the playbook
+    //                     name is nothing more than a key to correlate with the corresponding step.  The action
+    //                     function will be passed an argument with a logger function, which enables the action
+    //                     to add messages to the log displayed to the user.
+    //                     TODO: rename this component and its preperties to reflect that it can be really used
+    //                           for executing arbitrary functions rather than just playbooks
+    //
+    //   payload - body of REST call when invoking all playbooks.
+    //
+    //   isUpdateMode - Mostly used for determining whether playbooks is an array of objects
+    //      or an array of strings.   Also used to hardcode certain password-related extra-vars
+    //
+    //   steps - array of objects, each of which contains:
+    //     label     - string to display on the UI page
+    //     playbooks - array of playbook names.  When events arrive from ansible, they contain playbook
+    //                 names which will be matched against values in this array, and the steps displayed
+    //                 to the user will be rendered differently depending on their status.  This works in
+    //                 the same way for "playbooks" that are actions.
+    //     orCondition - optional. Used in one place to indicate that a step is complete if *any* playbook
+    //                   in the list completes
+    //   ]
+    //
   }
 
   getStatusCSSClass = (status) => {
@@ -256,17 +297,25 @@ class PlaybookProgress extends Component {
     this.socket.emit('join', playId);
   }
 
+  // "Playbooks" come in a couple varieties. Originally they were just names, but
+  // later improvements enhanced the concept to include a structure which contains
+  // the name as well as other fields.  Return the name here.
+  getPlaybookName = (playbook) => {
+    if (typeof(playbook) === 'object') {
+      return playbook.name;
+    } else {
+      return playbook;
+    }
+  }
+
   findNextPlaybook = (lastCompletedPlaybookName) => {
     // Find the next playbook in sequence after the given one.  Note that if the completed
-    // playbook is not found, indexOf() will return -1, so next will be 0 (the first playbook)
-    let thePlaybooks = this.props.playbooks;
-    if (this.props.isUpdateMode) {
-      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
-    }
-    const next = thePlaybooks.indexOf(lastCompletedPlaybookName) + 1;
+    // playbook is not found, findIndex() will return -1, so next will be 0 (the first playbook)
+    const index = this.props.playbooks.findIndex((p) => this.getPlaybookName(p) === lastCompletedPlaybookName);
+    const next = index + 1;
 
-    if (next < thePlaybooks.length) {
-      return thePlaybooks[next];
+    if (next < this.props.playbooks.length) {
+      return this.props.playbooks[next];
     }
   }
 
@@ -276,9 +325,9 @@ class PlaybookProgress extends Component {
       const thisPlaybook = this.globalPlaybookStatus.find(e => e.name === playbookName);
       // the global playbookStatus should be updated in playbookError or playbookStopped
       if(thisPlaybook && thisPlaybook.status === STATUS.COMPLETE) {
-        let nextPlaybookName = this.findNextPlaybook(thisPlaybook.name);
-        if (nextPlaybookName) {
-          this.launchPlaybook(nextPlaybookName);
+        const nextPlaybook = this.findNextPlaybook(thisPlaybook.name);
+        if (nextPlaybook) {
+          this.launchPlaybook(nextPlaybook);
         }
         else {
           this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
@@ -312,20 +361,17 @@ class PlaybookProgress extends Component {
   getGlobalPlaybookStatus = () => {
     let retStatus = this.props.playbookStatus; //passed global in InstallWizards
     // don't have playbookStatus, initialize it based on current playbooks
-    let thePlaybooks = this.props.playbooks;
-    if (this.props.isUpdateMode) {
-      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
-    }
+    let playbookNames = this.props.playbooks.map(p => this.getPlaybookName(p));
     if (!retStatus) {
-      retStatus = thePlaybooks.map((playbookName) => {
+      retStatus = playbookNames.map((playbookName) => {
         return {name: playbookName, status: undefined, playId: undefined};
       });
     }
     else { // have playbook status
-      let exitStatus = retStatus.find((play) => thePlaybooks.includes(play.name));
+      let exitStatus = retStatus.find((play) => playbookNames.includes(play.name));
       if (!exitStatus) {
         //need init for this.props.playbooks
-        let initPlayStatus =thePlaybooks.map((playbookName) => {
+        let initPlayStatus = playbookNames.map((playbookName) => {
           return {name: playbookName, status: undefined, playId: undefined};
         });
         retStatus = retStatus.concat(initPlayStatus);
@@ -341,13 +387,9 @@ class PlaybookProgress extends Component {
       return [];
     }
 
-    let thePlaybooks = this.props.playbooks;
-    if (this.props.isUpdateMode) {
-      thePlaybooks = this.props.playbooks.map(playbook => playbook.name);
-    }
-
+    let playbookNames = this.props.playbooks.map(p => this.getPlaybookName(p));
     return this.globalPlaybookStatus.filter(play =>
-      (thePlaybooks.includes(play.name) && play.playId && play.status === status));
+      (playbookNames.includes(play.name) && play.playId && play.status === status));
   }
 
   processAlreadyDonePlaybook = (playbook) => {
@@ -417,9 +459,9 @@ class PlaybookProgress extends Component {
             this.updateGlobalPlaybookStatus(progressPlay.name, progressPlay.playId, status);
 
             if (status === STATUS.COMPLETE) {
-              let nextPlaybookName = this.findNextPlaybook(progressPlay.name);
-              if(nextPlaybookName) {
-                this.launchPlaybook(nextPlaybookName);
+              const nextPlaybook = this.findNextPlaybook(progressPlay.name);
+              if(nextPlaybook) {
+                this.launchPlaybook(nextPlaybook);
               }
               else {
                 this.props.updatePageStatus(STATUS.COMPLETE);
@@ -458,10 +500,10 @@ class PlaybookProgress extends Component {
       // if have lastCompleted, use last completed playbook name otherwise
       // leave it undefined
       let lastCompletedName = lastCompleted ? lastCompleted.name : undefined;
-      let nextPlaybookName = this.findNextPlaybook(lastCompletedName);
-      if (nextPlaybookName) {
+      const nextPlaybook = this.findNextPlaybook(lastCompletedName);
+      if (nextPlaybook) {
         // launch the next playbook if there is more to run
-        this.launchPlaybook(nextPlaybookName);
+        this.launchPlaybook(nextPlaybook);
       }
       else {
         // No more playbooks to run.  Consider this page to be complete
@@ -470,53 +512,73 @@ class PlaybookProgress extends Component {
     }
   }
 
-  launchPlaybook = (playbookName) => {
-    // install
-    let payload =  JSON.stringify(this.props.payload || '');
+  launchPlaybook = (playbook) => {
 
-    // update, could have different payload for each playbook
+    let payload = this.props.payload;
     if (this.props.isUpdateMode) {
-      let book = this.props.playbooks.find(playbook => {
-        return playbook.name === playbookName;
-      });
       // TODO need handle extraVars for day2
       // for now hardcode some global extraVars until those can be
       // set by user
       let temp = { extraVars: {automate: 'true', encrypt: '', rekey: ''}};
-      if(book.payload) {
-        Object.keys(book.payload).forEach(key => {
+      if (playbook.payload) {
+        Object.keys(playbook.payload).forEach(key => {
           if(key !== 'extraVars') {
-            temp[key] = book.payload[key];
+            temp[key] = playbook.payload[key];
           }
           else {
             // merge extraVars with defaults extraVars
-            Object.keys(book.payload[key]).forEach(varKey => {
-              temp[key][varKey] = book.payload[key][varKey];
+            Object.keys(playbook.payload[key]).forEach(varKey => {
+              temp[key][varKey] = playbook.payload[key][varKey];
             });
           }
         });
       }
-      payload = JSON.stringify(temp);
+      payload = temp;
     }
 
-    postJson('/api/v1/clm/playbooks/' + playbookName, payload)
-      .then(response => {
-        const playId = response['id'];
-        this.monitorSocket(playbookName, playId);
-        // update local this.globalPlaybookStatus and also update global state playbookSatus
-        this.updateGlobalPlaybookStatus(playbookName, playId, STATUS.IN_PROGRESS);
-        // overall status for caller page
-        this.props.updatePageStatus(STATUS.IN_PROGRESS);
-      })
-      .catch((error) => {
-        // overall status for caller, if failed, just stop
-        this.props.updatePageStatus(STATUS.FAILED);
-        // update local this.globalPlaybookStatus and also update global state playbookSatus
-        this.updateGlobalPlaybookStatus(playbookName, '', STATUS.FAILED);
-        this.showErrorMessage(translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message));
-      });
+    if (playbook.action) {
+
+      this.updateGlobalPlaybookStatus(playbook.name, 0, STATUS.IN_PROGRESS);
+      this.props.updatePageStatus(STATUS.IN_PROGRESS);
+
+      playbook.action(this.logMessage)
+        .then(response => {
+          this.playbookStopped(playbook.name, playbook.name, 0);
+
+          const nextPlaybook = this.findNextPlaybook(playbook.name);
+          if (nextPlaybook) {
+            this.launchPlaybook(nextPlaybook);
+          }
+          else {
+            this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
+          }
+        })
+        .catch((error) => {
+          this.playbookError(playbook.name, playbook.name, 0);
+        });
+
+    } else {
+      const playbookName = this.getPlaybookName(playbook);
+      postJson('/api/v1/clm/playbooks/' + playbookName, payload)
+        .then(response => {
+          const playId = response['id'];
+          this.monitorSocket(playbookName, playId);
+          // update local this.globalPlaybookStatus and also update global state playbookSatus
+          this.updateGlobalPlaybookStatus(playbookName, playId, STATUS.IN_PROGRESS);
+          // overall status for caller page
+          this.props.updatePageStatus(STATUS.IN_PROGRESS);
+        })
+        .catch((error) => {
+          // overall status for caller, if failed, just stop
+          this.props.updatePageStatus(STATUS.FAILED);
+          // update local this.globalPlaybookStatus and also update global state playbookSatus
+          this.updateGlobalPlaybookStatus(playbookName, '', STATUS.FAILED);
+          this.showErrorMessage(translate('deploy.fail.launch.playbook', playbookName + '.yml', error.message));
+        });
+    }
   }
 
+  // TODO: Handle this when it is running a non-playbook action
   cancelRunningPlaybook = () => {
 
     this.setState({showConfirmationDlg: false});
@@ -674,7 +736,8 @@ class PlaybookProgress extends Component {
 
     this.setState((prevState) => {
       const completedPlaybooks = prevState.playbooksComplete.concat(stepPlaybook);
-      complete = completedPlaybooks.includes(playbookName + '.yml');
+      complete = completedPlaybooks.includes(playbookName + '.yml') ||
+        completedPlaybooks.includes(playbookName);
       return {'playbooksComplete': completedPlaybooks};
     });
     if (complete && playbookName) {
@@ -703,7 +766,8 @@ class PlaybookProgress extends Component {
 
     this.setState((prevState) => {
       const errorPlaybooks = prevState.playbooksError.concat(stepPlaybook);
-      failed = errorPlaybooks.includes(playbookName + '.yml');
+      failed = errorPlaybooks.includes(playbookName + '.yml') ||
+        errorPlaybooks.includes(playbookName);
       return {'playbooksError': errorPlaybooks};
     });
 
