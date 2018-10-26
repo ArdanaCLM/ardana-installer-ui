@@ -138,7 +138,7 @@ class PrepareReplace extends BaseUpdateWizardPage {
           {this.renderHeading(translate('server.replace.prepare'))}
         </div>
         <div className='wizard-content'>
-          {!cancel && this.state.startPlayBook && this.renderPlaybookProgress()}
+          {this.state.startPlayBook && this.renderPlaybookProgress()}
           {cancel && this.renderError()}
         </div>
         {this.renderNavButtons(cancel)}
