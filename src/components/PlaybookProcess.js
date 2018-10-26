@@ -151,7 +151,7 @@ class PlaybookProgress extends Component {
     //   updateGlobalState - function (usually in the installWizard) for updating the global state. Used in this class
     //                       for updating playbookStatus, which in turn is received separately as a prop.
     //
-    //   playbookStatus - array of playbooks, playIdsm, and statuses.  Used to track status of all playbooks
+    //   playbookStatus - array of playbooks, playIds, and statuses.  Used to track status of all playbooks
     //
     //   playbooks - EITHER:
     //       - array of playbook names to invoke (without the .yml suffix)
@@ -165,8 +165,6 @@ class PlaybookProgress extends Component {
     //                     name is nothing more than a key to correlate with the corresponding step.  The action
     //                     function will be passed an argument with a logger function, which enables the action
     //                     to add messages to the log displayed to the user.
-    //                     TODO: rename this component and its preperties to reflect that it can be really used
-    //                           for executing arbitrary functions rather than just playbooks
     //
     //   payload - body of REST call when invoking all playbooks.
     //
@@ -346,7 +344,7 @@ class PlaybookProgress extends Component {
   updateGlobalPlaybookStatus = (playbookName, playId, status) => {
     const playbook = this.globalPlaybookStatus.find(e => e.name === playbookName);
     if (playbook) {
-      if (playId && playId !== '') {
+      if (playId !== undefined) {
         playbook.playId = playId;
       }
       playbook.status = status;
@@ -389,10 +387,23 @@ class PlaybookProgress extends Component {
 
     let playbookNames = this.props.playbooks.map(p => this.getPlaybookName(p));
     return this.globalPlaybookStatus.filter(play =>
-      (playbookNames.includes(play.name) && play.playId && play.status === status));
+      (playbookNames.includes(play.name) && play.playId !== undefined && play.status === status));
   }
 
   processAlreadyDonePlaybook = (playbook) => {
+
+    if (! playbook.playId) {
+      // When it is a non-playbook action, instead of retrieving logs and events, just
+      // set the status according to what was saved in the progress file
+      if (playbook.status === STATUS.COMPLETE) {
+        this.playbookStopped(playbook.name);
+      } else if (playbook.status === STATUS.FAILED) {
+        this.playbookError(playbook.name);
+      }
+
+      return;
+    }
+
     // go get logs
     fetchJson('/api/v1/clm/plays/' + playbook.playId + '/log')
       .then(response => {
@@ -537,7 +548,7 @@ class PlaybookProgress extends Component {
     }
 
     if (playbook.action) {
-
+      // Handle non-playbook actions, i.e. function calls
       this.updateGlobalPlaybookStatus(playbook.name, 0, STATUS.IN_PROGRESS);
       this.props.updatePageStatus(STATUS.IN_PROGRESS);
 
