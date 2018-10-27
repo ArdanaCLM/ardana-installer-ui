@@ -23,7 +23,7 @@ import { ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
 import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
-import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
+import { updateServersInModel, getMergedServer, addServerInModel } from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
@@ -52,14 +52,15 @@ class UpdateServers extends BaseUpdateWizardPage {
 
       showSharedWarning: false,
 
-      serverToReplace: undefined,
+      serverToReplace: undefined
     };
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.model !== prevProps.model)
     {
-      const allGroups = this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
+      const allGroups =
+        this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
       if (allGroups.includes('COMPUTE-ROLE')) {
         this.setState({expandedGroup: ['COMPUTE-ROLE']});
       } else if (allGroups.size > 0) {
@@ -152,9 +153,18 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   replaceServer = (server, theProps) =>  {
-    // update model
-    let model =
-      updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL, server.id);
+    let model;
+
+    // if compute node, will have a oldServer props
+    // add server to the modal
+    if(theProps.oldServer) {
+      model = addServerInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL);
+    }
+    else { // update existing server
+      model =
+        updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL, server.id);
+    }
+
     this.props.updateGlobalState('model', model);
 
     // the new server is from discovered servers or manual servers
@@ -163,15 +173,17 @@ class UpdateServers extends BaseUpdateWizardPage {
       this.updateServerForReplaceServer(server);
     }
 
-    // TODO record only pass id and ip for now, not really used
-    // at this point. might be in the future. If it turns out no
-    // no use at all, remove it
+    // existing server id and ip-addr for non-compute node
+    // new server id and ip-addr for a new compute node
+    // for replacing a compute node, also recorded oldServer's id
+    // and ip-addr
+    // id and ip-addr can be used to retriev hostname in CloudModel.yml
     theProps.server = {id : server.id, 'ip': server['ip-addr']};
 
     let pages = this.assembleProcessPages(theProps);
 
     // trigger update process to start which calls the startUpdate in
-    // InstallWizard
+    // UpdateWizard
     this.props.startUpdateProcess('ReplaceServer', pages, theProps);
   }
 
@@ -240,8 +252,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
   }
 
-  handleDoneReplaceServer = (server, wipeDisk, installOS) => {
-    this.replaceServer(server, wipeDisk, installOS);
+  handleDoneReplaceServer = (server, theProps) => {
+    this.replaceServer(server, theProps);
     this.handleCancelReplaceServer();
   }
 

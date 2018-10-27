@@ -14,18 +14,26 @@
 **/
 
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
-import { IpV4AddressValidator, MacAddressValidator, createExcludesValidator, chainValidators }
+import {
+  IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
+  createExcludesValidator, chainValidators }
   from '../utils/InputValidators.js';
-import { genUID, maskPassword } from '../utils/ModelUtils.js';
+import {
+  genUID, maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds }
+  from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
 
 const Fragment = React.Fragment;
+
+const MAC_IPMI_INPUT_NAMES = ['ilo-ip', 'ilo-user', 'ilo-password', 'mac-addr'];
+const SERVER_INFO_INPUT_NAMES = ['id', 'ip-addr', 'nic-mapping', 'server-group'];
 
 class ReplaceServerDetails extends Component {
   constructor(props) {
@@ -35,29 +43,20 @@ class ReplaceServerDetails extends Component {
       isInstallOsSelected: false,
       isWipeDiskSelected: false,
       isUseAvailServersSelected: false,
-      inputValue: Map({
-        'ilo-user': '',
-        'ilo-password': '',
-        'ilo-ip': '',
-        'mac-addr': '',
-      }),
+      inputValue: this.initInputs(),
 
       selectedServerId: undefined,
       osInstallUsername: undefined,
       osInstallPassword: undefined,
 
-      isValid: Map({
-        'ilo-user': undefined,
-        'ilo-password': undefined,
-        'ilo-ip': undefined,
-        'mac-addr': undefined,
-      }),
+      isValid: this.initInputsValid(),
       isOsInstallPasswordValid: undefined,
+      nicMappings: getNicMappings(props.model),
+      serverGroups: getServerGroups(props.model)
     };
   }
 
-  // This should be componentDidMOunt, since reactjs has deprecated ComponentWillMount
-  componentWillMount() {
+  componentDidMount() {
     fetchJson('/api/v1/clm/user')
       .then(responseData => {
         this.setState({
@@ -66,22 +65,74 @@ class ReplaceServerDetails extends Component {
       });
   }
 
+  initInputs = () => {
+    let inputs = {};
+    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
+      inputs[input_name] = '';
+    });
+
+    if (this.isCompute()) {
+      MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES).forEach(input_name => {
+        inputs[input_name] = '';
+      });
+    }
+
+    return Map(inputs);
+  }
+
+  initInputsValid = () => {
+    let inputValid = {};
+    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
+      inputValid[input_name] = undefined;
+    });
+
+
+    if (this.isCompute()) {
+      MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES).forEach(input_name => {
+        inputValid[input_name] = undefined;
+      });
+    }
+
+    return Map(inputValid);
+  }
+
+  isServerInputsValid = () => {
+    // if it is compute node and install os is not checked
+    // don't need check MAC and IMPI inputs
+    if (this.isCompute() && !this.state.isInstallOsSelected) {
+      let checkValid = this.state.isValid.filter((value, key) => {
+        return !MAC_IPMI_INPUT_NAMES.includes(key);
+      });
+
+      return checkValid.every((value) => value === true);
+    }
+
+    return this.state.isValid.every((value) => value === true);
+  }
+
   isFormInputValid = () => {
 
     // The form is valid if all of the fields are valid.  The OS install password only has
     // to be valid when the OS Install checkbox is selected
-    return this.state.isValid.every((value) => value === true) &&
+    return this.isServerInputsValid() &&
       (this.state.isOsInstallPasswordValid || !this.state.isInstallOsSelected);
   }
 
   handleDone = () => {
-
     let data = {};
+    if(!this.isCompute()) {
+      data = Object.assign({}, this.props.data);
+    }
+    else {
+      SERVER_INFO_INPUT_NAMES.forEach(input_name => {
+        data[input_name] = this.state.inputValue.get(input_name);
+      });
+      data['role'] = this.props.data['role'];
+    }
 
-    data['mac-addr'] = this.state.inputValue.get('mac-addr');
-    data['ilo-ip'] = this.state.inputValue.get('ilo-ip');
-    data['ilo-user'] = this.state.inputValue.get('ilo-user');
-    data['ilo-password'] = this.state.inputValue.get('ilo-password');
+    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
+      data[input_name] = this.state.inputValue.get(input_name);
+    });
 
     let theProps = {
       wipeDisk : this.state.isWipeDiskSelected,
@@ -92,19 +143,26 @@ class ReplaceServerDetails extends Component {
       theProps.osInstallPassword = this.state.osInstallPassword; //TODO where to store
     }
 
-    //TODO the whole use available servers need further work
     // picked from available server, this is used to
     // update the available servers or manual servers list
     if(this.state.selectedServerId) {
       theProps.selectedServerId = this.state.selectedServerId;
-      // TODO if it is an existing server discovered or added, get its ID from availableServers
-      // this.props.availableServers.find(server => server.id === this.state.selectedServerId);
-      // was: data['uid'] = this.state.inputValue.get('uid');
+      // update internal uuid for UI purpose
+      let selServer =
+        this.props.availableServers.find(server => server.id === this.state.selectedServerId);
+      data['uid'] = selServer['uid'];
     }
     else {
       // user input new mac-addr and ilo info
-      // generate a new uid
-      data.uid = genUID();
+      // generate a new uid, treat it as manual added server
+      data['uid'] = genUID('manul');
+    }
+
+    // will record the old compute host information so we can process removing
+    // the compute host later
+    if(this.isCompute()) {
+      theProps.oldServer = {
+        'id': this.props.data['id'], 'ip-addr': this.props.data['ip-addr']};
     }
 
     this.props.doneAction(data, theProps);
@@ -150,14 +208,9 @@ class ReplaceServerDetails extends Component {
       // If the user had previously selected an available server but is now
       // un-selecting a server, clear out all relevant fields
       if (!selected && prev.selectedServerId) {
-        newState.inputValue = Map({
-          'ilo-user': '',
-          'ilo-password': '',
-          'ilo-ip': '',
-          'mac-addr': '',
-        });
+        newState.inputValue = this.initInputs();
         // Reset (to undefined) the validity of the fields being cleared
-        newState.isValid = prev.isValid.set('ilo-user').set('ilo-password').set('ilo-ip').set('mac-addr');
+        newState.isValid = this.initInputsValid();
         newState.selectedServerId = '';
       }
 
@@ -173,8 +226,8 @@ class ReplaceServerDetails extends Component {
         let isValid = prev.isValid;
 
         // Copy the fields of interest from known servers, and set the validity
-        //   of each field depending on whether it is populated
-        for (let key of ['ilo-ip', 'ilo-user', 'ilo-password', 'mac-addr']) {
+        // of each field depending on whether it is populated
+        for (let key of this.getInputNames()) {
           const valueToCopy = server[key] || '';
           inputValue = inputValue.set(key, valueToCopy);
           isValid = isValid.set(key, (valueToCopy.length > 0));
@@ -188,6 +241,33 @@ class ReplaceServerDetails extends Component {
     }
   }
 
+  isCompute = () => {
+    return this.props.data['role'].includes('COMPUTE');
+  }
+
+  handleSelectGroup = (groupName) => {
+    this.setState((prev) => ({
+      isValid: prev.isValid.set('server-group', true),
+      inputValue: prev.inputValue.set('server-group', groupName)
+    }));
+  }
+
+  handleSelectNicMapping = (nicMapName) => {
+    this.setState((prev) => ({
+      isValid: prev.isValid.set('nic-mapping', true),
+      inputValue: prev.inputValue.set('nic-mapping', nicMapName)
+    }));
+  }
+
+  getInputNames = () => {
+    if(!this.isCompute()) {
+      return  MAC_IPMI_INPUT_NAMES;
+    }
+    else {
+      return MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES);
+    }
+  }
+
   // Helper function to create a pair of TH and TD entries with the given name
   labelField = (name) => {
     return (
@@ -196,6 +276,7 @@ class ReplaceServerDetails extends Component {
         <td>{this.props.data[name]}</td>
       </Fragment>);
   }
+
   renderDetailsTable = () => {
     return (
       <table className='table table-condensed'>
@@ -269,6 +350,91 @@ class ReplaceServerDetails extends Component {
     }
   }
 
+  renderDropDown(name, list, handler, title) {
+    let emptyOptProps = '';
+    if(isEmpty(this.state.inputValue.get(name))) {
+      emptyOptProps = {
+        label: translate('server.please.select'),
+        value: 'noopt'
+      };
+    }
+    return (
+      <div className='detail-line'>
+        <div className='detail-heading'>{translate(title) + '*'}</div>
+        <div className='input-body'>
+          <ListDropdown name={this.props.name} value={this.state.inputValue.get(name)}
+            optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
+        </div>
+      </div>
+    );
+  }
+
+  renderNewComputeInfo(existingIpAddresses) {
+    if(this.isCompute()) {
+      let selectedServerId = this.state.selectedServerId;
+      // TODO try to use chainValidors for check id, for some reason, it complains about
+      // the id in Use when select an avaible server id, use the old way for now
+      let extraProps = {};
+      extraProps.ids =
+        getAllOtherServerIds(
+          this.props.model, this.props.availableServers, undefined, selectedServerId);
+
+      return (
+        <div>
+          <div className='message-line smaller-margin'>
+            {translate('server.replace.compute.details.message')}</div>
+          <div className='server-details-container'>
+            <InputLine
+              isRequired={true} inputName='id' label='server.id.prompt'
+              inputValidate={UniqueIdValidator}
+              inputValue={this.state.inputValue.get('id')}
+              inputAction={this.handleInputChange} {...extraProps}/>
+            <InputLine
+              isRequired={true} inputName='ip-addr' label='server.ip.prompt'
+              inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
+              inputValue={this.state.inputValue.get('ip-addr')}
+              inputAction={this.handleInputChange}/>
+            {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup,
+              'server.group.prompt')}
+            {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping,
+              'server.nicmapping.prompt')}
+          </div>
+        </div>
+      );
+    }
+  }
+
+  renderMACIPMIInfo(existingMacAddreses, existingIpAddresses) {
+    // if it is a compute role, mac address and IPIM info is not requried
+    // or it is compute role and want to install OS on the new compute
+    let isRequired = !this.isCompute() || this.state.isInstallOsSelected;
+    return (
+      <div>
+        <div className='message-line smaller-margin'>{translate('server.replace.details.message')}</div>
+        <div className='server-details-container'>
+          <InputLine
+            isRequired={isRequired} inputName='mac-addr' label='server.mac.prompt'
+            inputValidate={chainValidators(MacAddressValidator, createExcludesValidator(existingMacAddreses))}
+            inputValue={this.state.inputValue.get('mac-addr')}
+            inputAction={this.handleInputChange} />
+          <InputLine
+            isRequired={isRequired} inputName='ilo-ip' label='server.ipmi.ip.prompt'
+            inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
+            inputValue={this.state.inputValue.get('ilo-ip')}
+            inputAction={this.handleInputChange} />
+          <InputLine
+            isRequired={isRequired} inputName='ilo-user' label='server.ipmi.username.prompt'
+            inputValue={this.state.inputValue.get('ilo-user')}
+            inputAction={this.handleInputChange}/>
+          <InputLine
+            isRequired={isRequired} inputType='password' inputName='ilo-password' label='server.ipmi.password.prompt'
+            inputValue={this.state.inputValue.get('ilo-password')}
+            inputAction={this.handleInputChange}/>
+        </div>
+      </div>
+    );
+  }
+
   renderServerContent() {
     const modelServers = this.props.model.getIn(['inputModel','servers']);
 
@@ -277,33 +443,13 @@ class ReplaceServerDetails extends Component {
     // Avoid re-using any existing IP addresses
     const existingIpAddresses = modelServers.map(server => server.get('ilo-ip'))
       .concat(modelServers.map(server => server.get('ip-addr')));
-
     return (
       <div>
         <div className='server-details-container'>
           {this.renderDetailsTable()}
         </div>
-        <div className='message-line'>{translate('server.replace.details.message')}</div>
-        <div className='server-details-container'>
-          <InputLine
-            isRequired={true} inputName='mac-addr' label='server.mac.prompt'
-            inputValidate={chainValidators(MacAddressValidator, createExcludesValidator(existingMacAddreses))}
-            inputValue={this.state.inputValue.get('mac-addr')}
-            inputAction={this.handleInputChange} />
-          <InputLine
-            isRequired={true} inputName='ilo-ip' label='server.ipmi.ip.prompt'
-            inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
-            inputValue={this.state.inputValue.get('ilo-ip')}
-            inputAction={this.handleInputChange} />
-          <InputLine
-            isRequired={true} inputName='ilo-user' label='server.ipmi.username.prompt'
-            inputValue={this.state.inputValue.get('ilo-user')}
-            inputAction={this.handleInputChange}/>
-          <InputLine
-            isRequired={true} inputType='password' inputName='ilo-password' label='server.ipmi.password.prompt'
-            inputValue={this.state.inputValue.get('ilo-password')}
-            inputAction={this.handleInputChange}/>
-        </div>
+        {this.renderNewComputeInfo(existingIpAddresses)}
+        {this.renderMACIPMIInfo(existingMacAddreses, existingIpAddresses)}
         {this.renderAvailableServers()}
         <div className='server-details-container'>
           <input className='replace-options' type='checkbox' value='installos'
