@@ -15,6 +15,7 @@
 
 import React, { Component } from 'react';
 import { isEmpty } from 'lodash';
+import { MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS } from '../utils/constants.js';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
@@ -30,10 +31,9 @@ import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
 
+
 const Fragment = React.Fragment;
 
-const MAC_IPMI_INPUT_NAMES = ['ilo-ip', 'ilo-user', 'ilo-password', 'mac-addr'];
-const SERVER_INFO_INPUT_NAMES = ['id', 'ip-addr', 'nic-mapping', 'server-group'];
 
 class ReplaceServerDetails extends Component {
   constructor(props) {
@@ -67,12 +67,12 @@ class ReplaceServerDetails extends Component {
 
   initInputs = () => {
     let inputs = {};
-    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
+    REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
       inputs[input_name] = '';
     });
 
     if (this.isCompute()) {
-      MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES).forEach(input_name => {
+      MODEL_SERVER_PROPS.forEach(input_name => {
         inputs[input_name] = '';
       });
     }
@@ -82,13 +82,12 @@ class ReplaceServerDetails extends Component {
 
   initInputsValid = () => {
     let inputValid = {};
-    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
+    REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
       inputValid[input_name] = undefined;
     });
 
-
     if (this.isCompute()) {
-      MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES).forEach(input_name => {
+      MODEL_SERVER_PROPS.forEach(input_name => {
         inputValid[input_name] = undefined;
       });
     }
@@ -98,13 +97,16 @@ class ReplaceServerDetails extends Component {
 
   isServerInputsValid = () => {
     // if it is compute node and install os is not checked
-    // don't need check MAC and IMPI inputs
+    // only check MAC and IMPI inputs when user inputs them
     if (this.isCompute() && !this.state.isInstallOsSelected) {
-      let checkValid = this.state.isValid.filter((value, key) => {
-        return !MAC_IPMI_INPUT_NAMES.includes(key);
+      return this.state.isValid.every((value, key) =>{
+        if (REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
+          return value === true || value === undefined;
+        }
+        else {
+          return value === true;
+        }
       });
-
-      return checkValid.every((value) => value === true);
     }
 
     return this.state.isValid.every((value) => value === true);
@@ -122,17 +124,16 @@ class ReplaceServerDetails extends Component {
     let data = {};
     if(!this.isCompute()) {
       data = Object.assign({}, this.props.data);
+      REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
+        data[input_name] = this.state.inputValue.get(input_name);
+      });
     }
     else {
-      SERVER_INFO_INPUT_NAMES.forEach(input_name => {
+      MODEL_SERVER_PROPS.forEach(input_name => {
         data[input_name] = this.state.inputValue.get(input_name);
       });
       data['role'] = this.props.data['role'];
     }
-
-    MAC_IPMI_INPUT_NAMES.forEach(input_name => {
-      data[input_name] = this.state.inputValue.get(input_name);
-    });
 
     let theProps = {
       wipeDisk : this.state.isWipeDiskSelected,
@@ -261,10 +262,10 @@ class ReplaceServerDetails extends Component {
 
   getInputNames = () => {
     if(!this.isCompute()) {
-      return  MAC_IPMI_INPUT_NAMES;
+      return  REPLACE_SERVER_MAC_IPMI_PROPS;
     }
     else {
-      return MAC_IPMI_INPUT_NAMES.concat(SERVER_INFO_INPUT_NAMES);
+      return MODEL_SERVER_PROPS;
     }
   }
 
@@ -458,7 +459,7 @@ class ReplaceServerDetails extends Component {
           {this.renderOSUserPass()}
         </div>
         <div className='server-details-container'>
-          <input className='replace-options' type='checkbox' value='wipedisk'
+          <input className='replace-options more-bottom-margin' type='checkbox' value='wipedisk'
             checked={this.state.isWipeDiskSelected} onChange={this.handleWipeDiskCheck}/>
           {translate('common.wipedisk')}
         </div>

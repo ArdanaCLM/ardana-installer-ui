@@ -22,7 +22,9 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
 import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
-import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
+import {
+  MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS }
+  from '../utils/constants.js';
 import { updateServersInModel, getMergedServer, addServerInModel } from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
@@ -116,16 +118,36 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState(prevState => ({'expandedGroup': prevState.expandedGroup.concat(groupName)}));
   }
 
-  updateServerForReplaceServer = (server) => {
+  getReplaceProps = (isCompute) => {
+    if(isCompute) {
+      return MODEL_SERVER_PROPS;
+    }
+    else {
+      return REPLACE_SERVER_MAC_IPMI_PROPS;
+    }
+  }
+
+  updateServerForReplaceServer = (server, isCompute) => {
     let old = this.state.servers.find(s => server.uid === s.uid);
     if (old) {
-      const updated_server = getMergedServer(old, server, REPLACE_SERVER_PROPS);
+      const updated_server = getMergedServer(old, server, this.getReplaceProps(isCompute));
       putJson('/api/v1/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
         });
     }
+    // for compute host replacement, user added info manually, will add to
+    // to saved servers
+    else if(isCompute) {
+      postJson('/api/v1/server', server)
+        .catch(error => {
+          let msg = translate('server.save.error', error.toString());
+          this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
+        });
+    }
+    // for non-compute host replacement, if user added info manually, won't
+    // save to saved servers
   }
 
   assembleProcessPages = (theProps) => {
@@ -155,9 +177,12 @@ class UpdateServers extends BaseUpdateWizardPage {
   replaceServer = (server, theProps) =>  {
     let model;
 
+    // compute host replacement has oldServer
+    let isCompute = theProps.oldServer;
+
     // if compute node, will have a oldServer props
     // add server to the modal
-    if(theProps.oldServer) {
+    if(isCompute) {
       model = addServerInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL);
     }
     else { // update existing server
@@ -170,7 +195,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // the new server is from discovered servers or manual servers
     // need to update
     if(theProps.selectedServerId) {
-      this.updateServerForReplaceServer(server);
+      this.updateServerForReplaceServer(server, isCompute);
     }
 
     // existing server id and ip-addr for non-compute node
