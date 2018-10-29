@@ -67,12 +67,14 @@ class ReplaceServerDetails extends Component {
 
   initInputs = () => {
     let inputs = {};
-    REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
-      inputs[input_name] = '';
-    });
 
     if (this.isCompute()) {
       MODEL_SERVER_PROPS.forEach(input_name => {
+        inputs[input_name] = '';
+      });
+    }
+    else {
+      REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
         inputs[input_name] = '';
       });
     }
@@ -82,12 +84,14 @@ class ReplaceServerDetails extends Component {
 
   initInputsValid = () => {
     let inputValid = {};
-    REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
-      inputValid[input_name] = undefined;
-    });
 
     if (this.isCompute()) {
       MODEL_SERVER_PROPS.forEach(input_name => {
+        inputValid[input_name] = undefined;
+      });
+    }
+    else {
+      REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
         inputValid[input_name] = undefined;
       });
     }
@@ -122,17 +126,19 @@ class ReplaceServerDetails extends Component {
 
   handleDone = () => {
     let data = {};
-    if(!this.isCompute()) {
-      data = Object.assign({}, this.props.data);
-      REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
-        data[input_name] = this.state.inputValue.get(input_name);
-      });
-    }
-    else {
+    // if it is compute node, will take all user inputs
+    // for the new compute node
+    if(this.isCompute()) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         data[input_name] = this.state.inputValue.get(input_name);
       });
       data['role'] = this.props.data['role'];
+    }
+    else { // if it is non-compute node, only replace the mac-addr and ipmi info
+      data = Object.assign({}, this.props.data);
+      REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
+        data[input_name] = this.state.inputValue.get(input_name);
+      });
     }
 
     let theProps = {
@@ -261,11 +267,11 @@ class ReplaceServerDetails extends Component {
   }
 
   getInputNames = () => {
-    if(!this.isCompute()) {
-      return  REPLACE_SERVER_MAC_IPMI_PROPS;
+    if(this.isCompute()) {
+      return  MODEL_SERVER_PROPS;
     }
     else {
-      return MODEL_SERVER_PROPS;
+      return REPLACE_SERVER_MAC_IPMI_PROPS;
     }
   }
 
