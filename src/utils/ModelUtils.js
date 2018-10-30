@@ -297,3 +297,7 @@ export function hasConflictAddresses(theServer, serverList) {
     );
   });
 }
+
+export function isCompute(server) {
+  return server['role'].includes('COMPUTE');
+}

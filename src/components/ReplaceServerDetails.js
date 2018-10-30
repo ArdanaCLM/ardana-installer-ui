@@ -25,7 +25,7 @@ import {
   createExcludesValidator, chainValidators }
   from '../utils/InputValidators.js';
 import {
-  genUID, maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds }
+  maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds, isCompute }
   from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
@@ -68,7 +68,7 @@ class ReplaceServerDetails extends Component {
   initInputs = () => {
     let inputs = {};
 
-    if (this.isCompute()) {
+    if (isCompute(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputs[input_name] = '';
       });
@@ -85,7 +85,7 @@ class ReplaceServerDetails extends Component {
   initInputsValid = () => {
     let inputValid = {};
 
-    if (this.isCompute()) {
+    if (isCompute(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputValid[input_name] = undefined;
       });
@@ -102,7 +102,7 @@ class ReplaceServerDetails extends Component {
   isServerInputsValid = () => {
     // if it is compute node and install os is not checked
     // only check MAC and IMPI inputs when user inputs them
-    if (this.isCompute() && !this.state.isInstallOsSelected) {
+    if (isCompute(this.props.data) && !this.state.isInstallOsSelected) {
       return this.state.isValid.every((value, key) =>{
         if (REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
           return value === true || value === undefined;
@@ -125,19 +125,18 @@ class ReplaceServerDetails extends Component {
   }
 
   handleDone = () => {
-    let data = {};
+    let server = {};
     // if it is compute node, will take all user inputs
     // for the new compute node
-    if(this.isCompute()) {
+    if(isCompute(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
-        data[input_name] = this.state.inputValue.get(input_name);
+        server[input_name] = this.state.inputValue.get(input_name);
       });
-      data['role'] = this.props.data['role'];
     }
     else { // if it is non-compute node, only replace the mac-addr and ipmi info
-      data = Object.assign({}, this.props.data);
+      server = Object.assign({}, this.props.data);
       REPLACE_SERVER_MAC_IPMI_PROPS.forEach(input_name => {
-        data[input_name] = this.state.inputValue.get(input_name);
+        server[input_name] = this.state.inputValue.get(input_name);
       });
     }
 
@@ -154,25 +153,9 @@ class ReplaceServerDetails extends Component {
     // update the available servers or manual servers list
     if(this.state.selectedServerId) {
       theProps.selectedServerId = this.state.selectedServerId;
-      // update internal uuid for UI purpose
-      let selServer =
-        this.props.availableServers.find(server => server.id === this.state.selectedServerId);
-      data['uid'] = selServer['uid'];
-    }
-    else {
-      // user input new mac-addr and ilo info
-      // generate a new uid, treat it as manual added server
-      data['uid'] = genUID('manul');
     }
 
-    // will record the old compute host information so we can process removing
-    // the compute host later
-    if(this.isCompute()) {
-      theProps.oldServer = {
-        'id': this.props.data['id'], 'ip-addr': this.props.data['ip-addr']};
-    }
-
-    this.props.doneAction(data, theProps);
+    this.props.doneAction(server, theProps);
   }
 
   handleInputChange = (e, valid, props) => {
@@ -378,21 +361,22 @@ class ReplaceServerDetails extends Component {
 
   renderNewComputeInfo(existingIpAddresses) {
     if(this.isCompute()) {
-      let selectedServerId = this.state.selectedServerId;
+      // disable the id input when user select from available servers
+      let isDisabled = !isEmpty(this.state.selectedServerId);
       // TODO try to use chainValidors for check id, for some reason, it complains about
-      // the id in Use when select an avaible server id, use the old way for now
+      // the id in Use when select an available server id, use the old way for now
       let extraProps = {};
       extraProps.ids =
         getAllOtherServerIds(
-          this.props.model, this.props.availableServers, undefined, selectedServerId);
+          this.props.model, this.props.availableServers, undefined, this.state.selectedServerId);
 
       return (
         <div>
-          <div className='message-line smaller-margin'>
+          <div className='message-line'>
             {translate('server.replace.compute.details.message')}</div>
           <div className='server-details-container'>
             <InputLine
-              isRequired={true} inputName='id' label='server.id.prompt'
+              isRequired={true} disabled={isDisabled} inputName='id' label='server.id.prompt'
               inputValidate={UniqueIdValidator}
               inputValue={this.state.inputValue.get('id')}
               inputAction={this.handleInputChange} {...extraProps}/>
@@ -417,7 +401,7 @@ class ReplaceServerDetails extends Component {
     let isRequired = !this.isCompute() || this.state.isInstallOsSelected;
     return (
       <div>
-        <div className='message-line smaller-margin'>{translate('server.replace.details.message')}</div>
+        <div className='message-line'>{translate('server.replace.details.message')}</div>
         <div className='server-details-container'>
           <InputLine
             isRequired={isRequired} inputName='mac-addr' label='server.mac.prompt'
