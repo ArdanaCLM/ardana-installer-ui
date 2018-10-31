@@ -24,7 +24,7 @@ import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import {
   MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS }
   from '../utils/constants.js';
-import { updateServersInModel, getMergedServer, addServerInModel, isCompute } from '../utils/ModelUtils.js';
+import { updateServersInModel, getMergedServer, addServerInModel, isComputeNode } from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
@@ -119,7 +119,7 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   getReplaceProps = () => {
-    if(isCompute(this.state.serverToReplace)) {
+    if(isComputeNode(this.state.serverToReplace)) {
       return MODEL_SERVER_PROPS;
     }
     else {
@@ -139,7 +139,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
     // for compute host replacement, user added info manually, will add to
     // to saved servers
-    else if(isCompute(this.state.serverToReplace)) {
+    else if(isComputeNode(this.state.serverToReplace)) {
       server['source'] = 'manual';
       postJson('/api/v1/server', [server])
         .catch(error => {
@@ -199,7 +199,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
 
     // if compute node, will add server to the model
-    if(isCompute(this.state.serverToReplace)) {
+    if(isComputeNode(this.state.serverToReplace)) {
       // get the old server's role
       repServer['role'] = this.state.serverToReplace['role'];
       model = addServerInModel(repServer, this.props.model, MODEL_SERVER_PROPS_ALL);
@@ -222,7 +222,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     theProps.server = {id: repServer.id, 'ip': repServer['ip-addr']};
 
     // save the oldServer information for later process when replace compute
-    if(isCompute(this.state.serverToReplace)) {
+    if(isComputeNode(this.state.serverToReplace)) {
       theProps.oldServer = {
         id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr']};
     }

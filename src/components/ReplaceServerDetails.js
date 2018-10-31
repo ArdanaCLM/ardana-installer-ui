@@ -25,7 +25,7 @@ import {
   createExcludesValidator, chainValidators }
   from '../utils/InputValidators.js';
 import {
-  maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds, isCompute }
+  maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds, isComputeNode }
   from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
@@ -68,7 +68,7 @@ class ReplaceServerDetails extends Component {
   initInputs = () => {
     let inputs = {};
 
-    if (isCompute(this.props.data)) {
+    if (isComputeNode(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputs[input_name] = '';
       });
@@ -85,7 +85,7 @@ class ReplaceServerDetails extends Component {
   initInputsValid = () => {
     let inputValid = {};
 
-    if (isCompute(this.props.data)) {
+    if (isComputeNode(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputValid[input_name] = undefined;
       });
@@ -102,7 +102,7 @@ class ReplaceServerDetails extends Component {
   isServerInputsValid = () => {
     // if it is compute node and install os is not checked
     // only check MAC and IMPI inputs when user inputs them
-    if (isCompute(this.props.data) && !this.state.isInstallOsSelected) {
+    if (isComputeNode(this.props.data) && !this.state.isInstallOsSelected) {
       return this.state.isValid.every((value, key) =>{
         if (REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
           return value === true || value === undefined;
@@ -128,7 +128,7 @@ class ReplaceServerDetails extends Component {
     let server = {};
     // if it is compute node, will take all user inputs
     // for the new compute node
-    if(isCompute(this.props.data)) {
+    if(isComputeNode(this.props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         server[input_name] = this.state.inputValue.get(input_name);
       });

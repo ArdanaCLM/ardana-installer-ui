@@ -298,6 +298,6 @@ export function hasConflictAddresses(theServer, serverList) {
   });
 }
 
-export function isCompute(server) {
+export function isComputeNode(server) {
   return server['role'].includes('COMPUTE');
 }
