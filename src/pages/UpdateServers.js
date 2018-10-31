@@ -14,7 +14,6 @@
 **/
 
 import React from 'react';
-
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
 import { ActionButton } from '../components/Buttons.js';
 import CollapsibleTable from '../components/CollapsibleTable.js';
@@ -22,11 +21,14 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
 import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
-import { MODEL_SERVER_PROPS_ALL, REPLACE_SERVER_PROPS } from '../utils/constants.js';
-import { updateServersInModel, getMergedServer } from '../utils/ModelUtils.js';
+import {
+  MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS }
+  from '../utils/constants.js';
+import { updateServersInModel, getMergedServer, addServerInModel, isComputeNode } from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
+import { genUID } from '../utils/ModelUtils.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -52,14 +54,15 @@ class UpdateServers extends BaseUpdateWizardPage {
 
       showSharedWarning: false,
 
-      serverToReplace: undefined,
+      serverToReplace: undefined
     };
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.props.model !== prevProps.model)
     {
-      const allGroups = this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
+      const allGroups =
+        this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
       if (allGroups.includes('COMPUTE-ROLE')) {
         this.setState({expandedGroup: ['COMPUTE-ROLE']});
       } else if (allGroups.size > 0) {
@@ -115,16 +118,37 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState(prevState => ({'expandedGroup': prevState.expandedGroup.concat(groupName)}));
   }
 
+  getReplaceProps = () => {
+    if(isComputeNode(this.state.serverToReplace)) {
+      return MODEL_SERVER_PROPS;
+    }
+    else {
+      return REPLACE_SERVER_MAC_IPMI_PROPS;
+    }
+  }
+
   updateServerForReplaceServer = (server) => {
     let old = this.state.servers.find(s => server.uid === s.uid);
     if (old) {
-      const updated_server = getMergedServer(old, server, REPLACE_SERVER_PROPS);
+      const updated_server = getMergedServer(old, server, this.getReplaceProps());
       putJson('/api/v1/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
         });
     }
+    // for compute host replacement, user added info manually, will add to
+    // to saved servers
+    else if(isComputeNode(this.state.serverToReplace)) {
+      server['source'] = 'manual';
+      postJson('/api/v1/server', [server])
+        .catch(error => {
+          let msg = translate('server.save.error', error.toString());
+          this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
+        });
+    }
+    // for non-compute host replacement, if user added info manually, won't
+    // save to saved servers
   }
 
   assembleProcessPages = (theProps) => {
@@ -151,27 +175,62 @@ class UpdateServers extends BaseUpdateWizardPage {
     return pages;
   }
 
+  // server includes server info and ipmi info
+  // theProps includes zero or more of the items like
+  // wipeDisk, installOS, osInstallUsername, osInstallPassword,
+  // selectedServerId
   replaceServer = (server, theProps) =>  {
-    // update model
-    let model =
-      updateServersInModel(server, this.props.model, MODEL_SERVER_PROPS_ALL, server.id);
-    this.props.updateGlobalState('model', model);
+    let model;
+
+    let repServer = Object.assign({}, server);
 
     // the new server is from discovered servers or manual servers
     // need to update
     if(theProps.selectedServerId) {
-      this.updateServerForReplaceServer(server);
+      // update internal uuid for UI purpose
+      let selServer =
+        this.state.servers.find(svr => svr.id === theProps.selectedServerId);
+      repServer['uid'] = selServer['uid'];
+    }
+    else {
+      // user input new mac-addr and ilo info
+      // generate a new uid, treat it as manual added server
+      repServer['uid'] = genUID('manual');
     }
 
-    // TODO record only pass id and ip for now, not really used
-    // at this point. might be in the future. If it turns out no
-    // no use at all, remove it
-    theProps.server = {id : server.id, 'ip': server['ip-addr']};
+    // if compute node, will add server to the model
+    if(isComputeNode(this.state.serverToReplace)) {
+      // get the old server's role
+      repServer['role'] = this.state.serverToReplace['role'];
+      model = addServerInModel(repServer, this.props.model, MODEL_SERVER_PROPS_ALL);
+    }
+    else { // update existing server
+      model =
+        updateServersInModel(repServer, this.props.model, MODEL_SERVER_PROPS_ALL, repServer.id);
+    }
+
+    this.updateServerForReplaceServer(repServer);
+
+    this.props.updateGlobalState('model', model);
+
+
+    // existing server id and ip-addr for non-compute node
+    // new server id and ip-addr for a new compute node
+    // for replacing a compute node, also recorded oldServer's id
+    // and ip-addr
+    // id and ip-addr can be used to retriev hostname in CloudModel.yml
+    theProps.server = {id: repServer.id, 'ip': repServer['ip-addr']};
+
+    // save the oldServer information for later process when replace compute
+    if(isComputeNode(this.state.serverToReplace)) {
+      theProps.oldServer = {
+        id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr']};
+    }
 
     let pages = this.assembleProcessPages(theProps);
 
     // trigger update process to start which calls the startUpdate in
-    // InstallWizard
+    // UpdateWizard
     this.props.startUpdateProcess('ReplaceServer', pages, theProps);
   }
 
@@ -240,8 +299,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
   }
 
-  handleDoneReplaceServer = (server, wipeDisk, installOS) => {
-    this.replaceServer(server, wipeDisk, installOS);
+  handleDoneReplaceServer = (server, theProps) => {
+    this.replaceServer(server, theProps);
     this.handleCancelReplaceServer();
   }
 

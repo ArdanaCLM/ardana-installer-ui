@@ -566,6 +566,7 @@
     "server.replace.heading": "Replace a Server - {0}",
     "server.available.prompt": "Available Servers",
     "server.replace.details.message": "Please provide MAC address and IPMI information for the replacement server.",
+    "server.replace.compute.details.message": "Please provide server information for the replacement server.",
     "replace.server.details.role": "Role",
     "replace.server.details.ip-addr": "IP Address",
     "replace.server.details.server-group": "Server Group",
