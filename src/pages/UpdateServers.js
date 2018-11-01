@@ -154,10 +154,17 @@ class UpdateServers extends BaseUpdateWizardPage {
   assembleProcessPages = (theProps) => {
     let pages = [];
 
-    pages.push({
-      name: 'PrepareReplace',
-      component: UpdateServerPages.PrepareReplace
-    });
+    if(isComputeNode(this.state.serverToReplace)) {
+      pages.push({
+        name: 'PrepareCompute',
+        component: UpdateServerPages.PrepareCompute
+      });
+    } else {
+      pages.push({
+        name: 'PrepareController',
+        component: UpdateServerPages.PrepareController
+      });
+    }
 
     //TODO other pages based on the theProps
 

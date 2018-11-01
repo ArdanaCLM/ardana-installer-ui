@@ -51,7 +51,7 @@ const PLAYBOOK_STEPS = [
 // page or remove it if it is not used eventually.
 // Please refer to pages/AddServers where it has the latest
 // framework process handling
-class PrepareReplace extends BaseUpdateWizardPage {
+class PrepareCompute extends BaseUpdateWizardPage {
 
   constructor(props) {
     super(props);
@@ -147,4 +147,4 @@ class PrepareReplace extends BaseUpdateWizardPage {
   }
 }
 
-export default PrepareReplace;
+export default PrepareCompute;
