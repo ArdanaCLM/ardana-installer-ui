@@ -20,6 +20,9 @@ import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
+import { LoadingMask } from '../../components/LoadingMask.js';
+import { isEmpty } from 'lodash';
 
 class PrepareController extends BaseUpdateWizardPage {
 
@@ -29,10 +32,31 @@ class PrepareController extends BaseUpdateWizardPage {
     this.state = {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       invalidMsg: '',
+      showLoadingMask: false,
     };
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+
+  componentWillMount() {
+    this.setState({showLoadingMask: true});
+    getInternalModel()
+      .then((yml) => {
+        // Force a re-render if the page is still shown (user may navigate away while waiting)
+        if (this.refs.PrepareController) {
+          this.setState({internalModel: yml, showLoadingMask: false});
+        }
+      })
+      .catch((error) => {
+        this.setState({
+          error: {
+            title: translate('default.error'),
+            messages: [translate('services.services.per.role.unavailable')]
+          },
+          showLoadingMask: false
+        });
+      });
+  }
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
@@ -66,9 +90,6 @@ class PrepareController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.cobbler-deploy'),
         playbooks: ['cobbler-deploy.yml']
-        // TODO:
-        //    cobbler-deploy *might* prompt for a password, although the logs on the QE system
-        //       ardana@10.84.81.17 indicate that none was supplied and it succesfully ran. Hmmmm
       },
     ];
 
@@ -101,7 +122,7 @@ class PrepareController extends BaseUpdateWizardPage {
             .then((response) => {
               const cobbler_server = response.find((e) =>
                 e.ip === this.props.operationProps.server.ip ||
-                e.name === this.props.operationProps.server.name);
+                e.name === this.props.operationProps.server.id);
               if (cobbler_server) {
                 const name = cobbler_server.name;
 
@@ -124,9 +145,18 @@ class PrepareController extends BaseUpdateWizardPage {
       {
         name: 'known-hosts',
         action: ((logger) => {
-          return deleteJson('/api/v1/clm/known_hosts/' + this.props.operationProps.server.id)
+          const hostname = this.state.internalModel.internal.servers
+            .filter(s => s.id == this.props.operationProps.server.id)
+            .map(s => s.hostname);
+
+          if (isEmpty(hostname)) {
+            logger('No hostname found to remove from known_hosts, continuing\n');
+            return Promise.resolve();
+          }
+
+          return deleteJson('/api/v1/clm/known_hosts/' + hostname)
             .then((response) => {
-              logger('Host removed from known_hosts\n');
+              logger(hostname+' removed from known_hosts\n');
             })
             .catch((error) => {
               const message = translate('update.known_hosts.failure', error.toString());
@@ -163,7 +193,8 @@ class PrepareController extends BaseUpdateWizardPage {
     //if error happens, cancel button shows up
     let cancel =  this.state.overallStatus === STATUS.FAILED;
     return (
-      <div className='wizard-page'>
+      <div ref="PrepareController" className='wizard-page'>
+        <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='content-header'>
           {this.renderHeading(translate('server.replace.prepare'))}
         </div>
