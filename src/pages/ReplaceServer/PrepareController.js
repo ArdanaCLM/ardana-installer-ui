@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import { STATUS } from '../../utils/constants.js';
+import { INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProcess.js';
 import { ErrorBanner } from '../../components/Messages.js';
@@ -65,8 +65,12 @@ class PrepareController extends BaseUpdateWizardPage {
     }
   }
 
-  renderPlaybookProgress () {
-    const steps = [
+  renderPlaybookProgress (doInstall) {
+
+    const installPass = this.props.operationProps.osInstallPassword || '';
+    const serverId = this.props.operationProps.server.id;
+
+    let steps = [
       {
         label: translate('deploy.progress.commit'),
         playbooks: ['commit']
@@ -86,14 +90,32 @@ class PrepareController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.rm-known-host'),
         playbooks: ['known-hosts']
-      },
-      {
-        label: translate('server.deploy.progress.cobbler-deploy'),
-        playbooks: ['cobbler-deploy.yml']
-      },
-    ];
+      }];
 
-    const playbooks = [
+    if(this.props.operationProps.installOS) {
+      // The following steps will all be generated via the INSTALL_PLAYBOOK
+      steps.push(
+        {
+          label: translate('install.progress.step1'),
+          playbooks: ['bm-power-status.yml']
+        },
+        {
+          label: translate('install.progress.step2'),
+          playbooks: ['cobbler-deploy.yml']
+        },
+        {
+          label: translate('install.progress.step3'),
+          playbooks: ['bm-reimage.yml']
+        },
+        {
+          label: translate('install.progress.step4'),
+          playbooks: [INSTALL_PLAYBOOK + '.yml']
+        }
+      );
+    }
+
+
+    let playbooks = [
       {
         name: 'commit',
         action: ((logger) => {
@@ -165,10 +187,15 @@ class PrepareController extends BaseUpdateWizardPage {
             });
         }),
       },
-      {
-        name: 'cobbler-deploy',
-      },
     ];
+
+    if(this.props.operationProps.installOS) {
+      playbooks.push(
+        {
+          name: INSTALL_PLAYBOOK,
+          payload: {'extra-vars': {'nodelist': [serverId], 'ardanauser_password': installPass}}
+        });
+    }
 
     return (
       <PlaybookProgress

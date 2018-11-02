@@ -159,26 +159,25 @@ class UpdateServers extends BaseUpdateWizardPage {
         name: 'PrepareCompute',
         component: UpdateServerPages.PrepareCompute
       });
+
+      if(theProps.installOS) {
+        pages.push({
+          name: 'InstallOS',
+          component: UpdateServerPages.InstallOS
+        });
+      }
+
+      pages.push({
+        name: 'UpdateComplete',
+        component: UpdateServerPages.UpdateComplete
+      });
+
     } else {
       pages.push({
         name: 'PrepareController',
         component: UpdateServerPages.PrepareController
       });
     }
-
-    //TODO other pages based on the theProps
-
-    if(theProps.installOS) {
-      pages.push({
-        name: 'InstallOS',
-        component: UpdateServerPages.InstallOS
-      });
-    }
-
-    pages.push({
-      name: 'UpdateComplete',
-      component: UpdateServerPages.UpdateComplete
-    });
     return pages;
   }
 

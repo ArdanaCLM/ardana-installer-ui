@@ -525,26 +525,24 @@ class PlaybookProgress extends Component {
 
   launchPlaybook = (playbook) => {
 
-    let payload = this.props.payload;
-    if (this.props.isUpdateMode) {
-      // TODO need handle extraVars for day2
-      // for now hardcode some global extraVars until those can be
-      // set by user
-      let temp = { extraVars: {automate: 'true', encrypt: '', rekey: ''}};
-      if (playbook.payload) {
-        Object.keys(playbook.payload).forEach(key => {
-          if(key !== 'extraVars') {
-            temp[key] = playbook.payload[key];
+    // Seed the payload with defaults.  Many playbooks, including the config processor run, wipe disks,
+    // various service updates, plus *any* playbooks that call those, will stop and prompt for values, effectively
+    // causing the UI to hang.  Send extra-vars which avoid this to *all* playbooks.  Note that sending
+    // extra vars to playbooks that do not use them has no ill effects.
+    let payload = { 'extra-vars': {automate: 'true', encrypt: '', rekey: ''}};
+
+    for (const override of [this.props.payload, playbook.payload]) {
+      if (override) {
+        for (const [key, value] of Object.entries(override)) {
+          if (key == 'extra-vars' || key == 'extraVars') { // TODO: Remove extraVars here (SCRD-5738)
+            // Merge extra vars with defaults
+            Object.assign(payload['extra-vars'], value);
+          } else {
+            // override all other properties
+            payload[key] = value;
           }
-          else {
-            // merge extraVars with defaults extraVars
-            Object.keys(playbook.payload[key]).forEach(varKey => {
-              temp[key][varKey] = playbook.payload[key][varKey];
-            });
-          }
-        });
+        }
       }
-      payload = temp;
     }
 
     if (playbook.action) {
