@@ -27,7 +27,7 @@ import {
 import { updateServersInModel, getMergedServer, addServerInModel, isComputeNode } from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
-import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
+import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
 import { genUID } from '../utils/ModelUtils.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
@@ -213,7 +213,6 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     this.props.updateGlobalState('model', model);
 
-
     // existing server id and ip-addr for non-compute node
     // new server id and ip-addr for a new compute node
     // for replacing a compute node, also recorded oldServer's id
@@ -256,6 +255,10 @@ class UpdateServers extends BaseUpdateWizardPage {
     // Verify the prerequisites before prompting for replacement information:
     // - the selected controller node is not shared with the deployer
     // - the selected node is no longer reachable (via ssh)
+    // - For replacing a compute node, we need to migrate instances
+    // on the old compute node first, therefore it should be reachable.
+    // If it is not reachable, show a warning indicating that instances can not
+    // be migrated.
     fetchJson('api/v1/ips')
       .then(ips => {
         if (ips.includes(server['ip-addr'])) {
@@ -267,22 +270,39 @@ class UpdateServers extends BaseUpdateWizardPage {
 
           postJson('api/v1/connection_test', {host: server['ip-addr']})
             .then(result => {
-              // If the node is still reachable, then display a message to the user to have them
-              // power it down.
-              this.setState({loading: false, showPowerOffWarning: true});
-            })
-            .catch(error => {
-              if (error.status == 404) {
-                console.log(   // eslint-disable-line no-console
-                  'The 404 immediately preceding this message is expected, '+
-                  'and it means that the server is in the correct state (powered off)');
-                // 404 means the server is not found, which is the state that we *want* to be in.
-                // Proceed with the modal for entering the replacement info.
+              if(isComputeNode(server)) {
                 this.setState({
                   loading: false,
                   showReplaceModal: true,
                   serverToReplace: server
                 });
+              }
+              else {
+                // If the node is still reachable, then display a message to the user to have them
+                // power it down.
+                this.setState({loading: false, showPowerOffWarning: true});
+              }
+            })
+            .catch(error => {
+              if (error.status == 404) {
+                if(isComputeNode(server)) {
+                  this.setState({
+                    loading: false,
+                    serverToReplace: server,
+                    showNoMigrationWarning: true});
+                }
+                else {
+                  console.log(   // eslint-disable-line no-console
+                    'The 404 immediately preceding this message is expected, ' +
+                    'and it means that the server is in the correct state (powered off)');
+                  // 404 means the server is not found, which is the state that we *want* to be in.
+                  // Proceed with the modal for entering the replacement info.
+                  this.setState({
+                    loading: false,
+                    showReplaceModal: true,
+                    serverToReplace: server
+                  });
+                }
               } else {
                 let msg = translate('server.save.error', error.toString());
                 this.setState(prev => ({
@@ -318,6 +338,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       return null;
     }
   }
+
   renderPowerOffWarning() {
     if (this.state.showPowerOffWarning) {
       return (
@@ -327,6 +348,22 @@ class UpdateServers extends BaseUpdateWizardPage {
           onHide={() => this.setState({showPowerOffWarning: false})}>
           <div>{translate('replace.server.poweroff.warning')}</div>
         </ConfirmModal>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderNoMigrationWarning() {
+    if (this.state.showNoMigrationWarning) {
+      return (
+        <YesNoModal
+          show={true} title={translate('warning')}
+          yesAction={() => this.setState({showNoMigrationWarning: false, showReplaceModal: true})}
+          noAction={() => this.setState({showNoMigrationWarning: false, serverToReplace: undefined})}>
+          {translate('replace.server.nomigration.warning',
+            this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'])}
+        </YesNoModal>
       );
     } else {
       return null;
@@ -423,6 +460,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.state.showReplaceModal && this.renderReplaceServerModal()}
         {this.renderSharedWarning()}
         {this.renderPowerOffWarning()}
+        {this.renderNoMigrationWarning()}
       </div>
     );
   }

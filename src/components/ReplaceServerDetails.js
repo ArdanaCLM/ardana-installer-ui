@@ -231,10 +231,6 @@ class ReplaceServerDetails extends Component {
     }
   }
 
-  isCompute = () => {
-    return this.props.data['role'].includes('COMPUTE');
-  }
-
   handleSelectGroup = (groupName) => {
     this.setState((prev) => ({
       isValid: prev.isValid.set('server-group', true),
@@ -250,7 +246,7 @@ class ReplaceServerDetails extends Component {
   }
 
   getInputNames = () => {
-    if(this.isCompute()) {
+    if(isComputeNode(this.props.data)) {
       return  MODEL_SERVER_PROPS;
     }
     else {
@@ -360,7 +356,7 @@ class ReplaceServerDetails extends Component {
   }
 
   renderNewComputeInfo(existingIpAddresses) {
-    if(this.isCompute()) {
+    if(isComputeNode(this.props.data)) {
       // disable the id input when user select from available servers
       let isDisabled = !isEmpty(this.state.selectedServerId);
       // TODO try to use chainValidors for check id, for some reason, it complains about
@@ -398,7 +394,7 @@ class ReplaceServerDetails extends Component {
   renderMACIPMIInfo(existingMacAddreses, existingIpAddresses) {
     // if it is a compute role, mac address and IPIM info is not requried
     // or it is compute role and want to install OS on the new compute
-    let isRequired = !this.isCompute() || this.state.isInstallOsSelected;
+    let isRequired = !isComputeNode(this.props.data) || this.state.isInstallOsSelected;
     return (
       <div>
         <div className='message-line'>{translate('server.replace.details.message')}</div>
