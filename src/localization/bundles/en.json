@@ -581,7 +581,7 @@
     "replace.server.poweroff.warning": "The controller node must be powered off before it can be replaced since the new node will re-use the same IP address.\nPower off this node and continue",
     "replace.server.nomigration.warning": "The compute host {0} with IP {1} is not reachable, the replacement process won't be able to migrate instances. \n\n Do you still want to procceed?",
     "server.replace.details.select.message": "Check and select from the available servers to fill out inputs.",
-    "server.replace.prepare": "Preparing Replace Server in Progress",
+    "server.replace": "Server Replacement in Progress",
     "server.replace.complete.heading": "Completed Server Replacement",
     "server.replace.complete": "Completed replacing server {0}",
     "server.replace.prepare.failure": "Failed to prepare for replacing server",

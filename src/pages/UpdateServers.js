@@ -174,8 +174,8 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     } else {
       pages.push({
-        name: 'PrepareController',
-        component: UpdateServerPages.PrepareController
+        name: 'ReplaceController',
+        component: UpdateServerPages.ReplaceController
       });
     }
     return pages;

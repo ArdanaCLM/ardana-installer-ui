@@ -14,14 +14,14 @@
 **/
 
 import PrepareCompute from './PrepareCompute.js';
-import PrepareController from './PrepareController.js';
+import ReplaceController from './ReplaceController.js';
 import InstallOS from './InstallOS.js';
 import UpdateComplete from './UpdateComplete.js';
 
 // potential pages for all kinds of server replacement pages
 export const UpdateServerPages = {
   'PrepareCompute': PrepareCompute,
-  'PrepareController': PrepareController,
+  'ReplaceController': ReplaceController,
   'InstallOS': InstallOS,
   //TODO more possible pages list here
   'UpdateComplete': UpdateComplete
