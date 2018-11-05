@@ -13,14 +13,16 @@
 * limitations under the License.
 **/
 
-import PrepareReplace from './PrepareReplace.js';
+import PrepareCompute from './PrepareCompute.js';
+import PrepareController from './PrepareController.js';
 import InstallOS from './InstallOS.js';
 import UpdateComplete from './UpdateComplete.js';
 
 // potential pages for all kinds of server replacement pages
 export const UpdateServerPages = {
-  'PrepareReplace' :  PrepareReplace,
-  'InstallOS' : InstallOS,
+  'PrepareCompute': PrepareCompute,
+  'PrepareController': PrepareController,
+  'InstallOS': InstallOS,
   //TODO more possible pages list here
   'UpdateComplete': UpdateComplete
 };

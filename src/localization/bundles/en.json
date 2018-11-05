@@ -437,6 +437,7 @@
 
     "deploy.progress.heading": "Cloud Deployment In Progress",
     "deploy.progress.config-processor-run": "Config Processor Run",
+    "deploy.progress.commit": "Model committed",
     "deploy.progress.ready-deployment": "Ready Deployment",
     "deploy.progress.predeployment": "Pre-Deployment",
     "deploy.progress.step1": "Network Configuration",
@@ -610,5 +611,10 @@
     "server.addserver.empty.computeroles.info": "There are no compute roles available",
     "server.addserver.installos.passphrase.error": "Passphrase Error",
     "server.addserver.compute.installos": "Installing SLES OS",
-    "server.addserver.compute.installos.complete": "Successfully Installed SLES OS on Compute Servers"
+    "server.addserver.compute.installos.complete": "Successfully Installed SLES OS on Compute Servers",
+    "update.known_hosts.failure": "Unable to remove server from known_hosts file. {0}",
+    "update.remove_cobbler.failure": "Unable to remove system from cobbler. {0}",
+    "server.deploy.progress.rm-known-host": "Remove server from known_hosts",
+    "server.deploy.progress.rm-cobbler": "Remove system from cobbler",
+    "server.deploy.progress.cobbler-deploy": "Deploying cobbler"
 }
