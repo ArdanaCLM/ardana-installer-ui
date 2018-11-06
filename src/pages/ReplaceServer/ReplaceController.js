@@ -24,7 +24,7 @@ import { getInternalModel } from '../topology/TopologyUtils.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { isEmpty } from 'lodash';
 
-class PrepareController extends BaseUpdateWizardPage {
+class ReplaceController extends BaseUpdateWizardPage {
 
   constructor(props) {
     super(props);
@@ -43,7 +43,7 @@ class PrepareController extends BaseUpdateWizardPage {
     getInternalModel()
       .then((yml) => {
         // Force a re-render if the page is still shown (user may navigate away while waiting)
-        if (this.refs.PrepareController) {
+        if (this.refs.ReplaceController) {
           this.setState({internalModel: yml, showLoadingMask: false});
         }
       })
@@ -66,58 +66,30 @@ class PrepareController extends BaseUpdateWizardPage {
   }
 
   renderPlaybookProgress (doInstall) {
+    // Two related arrays, 'steps' and 'playbooks' are created from a single combined array for
+    // sending to playbookprocess.  Defining them as a single array keeps their definitions
+    // together, making them easier to relate to each other, and makes it easier to create a
+    // function to return just a single entry that can be re-used
+    //
+    // Each elements of this combined array, playbook_steps contains:
+    //   steps : an array of objects contaiing a label and and event , e.g.
+    //      steps : [{label: translate('foo'),  event: 'playbook.yml'},
+    //               {label: translate('foo'),  event: 'playbook.yml'}]
+    //         (this will only be used when running site.yml, where a single playbook results in
+    //          multiple noteworth events)
+    //        or
+    //      label : label to be shown, e.g. translate('foo').
+    //
+    //      playbook: name of a playbook to run. .yml suffix is optional.
+    //        or
+    //      action : function that returns a promise
+    //
+    //      payload: used when playbook is sent
 
-    const installPass = this.props.operationProps.osInstallPassword || '';
-    const serverId = this.props.operationProps.server.id;
-
-    let steps = [
+    // Create an array of all playbooks/steps
+    let playbook_steps = [
       {
         label: translate('deploy.progress.commit'),
-        playbooks: ['commit']
-      },
-      {
-        label: translate('deploy.progress.config-processor-run'),
-        playbooks: ['config-processor-run.yml']
-      },
-      {
-        label: translate('deploy.progress.ready-deployment'),
-        playbooks: ['ready-deployment.yml']
-      },
-      {
-        label: translate('server.deploy.progress.rm-cobbler'),
-        playbooks: ['rm-cobbler']
-      },
-      {
-        label: translate('server.deploy.progress.rm-known-host'),
-        playbooks: ['known-hosts']
-      }];
-
-    if(this.props.operationProps.installOS) {
-      // The following steps will all be generated via the INSTALL_PLAYBOOK
-      steps.push(
-        {
-          label: translate('install.progress.step1'),
-          playbooks: ['bm-power-status.yml']
-        },
-        {
-          label: translate('install.progress.step2'),
-          playbooks: ['cobbler-deploy.yml']
-        },
-        {
-          label: translate('install.progress.step3'),
-          playbooks: ['bm-reimage.yml']
-        },
-        {
-          label: translate('install.progress.step4'),
-          playbooks: [INSTALL_PLAYBOOK + '.yml']
-        }
-      );
-    }
-
-
-    let playbooks = [
-      {
-        name: 'commit',
         action: ((logger) => {
           const commitMessage = {'message': 'Committed via Ardana Installer'};
           return postJson('/api/v1/clm/model/commit', commitMessage)
@@ -132,13 +104,15 @@ class PrepareController extends BaseUpdateWizardPage {
         }),
       },
       {
-        name: 'config-processor-run',
+        label: translate('deploy.progress.config-processor-run'),
+        playbook: 'config-processor-run.yml'
       },
       {
-        name: 'ready-deployment',
+        label: translate('deploy.progress.ready-deployment'),
+        playbook: 'ready-deployment.yml'
       },
       {
-        name: 'rm-cobbler',
+        label: translate('server.deploy.progress.rm-cobbler'),
         action: ((logger) => {
           return fetchJson('/api/v1/clm/cobbler/servers')
             .then((response) => {
@@ -165,7 +139,7 @@ class PrepareController extends BaseUpdateWizardPage {
         }),
       },
       {
-        name: 'known-hosts',
+        label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
           const hostname = this.state.internalModel.internal.servers
             .filter(s => s.id == this.props.operationProps.server.id)
@@ -184,17 +158,72 @@ class PrepareController extends BaseUpdateWizardPage {
               const message = translate('update.known_hosts.failure', error.toString());
               logger(message+'\n');
               throw new Error(message);
-            });
-        }),
+            }); }),
       },
     ];
 
     if(this.props.operationProps.installOS) {
-      playbooks.push(
+      const installPass = this.props.operationProps.osInstallPassword || '';
+      const serverId = this.props.operationProps.server.id;
+      // The following steps will all be performed via the INSTALL_PLAYBOOK
+      playbook_steps.push(
         {
-          name: INSTALL_PLAYBOOK,
+          steps: [{
+            label: translate('install.progress.step1'),
+            event: 'bm-power-status.yml'
+          },
+          {
+            label: translate('install.progress.step2'),
+            event: 'cobbler-deploy.yml'
+          },
+          {
+            label: translate('install.progress.step3'),
+            event: 'bm-reimage.yml'
+          },
+          {
+            label: translate('install.progress.step4'),
+            event: INSTALL_PLAYBOOK + '.yml'
+          }],
+          playbook: INSTALL_PLAYBOOK,
           payload: {'extra-vars': {'nodelist': [serverId], 'ardanauser_password': installPass}}
-        });
+        },
+      );
+    }
+
+    let playbooks = [];
+    let steps = [];
+    let action_num = 1;
+
+    for (const pb_step of playbook_steps) {
+
+      let playbook_name;
+      if (pb_step.action) {
+        playbook_name = 'action'+action_num.toString();
+        action_num++;
+      } else {
+        playbook_name = pb_step.playbook.replace(/.yml$/,'');
+      }
+
+      // Build the steps array
+      if (pb_step.label) {
+        // single playbook.  For actions, the playbook name should exactly match
+        // the name in the playbook array, but for playbooks, the name here should
+        // have a .yml suffix
+        let event_name = pb_step.action ? playbook_name : playbook_name+'.yml';
+        steps.push({label: pb_step.label, playbooks: [event_name]});
+      } else {
+        // multi-event playbook
+        for (const entry of pb_step.steps) {
+          steps.push({label: entry.label, playbooks: [entry.event]});
+        }
+      }
+
+      // Build the playbooks array
+      if (pb_step.action) {
+        playbooks.push({name: playbook_name, action: pb_step.action});
+      } else {
+        playbooks.push({name: playbook_name, payload: pb_step.payload});
+      }
     }
 
     return (
@@ -220,10 +249,10 @@ class PrepareController extends BaseUpdateWizardPage {
     //if error happens, cancel button shows up
     let cancel =  this.state.overallStatus === STATUS.FAILED;
     return (
-      <div ref="PrepareController" className='wizard-page'>
+      <div ref="ReplaceController" className='wizard-page'>
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='content-header'>
-          {this.renderHeading(translate('server.replace.prepare'))}
+          {this.renderHeading(translate('server.replace'))}
         </div>
         <div className='wizard-content'>
           {this.renderPlaybookProgress()}
@@ -235,4 +264,4 @@ class PrepareController extends BaseUpdateWizardPage {
   }
 }
 
-export default PrepareController;
+export default ReplaceController;
