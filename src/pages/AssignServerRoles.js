@@ -44,8 +44,8 @@ import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE, IS_MS_IE } from
 import { YesNoModal } from '../components/Modals.js';
 import HelpText from '../components/HelpText.js';
 
-const AUTODISCOVER_TAB = 1;
-const MANUALADD_TAB = 2;
+const AUTODISCOVER_TAB = "1";
+const MANUALADD_TAB = "2";
 const COOKIES = new Cookies();
 
 class AssignServerRoles extends BaseWizardPage {

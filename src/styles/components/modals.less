@@ -35,12 +35,19 @@
   overflow-y: auto;
 }
 
+.modal-content {
+  box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+
 .complete-step {
   .modal-dialog {
     position: relative;
     top: 12em;
     .modal-content {
       min-width: 700px;
+      .modal-header {
+        display:block;
+      }
     }
     .heading {
       text-align: center;

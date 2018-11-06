@@ -27,22 +27,26 @@ h3,
 h4,
 h5 {
   font-family: 'Lato', sans-serif;
+  margin-top: 20px;//bootstrap 3 style replacement for 0px bootstrap 4 default
 }
-h1 {
-  font-size: 2em;
+h1, .h1 {
+  font-size: 2em;//bootstrap 3 style replacement for larger bootstrap 4 default
 }
-h2 {
-  font-size: 1.6em;
+h2, .h2 {
+  font-size: 1.6em;//bootstrap 3 style replacement for larger bootstrap 4 default
 }
-h3 {
-  font-size: 1.4em;
+h3, .h3 {
+  font-size: 1.4em;//bootstrap 3 style replacement for larger bootstrap 4 default
   font-weight: 700;
 }
-h4 {
-  font-size: 1.2em;
+h4, .h4 {
+  font-size: 1.2em;//bootstrap 3 style replacement for larger bootstrap 4 default
+  margin-top: 10px;//bootstrap 3 style replacement for 0px bootstrap 4 default
 }
-h5 {
+h5, .h5 {
   font-weight: bold;
+  font-size: 14px;//bootstrap 3 style replacement for 1.25rem bootstrap4 default
+  margin-top: 10px;//bootstrap 3 style replacement for 0px bootstrap 4 default
 }
 p {
   margin-bottom: 1em;
@@ -146,24 +150,31 @@ p {
 }
 
 .nav.nav-tabs {
-  li > a {
+  a.nav-link {
     border-bottom: 3px solid transparent;
   }
-  li > a:focus, li > a:hover {
+  a.nav-link:focus, a.nav-link:hover {
     outline-color: transparent;
     background-color: transparent;
     border-color: transparent;
     border-bottom: 3px solid @box-border-color;
   }
-  li.active > a:active {
+  a.nav-link {
     border: 1px solid transparent;
   }
-  li.active > a {
+  a.nav-link.active,
+  a.nav-link.active.disabled:hover {
     border: 1px solid transparent;
     border-bottom: 3px solid @preferredcolor;
+    background-color: transparent;
   }
   a {
     color: @subheadingcolor;
+  }
+  a.disabled,
+  a.disabled:hover {
+    border-bottom-color: transparent;
+    cursor: not-allowed;
   }
 }
 
@@ -332,4 +343,32 @@ p {
 
 .line-break {
   white-space: pre;
+}
+
+.row {
+  //width: 100%;//this shouldnt be necessary, need to figure out where the overflow is coming from
+  margin-left: 0px;//without the margin overrides, Bootstrap4 rows would need a width:100% override to avoid a horz scrollbar
+  margin-right: 0px;//without the margin overrides, Bootstrap4 rows would need a width:100% override to avoid a horz scrollbar
+}
+
+.tooltip.top{
+  margin-top: -40px;
+}
+
+a {
+  color: #337ab7;//bootstrap 4 changed its defaul to 007bff, change it back here
+}
+
+.alert.show{ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color:#bce8f1;
+}
+
+.hide {
+  display: none !important;
+}
+
+.form-control{
+  line-height: 20px;//in bootstrap 3 the default is 20px, in bootstrap 4 its 24px
 }
