@@ -38,6 +38,13 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
 
+  getHostname = (internalModel, serverId) => {
+    const matches = internalModel.internal.servers.filter(s => s.id == serverId).map(s => s.hostname);
+    if (matches.length > 0) {
+      return matches[0];
+    }
+  }
+
   componentWillMount() {
     this.setState({showLoadingMask: true});
     getInternalModel()
@@ -65,7 +72,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     }
   }
 
-  renderPlaybookProgress (doInstall) {
+  renderPlaybookProgress () {
     // Two related arrays, 'steps' and 'playbooks' are created from a single combined array for
     // sending to playbookprocess.  Defining them as a single array keeps their definitions
     // together, making them easier to relate to each other, and makes it easier to create a
@@ -85,6 +92,13 @@ class ReplaceController extends BaseUpdateWizardPage {
     //      action : function that returns a promise
     //
     //      payload: used when playbook is sent
+
+    // Return without rendering if the internalModel is still loading
+    if (!this.state.internalModel) {
+      return;
+    }
+
+    const hostname = this.getHostname(this.state.internalModel, this.props.operationProps.server.id);
 
     // Create an array of all playbooks/steps
     let playbook_steps = [
@@ -141,10 +155,6 @@ class ReplaceController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
-          const hostname = this.state.internalModel.internal.servers
-            .filter(s => s.id == this.props.operationProps.server.id)
-            .map(s => s.hostname);
-
           if (isEmpty(hostname)) {
             logger('No hostname found to remove from known_hosts, continuing\n');
             return Promise.resolve();
@@ -189,6 +199,18 @@ class ReplaceController extends BaseUpdateWizardPage {
         },
       );
     }
+
+    playbook_steps.push(
+      {
+        label: translate('server.deploy.progress.monasca-rebuild'),
+        playbook: 'monasca-rebuild-pretasks.yml'
+      },
+      {
+        label: translate('server.deploy.progress.os-config'),
+        playbook: 'osconfig-run.yml',
+        payload: {'extra-vars': {'rebuild': 'True'}, limit: hostname}
+      },
+    );
 
     let playbooks = [];
     let steps = [];

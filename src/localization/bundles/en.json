@@ -624,5 +624,7 @@
     "update.remove_cobbler.failure": "Unable to remove system from cobbler. {0}",
     "server.deploy.progress.rm-known-host": "Remove server from known_hosts",
     "server.deploy.progress.rm-cobbler": "Remove system from cobbler",
-    "server.deploy.progress.cobbler-deploy": "Deploying cobbler"
+    "server.deploy.progress.cobbler-deploy": "Deploying cobbler",
+    "server.deploy.progress.monasca-rebuild": "Rebuild monasca pretasks",
+    "server.deploy.progress.os-config": "Performing OS configuration"
 }
