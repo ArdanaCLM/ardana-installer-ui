@@ -220,7 +220,18 @@ class ReplaceServerDetails extends Component {
         for (let key of this.getInputNames()) {
           const valueToCopy = server[key] || '';
           inputValue = inputValue.set(key, valueToCopy);
-          isValid = isValid.set(key, (valueToCopy.length > 0));
+          if(isComputeNode(this.props.data) && !this.state.isInstallOsSelected) {
+            // if not isInstallOsSelected, mac-addr and ipmpi info can be empty
+            if (REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
+              isValid = isValid.set(key, (valueToCopy.length > 0) || undefined);
+            }
+            else {
+              isValid = isValid.set(key, (valueToCopy.length > 0));
+            }
+          }
+          else {
+            isValid = isValid.set(key, (valueToCopy.length > 0));
+          }
         }
         return {
           selectedServerId: serverId,

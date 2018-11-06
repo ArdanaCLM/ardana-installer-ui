@@ -24,7 +24,10 @@ import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
 import {
   MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS }
   from '../utils/constants.js';
-import { updateServersInModel, getMergedServer, addServerInModel, isComputeNode } from '../utils/ModelUtils.js';
+import {
+  updateServersInModel, getMergedServer, addServerInModel, isComputeNode,
+  removeServerFromModel }
+  from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
@@ -54,7 +57,11 @@ class UpdateServers extends BaseUpdateWizardPage {
 
       showSharedWarning: false,
 
-      serverToReplace: undefined
+      serverToReplace: undefined,
+
+      validating: false,
+      // error message show as a popup modal for validation errors
+      validationError: undefined
     };
   }
 
@@ -156,22 +163,17 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     if(isComputeNode(this.state.serverToReplace)) {
       pages.push({
-        name: 'PrepareCompute',
-        component: UpdateServerPages.PrepareCompute
+        name: 'PrepareAddCompute',
+        component: UpdateServerPages.PrepareAddCompute
       });
-
-      if(theProps.installOS) {
-        pages.push({
-          name: 'InstallOS',
-          component: UpdateServerPages.InstallOS
-        });
-      }
-
       pages.push({
-        name: 'UpdateComplete',
-        component: UpdateServerPages.UpdateComplete
+        name: 'DeployAddCompute',
+        component: UpdateServerPages.DeployAddCompute
       });
-
+      pages.push({
+        name: 'CompleteAddCompute',
+        component: UpdateServerPages.CompleteAddCompute
+      });
     } else {
       pages.push({
         name: 'ReplaceController',
@@ -230,13 +232,54 @@ class UpdateServers extends BaseUpdateWizardPage {
     if(isComputeNode(this.state.serverToReplace)) {
       theProps.oldServer = {
         id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr']};
+      // will always activate the newly added compute server
+      theProps.activate = true;
     }
 
     let pages = this.assembleProcessPages(theProps);
 
-    // trigger update process to start which calls the startUpdate in
-    // UpdateWizard
-    this.props.startUpdateProcess('ReplaceServer', pages, theProps);
+    if(isComputeNode(this.state.serverToReplace)) {
+      this.setState({validating: true});
+      postJson('/api/v1/clm/config_processor')
+        .then(() => {
+          this.setState({validating: false});
+          this.props.startUpdateProcess('ReplaceServer', pages, theProps);
+        })
+        .catch((error) => {
+          // when validation failed, show error messages and
+          // instruct users to update and do replace again.
+          this.setState({validating: false});
+          this.setState({validationError: error.value ? error.value.log : error.toString()});
+          // remove the server from model
+          // remove role of the server in the availabe server list
+          this.updateInvalidComputeServer(repServer);
+
+        });
+    }
+    else {
+      // trigger update process to start which calls the startUpdate in
+      // UpdateWizard
+      this.props.startUpdateProcess('ReplaceServer', pages, theProps);
+    }
+  }
+
+  updateInvalidComputeServer = (server) => {
+    let model = removeServerFromModel(server, this.props.model);
+    this.props.updateGlobalState('model', model);
+    // remove role and update servers list
+    server['role'] = '';
+    let old = this.state.servers.find(s => server.uid === s.uid);
+    if (old) {
+      const updated_server = getMergedServer(old, server, MODEL_SERVER_PROPS_ALL);
+      let servers = this.state.servers.filter(s => server.uid !== s.uid);
+      servers.push(updated_server);
+      this.setState({'servers': servers});
+      putJson('/api/v1/server', updated_server)
+        .catch(error => {
+          let msg = translate('server.save.error', error.toString());
+          this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
+        });
+    }
   }
 
   handleCloseMessage = (idx) => {
@@ -245,6 +288,25 @@ class UpdateServers extends BaseUpdateWizardPage {
       msgs.splice(idx, 1);
       return {errorMessages: msgs};
     });
+  }
+
+  handleCloseValidationErrorModal = () => {
+    this.setState({validationError: undefined});
+  }
+
+  renderValidationErrorModal() {
+    let msg = translate('server.addcompute.validate.error.msg');
+    return (
+      <BaseInputModal
+        show={this.state.validationError !== undefined}
+        className='addserver-log-dialog'
+        onHide={this.handleCloseValidationErrorModal}
+        title={translate('server.addcompute.validate.error.title')}>
+        <div className='addservers-page'>
+          <pre>{msg}</pre>
+          <pre className='log'>{this.state.validationError}</pre></div>
+      </BaseInputModal>
+    );
   }
 
   renderMessages() {
@@ -447,9 +509,11 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   render() {
+    let loadingText =  this.state.validating ? translate('server.validating') : '';
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.state.wizardLoading || this.state.loading}/>
+        <LoadingMask show={this.state.wizardLoading || this.state.loading || this.state.validating}
+          text={loadingText}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
@@ -467,6 +531,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.renderSharedWarning()}
         {this.renderPowerOffWarning()}
         {this.renderNoMigrationWarning()}
+        {this.renderValidationErrorModal()}
       </div>
     );
   }
