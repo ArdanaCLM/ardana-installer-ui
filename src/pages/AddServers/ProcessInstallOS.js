@@ -80,7 +80,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     let playbooks = [{
       name: INSTALL_PLAYBOOK,
       payload: {
-        'extraVars': {
+        'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
           'ardanauser_password': this.props.operationProps.osInstallPassword
         }
