@@ -260,10 +260,8 @@ export function addServerInModel(server, model, props) {
 
 export function removeServerFromModel(server, model) {
   return model.updateIn(
-    ['inputModel', 'servers'], list => list.filter(
-      svr => {
-        return svr.get('uid') ? svr.get('uid') !== server.uid : svr.get('id') !== server.id;
-      })
+    ['inputModel', 'servers'], list => list.filterNot(
+      svr => svr.get('uid') === server.uid || svr.get('id') === server.id)
   );
 }
 
