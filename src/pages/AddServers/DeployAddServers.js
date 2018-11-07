@@ -25,37 +25,31 @@ import {
 } from '../../utils/constants.js';
 import { fetchJson } from '../../utils/RestUtils.js';
 
-let PLAYBOOK_POSSIBLE_STEPS = [
-  {
-    name: WIPE_DISKS_PLAYBOOK,
-    label: translate('server.deploy.progress.wipe-disks'),
-    playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
-    payload: {limit: {}}
-  },
-  {
-    name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
-    label: translate('server.deploy.progress.gen-hosts-file'),
-    playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
-  },
-  {
-    name: SITE_PLAYBOOK,
-    label: translate('server.deploy.progress.addserver.deploy'),
-    playbooks: [SITE_PLAYBOOK + '.yml'],
-    payload: {limit: {}}
-  },
-  {
-    name: MONASCA_DEPLOY_PLAYBOOK,
-    label: translate('server.deploy.progress.update-monasca'),
-    playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
-    payload: {tags: 'active_ping_checks'}
-  },
-  {
-    name: ARDANA_START_PLAYBOOK,
-    label: translate('server.deploy.progress.activate'),
-    playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
-    payload: {limit: {}}
-  }
-];
+const PLAYBOOK_POSSIBLE_STEPS = [{
+  name: WIPE_DISKS_PLAYBOOK,
+  label: translate('server.deploy.progress.wipe-disks'),
+  playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
+  payload: {limit: {}}
+}, {
+  name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
+  label: translate('server.deploy.progress.gen-hosts-file'),
+  playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
+}, {
+  name: SITE_PLAYBOOK,
+  label: translate('server.deploy.progress.addserver.deploy'),
+  playbooks: [SITE_PLAYBOOK + '.yml'],
+  payload: {limit: {}}
+}, {
+  name: MONASCA_DEPLOY_PLAYBOOK,
+  label: translate('server.deploy.progress.update-monasca'),
+  playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
+  payload: {tags: 'active_ping_checks'}
+}, {
+  name: ARDANA_START_PLAYBOOK,
+  label: translate('server.deploy.progress.activate'),
+  playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
+  payload: {limit: {}}
+}];
 
 // This is the deployment page for adding compute servers
 // process. If newHosts are not recorded in progress.json,
@@ -135,6 +129,14 @@ class DeployAddServers extends BaseUpdateWizardPage {
     }
   }
 
+  getDeployServerTitle = () => {
+    return translate('server.addserver.compute.deploy');
+  }
+
+  getDeployFailureMsg = () => {
+    return translate('server.addserver.deploy.failure');
+  }
+
   getAddedComputeHosts = (cloudModel) => {
     let deployedServerIds =
       this.props.operationProps && this.props.operationProps.deployedServers ?
@@ -169,7 +171,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
       this.setState({
-        processErrorBanner: translate('server.addserver.deploy.failure')});
+        processErrorBanner: this.getDeployFailureMsg()});
     }
   }
 
@@ -250,7 +252,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
       <div className='wizard-page'>
         <LoadingMask show={this.toShowLoadingMask()}/>
         <div className='content-header'>
-          {this.renderHeading(translate('server.addserver.compute.deploy'))}
+          {this.renderHeading(this.getDeployServerTitle())}
         </div>
         <div className='wizard-content'>
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}

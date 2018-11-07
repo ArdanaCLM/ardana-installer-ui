@@ -258,6 +258,13 @@ export function addServerInModel(server, model, props) {
   return model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(new_server)));
 }
 
+export function removeServerFromModel(server, model) {
+  return model.updateIn(
+    ['inputModel', 'servers'], list => list.filterNot(
+      svr => svr.get('uid') === server.uid || svr.get('id') === server.id)
+  );
+}
+
 export function genUID(prefix) {
   function hex4() {
     return Math.floor((1 + Math.random()) * 0x10000)
