@@ -41,8 +41,8 @@ class EditServerDetails extends Component {
       isFormValid: false,
       showAddServerGroup: false,
       showAddNicMapping: false,
-      nicMappings: getNicMappings(this.props.model),
-      serverGroups: getServerGroups(this.props.model)
+      nicMappings: getNicMappings(props.model),
+      serverGroups: getServerGroups(props.model)
     };
   }
 

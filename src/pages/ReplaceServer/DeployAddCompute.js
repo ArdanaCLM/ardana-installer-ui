@@ -19,11 +19,6 @@ import {translate} from "../../localization/localize";
 // This is the deployment page for adding a compute server
 // for replace a compute server
 class DeployAddCompute extends DeployAddServers {
-
-  constructor(props) {
-    super(props);
-  }
-
   getDeployServerTitle = () => {
     return translate('server.addcompute.deploy');
   }

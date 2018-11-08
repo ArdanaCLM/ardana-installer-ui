@@ -39,7 +39,7 @@ class CloudModelPicker extends BaseWizardPage {
 
     this.state = {
       // Capture the name of the selected model
-      selectedModelName: this.props.model.get('name'),
+      selectedModelName: props.model.get('name'),
 
       errorContent: undefined,
       loading: false,

@@ -23,10 +23,6 @@ import { alphabetically } from '../../utils/Sort.js';
 // process. It will display newly deployed server hostname,
 // server ID and IP.
 class CompleteAddServers extends BaseUpdateWizardPage {
-  constructor(props) {
-    super(props);
-  }
-
   renderServerList() {
     let serverList = this.props.operationProps.newHosts.sort((a, b) => {
       return alphabetically(a['display_hostname'],b['display_hostname']);

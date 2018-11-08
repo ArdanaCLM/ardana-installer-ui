@@ -21,7 +21,7 @@ export class ValidatingInput extends Component {
     super(props);
     this.state = {
       errorMsg: '',
-      inputValue: this.props.inputValue,
+      inputValue: props.inputValue,
       showMask: true
     };
   }

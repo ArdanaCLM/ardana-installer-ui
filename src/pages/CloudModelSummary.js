@@ -26,7 +26,7 @@ class CloudModelSummary extends BaseWizardPage {
     this.PATH_TO_CONTROL_PLANE = ['inputModel', 'control-planes', '0'];
 
     this.state = {
-      controlPlane: this.props.model.getIn(this.PATH_TO_CONTROL_PLANE),
+      controlPlane: props.model.getIn(this.PATH_TO_CONTROL_PLANE),
       // The control plane structure from the input model.
       // Note: immutableJS is used so that we can keep track
       // of the counts directly in the model, and manage state

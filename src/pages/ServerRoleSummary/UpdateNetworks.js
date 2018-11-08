@@ -29,7 +29,7 @@ import HelpText from '../../components/HelpText.js';
 class UpdateNetworks extends Component {
   constructor(props) {
     super(props);
-    this.networkGroups = this.getNetworkGroups();
+    this.networkGroups = this.getNetworkGroups(props);
     this.allInputsStatus = {
       'name': INPUT_STATUS.UNKNOWN,
       'vlanid': INPUT_STATUS.UNKNOWN,
@@ -39,7 +39,7 @@ class UpdateNetworks extends Component {
 
     this.allAddressesStatus = [];
 
-    let networks = this.props.mode === MODE.EDIT ? this.getNetworkData(this.props.networkName) : {};
+    let networks = props.mode === MODE.EDIT ? this.getNetworkData(props) : {};
     networks.addresses = this.initAddresses(networks);
     this.state = {
       isFormValid: false,
@@ -67,9 +67,10 @@ class UpdateNetworks extends Component {
     return retAddresses;
   }
 
-  getNetworkData(name) {
+  getNetworkData(props) {
+    const name = props.networkName;
     let network =
-      this.props.model.getIn(['inputModel','networks']).find(net => net.get('name') === name);
+      props.model.getIn(['inputModel','networks']).find(net => net.get('name') === name);
     return JSON.parse(JSON.stringify(network));
   }
 
@@ -187,8 +188,8 @@ class UpdateNetworks extends Component {
     });
   }
 
-  getNetworkGroups = () => {
-    return this.props.model.getIn(['inputModel','network-groups']).map(e => e.get('name'))
+  getNetworkGroups = (props) => {
+    return props.model.getIn(['inputModel','network-groups']).map(e => e.get('name'))
       .toJS()
       .sort(alphabetically);
   }

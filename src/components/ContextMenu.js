@@ -19,10 +19,6 @@ import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 
 class ContextMenu extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount() {
     // add a listener for clicking outside menu area
     // when user clicks outside menu area, the menu will be closed

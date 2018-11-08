@@ -21,11 +21,6 @@ import  PrepareAddServers from '../AddServers/PrepareAddServers.js';
 // It will first commit the model changes and start
 // the playbook to do pre-deployment.
 class PrepareAddCompute extends PrepareAddServers {
-
-  constructor(props) {
-    super(props);
-  }
-
   getPrepareServerFailureMsg = () => {
     return translate('server.addcompute.prepare.failure');
   }

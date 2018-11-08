@@ -24,7 +24,7 @@ class BaremetalSettings extends Component {
 
   constructor(props) {
     super(props);
-    const baremetal = this.props.model.getIn(['inputModel', 'baremetal']).toJS();
+    const baremetal = props.model.getIn(['inputModel', 'baremetal']).toJS();
     this.state = {
       subnet: baremetal.subnet,
       netmask: baremetal.netmask,

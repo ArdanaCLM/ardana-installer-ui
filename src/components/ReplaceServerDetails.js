@@ -43,13 +43,13 @@ class ReplaceServerDetails extends Component {
       isInstallOsSelected: false,
       isWipeDiskSelected: false,
       isUseAvailServersSelected: false,
-      inputValue: this.initInputs(),
+      inputValue: this.initInputs(props),
 
       selectedServerId: undefined,
       osInstallUsername: undefined,
       osInstallPassword: undefined,
 
-      isValid: this.initInputsValid(),
+      isValid: this.initInputsValid(props),
       isOsInstallPasswordValid: undefined,
       nicMappings: getNicMappings(props.model),
       serverGroups: getServerGroups(props.model)
@@ -65,10 +65,10 @@ class ReplaceServerDetails extends Component {
       });
   }
 
-  initInputs = () => {
+  initInputs = (props) => {
     let inputs = {};
 
-    if (isComputeNode(this.props.data)) {
+    if (isComputeNode(props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputs[input_name] = '';
       });
@@ -82,10 +82,10 @@ class ReplaceServerDetails extends Component {
     return Map(inputs);
   }
 
-  initInputsValid = () => {
+  initInputsValid = (props) => {
     let inputValid = {};
 
-    if (isComputeNode(this.props.data)) {
+    if (isComputeNode(props.data)) {
       MODEL_SERVER_PROPS.forEach(input_name => {
         inputValid[input_name] = undefined;
       });
@@ -198,9 +198,9 @@ class ReplaceServerDetails extends Component {
       // If the user had previously selected an available server but is now
       // un-selecting a server, clear out all relevant fields
       if (!selected && prev.selectedServerId) {
-        newState.inputValue = this.initInputs();
+        newState.inputValue = this.initInputs(this.props);
         // Reset (to undefined) the validity of the fields being cleared
-        newState.isValid = this.initInputsValid();
+        newState.isValid = this.initInputsValid(this.props);
         newState.selectedServerId = '';
       }
 

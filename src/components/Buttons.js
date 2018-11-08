@@ -92,11 +92,6 @@ class SubmitButton extends Component {
 
 
 class LoadFileButton extends Component {
-
-  constructor(props) {
-    super(props);
-  }
-
   // The standard html control for getting a filename from a user is <input type="file">,
   // and while this is just a single DOM element, it is actually rendered visually as both
   // a button and a text field.  The behavior of this control is that when the button is
@@ -159,9 +154,6 @@ class LoadFileButton extends Component {
 }
 
 class PickerButton extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
     let classN = 'picker-card rounded-corner shadowed-border' +
       (this.props.isSelected ? ' selected' : '');
@@ -251,9 +243,6 @@ function AssignmentButton(props) {
 
 
 class ItemMenuButton extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
     let showMenuAction = this.props.clickAction;
     let moreClass = this.props.className || '';
@@ -267,9 +256,6 @@ class ItemMenuButton extends Component {
 }
 
 class EditPencilForTableRow extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
     return (
       <td className='actions'>
@@ -284,9 +270,6 @@ class EditPencilForTableRow extends Component {
 }
 
 class InfoForTableRow extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
     return (
       <td className='actions'>
@@ -301,9 +284,6 @@ class InfoForTableRow extends Component {
 }
 
 class DeleteForTableRow extends Component {
-  constructor(props) {
-    super(props);
-  }
   render() {
     return (
       <td className='actions'>

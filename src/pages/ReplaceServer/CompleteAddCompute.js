@@ -20,10 +20,6 @@ import { translate } from '../../localization/localize.js';
 // process. It will display newly deployed server hostname,
 // server ID and IP.
 class CompleteAddCompute extends CompleteAddServers {
-  constructor(props) {
-    super(props);
-  }
-
   getCompleteTitle = () => {
     let heading =
       this.props.operationProps.activate ?
