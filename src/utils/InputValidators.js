@@ -39,33 +39,15 @@ const NETMASK = new RegExp('' +
 const IPV4ADDRESS_RANGE =
   /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
-export function IpV4AddressValidator(ipAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function IpV4AddressValidator(ipAddress) {
   if(IPV4ADDRESS.exec(ipAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.error');
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.ipv4address.error')
+    };
   }
 
-  if(props && props.exist_ip_addresses && props.exist_ip_addresses.includes(ipAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.exist.error');
-  }
-
-  if(props && props.exist_availservers_ip_addr_objs) {
-    let found =
-      props.exist_availservers_ip_addr_objs.find(addr => addr['ilo-ip'] === ipAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.ipv4address.availservers.exist.error', found.serverId);
-    }
-  }
-
-  return retValue;
+  return { isValid: true };
 }
 
 export function MacAddressValidator(macAddress) {

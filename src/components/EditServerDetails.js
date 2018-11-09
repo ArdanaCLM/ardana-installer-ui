@@ -120,20 +120,11 @@ class EditServerDetails extends Component {
   }
 
   renderInput(name, type, isRequired, title, validate) {
-    let extraProps = {};
-    if (name === 'ilo-ip') {
-      extraProps['exist_ip_addresses'] = this.props.existIPMIAddressesModel;
-    }
-    if (name === 'ip-addr') {
-      extraProps['exist_ip_addresses'] = this.props.existIPAddressesModel;
-    }
-
     return (
       <InputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title}
         inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}
-        {...extraProps}/>
+        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity} />
     );
   }
 
@@ -219,7 +210,13 @@ class EditServerDetails extends Component {
             )
           )}
           {this.renderTextLine('server.role.prompt', this.data.role)}
-          {this.renderInput('ip-addr', 'text', true, 'server.ip.prompt', IpV4AddressValidator)}
+          {this.renderInput(
+            'ip-addr', 'text', true, 'server.ip.prompt',
+            chainValidators(
+              createExcludesValidator(this.props.existIPAddressesModel, translate('input.validator.ipv4address.exist.error')),
+              IpV4AddressValidator
+            )
+          )}
           {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,
             'server.group.prompt', 'server.group.prompt', this.addServerGroup)}
           {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping, true,
@@ -234,7 +231,12 @@ class EditServerDetails extends Component {
               MacAddressValidator
             )
           )}
-          {this.renderInput('ilo-ip', 'text', false, 'server.ipmi.ip.prompt', IpV4AddressValidator)}
+          {this.renderInput(
+            'ilo-ip', 'text', false, 'server.ipmi.ip.prompt',
+            chainValidators(
+              createExcludesValidator(this.props.existIPMIAddressesModel, translate('input.validator.ipv4address.exist.error')),
+              IpV4AddressValidator)
+          )}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}
         </div>
