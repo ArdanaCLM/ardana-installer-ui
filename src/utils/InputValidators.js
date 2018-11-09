@@ -68,33 +68,15 @@ export function IpV4AddressValidator(ipAddress, props) {
   return retValue;
 }
 
-export function MacAddressValidator(macAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function MacAddressValidator(macAddress) {
   if(MACADDRESS.exec(macAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.error');
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.macaddress.error')
+    };
   }
 
-  if(props && props.exist_mac_addresses && props.exist_mac_addresses.includes(macAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.exist.error');
-  }
-
-  if(props && props.exist_availservers_mac_addr_objs) {
-    let found =
-      props.exist_availservers_mac_addr_objs.find(mac => mac['mac-addr'] === macAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.macaddress.availserver.exist.error' , found.serverId);
-    }
-  }
-
-  return retValue;
+  return { isValid: true };
 }
 
 export function PortValidator(port) {

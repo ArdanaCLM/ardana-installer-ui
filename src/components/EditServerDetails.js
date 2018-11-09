@@ -121,9 +121,6 @@ class EditServerDetails extends Component {
 
   renderInput(name, type, isRequired, title, validate) {
     let extraProps = {};
-    if (name === 'mac-addr') {
-      extraProps['exist_mac_addresses'] = this.props.existMacAddressesModel;
-    }
     if (name === 'ilo-ip') {
       extraProps['exist_ip_addresses'] = this.props.existIPMIAddressesModel;
     }
@@ -230,7 +227,13 @@ class EditServerDetails extends Component {
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
-          {this.renderInput('mac-addr', 'text', false, 'server.mac.prompt', MacAddressValidator)}
+          {this.renderInput(
+            'mac-addr', 'text', false, 'server.mac.prompt',
+            chainValidators(
+              createExcludesValidator(this.props.existMacAddressesModel, translate('input.validator.macaddress.exist.error')),
+              MacAddressValidator
+            )
+          )}
           {this.renderInput('ilo-ip', 'text', false, 'server.ipmi.ip.prompt', IpV4AddressValidator)}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}
