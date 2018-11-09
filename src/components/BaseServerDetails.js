@@ -17,8 +17,8 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { translate } from '../localization/localize.js';
 import ModelServerDetails from './ModelServerDetails.js';
 
-const DETAILS_FROM_SERVER_TAB = 1;
-const DETAILS_FROM_MODEL_TAB = 2;
+const DETAILS_FROM_SERVER_TAB = "1";
+const DETAILS_FROM_MODEL_TAB = "2";
 
 class BaseServerDetails extends Component {
   constructor(props) {
