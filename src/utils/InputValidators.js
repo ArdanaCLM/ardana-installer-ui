@@ -29,7 +29,6 @@ const PCI_ADDRESS = /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$
 const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
-const STRING_WITH_NO_SPACES = /^\S+$/;
 const NETMASK = new RegExp('' +
   /^((255\.){3}(255|254|252|248|240|224|192|128|0+))|/.source +
   /((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|/.source +
@@ -216,7 +215,8 @@ export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate
 
 export function NoWhiteSpaceValidator(errorMessage) {
   function validator(value) {
-    if(STRING_WITH_NO_SPACES.exec(name) === null) {
+    // if the string contains whitespace
+    if(!!/\s/.exec(value)) {
       return { isValid: false, errorMsg: errorMessage };
     }
     return { isValid: true };
@@ -277,7 +277,7 @@ export function createExcludesValidator(values, errorMsg) {
     let exists;
     if (typeof(values) === 'object' && values instanceof Set) {
       exists = values.has(value);
-    } else {
+    } else if (Array.isArray(values)) {
       exists = values.includes(value);
     }
 
