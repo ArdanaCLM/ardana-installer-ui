@@ -17,7 +17,8 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
-import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../utils/InputValidators.js';
+import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
+  chainValidators, NoWhiteSpaceValidator } from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups, genUID } from '../utils/ModelUtils.js';
@@ -120,10 +121,6 @@ class EditServerDetails extends Component {
 
   renderInput(name, type, isRequired, title, validate) {
     let extraProps = {};
-    if(name === 'id') {
-      extraProps.ids = this.props.ids;
-    }
-
     if (name === 'mac-addr') {
       extraProps['exist_mac_addresses'] = this.props.existMacAddressesModel;
     }
@@ -217,7 +214,13 @@ class EditServerDetails extends Component {
     return (
       <div>
         <div className='server-details-container'>
-          {this.renderInput('id', 'text', true, 'server.id.prompt', UniqueIdValidator)}
+          {this.renderInput(
+            'id', 'text', true, 'server.id.prompt',
+            chainValidators(
+              NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
+              UniqueIdValidator(this.props.ids)
+            )
+          )}
           {this.renderTextLine('server.role.prompt', this.data.role)}
           {this.renderInput('ip-addr', 'text', true, 'server.ip.prompt', IpV4AddressValidator)}
           {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,

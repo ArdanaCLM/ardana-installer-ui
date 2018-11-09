@@ -247,45 +247,18 @@ export function AddressesValidator(addresses) {
   return retValue;
 }
 
-export function UniqueNameValidator(name, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
+export const UniqueNameValidator = (names) => createExcludesValidator(names, translate('input.validator.uniquename.error'));
+export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate('input.validator.uniqueid.error'));
 
-  if(props && props.names && props.names.length > 0 &&
-    name && props.names.indexOf(name) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniquename.error');
-  }
-  else if(props && props.check_nospace) {
+export function NoWhiteSpaceValidator(errorMessage) {
+  function validator(value) {
     if(STRING_WITH_NO_SPACES.exec(name) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.name.spaces.error');
+      return { isValid: false, errorMsg: errorMessage };
     }
-  }
-  return retValue;
-}
-
-export function UniqueIdValidator(id, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
-  if(props && props.ids && props.ids.length > 0 &&
-    id && props.ids.indexOf(id) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniqueid.error');
-    return retValue;
+    return { isValid: true };
   }
 
-  // make sure no space in the id
-  if(STRING_WITH_NO_SPACES.exec(id) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.id.spaces.error');
-  }
-  return retValue;
+  return validator;
 }
 
 export function YamlValidator(text) {
@@ -323,7 +296,7 @@ export function IpInNetmaskValidator(ip, netmask) {
 // Note that the counterpart to this validator, createIncludesValidator,
 // is generally unnecessary, since a pulldown list would normally
 // be used in the situation where there is a fixed set of valid inputs.
-export function createExcludesValidator(values) {
+export function createExcludesValidator(values, errorMsg) {
 
   function validator(value) {
 
@@ -337,7 +310,7 @@ export function createExcludesValidator(values) {
     if (exists) {
       return {
         isValid: false,
-        errorMsg: translate('duplicate.error', value)
+        errorMsg: errorMsg || translate('duplicate.error', value)
       };
     } else {
       return { isValid: true };
