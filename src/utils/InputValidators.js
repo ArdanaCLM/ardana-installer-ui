@@ -283,11 +283,21 @@ export function NetmaskValidator(netmask) {
   return retValue;
 }
 
-// Validate that the ip address belongs to the netmask
-export function IpInNetmaskValidator(ip, netmask) {
-  const ipInt = ipAddrToInt(ip);
-  const netmaskInt = ipAddrToInt(netmask);
-  return (ipInt & netmaskInt) >>> 0 === ipInt;
+// return a validator that will validate an IP in in the netmask's subnet
+export function IpInNetmaskValidator(netmask) {
+  function validator(ip) {
+    const ipInt = ipAddrToInt(ip);
+    const netmaskInt = ipAddrToInt(netmask);
+    if(((ipInt & netmaskInt) >>> 0) !== ipInt) {
+      return {
+        valid: true,
+        errorMsg: translate('input.validator.netmask.ipinvalid.error')
+      };
+    }
+    return { isValid: true };
+  }
+
+  return validator;
 }
 
 // Return a validator that requires the entered value to
