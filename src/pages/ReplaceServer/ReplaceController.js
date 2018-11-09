@@ -23,6 +23,8 @@ import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { isEmpty } from 'lodash';
+import { ConfirmModal } from '../../components/Modals.js';
+import { ActionButton } from '../../components/Buttons.js';
 
 class ReplaceController extends BaseUpdateWizardPage {
 
@@ -33,17 +35,12 @@ class ReplaceController extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       invalidMsg: '',
       showLoadingMask: false,
+
+      ringBuilderConfirmation: undefined,
     };
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
-
-  getHostname = (internalModel, serverId) => {
-    const matches = internalModel.internal.servers.filter(s => s.id == serverId).map(s => s.hostname);
-    if (matches.length > 0) {
-      return matches[0];
-    }
-  }
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
@@ -98,7 +95,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       return;
     }
 
-    const hostname = this.getHostname(this.state.internalModel, this.props.operationProps.server.id);
+    const server = this.state.internalModel.internal.servers.find(s => s.id == this.props.operationProps.server.id);
 
     // Create an array of all playbooks/steps
     let playbook_steps = [
@@ -155,14 +152,14 @@ class ReplaceController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
-          if (isEmpty(hostname)) {
+          if (isEmpty(server.hostname)) {
             logger('No hostname found to remove from known_hosts, continuing\n');
             return Promise.resolve();
           }
 
-          return deleteJson('/api/v1/clm/known_hosts/' + hostname)
+          return deleteJson('/api/v1/clm/known_hosts/' + server.hostname)
             .then((response) => {
-              logger(hostname+' removed from known_hosts\n');
+              logger(server.hostname+' removed from known_hosts\n');
             })
             .catch((error) => {
               const message = translate('update.known_hosts.failure', error.toString());
@@ -208,9 +205,57 @@ class ReplaceController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.os-config'),
         playbook: 'osconfig-run.yml',
-        payload: {'extra-vars': {'rebuild': 'True'}, limit: hostname}
+        payload: {'extra-vars': {'rebuild': 'True'}, limit: server.hostname}
       },
     );
+
+    // Determine whether the given node is the swift ring builder, which requires special handling
+    let ring_builder;
+    for (const cp of Object.values(this.state.internalModel.internal['control-planes'])) {
+      try {
+        // Extract a list of swift nodes from the control plane.  Note that this
+        const swift_nodes =
+          cp['components']['swift-ring-builder']['consumes']['consumes_SWF_ACC']['members']['private'];
+
+        // The first swift node is the ring builder
+        ring_builder = swift_nodes[0];
+        break;
+      }
+      catch (err) {
+        // Ignore any errors when the ring-builder nested object is not preset
+      }
+    }
+
+    let deploy_limit = server.hostname;
+
+    if (ring_builder.ardana_ansible_host === server.ardana_ansible_host) {
+      playbook_steps.push(
+        {
+          label: translate('server.deploy.progress.swift-check'),
+          action: ((logger) => {
+            return new Promise((resolve, reject) => {
+              this.setState({
+                'ringBuilderConfirmation': {
+                  'resolve': resolve,
+                  'reject': reject,
+                },
+              });
+            });
+          }),
+        },
+      );
+    } else if (ring_builder !== undefined) {
+      // Per the operations guide, (13.1.2.1.2 Replacing a Standalone Controller Node), when the node being replaced
+      // is *not* the swift ring builder, the swift ring builder host should be included in the limit switch for the
+      // ardana-deploy playbook
+      deploy_limit += ','+ring_builder.host;
+    }
+
+    playbook_steps.push({
+      label: translate('server.deploy.progress.ardana-deploy'),
+      playbook: 'ardana-deploy.yml',
+      payload: {'extra-vars': {'rebuild': 'True'}, limit: deploy_limit}
+    });
 
     let playbooks = [];
     let steps = [];
@@ -267,6 +312,34 @@ class ReplaceController extends BaseUpdateWizardPage {
     );
   }
 
+  renderRingBuilderConfirmation() {
+    if (this.state.ringBuilderConfirmation) {
+
+      const cancel = () => {
+        this.state.ringBuilderConfirmation.reject();
+        this.setState({ringBuilderConfirmation: undefined});
+      };
+      const done = () => {
+        this.state.ringBuilderConfirmation.resolve();
+        this.setState({ringBuilderConfirmation: undefined});
+      };
+
+      const footer = (
+        <div className="btn-row">
+          <ActionButton type='default' clickAction={cancel} displayLabel={translate('cancel')}/>
+          <ActionButton clickAction={done} displayLabel={translate('done')}/>
+        </div>
+      );
+
+      return (
+        <ConfirmModal show={true} title={translate('server.deploy.progress.swift-check')}
+          onHide={cancel} footer={footer}>
+          {translate('server.deploy.progress.swift-manual')}
+        </ConfirmModal>
+      );
+    }
+  }
+
   render() {
     //if error happens, cancel button shows up
     let cancel =  this.state.overallStatus === STATUS.FAILED;
@@ -279,6 +352,7 @@ class ReplaceController extends BaseUpdateWizardPage {
         <div className='wizard-content'>
           {this.renderPlaybookProgress()}
           {cancel && this.renderError()}
+          {this.renderRingBuilderConfirmation()}
         </div>
         {this.renderNavButtons(cancel)}
       </div>
