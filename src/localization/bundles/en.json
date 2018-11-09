@@ -626,5 +626,7 @@
     "server.deploy.progress.rm-cobbler": "Remove system from cobbler",
     "server.deploy.progress.cobbler-deploy": "Deploying cobbler",
     "server.deploy.progress.monasca-rebuild": "Rebuild monasca pretasks",
-    "server.deploy.progress.os-config": "Performing OS configuration"
+    "server.deploy.progress.os-config": "Performing OS configuration",
+    "server.deploy.progress.swift-check": "Restore swift ring builder files",
+    "server.deploy.progress.swift-manual": "The server being replaced is the swift ring builder.  In order to proceed, the swift ring build files need to be manually copied from one of the other swift nodes.  Please follow the instructions in the section 15.6.2.7 of the operations guide. When this has been completed, click on Done to continue with the server replacement."
 }
