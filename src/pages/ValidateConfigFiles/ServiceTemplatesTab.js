@@ -34,10 +34,12 @@ class EditTemplateFile extends Component {
         if (this.props.revertable) {
           fetchJson('/api/v1/clm/service/files/' +  this.props.editFile + '.bak')
             .then((response) => {
-              this.setState({original: response, loading: false});
+              this.setState({original: response});
             })
             .catch((error) => {
               // it's ok to not have the original file
+            }).finally(() => {
+              this.setState({ loading: false });
             });
         } else {
           this.setState({ loading: false });
