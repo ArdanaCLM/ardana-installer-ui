@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { alphabetically } from '../utils/Sort.js';
-import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ConfirmModal } from '../components/Modals.js';
 import { AlarmDonut } from '../components/Graph';

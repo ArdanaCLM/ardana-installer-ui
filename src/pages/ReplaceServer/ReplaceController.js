@@ -17,7 +17,7 @@ import React from 'react';
 import { translate } from '../../localization/localize.js';
 import { INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
-import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
@@ -71,7 +71,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   renderPlaybookProgress () {
     // Two related arrays, 'steps' and 'playbooks' are created from a single combined array for
-    // sending to playbookprocess.  Defining them as a single array keeps their definitions
+    // sending to PlaybookProgress.  Defining them as a single array keeps their definitions
     // together, making them easier to relate to each other, and makes it easier to create a
     // function to return just a single entry that can be re-used
     //

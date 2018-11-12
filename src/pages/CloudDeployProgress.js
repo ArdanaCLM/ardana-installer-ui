@@ -18,7 +18,7 @@ import { translate } from '../localization/localize.js';
 import { PRE_DEPLOYMENT_PLAYBOOK, DAYZERO_SITE_PLAYBOOK,
   SITE_PLAYBOOK, STATUS } from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
-import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 
 /*

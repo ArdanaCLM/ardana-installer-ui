@@ -18,7 +18,7 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { postJson } from '../utils/RestUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
-import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../utils/constants.js';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 

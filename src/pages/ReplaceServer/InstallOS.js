@@ -17,7 +17,7 @@ import React from 'react';
 import { translate } from '../../localization/localize.js';
 import { INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
-import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
 
 const OS_INSTALL_STEPS = [

@@ -17,7 +17,7 @@ import React from 'react';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
-import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
