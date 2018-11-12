@@ -98,7 +98,8 @@ export class AlarmDonutTest extends Component {
               <div className='irow'>
                 <div className='name'>Radius</div>
                 <div className='value'>
-                  <input type="range" min={40} max={100} value={this.state.radius} name='radius' onChange={this.changed} />
+                  <input type="range" min={40} max={100} value={this.state.radius} name='radius'
+                    onChange={this.changed} />
                   <div>{this.state.radius}</div>
                 </div>
               </div>
@@ -113,9 +114,9 @@ export class AlarmDonutTest extends Component {
                 unknown={this.state.unknown}
                 ok={this.state.ok}
               />
+            </div>
           </div>
         </div>
-      </div>
       </div>
     );
   }

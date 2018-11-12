@@ -57,123 +57,124 @@ export class SpeedometerTest extends Component {
 
     const name = target.name;
     this.setState({[name]: value});
-}
+  }
 
   render() {
     const valueStep = this.state.integersOnly ? '1' : 'any';
 
     return (
-        <div className='row'>
-          <div className='speedometer-test col-md-12'>
-            <div className='row'>
-              <div className='controls col-md-8'>
-                <div className='irow'>
-                  <div className='name'>Value</div>
-                  <div className='value'>
-                    <input type="range" min={0} max={this.state.max} step={valueStep} value={this.state.value} name='value'
-                    onChange={this.changed} disabled={this.state.noValue} />
-                    <div>{this.state.noValue ? '(No Value)' : this.state.value}</div>
-                  </div>
+      <div className='row'>
+        <div className='speedometer-test col-md-12'>
+          <div className='row'>
+            <div className='controls col-md-8'>
+              <div className='irow'>
+                <div className='name'>Value</div>
+                <div className='value'>
+                  <input type="range" min={0} max={this.state.max} step={valueStep} value={this.state.value}
+                    name='value' onChange={this.changed} disabled={this.state.noValue} />
+                  <div>{this.state.noValue ? '(No Value)' : this.state.value}</div>
+                </div>
 
-                  <div className='name'>Integers Only?</div>
-                  <div>
-                    <input type="checkbox" value={this.state.integersOnly} name='integersOnly'
+                <div className='name'>Integers Only?</div>
+                <div>
+                  <input type="checkbox" value={this.state.integersOnly} name='integersOnly'
                     defaultChecked={this.state.integersOnly} onChange={this.changed} />
-                  </div>
+                </div>
 
-                  <div className='name'>No Value ?</div>
-                  <div>
-                    <input type="checkbox" value={this.state.noValue} name='noValue'
+                <div className='name'>No Value ?</div>
+                <div>
+                  <input type="checkbox" value={this.state.noValue} name='noValue'
                     defaultChecked={this.state.noValue} onChange={this.changed} />
-                  </div>
                 </div>
-
-
-                <div className='irow'>
-                  <div className='name'>Danger</div>
-                  <div className='value'>
-                    <input type="range" min={0} max={this.state.max} value={this.state.danger} name='danger'
-                    onChange={this.changed} />
-                    <div>{this.state.danger}</div>
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Max</div>
-                  <div className='value'>
-                    <input type="number" min="0" value={this.state.max} name='max' onChange={this.changed} />
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Radius</div>
-                  <div className='value'>
-                    <input type="range" min={40} max={100} value={this.state.radius} name='radius' onChange={this.changed} />
-                    <div>{this.state.radius}</div>
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Start Angle</div>
-                  <div className='value'>
-                    <input type="range" min={0} max={360} value={this.state.startAngle} name='startAngle'
-                    onChange={this.changed} />
-                    <div>{this.state.startAngle}</div>
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>End Angle</div>
-                  <div className='value'>
-                    <input type="range" min={0} max={360} value={this.state.endAngle} name='endAngle'
-                    onChange={this.changed} />
-                    <div>{this.state.endAngle}</div>
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Decimals</div>
-                  <div className='value'>
-                    <input type="number" min="0" max="2" value={this.state.decimals} name='decimals'
-                    onChange={this.changed} />
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Display As %</div>
-                  <input type="checkbox" value={this.state.displayAsPercent} name='displayAsPercent'
-                  defaultChecked={this.state.displayAsPercent} onChange={this.changed} />
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>Title</div>
-                  <div className='value'>
-                    <input type="text" value={this.state.title} name='title' onChange={this.changed} />
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>
-                  Units
-                  </div>
-                  <div className='value'>
-                    <input type="text" value={this.state.units} name='units' onChange={this.changed} />
-                  </div>
-                </div>
-
-                <div className='irow'>
-                  <div className='name'>
-                  Caption
-                  </div>
-                  <div className='value'>
-                    <input type="text" value={this.state.caption} name='caption' onChange={this.changed} />
-                  </div>
-                </div>
-
               </div>
 
-              <div className='gauge col-md-4'>
-                <Speedometer
+
+              <div className='irow'>
+                <div className='name'>Danger</div>
+                <div className='value'>
+                  <input type="range" min={0} max={this.state.max} value={this.state.danger} name='danger'
+                    onChange={this.changed} />
+                  <div>{this.state.danger}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Max</div>
+                <div className='value'>
+                  <input type="number" min="0" value={this.state.max} name='max' onChange={this.changed} />
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Radius</div>
+                <div className='value'>
+                  <input type="range" min={40} max={100} value={this.state.radius} name='radius'
+                    onChange={this.changed} />
+                  <div>{this.state.radius}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Start Angle</div>
+                <div className='value'>
+                  <input type="range" min={0} max={360} value={this.state.startAngle} name='startAngle'
+                    onChange={this.changed} />
+                  <div>{this.state.startAngle}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>End Angle</div>
+                <div className='value'>
+                  <input type="range" min={0} max={360} value={this.state.endAngle} name='endAngle'
+                    onChange={this.changed} />
+                  <div>{this.state.endAngle}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Decimals</div>
+                <div className='value'>
+                  <input type="number" min="0" max="2" value={this.state.decimals} name='decimals'
+                    onChange={this.changed} />
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Display As %</div>
+                <input type="checkbox" value={this.state.displayAsPercent} name='displayAsPercent'
+                  defaultChecked={this.state.displayAsPercent} onChange={this.changed} />
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Title</div>
+                <div className='value'>
+                  <input type="text" value={this.state.title} name='title' onChange={this.changed} />
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>
+                Units
+                </div>
+                <div className='value'>
+                  <input type="text" value={this.state.units} name='units' onChange={this.changed} />
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>
+                Caption
+                </div>
+                <div className='value'>
+                  <input type="text" value={this.state.caption} name='caption' onChange={this.changed} />
+                </div>
+              </div>
+
+            </div>
+
+            <div className='gauge col-md-4'>
+              <Speedometer
                 caption={this.state.caption !== '' ? this.state.caption : undefined}
                 decimals={this.state.decimals}
                 displayAsPercent={this.state.displayAsPercent}
@@ -185,11 +186,11 @@ export class SpeedometerTest extends Component {
                 units={this.state.units}
                 value={this.state.noValue ? undefined : this.state.value}
                 danger={this.state.danger}
-                />
-              </div>
+              />
             </div>
           </div>
         </div>
+      </div>
     );
   }
 }

@@ -14,7 +14,7 @@
 **/
 
 import DeployAddServers from '../AddServers/DeployAddServers.js';
-import {translate} from "../../localization/localize";
+import {translate} from '../../localization/localize';
 
 // This is the deployment page for adding a compute server
 // for replace a compute server

@@ -65,7 +65,7 @@ class EditFile extends Component {
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => {
         this.setState({loading: false});
-        this.props.loadModel()
+        this.props.loadModel();
       });
   }
 
@@ -99,7 +99,7 @@ class EditFile extends Component {
           <div className='col-md-12'>
             <div className={editPanelCssClass}>
               {this.state.loading ?
-                <h3>{translate("loading.pleasewait")}</h3> :
+                <h3>{translate('loading.pleasewait')}</h3> :
                 <ValidatingInput
                   inputValue={this.state.contents}
                   inputName='fileContents'
@@ -109,6 +109,7 @@ class EditFile extends Component {
                 />
               }
             </div>
+            {errorMsgPanel}
           </div>
         </div>
         <div className='btn-row'>

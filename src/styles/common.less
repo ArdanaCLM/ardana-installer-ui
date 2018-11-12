@@ -359,10 +359,10 @@ a {
   color: #337ab7;//bootstrap 4 changed its defaul to 007bff, change it back here
 }
 
-.alert.show:not(.alert-danger){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
+.alert.show:not(.alert-danger):not(.alert-success){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
   color: #31708f;
   background-color: #d9edf7;
-  border-color:#bce8f1;
+  border-color: #bce8f1;
 }
 
 .hide {

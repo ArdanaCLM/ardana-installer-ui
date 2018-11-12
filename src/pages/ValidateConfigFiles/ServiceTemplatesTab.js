@@ -82,7 +82,7 @@ class EditTemplateFile extends Component {
     return (
       <div className='edit-container file-editor'>
         {this.state.loading ?
-          <h3>{translate("loading.pleasewait")}</h3> :
+          <h3>{translate('loading.pleasewait')}</h3> :
           <ValidatingInput
             inputValue={this.state.contents}
             inputName='fileContents'

@@ -90,7 +90,7 @@ function ErrorBanner(props) {
   let banner = null;
   if (props.show) {
     banner = (
-      <Alert variant="danger" dismissible={true}>
+      <Alert variant="danger">
         <span className='error-banner'>
           <i className='material-icons error-icon'>error</i>{props.message}
         </span>
