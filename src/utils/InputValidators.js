@@ -216,7 +216,7 @@ export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate
 export function NoWhiteSpaceValidator(errorMessage) {
   function validator(value) {
     // if the string contains whitespace
-    if(!!/\s/.exec(value)) {
+    if(/\s/.test(value)) {
       return { isValid: false, errorMsg: errorMessage };
     }
     return { isValid: true };

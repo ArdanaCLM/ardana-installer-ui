@@ -795,7 +795,7 @@ class DiskModelDetails extends Component {
     const names = this.props.model.getIn(['inputModel','disk-models'])
       .map((group) => {return group.get('name');}).sort().toJS();
     if (this.dmMode === MODE.EDIT) {
-      if (names.indexOf(this.origDKName) !== -1) {
+      if (names.includes(this.origDKName)) {
         names.splice(names.indexOf(this.origDKName), 1);
       }
     }
