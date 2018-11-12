@@ -17,7 +17,9 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
-import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator } from '../utils/InputValidators.js';
+import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
+  chainValidators, NoWhiteSpaceValidator, createExcludesValidator }
+  from '../utils/InputValidators.js';
 import { INPUT_STATUS } from '../utils/constants.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups, genUID } from '../utils/ModelUtils.js';
@@ -119,27 +121,11 @@ class EditServerDetails extends Component {
   }
 
   renderInput(name, type, isRequired, title, validate) {
-    let extraProps = {};
-    if(name === 'id') {
-      extraProps.ids = this.props.ids;
-    }
-
-    if (name === 'mac-addr') {
-      extraProps['exist_mac_addresses'] = this.props.existMacAddressesModel;
-    }
-    if (name === 'ilo-ip') {
-      extraProps['exist_ip_addresses'] = this.props.existIPMIAddressesModel;
-    }
-    if (name === 'ip-addr') {
-      extraProps['exist_ip_addresses'] = this.props.existIPAddressesModel;
-    }
-
     return (
       <InputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title}
         inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}
-        {...extraProps}/>
+        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity} />
     );
   }
 
@@ -217,9 +203,24 @@ class EditServerDetails extends Component {
     return (
       <div>
         <div className='server-details-container'>
-          {this.renderInput('id', 'text', true, 'server.id.prompt', UniqueIdValidator)}
+          {this.renderInput(
+            'id', 'text', true, 'server.id.prompt',
+            chainValidators(
+              NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
+              UniqueIdValidator(this.props.ids)
+            )
+          )}
           {this.renderTextLine('server.role.prompt', this.data.role)}
-          {this.renderInput('ip-addr', 'text', true, 'server.ip.prompt', IpV4AddressValidator)}
+          {this.renderInput(
+            'ip-addr', 'text', true, 'server.ip.prompt',
+            chainValidators(
+              createExcludesValidator(
+                this.props.existIPAddressesModel,
+                translate('input.validator.ipv4address.exist.error')
+              ),
+              IpV4AddressValidator
+            )
+          )}
           {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,
             'server.group.prompt', 'server.group.prompt', this.addServerGroup)}
           {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping, true,
@@ -227,8 +228,25 @@ class EditServerDetails extends Component {
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
-          {this.renderInput('mac-addr', 'text', false, 'server.mac.prompt', MacAddressValidator)}
-          {this.renderInput('ilo-ip', 'text', false, 'server.ipmi.ip.prompt', IpV4AddressValidator)}
+          {this.renderInput(
+            'mac-addr', 'text', false, 'server.mac.prompt',
+            chainValidators(
+              createExcludesValidator(
+                this.props.existMacAddressesModel,
+                translate('input.validator.macaddress.exist.error')
+              ),
+              MacAddressValidator
+            )
+          )}
+          {this.renderInput(
+            'ilo-ip', 'text', false, 'server.ipmi.ip.prompt',
+            chainValidators(
+              createExcludesValidator(
+                this.props.existIPMIAddressesModel,
+                translate('input.validator.ipv4address.exist.error')
+              ),
+              IpV4AddressValidator)
+          )}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}
         </div>

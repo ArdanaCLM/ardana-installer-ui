@@ -18,7 +18,8 @@ import { translate } from '../../localization/localize.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
-import { UniqueNameValidator, YamlValidator } from '../../utils/InputValidators.js';
+import { UniqueNameValidator, YamlValidator, NoWhiteSpaceValidator, chainValidators }
+  from '../../utils/InputValidators.js';
 import { InlineAddRemoveInput } from '../../components/InlineAddRemoveFields.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
@@ -792,12 +793,11 @@ class DiskModelDetails extends Component {
         {translate('add.device.group')}</div>
     );
 
-    const diskModels = this.props.model.getIn(['inputModel','disk-models'])
+    const names = this.props.model.getIn(['inputModel','disk-models'])
       .map((group) => {return group.get('name');}).sort().toJS();
-    let extraProps = {names: diskModels, check_nospace: true};
     if (this.dmMode === MODE.EDIT) {
-      if (diskModels.indexOf(this.origDKName) !== -1) {
-        extraProps.names.splice(diskModels.indexOf(this.origDKName), 1);
+      if (names.includes(this.origDKName)) {
+        names.splice(names.indexOf(this.origDKName), 1);
       }
     }
     const buttonClass = (this.secondDetails === '') ? 'btn-container' : 'btn-container hide';
@@ -841,7 +841,11 @@ class DiskModelDetails extends Component {
           <div className='details-body'>
             <ValidatingInput isRequired={true} placeholder={translate('disk.model.name') + '*'}
               inputValue={this.state.diskModelName} inputName='dmName' inputType='text'
-              inputAction={this.handleInputLine} inputValidate={UniqueNameValidator} {...extraProps}
+              inputAction={this.handleInputLine}
+              inputValidate={chainValidators(
+                NoWhiteSpaceValidator(translate('input.validator.name.spaces.error')),
+                UniqueNameValidator(names)
+              )}
               autoFocus={true} disabled={this.secondDetails !== ''}/>
             {firstDetailsLines}
             <div className='btn-row details-btn'>

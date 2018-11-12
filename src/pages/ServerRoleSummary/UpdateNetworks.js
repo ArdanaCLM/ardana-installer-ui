@@ -21,7 +21,8 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator
+  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator, NoWhiteSpaceValidator,
+  chainValidators
 } from '../../utils/InputValidators.js';
 import { MODE, INPUT_STATUS } from '../../utils/constants.js';
 import HelpText from '../../components/HelpText.js';
@@ -266,19 +267,6 @@ class UpdateNetworks extends Component {
       extraProps.max = 4094;
     }
 
-    if(name === 'name') {
-      extraProps.names =
-        this.props.model.getIn(['inputModel','networks']).map(e => e.get('name'))
-          .toJS();
-      if(this.props.mode === MODE.EDIT) {
-        //remove current name so won't check against it
-        let idx = this.props.model.getIn(['inputModel','networks']).findIndex(
-          net => net.get('name') === this.props.networkName);
-        extraProps.names.splice(idx, 1);
-      }
-      extraProps.check_nospace=true;
-    }
-
     if(this.props.mode === MODE.EDIT) {
       extraProps.updateFormValidity = this.updateFormValidity;
     }
@@ -333,11 +321,26 @@ class UpdateNetworks extends Component {
   render() {
     let title =
       this.props.mode === MODE.EDIT ? translate('network.update') : translate('network.add');
+
+    let names = this.props.model.getIn(['inputModel','networks'])
+      .map(e => e.get('name')).toJS();
+    if(this.props.mode === MODE.EDIT) {
+      //remove current name so won't check against it
+      let idx = this.props.model.getIn(['inputModel','networks']).findIndex(
+        net => net.get('name') === this.props.networkName);
+      names.splice(idx, 1);
+    }
     return (
       <div className='details-section network-section'>
         <div className='details-header'>{title}</div>
         <div className='details-body'>
-          {this.renderNetworkInput('name', 'text', true, translate('network.name') + '*', UniqueNameValidator)}
+          {this.renderNetworkInput(
+            'name', 'text', true, translate('network.name') + '*',
+            chainValidators(
+              NoWhiteSpaceValidator(translate('input.validator.name.spaces.error')),
+              UniqueNameValidator(names)
+            )
+          )}
           <div className='details-group-title'>{translate('vlanid') + '*:'}
             <HelpText tooltipText={translate('tooltip.network.vlanid')}/></div>
           {this.renderNetworkInput('vlanid', 'number', true, translate('vlanid'), VLANIDValidator)}

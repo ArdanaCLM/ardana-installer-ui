@@ -19,7 +19,7 @@ import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { InlineAddRemoveDropdown } from '../../components/InlineAddRemoveFields.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
-import { UniqueNameValidator } from '../../utils/InputValidators.js';
+import { UniqueNameValidator, chainValidators, NoWhiteSpaceValidator } from '../../utils/InputValidators.js';
 
 class ServerGroupDetails extends Component {
   constructor(props) {
@@ -133,12 +133,12 @@ class ServerGroupDetails extends Component {
       translate('edit.server.group');
 
     let exceptions = [];
-    let extraProps = {names: serverGroups, check_nospace: true};
+    let names = serverGroups;
     if (this.props.value !== '') {
       exceptions.push(this.state.name);
       // remove orig name from the list to check for uniqueness in edit mode
       if (serverGroups.indexOf(this.origName) !== -1) {
-        extraProps.names.splice(serverGroups.indexOf(this.origName), 1);
+        names.splice(serverGroups.indexOf(this.origName), 1);
       }
     }
 
@@ -148,8 +148,12 @@ class ServerGroupDetails extends Component {
           <div className='details-header'>{header}</div>
           <div className='details-body'>
             <ValidatingInput isRequired={true} placeholder={translate('server.group.name') + '*'}
-              inputValue={this.state.name} inputName='name' inputType='text' {...extraProps}
-              inputAction={this.handleInputLine} inputValidate={UniqueNameValidator}
+              inputValue={this.state.name} inputName='name' inputType='text'
+              inputAction={this.handleInputLine}
+              inputValidate={chainValidators(
+                NoWhiteSpaceValidator(translate('input.validator.name.spaces.error')),
+                UniqueNameValidator(names)
+              )}
               autoFocus={true}/>
             <div className='details-group-title'>{translate('edit.networks') + ':'}</div>
             <InlineAddRemoveDropdown name='networks' options={networks}

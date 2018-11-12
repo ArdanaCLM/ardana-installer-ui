@@ -29,7 +29,6 @@ const PCI_ADDRESS = /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$
 const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
-const STRING_WITH_NO_SPACES = /^\S+$/;
 const NETMASK = new RegExp('' +
   /^((255\.){3}(255|254|252|248|240|224|192|128|0+))|/.source +
   /((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|/.source +
@@ -39,62 +38,26 @@ const NETMASK = new RegExp('' +
 const IPV4ADDRESS_RANGE =
   /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
-export function IpV4AddressValidator(ipAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function IpV4AddressValidator(ipAddress) {
   if(IPV4ADDRESS.exec(ipAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.error');
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.ipv4address.error')
+    };
   }
 
-  if(props && props.exist_ip_addresses && props.exist_ip_addresses.includes(ipAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.exist.error');
-  }
-
-  if(props && props.exist_availservers_ip_addr_objs) {
-    let found =
-      props.exist_availservers_ip_addr_objs.find(addr => addr['ilo-ip'] === ipAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.ipv4address.availservers.exist.error', found.serverId);
-    }
-  }
-
-  return retValue;
+  return { isValid: true };
 }
 
-export function MacAddressValidator(macAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function MacAddressValidator(macAddress) {
   if(MACADDRESS.exec(macAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.error');
+    return {
+      isValid: false,
+      errorMsg: translate('input.validator.macaddress.error')
+    };
   }
 
-  if(props && props.exist_mac_addresses && props.exist_mac_addresses.includes(macAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.exist.error');
-  }
-
-  if(props && props.exist_availservers_mac_addr_objs) {
-    let found =
-      props.exist_availservers_mac_addr_objs.find(mac => mac['mac-addr'] === macAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.macaddress.availserver.exist.error' , found.serverId);
-    }
-  }
-
-  return retValue;
+  return { isValid: true };
 }
 
 export function PortValidator(port) {
@@ -247,45 +210,20 @@ export function AddressesValidator(addresses) {
   return retValue;
 }
 
-export function UniqueNameValidator(name, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
+export const UniqueNameValidator = (names) =>
+  createExcludesValidator(names, translate('input.validator.uniquename.error'));
+export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate('input.validator.uniqueid.error'));
 
-  if(props && props.names && props.names.length > 0 &&
-    name && props.names.indexOf(name) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniquename.error');
-  }
-  else if(props && props.check_nospace) {
-    if(STRING_WITH_NO_SPACES.exec(name) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.name.spaces.error');
+export function NoWhiteSpaceValidator(errorMessage) {
+  function validator(value) {
+    // if the string contains whitespace
+    if(/\s/.test(value)) {
+      return { isValid: false, errorMsg: errorMessage };
     }
-  }
-  return retValue;
-}
-
-export function UniqueIdValidator(id, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
-  if(props && props.ids && props.ids.length > 0 &&
-    id && props.ids.indexOf(id) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniqueid.error');
-    return retValue;
+    return { isValid: true };
   }
 
-  // make sure no space in the id
-  if(STRING_WITH_NO_SPACES.exec(id) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.id.spaces.error');
-  }
-  return retValue;
+  return validator;
 }
 
 export function YamlValidator(text) {
@@ -310,11 +248,21 @@ export function NetmaskValidator(netmask) {
   return retValue;
 }
 
-// Validate that the ip address belongs to the netmask
-export function IpInNetmaskValidator(ip, netmask) {
-  const ipInt = ipAddrToInt(ip);
-  const netmaskInt = ipAddrToInt(netmask);
-  return (ipInt & netmaskInt) >>> 0 === ipInt;
+// return a validator that will validate an IP in in the netmask's subnet
+export function IpInNetmaskValidator(netmask) {
+  function validator(ip) {
+    const ipInt = ipAddrToInt(ip);
+    const netmaskInt = ipAddrToInt(netmask);
+    if(((ipInt & netmaskInt) >>> 0) !== ipInt) {
+      return {
+        valid: true,
+        errorMsg: translate('input.validator.netmask.ipinvalid.error')
+      };
+    }
+    return { isValid: true };
+  }
+
+  return validator;
 }
 
 // Return a validator that requires the entered value to
@@ -323,21 +271,21 @@ export function IpInNetmaskValidator(ip, netmask) {
 // Note that the counterpart to this validator, createIncludesValidator,
 // is generally unnecessary, since a pulldown list would normally
 // be used in the situation where there is a fixed set of valid inputs.
-export function createExcludesValidator(values) {
+export function createExcludesValidator(values, errorMsg) {
 
   function validator(value) {
 
     let exists;
     if (typeof(values) === 'object' && values instanceof Set) {
       exists = values.has(value);
-    } else {
+    } else if (Array.isArray(values)) {
       exists = values.includes(value);
     }
 
     if (exists) {
       return {
         isValid: false,
-        errorMsg: translate('duplicate.error', value)
+        errorMsg: errorMsg || translate('duplicate.error', value)
       };
     } else {
       return { isValid: true };

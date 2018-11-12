@@ -22,7 +22,7 @@ import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
 import {
   IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
-  createExcludesValidator, chainValidators }
+  createExcludesValidator, chainValidators, NoWhiteSpaceValidator }
   from '../utils/InputValidators.js';
 import {
   maskPassword, getNicMappings, getServerGroups, getAllOtherServerIds, isComputeNode }
@@ -367,10 +367,7 @@ class ReplaceServerDetails extends Component {
     if(isComputeNode(this.props.data)) {
       // disable the id input when user select from available servers
       let isDisabled = !isEmpty(this.state.selectedServerId);
-      // TODO try to use chainValidors for check id, for some reason, it complains about
-      // the id in Use when select an available server id, use the old way for now
-      let extraProps = {};
-      extraProps.ids =
+      let previousIds =
         getAllOtherServerIds(
           this.props.model, this.props.availableServers, undefined, this.state.selectedServerId);
 
@@ -381,9 +378,12 @@ class ReplaceServerDetails extends Component {
           <div className='server-details-container'>
             <InputLine
               isRequired={true} disabled={isDisabled} inputName='id' label='server.id.prompt'
-              inputValidate={UniqueIdValidator}
+              inputValidate={chainValidators(
+                NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
+                UniqueIdValidator(previousIds)
+              )}
               inputValue={this.state.inputValue.get('id')}
-              inputAction={this.handleInputChange} {...extraProps}/>
+              inputAction={this.handleInputChange} />
             <InputLine
               isRequired={true} inputName='ip-addr' label='server.ip.prompt'
               inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
