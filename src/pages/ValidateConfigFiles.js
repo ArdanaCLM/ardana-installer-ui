@@ -65,7 +65,7 @@ class EditFile extends Component {
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => {
         this.setState({loading: false});
-        this.props.loadModel()
+        this.props.loadModel();
       });
   }
 
