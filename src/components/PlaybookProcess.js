@@ -534,7 +534,7 @@ class PlaybookProgress extends Component {
     for (const override of [this.props.payload, playbook.payload]) {
       if (override) {
         for (const [key, value] of Object.entries(override)) {
-          if (key == 'extra-vars' || key == 'extraVars') { // TODO: Remove extraVars here (SCRD-5738)
+          if (key == 'extra-vars') {
             // Merge extra vars with defaults
             Object.assign(payload['extra-vars'], value);
           } else {

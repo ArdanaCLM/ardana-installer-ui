@@ -140,7 +140,7 @@ class ServiceConfiguration extends Component {
       if (!this.playbooksToRun) {
         this.playbooksToRun = this.getPlaybooks();
       }
-      const payload = {extraVars: {automate: 'true', encrypt: '', rekey: ''}};
+      const payload = {'extra-vars': {automate: 'true', encrypt: '', rekey: ''}};
       return (
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update.progress')}</div>

@@ -133,19 +133,19 @@ class CloudDeployProgress extends BaseWizardPage {
         sitePlaybook = DAYZERO_SITE_PLAYBOOK;
       }
       payload['verbose'] = this.props.deployConfig['verbosity'];
-      payload['extraVars'] = {};
+      payload['extra-vars'] = {};
       // don't prompt "Are you sure?" questions for wipedisks
-      payload['extraVars']['automate'] = 'true';
+      payload['extra-vars']['automate'] = 'true';
       if (this.props.deployConfig['encryptKey']) {
-        payload['extraVars']['encrypt'] = this.props.deployConfig['encryptKey'];
-        payload['extraVars']['rekey'] = '';
+        payload['extra-vars']['encrypt'] = this.props.deployConfig['encryptKey'];
+        payload['extra-vars']['rekey'] = '';
       } else {
-        payload['extraVars']['encrypt'] = '';
-        payload['extraVars']['rekey'] = '';
+        payload['extra-vars']['encrypt'] = '';
+        payload['extra-vars']['rekey'] = '';
       }
       if (this.props.deployConfig['clearServers']) {
-        payload['extraVars']['remove_deleted_servers'] = 'y';
-        payload['extraVars']['free_unused_addresses'] = 'y';
+        payload['extra-vars']['remove_deleted_servers'] = 'y';
+        payload['extra-vars']['free_unused_addresses'] = 'y';
       }
     }
 
