@@ -255,6 +255,9 @@ class ReplaceController extends BaseUpdateWizardPage {
       label: translate('server.deploy.progress.ardana-deploy'),
       playbook: 'ardana-deploy.yml',
       payload: {'extra-vars': {'rebuild': 'True'}, limit: deploy_limit}
+    },{
+      label: translate('server.deploy.progress.ceilometer'),
+      playbook: 'ceilometer-reconfigure.yml',
     });
 
     let playbooks = [];
