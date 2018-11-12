@@ -22,7 +22,18 @@ export class ValidatingInput extends Component {
     this.state = {
       errorMsg: '',
       inputValue: props.inputValue,
+      initialValue: props.inputValue,
       showMask: true
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const takeFromProps = props.inputValue != state.initialValue && (
+      state.inputValue === props.inputValue
+    );
+    return {
+      ...state,
+      inputValue: takeFromProps ? props.inputValue : state.inputValue
     };
   }
 
@@ -32,13 +43,6 @@ export class ValidatingInput extends Component {
       //callback function from parent to initially check
       //all inputs
       this.props.updateFormValidity(this.props, isValid);
-    }
-  }
-
-  componentWillReceiveProps(newProps) {
-    if (this.props.inputValue !== newProps.inputValue) {
-      this.setState({inputValue : newProps.inputValue});
-      this.validateInput(newProps.inputValue, newProps);
     }
   }
 

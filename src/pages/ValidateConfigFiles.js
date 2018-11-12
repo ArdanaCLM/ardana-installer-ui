@@ -44,14 +44,16 @@ class EditFile extends Component {
     super(props);
     this.state = {
       contents : '',
-      isValid: true
+      isValid: true,
+      loading: true
     };
   }
 
   componentWillMount() {
+    this.setState({loading: true});
     fetchJson('/api/v1/clm/model/files/' + this.props.file.name)
       .then((response) => {
-        this.setState({contents: response});
+        this.setState({contents: response, loading: false});
       });
   }
 
@@ -59,8 +61,12 @@ class EditFile extends Component {
     this.props.setChanged();
     this.props.doneEditingFile();
 
+    this.setState({loading: true});
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
-      .then(() => this.props.loadModel());
+      .then(() => {
+        this.setState({loading: false});
+        this.props.loadModel()
+      });
   }
 
   handleCancel() {
@@ -91,13 +97,16 @@ class EditFile extends Component {
         <h3>{this.props.file.name}</h3>
         <div className='col-md-12'>
           <div className={editPanelCssClass}>
-            <ValidatingInput
-              inputValue={this.state.contents}
-              inputName='fileContents'
-              inputType='textarea'
-              inputValidate={YamlValidator}
-              inputAction={this.handleChange}
-            />
+            {this.state.loading ?
+              <h3>{translate("loading.pleasewait")}</h3> :
+              <ValidatingInput
+                inputValue={this.state.contents}
+                inputName='fileContents'
+                inputType='textarea'
+                inputValidate={YamlValidator}
+                inputAction={this.handleChange}
+              />
+            }
           </div>
           {errorMsgPanel}
         </div>
