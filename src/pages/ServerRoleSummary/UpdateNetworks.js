@@ -21,7 +21,8 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator
+  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator, NoWhiteSpaceValidator,
+  chainValidators
 } from '../../utils/InputValidators.js';
 import { MODE, INPUT_STATUS } from '../../utils/constants.js';
 import HelpText from '../../components/HelpText.js';

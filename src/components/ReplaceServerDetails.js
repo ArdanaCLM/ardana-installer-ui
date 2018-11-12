@@ -379,9 +379,9 @@ class ReplaceServerDetails extends Component {
             <InputLine
               isRequired={true} disabled={isDisabled} inputName='id' label='server.id.prompt'
               inputValidate={chainValidators(
-                              NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
-                              UniqueIdValidator(previousIds)
-                            )}
+                NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
+                UniqueIdValidator(previousIds)
+              )}
               inputValue={this.state.inputValue.get('id')}
               inputAction={this.handleInputChange} />
             <InputLine

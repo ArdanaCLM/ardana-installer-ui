@@ -18,7 +18,8 @@ import { translate } from '../../localization/localize.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
-import { UniqueNameValidator, YamlValidator } from '../../utils/InputValidators.js';
+import { UniqueNameValidator, YamlValidator, NoWhiteSpaceValidator, chainValidators }
+  from '../../utils/InputValidators.js';
 import { InlineAddRemoveInput } from '../../components/InlineAddRemoveFields.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
@@ -841,7 +842,7 @@ class DiskModelDetails extends Component {
             <ValidatingInput isRequired={true} placeholder={translate('disk.model.name') + '*'}
               inputValue={this.state.diskModelName} inputName='dmName' inputType='text'
               inputAction={this.handleInputLine}
-              inputValidate={chainValidors(
+              inputValidate={chainValidators(
                 NoWhiteSpaceValidator(translate('input.validator.name.spaces.error')),
                 UniqueNameValidator(names)
               )}

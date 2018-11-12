@@ -214,7 +214,10 @@ class EditServerDetails extends Component {
           {this.renderInput(
             'ip-addr', 'text', true, 'server.ip.prompt',
             chainValidators(
-              createExcludesValidator(this.props.existIPAddressesModel, translate('input.validator.ipv4address.exist.error')),
+              createExcludesValidator(
+                this.props.existIPAddressesModel,
+                translate('input.validator.ipv4address.exist.error')
+              ),
               IpV4AddressValidator
             )
           )}
@@ -228,14 +231,20 @@ class EditServerDetails extends Component {
           {this.renderInput(
             'mac-addr', 'text', false, 'server.mac.prompt',
             chainValidators(
-              createExcludesValidator(this.props.existMacAddressesModel, translate('input.validator.macaddress.exist.error')),
+              createExcludesValidator(
+                this.props.existMacAddressesModel,
+                translate('input.validator.macaddress.exist.error')
+              ),
               MacAddressValidator
             )
           )}
           {this.renderInput(
             'ilo-ip', 'text', false, 'server.ipmi.ip.prompt',
             chainValidators(
-              createExcludesValidator(this.props.existIPMIAddressesModel, translate('input.validator.ipv4address.exist.error')),
+              createExcludesValidator(
+                this.props.existIPMIAddressesModel,
+                translate('input.validator.ipv4address.exist.error')
+              ),
               IpV4AddressValidator)
           )}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}

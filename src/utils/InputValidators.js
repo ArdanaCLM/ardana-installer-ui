@@ -210,7 +210,8 @@ export function AddressesValidator(addresses) {
   return retValue;
 }
 
-export const UniqueNameValidator = (names) => createExcludesValidator(names, translate('input.validator.uniquename.error'));
+export const UniqueNameValidator = (names) =>
+  createExcludesValidator(names, translate('input.validator.uniquename.error'));
 export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate('input.validator.uniqueid.error'));
 
 export function NoWhiteSpaceValidator(errorMessage) {

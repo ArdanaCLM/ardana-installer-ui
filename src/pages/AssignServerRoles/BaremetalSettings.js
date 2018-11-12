@@ -15,7 +15,8 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator, chainValidators } from '../../utils/InputValidators.js';
+import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator, chainValidators }
+  from '../../utils/InputValidators.js';
 import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { fromJS } from 'immutable';
