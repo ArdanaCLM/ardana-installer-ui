@@ -32,9 +32,6 @@ import { Map, List } from 'immutable';
 import {fetchJson} from '../utils/RestUtils.js';
 
 
-const Fragment = React.Fragment;
-
-
 class ReplaceServerDetails extends Component {
   constructor(props) {
     super(props);
@@ -265,10 +262,10 @@ class ReplaceServerDetails extends Component {
   // Helper function to create a pair of TH and TD entries with the given name
   labelField = (name) => {
     return (
-      <Fragment>
+      <>
         <th>{translate('replace.server.details.'+name)}</th>
         <td>{this.props.data[name]}</td>
-      </Fragment>);
+      </>);
   }
 
   renderDetailsTable = () => {
@@ -330,7 +327,7 @@ class ReplaceServerDetails extends Component {
   renderOSUserPass() {
     if (this.state.isInstallOsSelected) {
       return (
-        <Fragment>
+        <>
           <div className='detail-line'>
             <div className='detail-heading'>{translate('server.user.prompt')}</div>
             <div className='info-body'>{this.state.osInstallUsername}</div>
@@ -340,7 +337,7 @@ class ReplaceServerDetails extends Component {
             inputType={'password'} label={'server.pass.prompt'}
             inputValue={this.state.osInstallPassword || ''}
             inputAction={this.handleOsPasswordChange}/>
-        </Fragment>);
+        </>);
     }
   }
 

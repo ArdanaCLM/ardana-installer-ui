@@ -20,7 +20,6 @@ import { getInternalModel } from './TopologyUtils.js';
 import { ErrorBanner } from '../../components/Messages';
 import { LoadingMask } from '../../components/LoadingMask';
 
-const Fragment = React.Fragment;
 /*
  * This class is a JavaScript implementation of the script
  * ardana_configurationprocessor/plugins/builders/HTMLDiagram/ControlPlanes.py
@@ -58,7 +57,7 @@ class ControlPlanes extends Component {
 
   render_servers = (servers) => {
     if (servers.length == 0) {
-      return <Fragment> </Fragment>;
+      return;
     }
 
     // Example of creating a link to another page. Probably don't want to do this for real
@@ -67,7 +66,7 @@ class ControlPlanes extends Component {
         <HashLink to={'/topology/servers#'+this.server_by_hostname[server]['id']}>{server}</HashLink>
       </div>);
     });
-    return (<Fragment>{hosts}</Fragment>);
+    return (<>{hosts}</>);
   }
 
   render_control_plane = (cp_name, cp_topology) => {

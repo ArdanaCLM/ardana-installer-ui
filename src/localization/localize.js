@@ -76,7 +76,7 @@ export function translate(key, ...args) {
       // Add a unique key to each part of the translated result.  Symbol() is a JavaScript feature
       // that will yield unique keys.
       const keyed = pieces.map((p) => <React.Fragment key={Symbol(p).toString()}>{p}</React.Fragment>);
-      return (<React.Fragment>{keyed}</React.Fragment>);
+      return (<>{keyed}</>);
     } else {
       // Note!
       // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
