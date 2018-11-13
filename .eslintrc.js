@@ -5,7 +5,8 @@ module.exports = {
     'node': true
   },
   'extends': [
-    'eslint:recommended'
+    'eslint:recommended',
+    'plugin:jsx-control-statements/recommended'
   ],
   'parser': 'babel-eslint',
   'parserOptions': {
@@ -17,7 +18,8 @@ module.exports = {
     'sourceType': 'module'
   },
   'plugins': [
-    'react'
+    'react',
+    'jsx-control-statements'
   ],
   'rules': {
     'indent': ['error', 2],
