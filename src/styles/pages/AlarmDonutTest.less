@@ -17,7 +17,7 @@
 .alarmdonut-test {
 
   .controls {
-    .row {
+    .irow {
       width: 100%;
       display: flex;
       margin-bottom: 1em;
@@ -31,6 +31,11 @@
       .value {
           width: 80%;
       }
+
+      input[type=range]{
+         display: block;
+         width: 100%;
+      }
     }
   }
 
@@ -40,6 +45,11 @@
     .alarmdonut {
       border-width: 1px;
       border-style: solid;
+      //by default in bootstrap 4 this will be as tall as its sibling columns
+      //adjust for that here
+      height: fit-content;
+      padding-top: 15px;
+      padding-right: 5px;
     }
   }
 }

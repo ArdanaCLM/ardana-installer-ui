@@ -38,7 +38,7 @@ class CompleteAddServers extends BaseUpdateWizardPage {
     });
 
     return (
-      <div className='col-xs-8 addservers-page'>
+      <div className='col-8 addservers-page'>
         <ul className='complete-servernames-list'>{serverList}</ul>
       </div>
     );

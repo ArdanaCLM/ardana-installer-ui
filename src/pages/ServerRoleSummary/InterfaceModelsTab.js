@@ -208,16 +208,16 @@ class InterfaceModelsTab extends Component {
     );
 
     let extendedClass = 'extended-one';
-    let tableWidthClass = 'col-xs-12';
+    let tableWidthClass = 'col-12';
     let detailWidthClass = '';
     if (this.state.overallMode !== MODE.NONE) {
       if (this.state.detailMode === MODE.NONE) {
-        tableWidthClass = 'col-xs-8 verticalLine';
-        detailWidthClass = 'col-xs-4';
+        tableWidthClass = 'col-8 verticalLine';
+        detailWidthClass = 'col-4';
       } else {
         extendedClass = 'extended-two';
-        tableWidthClass = 'col-xs-6 verticalLine';
-        detailWidthClass = 'col-xs-6 multiple-details';
+        tableWidthClass = 'col-6 verticalLine';
+        detailWidthClass = 'col-6 multiple-details';
       }
     }
 
@@ -458,7 +458,7 @@ class InterfaceModelsTab extends Component {
       let buttonClass = 'btn-container';
       if (this.state.detailMode !== MODE.NONE) {
         addClass += ' disabled';
-        widthClass = 'col-xs-6 verticalLine';
+        widthClass = 'col-6 verticalLine';
         buttonClass += ' hide';
       }
 
@@ -631,7 +631,7 @@ class InterfaceModelsTab extends Component {
       }
 
       return (
-        <div className='col-xs-6 second-details'>
+        <div className='col-6 second-details'>
           <div className='details-section'>
             <div className='details-header'>{title}</div>
             <div className='details-body'>

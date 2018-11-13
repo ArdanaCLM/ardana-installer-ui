@@ -267,7 +267,7 @@ class DiskModelDetails extends Component {
       const header = this.lvMode === MODE.ADD ? translate('add.logical.volume') :
         translate('edit.logical.volume');
       return (
-        <div className='col-xs-4 details-section second-details'>
+        <div className='col-4 details-section second-details'>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
             <ValidatingInput isRequired={true} placeholder={translate('logical.volume.name') + '*'}
@@ -609,8 +609,8 @@ class DiskModelDetails extends Component {
         value = this.state.deviceGroup.name || '';
       }
 
-      const detailsClass = !this.state.showThirdDetails ? 'col-xs-6 details-section second-details'
-        : 'col-xs-4 details-section verticalLine second-details';
+      const detailsClass = !this.state.showThirdDetails ? 'col-6 details-section second-details'
+        : 'col-4 details-section verticalLine second-details';
       const buttonClass = this.state.showThirdDetails ? 'btn-container hide' : 'btn-container';
 
       return (
@@ -730,10 +730,10 @@ class DiskModelDetails extends Component {
     const header = (this.dmMode === MODE.ADD) ? translate('add.disk.model') :
       translate('edit.disk.model');
     const detailsClass = (this.secondDetails === '') ? 'details-section second-details' :
-      (this.state.showThirdDetails) ? 'col-xs-4 details-section second-details verticalLine' :
-        'col-xs-6 details-section second-details verticalLine';
-    const widthClass = (this.secondDetails === '') ? 'col-xs-4' :
-      (this.state.showThirdDetails) ? 'col-xs-7 multiple-details' : 'col-xs-6 multiple-details';
+      (this.state.showThirdDetails) ? 'col-4 details-section second-details verticalLine' :
+        'col-6 details-section second-details verticalLine';
+    const widthClass = (this.secondDetails === '') ? 'col-4' :
+      (this.state.showThirdDetails) ? 'col-7 multiple-details' : 'col-6 multiple-details';
     const addClass = this.secondDetails === '' ? 'material-icons add-button' :
       'material-icons add-button disabled';
     const removeClass = this.secondDetails === '' ? 'material-icons right-sign' :

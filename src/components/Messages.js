@@ -35,7 +35,7 @@ class NotificationMessage extends Component {
 
     return (
       <div className='notification-message'>
-        <Alert bsStyle={this.props.type} onDismiss={this.props.closeAction}>
+        <Alert variant={this.props.type} onClose={this.props.closeAction} dismissible={true}>
           <div>
             <h4>{this.props.title}</h4>
             {msgs}
@@ -90,7 +90,7 @@ function ErrorBanner(props) {
   let banner = null;
   if (props.show) {
     banner = (
-      <Alert bsStyle="danger">
+      <Alert variant="danger">
         <span className='error-banner'>
           <i className='material-icons error-icon'>error</i>{props.message}
         </span>

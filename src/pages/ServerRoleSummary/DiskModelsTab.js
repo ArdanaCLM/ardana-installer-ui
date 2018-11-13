@@ -170,16 +170,16 @@ class DiskModelsTab extends Component {
     }
 
     let extendedClass = 'extended-one';
-    let widthClass = 'col-xs-12';
+    let widthClass = 'col-12';
     if (this.state.showDiskModelDetails) {
       if (this.state.extendedDetails === 1) {
-        widthClass = 'col-xs-8 verticalLine';
+        widthClass = 'col-8 verticalLine';
       } else if (this.state.extendedDetails === 2) {
         extendedClass = 'extended-two';
-        widthClass = 'col-xs-6 verticalLine';
+        widthClass = 'col-6 verticalLine';
       } else if (this.state.extendedDetails === 3) {
         extendedClass = 'extended-three';
-        widthClass = 'col-xs-5 verticalLine';
+        widthClass = 'col-5 verticalLine';
       }
     }
 

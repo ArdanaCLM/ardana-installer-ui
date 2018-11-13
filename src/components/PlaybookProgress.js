@@ -681,21 +681,23 @@ class PlaybookProgress extends Component {
       return (
         <div className='playbook-progress'>
           <div className='progress-body'>
-            <div className='col-xs-4'>
-              <ul>{this.getProgress()}</ul>
-              <div>
-                {this.renderCancelButton()}
-                {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
-                <YesNoModal show={this.state.showConfirmationDlg}
-                  title={translate('warning')}
-                  yesAction={this.cancelRunningPlaybook}
-                  noAction={() => this.setState({showConfirmationDlg: false})}>
-                  {translate('deploy.cancel.confirm')}
-                </YesNoModal>
+            <div className='row'>
+              <div className='col-4'>
+                <ul>{this.getProgress()}</ul>
+                <div>
+                  {this.renderCancelButton()}
+                  {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
+                  <YesNoModal show={this.state.showConfirmationDlg}
+                    title={translate('warning')}
+                    yesAction={this.cancelRunningPlaybook}
+                    noAction={() => this.setState({showConfirmationDlg: false})}>
+                    {translate('deploy.cancel.confirm')}
+                  </YesNoModal>
+                </div>
               </div>
-            </div>
-            <div className='col-xs-8'>
-              {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
+              <div className='col-8'>
+                {this.state.errorMsg ? errorDiv : this.state.showLog && this.renderLogViewer()}
+              </div>
             </div>
           </div>
         </div>

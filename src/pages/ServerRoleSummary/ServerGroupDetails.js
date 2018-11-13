@@ -143,7 +143,7 @@ class ServerGroupDetails extends Component {
     }
 
     return (
-      <div className='col-xs-4'>
+      <div className='col-4'>
         <div className='details-section'>
           <div className='details-header'>{header}</div>
           <div className='details-body'>

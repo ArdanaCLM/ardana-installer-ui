@@ -82,7 +82,7 @@ class EditTemplateFile extends Component {
     return (
       <div className='edit-container file-editor'>
         {this.state.loading ?
-          <h3>{translate("loading.pleasewait")}</h3> :
+          <h3>{translate('loading.pleasewait')}</h3> :
           <ValidatingInput
             inputValue={this.state.contents}
             inputName='fileContents'
@@ -261,7 +261,7 @@ class ServiceTemplatesTab extends Component {
   renderFileSection() {
     if(this.state.editFile) {
       return (
-        <div>
+        <div className='col-12'>
           <h3>{this.state.editServiceName + ' - ' + this.state.editFile}</h3>
           <EditTemplateFile closeAction={this.handleCloseEdit} changeAction={this.recordChangedFile}
             editFile={this.state.editServiceName + '/' + this.state.editFile}
@@ -271,7 +271,7 @@ class ServiceTemplatesTab extends Component {
     }
     else {
       let desc = translate('validate.config.service.info');
-      return (<div className='col-xs-6'><InfoBanner message={desc}/></div>);
+      return (<div className='col-6'><InfoBanner message={desc}/></div>);
     }
   }
 
@@ -324,7 +324,7 @@ class ServiceTemplatesTab extends Component {
       });
 
     return (
-      <div className='col-xs-6 verticalLine'>
+      <div className='col-6 verticalLine'>
         <ul className='all-service-list'>{serviceList}</ul>
       </div>
     );
@@ -333,7 +333,7 @@ class ServiceTemplatesTab extends Component {
   render() {
     return (
       <div className='template-service-files'>
-        <div>
+        <div className='row'>
           {!this.state.editFile && this.renderServiceList()}
           {this.renderFileSection()}
         </div>
