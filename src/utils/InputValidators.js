@@ -40,94 +40,44 @@ const IPV4ADDRESS_RANGE =
 
 export function IpV4AddressValidator(ipAddress) {
   if(IPV4ADDRESS.exec(ipAddress) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.ipv4address.error')
-    };
+    return translate('input.validator.ipv4address.error');
   }
-
-  return { isValid: true };
 }
 
 export function MacAddressValidator(macAddress) {
   if(MACADDRESS.exec(macAddress) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.macaddress.error')
-    };
+    return translate('input.validator.macaddress.error');
   }
-
-  return { isValid: true };
 }
 
 export function PortValidator(port) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(PORT.exec(port) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.port.error');
+    return translate('input.validator.port.error');
   }
-
-  return retValue;
 }
 
 export function IpV4AddressHostValidator(host) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(IPV4ADDRESS_HOST.exec(host) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4addresshost.error');
+    return translate('input.validator.ipv4addresshost.error');
   }
-
-  return retValue;
 }
 
 export function PCIAddressValidator(str) {
   if(PCI_ADDRESS.exec(str) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.pciaddress.error')
-    };
-  } else {
-    return {
-      isValid: true,
-      errorMsg: ''
-    };
+    return translate('input.validator.pciaddress.error');
   }
 }
 
 export function NetworkInterfaceValidator(str) {
   if(NET_INTERFACE.exec(str) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.networkinterface.error')
-    };
-  } else {
-    return {
-      isValid: true,
-      errorMsg: ''
-    };
+    return translate('input.validator.networkinterface.error');
   }
 }
 
 export function VLANIDValidator(vlanid) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(vlanid && vlanid <= 0 || vlanid > 4094) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.vlanid.error');
+    return translate('input.validator.vlanid.error');
   }
-
-  return retValue;
 }
 
 
@@ -142,13 +92,9 @@ function ipAddrToInt(ip) {
 }
 
 export function CidrValidator(cidr) {
-
   const match = CIDR.exec(cidr);
   if(match === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.cidr.error')
-    };
+    return translate('input.validator.cidr.error');
   }
 
   // match[1] is the ip address, match[2] is number of leading bits (the part after the slash)
@@ -158,40 +104,22 @@ export function CidrValidator(cidr) {
   // Verify that all of the values in the IP address portion after the leading
   // bits are zeros.  For example, the CIDR 192.168.1.0/24 would be an integer address
   // value of 0xC0A80100, and the last 8 bits (32-24) are required to be zeros.
-  if ((ip & (0xffffffff >>> bits)) !== 0)
-  {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.cidr.error')
-    };
+  if ((ip & (0xffffffff >>> bits)) !== 0) {
+    return translate('input.validator.cidr.error');
   }
-
-  return {
-    isValid: true,
-    errorMsg: ''
-  };
 }
 
 export function AddressesValidator(addresses) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   // just one IPV4 address
   if(addresses && addresses.indexOf('-') === -1) {
     if(IPV4ADDRESS.exec(addresses.trim()) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
     }
   }
 
   if(addresses && addresses.indexOf('-') !== -1) { // just one range
     if (IPV4ADDRESS_RANGE.exec(addresses.trim()) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
     }
 
     var ips = addresses.replace(/\s/g, '').split('-');
@@ -201,13 +129,9 @@ export function AddressesValidator(addresses) {
     var e_ip_num = ipAddrToInt(e_ip);
 
     if (s_ip_num >= e_ip_num) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
     }
   }
-
-  return retValue;
 }
 
 export const UniqueNameValidator = (names) =>
@@ -218,9 +142,8 @@ export function NoWhiteSpaceValidator(errorMessage) {
   function validator(value) {
     // if the string contains whitespace
     if(/\s/.test(value)) {
-      return { isValid: false, errorMsg: errorMessage };
+      return errorMessage;
     }
-    return { isValid: true };
   }
 
   return validator;
@@ -229,23 +152,15 @@ export function NoWhiteSpaceValidator(errorMessage) {
 export function YamlValidator(text) {
   try {
     safeLoad(text);
-    return { isValid: true, errorMsg: '' };
   } catch (e) {
-    return { isValid: false, errorMsg: translate('input.validator.yaml.error')};
+    return translate('input.validator.yaml.error');
   }
 }
 
 export function NetmaskValidator(netmask) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if (NETMASK.exec(netmask) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.netmask.error');
+    return translate('input.validator.netmask.error');
   }
-  return retValue;
 }
 
 // return a validator that will validate an IP in in the netmask's subnet
@@ -254,12 +169,8 @@ export function IpInNetmaskValidator(netmask) {
     const ipInt = ipAddrToInt(ip);
     const netmaskInt = ipAddrToInt(netmask);
     if(((ipInt & netmaskInt) >>> 0) !== ipInt) {
-      return {
-        valid: true,
-        errorMsg: translate('input.validator.netmask.ipinvalid.error')
-      };
+      return translate('input.validator.netmask.ipinvalid.error');
     }
-    return { isValid: true };
   }
 
   return validator;
@@ -283,12 +194,7 @@ export function createExcludesValidator(values, errorMsg) {
     }
 
     if (exists) {
-      return {
-        isValid: false,
-        errorMsg: errorMsg || translate('duplicate.error', value)
-      };
-    } else {
-      return { isValid: true };
+      return errorMsg || translate('duplicate.error', value);
     }
   }
 
@@ -306,11 +212,10 @@ export function chainValidators(...validators) {
   function chained(value) {
     for (let validator of validators) {
       const result = validator(value);
-      if (! result.isValid) {
+      if (result) {
         return result;
       }
     }
-    return { isValid: true };
   }
 
   return chained;
