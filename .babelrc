@@ -1,15 +1,18 @@
 {
   "presets": [
     [
-      "latest", {
-        "es2015": {
-          "modules": false
-        }
+      "@babel/preset-env",
+      {
+        "modules": false
       }
     ],
-    "react"
+    "@babel/react"
   ],
   "plugins": [
-    "react-hot-loader/babel"
+    "react-hot-loader/babel",
+    "babel-plugin-jsx-control-statements",
+    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-proposal-function-bind",
+    "@babel/plugin-proposal-class-properties"
   ]
 }

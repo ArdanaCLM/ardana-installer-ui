@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 
-function BackButton(props) {
+export function BackButton(props) {
   return (
     <ActionButton type='default'
       clickAction={props.clickAction}
@@ -26,7 +26,7 @@ function BackButton(props) {
   );
 }
 
-function NextButton(props) {
+export function NextButton(props) {
   return (
     <ActionButton
       clickAction={props.clickAction}
@@ -36,7 +36,7 @@ function NextButton(props) {
   );
 }
 
-function CloseButton(props) {
+export function CloseButton(props) {
   return (
     <ActionButton
       clickAction={props.clickAction}
@@ -46,7 +46,7 @@ function CloseButton(props) {
   );
 }
 
-function CancelButton(props) {
+export function CancelButton(props) {
   return (
     <ActionButton type='default'
       clickAction={props.clickAction}
@@ -56,7 +56,7 @@ function CancelButton(props) {
   );
 }
 
-class ActionButton extends Component {
+export class ActionButton extends Component {
   render() {
     let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
       (this.props.isDisabled ? ' disabled' : '');
@@ -74,7 +74,7 @@ class ActionButton extends Component {
 }
 
 
-class SubmitButton extends Component {
+export class SubmitButton extends Component {
   render() {
     let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
       (this.props.isDisabled ? ' disabled' : '');
@@ -91,7 +91,7 @@ class SubmitButton extends Component {
 }
 
 
-class LoadFileButton extends Component {
+export class LoadFileButton extends Component {
   // The standard html control for getting a filename from a user is <input type="file">,
   // and while this is just a single DOM element, it is actually rendered visually as both
   // a button and a text field.  The behavior of this control is that when the button is
@@ -153,7 +153,7 @@ class LoadFileButton extends Component {
   }
 }
 
-class PickerButton extends Component {
+export class PickerButton extends Component {
   render() {
     let classN = 'picker-card rounded-corner shadowed-border' +
       (this.props.isSelected ? ' selected' : '');
@@ -172,13 +172,7 @@ class PickerButton extends Component {
   }
 }
 
-class ActivePickerButton extends Component {
-  constructor() {
-    super();
-
-    this.handleClick = this.handleClick.bind(this);
-  }
-
+export class ActivePickerButton extends Component {
   handleClick(e) {
     e.preventDefault();
     this.props.handleClick(e);
@@ -195,7 +189,7 @@ class ActivePickerButton extends Component {
         <div
           id={this.props.id}
           className='card rounded-corner shadowed-border'
-          onClick={this.handleClick}
+          onClick={::this.handleClick}
           value={this.props.value} >
           <p className='card-text-unit' id={this.props.id} >
             {this.props.value}
@@ -210,7 +204,7 @@ class ActivePickerButton extends Component {
   }
 }
 
-class ItemHelpButton extends Component {
+export class ItemHelpButton extends Component {
   render() {
     return (
       <span className='helper' onClick={this.props.clickAction}>
@@ -220,7 +214,7 @@ class ItemHelpButton extends Component {
   }
 }
 
-function AssignmentButton(props) {
+export function AssignmentButton(props) {
   let cName = 'material-icons assignment-button';
   let iconName = '';
   if (props.type === 'right') {
@@ -242,7 +236,7 @@ function AssignmentButton(props) {
 }
 
 
-class ItemMenuButton extends Component {
+export class ItemMenuButton extends Component {
   render() {
     let showMenuAction = this.props.clickAction;
     let moreClass = this.props.className || '';
@@ -255,7 +249,7 @@ class ItemMenuButton extends Component {
   }
 }
 
-class EditPencilForTableRow extends Component {
+export class EditPencilForTableRow extends Component {
   render() {
     return (
       <td className='actions'>
@@ -269,7 +263,7 @@ class EditPencilForTableRow extends Component {
   }
 }
 
-class InfoForTableRow extends Component {
+export class InfoForTableRow extends Component {
   render() {
     return (
       <td className='actions'>
@@ -283,7 +277,7 @@ class InfoForTableRow extends Component {
   }
 }
 
-class DeleteForTableRow extends Component {
+export class DeleteForTableRow extends Component {
   render() {
     return (
       <td className='actions'>
@@ -296,21 +290,3 @@ class DeleteForTableRow extends Component {
     );
   }
 }
-
-module.exports = {
-  BackButton: BackButton,
-  NextButton: NextButton,
-  CloseButton: CloseButton,
-  CancelButton: CancelButton,
-  PickerButton: PickerButton,
-  ActivePickerButton: ActivePickerButton,
-  ActionButton: ActionButton,
-  SubmitButton: SubmitButton,
-  LoadFileButton: LoadFileButton,
-  ItemHelpButton: ItemHelpButton,
-  AssignmentButton: AssignmentButton,
-  ItemMenuButton: ItemMenuButton,
-  EditPencilForTableRow: EditPencilForTableRow,
-  InfoForTableRow: InfoForTableRow,
-  DeleteForTableRow: DeleteForTableRow
-};

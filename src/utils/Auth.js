@@ -97,8 +97,6 @@ if (_cookies_supported()) {
   auth = new MemoryToken();
 }
 
-module.exports = {
-  setAuthToken: auth.setAuthToken,
-  getAuthToken: auth.getAuthToken,
-  clearAuthToken: auth.clearAuthToken
-};
+export const setAuthToken = ::auth.setAuthToken;
+export const getAuthToken = ::auth.getAuthToken;
+export const clearAuthToken = ::auth.clearAuthToken;

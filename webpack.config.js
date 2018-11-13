@@ -25,9 +25,8 @@ module.exports = (env, argv) => {
 
   let config = {
     entry: [
-      'babel-polyfill',
+      '@babel/polyfill',
       'whatwg-fetch',
-      'react-hot-loader/patch',
       './index.js'
     ],
     output: {
@@ -60,33 +59,21 @@ module.exports = (env, argv) => {
       rules: [
         {
           test: /\.js$/,
-          exclude: /node_modules/,
-          loader: 'react-hot-loader/webpack'
-        },
-        {
-          test: /\.js$/,
           loader: 'babel-loader',
           exclude: /node_modules/,
           query: {
             cacheDirectory: true,
-            presets: [['env', {
-              // Using https://www.npmjs.com/package/babel-preset-env, determine
+            presets: [['@babel/preset-env', {
+              // Using https://www.npmjs.com/package/@babel/preset-env, determine
               // which features need to be transpiled based on the browsers we
               // need to support.
               'targets': {
                 'browsers': [
-                  'last 2 Chrome versions',
-                  'last 2 Firefox versions',
-                  'last 2 Edge versions',
-                  'IE 11'
+                  'last 2 versions'
                 ]}}],
 
             // Handle React, especially JSX
-            'react',
-
-            // Permit using arrow functions as class properties.
-            // See https://babeljs.io/docs/plugins/preset-stage-2 for more
-            'stage-2'
+            '@babel/preset-react'
             ]
           }
         },

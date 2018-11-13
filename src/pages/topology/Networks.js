@@ -12,7 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { HashLink } from 'react-router-hash-link';
 import { translate } from '../../localization/localize.js';
 import '../../styles/deployer.less';
@@ -21,7 +21,6 @@ import { ErrorBanner } from '../../components/Messages';
 import { LoadingMask } from '../../components/LoadingMask';
 import { byEntry, byProperty } from '../../utils/Sort.js';
 
-const Fragment = React.Fragment;
 /*
  * This class is a JavaScript implementation of the script
  * ardana_configurationprocessor/plugins/builders/HTMLDiagram/Networks.py
@@ -319,8 +318,8 @@ class Networks extends Component {
                   server_link = e.server;
                 }
               } else if (e.control_plane && e.lb_name) {
-                server_link = (<Fragment><HashLink to={'/topology/control_planes#'+e.control_plane}>
-                  {translate('vip.address', e.lb_name)}</HashLink></Fragment>);
+                server_link = (<><HashLink to={'/topology/control_planes#'+e.control_plane}>
+                  {translate('vip.address', e.lb_name)}</HashLink></>);
               }
 
               let if_link;
