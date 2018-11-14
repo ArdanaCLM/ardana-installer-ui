@@ -274,8 +274,10 @@ export class Speedometer extends BaseCircularGraph {
                 <path className="ticks" d={this.getPath(0, 100)} />
                 <path className="danger-arc" style={dangerStyle} d={this.getPath(normDanger, 100, danger_radius)} />
                 {/* Only draw the value arc and circle when we have a value */}
-                { haveValue? <path className={valueCls} d={this.getPath(0, normValue || 0)} /> : undefined }
-                { haveValue? <circle className={circleCls} cx={valuex} cy={valuey} r={5} /> : undefined }
+                <If condition={haveValue}>
+                  <path className={valueCls} d={this.getPath(0, normValue || 0)} />
+                  <circle className={circleCls} cx={valuex} cy={valuey} r={5} />
+                </If>
               </g>
             </g>
           </svg>

@@ -81,15 +81,19 @@ class EditTemplateFile extends Component {
   render() {
     return (
       <div className='edit-container file-editor'>
-        {this.state.loading ?
-          <h3>{translate('loading.pleasewait')}</h3> :
-          <ValidatingInput
-            inputValue={this.state.contents}
-            inputName='fileContents'
-            inputType='textarea'
-            inputAction={this.handleChange}
-          />
-        }
+        <Choose>
+          <When condition={this.state.loading}>
+            <h3>{translate('loading.pleasewait')}</h3>
+          </When>
+          <Otherwise>
+            <ValidatingInput
+              inputValue={this.state.contents}
+              inputName='fileContents'
+              inputType='textarea'
+              inputAction={this.handleChange}
+            />
+          </Otherwise>
+        </Choose>
         <div className='btn-row'>
           <ActionButton type='default'
             displayLabel={translate('cancel')}

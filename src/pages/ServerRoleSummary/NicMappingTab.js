@@ -228,16 +228,16 @@ class NicMappingTab extends Component {
           </div>
 
           <div className='plus-minus-container'>
-            {(idx > 0 || row.get('logical-name') || row.get('bus-address')) ?
+            <If condition={idx > 0 || row.get('logical-name') || row.get('bus-address')}>
               <span key={this.props.name + 'minus'} onClick={() => this.removeDetailRow(idx)}>
                 <i className='material-icons left-sign'>remove</i>
               </span>
-              : null}
-            {(lastRow && row.get('isBusAddressValid') && row.get('isLogicalNameValid')) ?
+            </If>
+            <If condition={lastRow && row.get('isBusAddressValid') && row.get('isLogicalNameValid')}>
               <span key={this.props.name + 'plus'} onClick={this.addDetailRow}>
                 <i className='material-icons right-sign'>add</i>
               </span>
-              : null}
+            </If>
           </div>
         </div>
       );

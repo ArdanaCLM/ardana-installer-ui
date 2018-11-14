@@ -255,7 +255,7 @@ class ServerRoles extends Component {
         for(let i=0; i<roleLen; i++) {
           rows.push(
             <tr key={role.name+i}>
-              {(i === 0) ? <td rowSpan={roleLen} key="r"><a id={role.name}/>{role.name}</td> : undefined}
+              <If condition={i === 0}><td rowSpan={roleLen} key="r"><a id={role.name}/>{role.name}</td></If>
               {diskRows[i]}
               {ifRows[i]}
             </tr>

@@ -644,7 +644,7 @@ class InterfaceModelsTab extends Component {
               {this.renderDevices()}
               {this.renderNetworkGroups()}
 
-              {this.state.networkInterface.has('bond-data') ?
+              <If condition={this.state.networkInterface.has('bond-data')}>
                 <div>
                   <div className='details-group-title'>{translate('bond.device.name') + '* :'}</div>
                   <ValidatingInput required='true' placeholder={translate('bond.device.name')}
@@ -652,9 +652,9 @@ class InterfaceModelsTab extends Component {
                     inputAction={(e, valid) => this.handleBondDeviceNameChange(e.target.value, valid)}
                   />
                 </div>
-                : undefined}
+              </If>
 
-              {this.state.networkInterface.has('bond-data') ?
+              <If condition={this.state.networkInterface.has('bond-data')}>
                 <div>
                   <div className='details-group-title'>{translate('bond.options') + ':'}</div>
                   <ValidatingInput placeholder={translate('bond.options')}
@@ -664,7 +664,7 @@ class InterfaceModelsTab extends Component {
                     inputAction={(e, valid) => this.handleBondOptionsChange(e.target.value, valid)}
                   />
                 </div>
-                : undefined}
+              </If>
 
               <div className='btn-row details-btn'>
                 <div className='btn-container'>
