@@ -14,6 +14,7 @@
 **/
 import { translate } from '../localization/localize.js';
 import { safeLoad } from 'js-yaml';
+import { List } from 'immutable';
 
 const IPV4ADDRESS =
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -189,7 +190,7 @@ export function createExcludesValidator(values, errorMsg) {
     let exists;
     if (typeof(values) === 'object' && values instanceof Set) {
       exists = values.has(value);
-    } else if (Array.isArray(values)) {
+    } else if (Array.isArray(values) || List.isList(values)) {
       exists = values.includes(value);
     }
 
