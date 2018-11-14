@@ -28,7 +28,7 @@ function ConfirmModal(props) {
   return (
     <Modal
       className='modals'
-      show={props.show}
+      show={true}
       onHide={props.onHide}
       backdrop={'static'}
       dialogClassName={props.className}>
@@ -56,7 +56,7 @@ function YesNoModal(props) {
   );
 
   return (
-    <ConfirmModal show={props.show} title={props.title} onHide={props.noAction} footer={footer}
+    <ConfirmModal title={props.title} onHide={props.noAction} footer={footer}
       hideFooter={props.hideFooter}>
       {props.children}
     </ConfirmModal>
@@ -70,7 +70,7 @@ function BaseInputModal(props) {
   return (
     <Modal
       className='modals'
-      show={props.show}
+      show={true}
       onHide={props.onHide}
       backdrop={'static'}
       dialogClassName={props.className}>
@@ -140,7 +140,7 @@ class GetSshPassphraseModal extends Component {
     return (
       <div>
         {this.renderErrorMessage()}
-        <ConfirmModal show={this.props.show} title={translate('get.passphrase')}
+        <ConfirmModal title={translate('get.passphrase')}
           onHide={this.props.cancelAction} footer={footer}>
           <div>{translate('get.passphrase.description')}</div>
           <div className='passphrase-line'>

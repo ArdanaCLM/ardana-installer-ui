@@ -142,9 +142,8 @@ class EditCloudSettings extends Component {
     }
 
     return (
-      <div>
+      <>
         <ConfirmModal
-          show={this.props.show}
           title={translate('edit.cloud.settings')}
           className={'cloud-settings'}
           hideFooter='true'
@@ -154,11 +153,13 @@ class EditCloudSettings extends Component {
 
         </ConfirmModal>
 
-        <YesNoModal show={this.state.showCloseConfirmation} title={translate('warning')}
-          yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>
-          {translate('edit.cloud.settings.close.confirm')}
-        </YesNoModal>
-      </div>
+        <If condition={this.state.showCloseConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>
+            {translate('edit.cloud.settings.close.confirm')}
+          </YesNoModal>
+        </If>
+      </>
     );
   }
 }

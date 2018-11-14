@@ -80,11 +80,13 @@ class SelectInstallOS extends BaseUpdateWizardPage {
 
   renderInstallConfirmModal() {
     return (
-      <YesNoModal show={this.state.showInstallConfirmModal} title={translate('warning')}
-        yesAction={this.startInstallProcess}
-        noAction={() => this.setState({showInstallConfirmModal: false})}>
-        {translate('provision.server.confirm.body', this.props.operationProps.selectedToInstallOS.length)}
-      </YesNoModal>
+      <If condition={this.state.showInstallConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={this.startInstallProcess}
+          noAction={() => this.setState({showInstallConfirmModal: false})}>
+          {translate('provision.server.confirm.body', this.props.operationProps.selectedToInstallOS.length)}
+        </YesNoModal>
+      </If>
     );
   }
 

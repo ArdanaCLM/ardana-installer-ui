@@ -285,18 +285,18 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   renderValidationErrorModal() {
-    let msg = translate('server.addcompute.validate.error.msg');
-    return (
-      <BaseInputModal
-        show={this.state.validationError !== undefined}
-        className='addserver-log-dialog'
-        onHide={this.handleCloseValidationErrorModal}
-        title={translate('server.addcompute.validate.error.title')}>
-        <div className='addservers-page'>
-          <pre>{msg}</pre>
-          <pre className='log'>{this.state.validationError}</pre></div>
-      </BaseInputModal>
-    );
+    if (this.state.validationError) {
+      return (
+        <BaseInputModal
+          className='addserver-log-dialog'
+          onHide={this.handleCloseValidationErrorModal}
+          title={translate('server.addcompute.validate.error.title')}>
+          <div className='addservers-page'>
+            <pre>{translate('server.addcompute.validate.error.msg')}</pre>
+            <pre className='log'>{this.state.validationError}</pre></div>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderMessages() {
@@ -386,14 +386,11 @@ class UpdateServers extends BaseUpdateWizardPage {
     if (this.state.showSharedWarning) {
       return (
         <ConfirmModal
-          show={true}
           title={translate('warning')}
           onHide={() => this.setState({showSharedWarning: false})}>
           <div>{translate('replace.server.shared.warning')}</div>
         </ConfirmModal>
       );
-    } else {
-      return null;
     }
   }
 
@@ -401,30 +398,24 @@ class UpdateServers extends BaseUpdateWizardPage {
     if (this.state.showPowerOffWarning) {
       return (
         <ConfirmModal
-          show={true}
           title={translate('warning')}
           onHide={() => this.setState({showPowerOffWarning: false})}>
           <div>{translate('replace.server.poweroff.warning')}</div>
         </ConfirmModal>
       );
-    } else {
-      return null;
     }
   }
 
   renderNoMigrationWarning() {
     if (this.state.showNoMigrationWarning) {
       return (
-        <YesNoModal
-          show={true} title={translate('warning')}
+        <YesNoModal title={translate('warning')}
           yesAction={() => this.setState({showNoMigrationWarning: false, showReplaceModal: true})}
           noAction={() => this.setState({showNoMigrationWarning: false, serverToReplace: undefined})}>
           {translate('replace.server.nomigration.warning',
             this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'])}
         </YesNoModal>
       );
-    } else {
-      return null;
     }
   }
 
@@ -443,7 +434,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     return (
       <BaseInputModal
-        show={true} className='edit-details-dialog'
+        className='edit-details-dialog'
         onHide={this.handleCancelReplaceServer} title={title}>
         <ReplaceServerDetails
           cancelAction={this.handleCancelReplaceServer}

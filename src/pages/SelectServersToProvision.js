@@ -321,12 +321,14 @@ class SelectServersToProvision extends BaseWizardPage {
               rightTableHeader={translate('provision.server.right.table')}/>
             {this.state.hasError && this.showErrorBanner()}
             {!this.props.isUpdateMode && this.renderInstallButton()}
-            <YesNoModal show={this.state.showModal}
-              title={translate('warning')}
-              yesAction={this.startInstalling}
-              noAction={() => this.setState({showModal: false})}>
-              {translate('provision.server.confirm.body', this.state.rightList.length)}
-            </YesNoModal>
+            <If condition={this.state.showModal}>
+              <YesNoModal
+                title={translate('warning')}
+                yesAction={this.startInstalling}
+                noAction={() => this.setState({showModal: false})}>
+                {translate('provision.server.confirm.body', this.state.rightList.length)}
+              </YesNoModal>
+            </If>
           </div>
         </div>
       </div>

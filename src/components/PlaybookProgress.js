@@ -110,7 +110,7 @@ class StatusModal extends Component {
     const footer = <ActionButton id='closePlaybookStatus' clickAction={this.handleButton} displayLabel={label}/>;
 
     return (
-      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide} className='status-modal'
+      <ConfirmModal onHide={this.props.onHide} className='status-modal'
         title={translate('services.status.result', this.props.serviceName)} hideCloseButton
         footer={footer}>
         <div className='log-viewer'>
@@ -618,16 +618,6 @@ class PlaybookProgress extends Component {
     });
   }
 
-  renderShowLogButton() {
-    const logButtonLabel = translate('progress.show.log');
-
-    return (
-      <ActionButton type='link'
-        displayLabel={logButtonLabel}
-        clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
-    );
-  }
-
   renderCancelButton() {
     if (!this.state.errorMsg &&
       this.getPlaybooksWithStatus(STATUS.IN_PROGRESS).length > 0 &&
@@ -660,7 +650,7 @@ class PlaybookProgress extends Component {
       this.setState({errorMsg: '', closeStatusPlaybookModal: true});
     }
     return (
-      <StatusModal showModal={this.props.showModal} serviceName={this.props.serviceName}
+      <StatusModal serviceName={this.props.serviceName}
         onHide={this.props.onHide} contents={this.state.displayedLogs}
         closeModal={this.state.closeStatusPlaybookModal} cancelPlaybook={this.cancelRunningPlaybook}
         playbooksComplete={this.state.playbooksComplete}/>
@@ -686,13 +676,19 @@ class PlaybookProgress extends Component {
                 <ul>{this.getProgress()}</ul>
                 <div>
                   {this.renderCancelButton()}
-                  {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
-                  <YesNoModal show={this.state.showConfirmationDlg}
-                    title={translate('warning')}
-                    yesAction={this.cancelRunningPlaybook}
-                    noAction={() => this.setState({showConfirmationDlg: false})}>
-                    {translate('deploy.cancel.confirm')}
-                  </YesNoModal>
+                  <If condition={!this.state.errorMsg && !this.state.showLog}>
+                    <ActionButton type='link'
+                      displayLabel={translate('progress.show.log')}
+                      clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
+                  </If>
+                  <If condition={this.state.showConfirmationDlg}>
+                    <YesNoModal
+                      title={translate('warning')}
+                      yesAction={this.cancelRunningPlaybook}
+                      noAction={() => this.setState({showConfirmationDlg: false})}>
+                      {translate('deploy.cancel.confirm')}
+                    </YesNoModal>
+                  </If>
                 </div>
               </div>
               <div className='col-8'>

@@ -201,7 +201,7 @@ class ServiceDetails extends Component {
 
   render() {
     return (
-      <ConfirmModal show={this.props.show} className='service-info-details-modal'
+      <ConfirmModal className='service-info-details-modal'
         onHide={this.props.onHide} title={this.props.title}>
         <div className='details'>
           {this.renderDetailsLine('name', this.props.service.name)}
@@ -416,35 +416,24 @@ class ServiceInfo extends Component {
         });
     }
 
-    const passPhraseModal = (
-      <GetSshPassphraseModal show={this.state.showGetPassphraseModal} doneAction={this.handlePassphrase}
-        cancelAction={() => this.setState({showGetPassphraseModal: false})}/>
-    );
-
-    let statusModal;
-    if (this.state.showRunStatusPlaybookModal) {
-      statusModal = (
-        <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
-          updatePageStatus={() => {}} modalMode showModal={this.state.showRunStatusPlaybookModal}
-          onHide={() => this.setState({showRunStatusPlaybookModal: false})}
-          serviceName={this.state.selectedService.name}/>
-      );
-    }
-
-    let detailsModal;
-    if (this.state.showDetailsModal) {
-      detailsModal = (
-        <ServiceDetails show={this.state.showDetailsModal} service={this.state.selectedService}
-          onHide={() => this.setState({showDetailsModal: false})} setLoadingMask={this.setLoadingMask}
-          title={translate('services.details', this.state.selectedService.name)}/>
-      );
-    }
-
     return (
-      <div>
-        {passPhraseModal}
-        {statusModal}
-        {detailsModal}
+      <>
+        <If condition={this.state.showGetPassphraseModal}>
+          <GetSshPassphraseModal
+            doneAction={this.handlePassphrase}
+            cancelAction={() => this.setState({showGetPassphraseModal: false})}/>
+        </If>
+        <If condition={this.state.showRunStatusPlaybookModal}>
+          <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
+            updatePageStatus={() => {}} modalMode showModal={true}
+            onHide={() => this.setState({showRunStatusPlaybookModal: false})}
+            serviceName={this.state.selectedService.name}/>
+        </If>
+        <If condition={this.state.showDetailsModal}>
+          <ServiceDetails service={this.state.selectedService}
+            onHide={() => this.setState({showDetailsModal: false})} setLoadingMask={this.setLoadingMask}
+            title={translate('services.details', this.state.selectedService.name)}/>
+        </If>
         {this.renderErrorMessage()}
         <LoadingMask className='details-modal-mask' show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
@@ -466,7 +455,7 @@ class ServiceInfo extends Component {
           </table>
           {this.state.showActionMenu && this.renderMenuItems()}
         </div>
-      </div>
+      </>
     );
   }
 

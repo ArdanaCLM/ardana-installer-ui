@@ -335,7 +335,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       );
 
       return (
-        <ConfirmModal show={true} title={translate('server.deploy.progress.swift-check')}
+        <ConfirmModal title={translate('server.deploy.progress.swift-check')}
           onHide={cancel} footer={footer}>
           {translate('server.deploy.progress.swift-manual')}
         </ConfirmModal>

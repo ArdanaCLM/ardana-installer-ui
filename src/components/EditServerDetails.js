@@ -146,19 +146,23 @@ class EditServerDetails extends Component {
   }
 
   renderAddServerGroup() {
-    return (
-      <EditCloudSettings show={this.state.showAddServerGroup} model={this.props.model}
-        oneTab='server-group' onHide={this.closeAddServerGroup}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showAddServerGroup) {
+      return (
+        <EditCloudSettings model={this.props.model}
+          oneTab='server-group' onHide={this.closeAddServerGroup}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderAddNicMapping() {
-    return (
-      <EditCloudSettings show={this.state.showAddNicMapping} model={this.props.model}
-        oneTab='nic-mapping' onHide={this.closeAddNicMapping}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showAddNicMapping) {
+      return (
+        <EditCloudSettings model={this.props.model}
+          oneTab='nic-mapping' onHide={this.closeAddNicMapping}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderButtonForDropDown(addAction, buttonLabel) {

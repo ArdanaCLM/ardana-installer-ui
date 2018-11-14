@@ -883,8 +883,7 @@ class InterfaceModelsTab extends Component {
       const name = this.getRows().getIn([this.state.activeOverallRow, 'name']);
 
       return (
-        <YesNoModal show={true}
-          title={translate('warning')}
+        <YesNoModal title={translate('warning')}
           yesAction={() => {this.deleteModel(this.state.activeOverallRow);
             this.setState({showRemoveConfirmation: false});} }
           noAction={() => this.setState({showRemoveConfirmation: false})}>
@@ -897,8 +896,7 @@ class InterfaceModelsTab extends Component {
         .get(this.state.interfaceToRemoveIndex).get('name');
 
       return (
-        <YesNoModal show={true}
-          title={translate('warning')}
+        <YesNoModal title={translate('warning')}
           yesAction={(e) => this.removeInterface()}
           noAction={() => this.setState({showRemoveInterfaceConfirmation: false,
             interfaceToRemoveIndex: undefined})}>
