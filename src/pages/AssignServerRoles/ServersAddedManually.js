@@ -63,7 +63,7 @@ class ServersAddedManually extends Component {
   }
 
   // Return new server state variables with appropriate defaults
-  getNewServer = (model) => {
+  getNewServer(model) {
     const serverGroups = getServerGroups(model);
     const nicMappings = getNicMappings(model);
 
@@ -92,12 +92,12 @@ class ServersAddedManually extends Component {
     };
   }
 
-  isFormInputValid = () => {
+  isFormInputValid() {
     return this.state.isValid.every((value, key) => value === true || (value === undefined &&
       key !== 'id' && key !== 'ip-addr'));
   }
 
-  saveServer = () => {
+  saveServer() {
     // if role is provided, add server to the model
     let model = this.props.model;
 
@@ -123,17 +123,18 @@ class ServersAddedManually extends Component {
     }
   }
 
-  saveAndClose = () => {
+  saveAndClose(event) {
+    event?.preventDefault();
     this.saveServer();
     this.props.closeAction();
   }
 
-  saveAndClear = () => {
+  saveAndClear() {
     this.saveServer();
     this.setState(this.getNewServer(this.props.model));
   }
 
-  handleInputChange = (value, valid, name) => {
+  handleInputChange(value, valid, name) {
     this.setState((prev) => ({
       isValid: prev.isValid.set(name, valid),
       inputValue: prev.inputValue.set(name, value)
@@ -175,7 +176,7 @@ class ServersAddedManually extends Component {
 
     let addOnlyButton;
     if (this.props.addAction) {
-      addOnlyButton = (<ActionButton type={'default'} clickAction={this.saveAndClear}
+      addOnlyButton = (<ActionButton type={'default'} clickAction={::this.saveAndClear}
         displayLabel={translate('add.more')} isDisabled={!isValid}/>);
     }
 
@@ -183,7 +184,7 @@ class ServersAddedManually extends Component {
       <div className='btn-row'>
         <ActionButton type={'default'} clickAction={this.props.closeAction} displayLabel={translate('cancel')}/>
         {addOnlyButton}
-        <ActionButton clickAction={this.saveAndClose} displayLabel={translate('save')} isDisabled={!isValid}/>
+        <ActionButton clickAction={::this.saveAndClose} displayLabel={translate('save')} isDisabled={!isValid}/>
       </div>
     );
 
@@ -198,20 +199,22 @@ class ServersAddedManually extends Component {
         title={this.props.addAction ? translate('add.server.add') : translate('edit.server')}
         onHide={this.props.closeAction} footer={footer}>
 
-        <div className='server-details-container'>
-          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
-          {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
-          {this.renderDropdownLine(true, 'server.group.prompt', 'server-group', serverGroups)}
-          {this.renderDropdownLine(true, 'server.nicmapping.prompt', 'nic-mapping', nicMappings)}
-          {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
-        </div>
-        <div className='message-line'>{translate('server.ipmi.message')}</div>
-        <div className='server-details-container'>
-          {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
-          {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
-        </div>
+        <form onSubmit={::this.saveAndClose}>
+          <div className='server-details-container'>
+            {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
+            {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
+            {this.renderDropdownLine(true, 'server.group.prompt', 'server-group', serverGroups)}
+            {this.renderDropdownLine(true, 'server.nicmapping.prompt', 'nic-mapping', nicMappings)}
+            {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
+          </div>
+          <div className='message-line'>{translate('server.ipmi.message')}</div>
+          <div className='server-details-container'>
+            {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
+            {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
+            {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
+            {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
+          </div>
+        </form>
 
       </ConfirmModal>
     );

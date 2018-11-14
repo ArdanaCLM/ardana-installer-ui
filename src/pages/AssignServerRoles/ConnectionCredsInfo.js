@@ -102,7 +102,7 @@ class ConnectionCredsInfo extends Component {
       (this.state.ovTestStatus != TEST_STATUS.INVALID || ! this.state.inputValue.getIn(['ov','checked']));
   }
 
-  testSm = () => {
+  testSm() {
     this.setState(prev => ({inputValue: prev.inputValue.removeIn(['sm','sessionKey'])}));
     const sm = this.state.inputValue.get('sm');
 
@@ -147,7 +147,7 @@ class ConnectionCredsInfo extends Component {
     );
   }
 
-  testOv = () => {
+  testOv() {
     const host = this.state.inputValue.getIn(['ov', 'host']);
     this.setState(prev => ({inputValue: prev.inputValue.removeIn(['ov','sessionKey'])}));
     return (
@@ -176,7 +176,8 @@ class ConnectionCredsInfo extends Component {
     );
   }
 
-  handleTest = () => {
+  async handleTest(event) {
+    event?.preventDefault();
     this.setState({
       messages: [],
       loading: true
@@ -193,7 +194,8 @@ class ConnectionCredsInfo extends Component {
     }
 
     // Perform all tests
-    return Promise.all(tests);
+    await Promise.all(tests);
+    this.setState({ loading: false });
   }
 
   handleInputChange = (e, valid, name, category) => {
@@ -211,11 +213,11 @@ class ConnectionCredsInfo extends Component {
     }));
   }
 
-  handleCancel = () => {
+  handleCancel() {
     this.props.cancelAction();
   }
 
-  handleDone = () => {
+  handleDone() {
 
     // Create the data structure needed for the callback
     let callbackData = {};
@@ -338,14 +340,14 @@ class ConnectionCredsInfo extends Component {
     return (
       <div className='btn-row input-button-container'>
         <ActionButton type='default'
-          clickAction={this.handleCancel} displayLabel={translate('cancel')}/>
+          clickAction={::this.handleCancel} displayLabel={translate('cancel')}/>
         <ActionButton type='default'
           isDisabled={!this.isFormValid()}
-          clickAction={()=> this.handleTest().then(() => this.setState({loading: false}))}
+          clickAction={::this.handleTest}
           displayLabel={translate('test')}/>
         <ActionButton
           isDisabled={!this.isDoneEnabled()}
-          clickAction={this.handleDone} displayLabel={translate('common.save.continue')}/>
+          clickAction={::this.handleDone} displayLabel={translate('common.save.continue')}/>
       </div>
     );
   }
@@ -354,8 +356,10 @@ class ConnectionCredsInfo extends Component {
     return (
       <div className='connection-creds-info'>
         {this.renderMessage()}
-        {this.renderCredentials('sm')}
-        {this.renderCredentials('ov')}
+        <form onSubmit={::this.handleTest}>
+          {this.renderCredentials('sm')}
+          {this.renderCredentials('ov')}
+        </form>
         {this.renderFooter()}
         {this.renderLoadingMask()}
       </div>

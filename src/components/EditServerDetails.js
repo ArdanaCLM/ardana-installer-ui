@@ -40,7 +40,7 @@ class EditServerDetails extends Component {
     };
   }
 
-  initInputValues = (props) => {
+  initInputValues(props) {
     return Map({
       'id': props.data.id,
       'ip-addr': props.data['ip-addr'] || '',
@@ -55,7 +55,7 @@ class EditServerDetails extends Component {
     });
   }
 
-  initInputValid = (props) => {
+  initInputValid(props) {
     return  Map({
       'id': !isEmpty(props.data.id),
       'ip-addr': !isEmpty(props.data['ip-addr']),
@@ -68,16 +68,16 @@ class EditServerDetails extends Component {
     });
   }
 
-  isFormInputValid = () => {
+  isFormInputValid() {
     return this.state.isValid.every((value, key) => value === true || (value === undefined &&
       key !== 'id' && key !== 'ip-addr' && key !== 'nic-mapping' && key !== 'server-group'));
   }
 
-  handleDone = () => {
+  handleDone() {
     this.props.doneAction(this.state.inputValues.toJS(), this.props.data.id);
   }
 
-  handleInputChange = (value, isValid, name) => {
+  handleInputChange(value, isValid, name) {
     this.setState((prev) => ({
       isValid: prev.isValid.set(name, isValid),
       inputValues: prev.inputValues.set(name, value)
@@ -93,19 +93,19 @@ class EditServerDetails extends Component {
     );
   }
 
-  addServerGroup = () => {
+  addServerGroup() {
     this.setState({showAddServerGroup: true});
   }
 
-  addNicMapping = () => {
+  addNicMapping() {
     this.setState({showAddNicMapping: true});
   }
 
-  closeAddServerGroup = () => {
+  closeAddServerGroup() {
     this.setState({showAddServerGroup: false, serverGroups: getServerGroups(this.props.model)});
   }
 
-  closeAddNicMapping = () => {
+  closeAddNicMapping() {
     this.setState({showAddNicMapping: false, nicMappings: getNicMappings(this.props.model)});
   }
 
@@ -113,7 +113,7 @@ class EditServerDetails extends Component {
     if (this.state.showAddServerGroup) {
       return (
         <EditCloudSettings model={this.props.model}
-          oneTab='server-group' onHide={this.closeAddServerGroup}
+          oneTab='server-group' onHide={::this.closeAddServerGroup}
           updateGlobalState={this.props.updateGlobalState}/>
       );
     }
@@ -123,7 +123,7 @@ class EditServerDetails extends Component {
     if (this.state.showAddNicMapping) {
       return (
         <EditCloudSettings model={this.props.model}
-          oneTab='nic-mapping' onHide={this.closeAddNicMapping}
+          oneTab='nic-mapping' onHide={::this.closeAddNicMapping}
           updateGlobalState={this.props.updateGlobalState}/>
       );
     }
@@ -192,10 +192,10 @@ class EditServerDetails extends Component {
               IpV4AddressValidator
             )
           )}
-          {this.renderDropDown('server-group', this.state.serverGroups, this.handleInputChange, true,
-            'server.group.prompt', 'server.group.prompt', this.addServerGroup)}
-          {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleInputChange, true,
-            'server.nicmapping.prompt', 'server.nicmapping.prompt', this.addNicMapping)}
+          {this.renderDropDown('server-group', this.state.serverGroups, ::this.handleInputChange, true,
+            'server.group.prompt', 'server.group.prompt', ::this.addServerGroup)}
+          {this.renderDropDown('nic-mapping', this.state.nicMappings, ::this.handleInputChange, true,
+            'server.nicmapping.prompt', 'server.nicmapping.prompt', ::this.addNicMapping)}
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
@@ -232,7 +232,7 @@ class EditServerDetails extends Component {
           clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
           isDisabled={!this.isFormInputValid()}
-          clickAction={this.handleDone} displayLabel={translate('done')}/>
+          clickAction={::this.handleDone} displayLabel={translate('done')}/>
       </div>
     );
   }
@@ -242,7 +242,9 @@ class EditServerDetails extends Component {
       <ConfirmModal className={this.props.className} title={this.props.title}
         onHide={this.props.cancelAction} footer={this.renderFooter()}>
         <div className='edit-server-details'>
-          {this.renderServerContent()}
+          <form onSubmit={::this.handleDone}>
+            {this.renderServerContent()}
+          </form>
           <If condition={!this.props.isUpdateMode}>
             {this.renderAddServerGroup()}
             {this.renderAddNicMapping()}
