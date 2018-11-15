@@ -185,12 +185,28 @@ export function IpInNetmaskValidator(netmask) {
 // be used in the situation where there is a fixed set of valid inputs.
 export function createExcludesValidator(values, errorMsg) {
 
+  console.assert(values !== undefined,                  // eslint-disable-line no-console
+    'Error: createExcludesValidator called without values');
+
   function validator(value) {
 
+    if (values === undefined)
+      return;
+
     let exists;
-    if (typeof(values) === 'object' && values instanceof Set) {
+    // Use the value of the has() function if such a function is present, otherwise use the
+    // exists() function if present. Immutable lists are the exception as they possess both has()
+    // and includes(), and they should use the latter.
+    //
+    // Note that while this is slightly wordier than than compact construct:
+    //    values.has?(value) || value?.includes(value)
+    // this construct was not used since some types (particularly immutable Maps) have both a
+    // 'has' (for checking keys) and an 'includes' (for checking values), and we only want to use
+    // the has; i.e. we don't want to search through the values if the keys are known not to contain
+    // the value.
+    if (values.has && ! List.isList(values)) {
       exists = values.has(value);
-    } else if (Array.isArray(values) || List.isList(values)) {
+    } else if (values.includes) {
       exists = values.includes(value);
     }
 
