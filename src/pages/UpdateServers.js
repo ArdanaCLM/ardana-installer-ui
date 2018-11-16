@@ -59,7 +59,11 @@ class UpdateServers extends BaseUpdateWizardPage {
       serverToReplace: undefined,
 
       // error message show as a popup modal for validation errors
-      validationError: undefined
+      validationError: undefined,
+      // need the expanded model to match up server info for Nova and Monasca
+      internalModel: undefined,        // a copy of the full internal model for matching up hostnames
+      monasca: undefined,               // whether monasca is installed
+      serverMonascaStatuses: {}
     };
   }
 
@@ -84,6 +88,7 @@ class UpdateServers extends BaseUpdateWizardPage {
           this.setState({ internalModel: fromJS(model) });
         })
         .then(::this.getServerStatuses)
+        .then(::this.checkMonasca)
         .then(() => this.setState({ loading: undefined }))
         .catch(error => {
           this.setState({
@@ -113,6 +118,70 @@ class UpdateServers extends BaseUpdateWizardPage {
           };
         });
       });
+  }
+
+  /**
+   * checks to see if Monasca is installed, and if it is, triggers a call to the status
+   * of each server in the model
+   */
+  checkMonasca() {
+    if(this.state.monasca === undefined) {
+      //default state.monasca to false, primarily to short circuit additional checks
+      //this is because componentDidMount and componentDidUpdate both call into this
+      //depending on how the page was navigated to... removing either of those calls results
+      //in some cases where this function never gets called... keeping both results in it
+      //usually being called twice, setting the state to false (from its original value of
+      //undefined) prevents the 2nd call from duplicating the check and model load
+      this.setState({monasca: false});
+      fetchJson('/api/v2/monasca/is_installed')
+        .then(responseData => {
+          if(responseData.installed) {
+            this.setState({monasca: true}, () => this.getServerMonascaStatuses());
+          }
+        }).catch((error) => {
+          console.log('error checking if Monasca is installed:' + error);// eslint-disable-line no-console
+        });
+    } else if(this.state.monasca === true) {
+      //if monasca is installed, get the server statuses
+      this.getServerMonascaStatuses();
+    }
+  }
+
+  /**
+  * takes a List (immutable) of serverIds, serially requests server status on each
+  * the serial nature is to avoid flooding the monasca API with status requests
+  */
+  async throttledServerStatusRequest(serverIds) {
+    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
+    for (const server_id of serverIds.values()) {
+      let server = internalModelServers.find(s => s.id == server_id);
+      try {
+        const responseData = await fetchJson('/api/v2/monasca/server_status/' + server.hostname);
+        this.setState(prevState => {
+          let serverMonascaStatuses = prevState.serverMonascaStatuses;
+          serverMonascaStatuses[server_id] = translate('server.details.status.' + responseData.status);
+          return { 'serverMonascaStatuses' : serverMonascaStatuses };
+        });
+      } catch(error) {
+        console.log('error getting server status for:' + server.hostname + // eslint-disable-line no-console
+          ' -- error is:' + error);
+      }
+    }
+  }
+
+  /**
+   * get the monasca status (up/down/unknown) for each server in the cloud
+   */
+  getServerMonascaStatuses() {
+    if(this.state.monasca && this.state.internalModel !== undefined
+        && this.props.model !== undefined) {
+      // get the list of all servers, then load their statuses
+      // possible future enhancement: batching this
+      const serverIds = this.props.model.getIn(['inputModel','servers'])
+        .map(server => server.get('id'));
+
+      this.throttledServerStatusRequest(serverIds);
+    }
   }
 
   async getServerStatuses() {
@@ -625,6 +694,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
+        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses'},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
@@ -643,7 +713,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         replaceServer={this.checkPrereqs} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
-        activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}/>
+        activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}
+        serverMonascaStatuses={this.state.serverMonascaStatuses} />
     );
   }
 
