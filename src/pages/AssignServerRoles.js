@@ -1504,16 +1504,22 @@ class AssignServerRoles extends BaseWizardPage {
           this.state.serversAddedManually, this.state.activeRowData.id);
       extraProps.ids = ids;
 
+      // check against other existing addresses
+      extraProps.existMacAddressesModel =
+        getModelMacAddresses(this.props.model, this.state.activeRowData['mac-addr']);
+      extraProps.existIPMIAddressesModel =
+        getModelIPMIAddresses(this.props.model, this.state.activeRowData['ilo-ip']);
+      extraProps.existIPAddressesModel =
+        getModelIPAddresses(this.props.model, this.state.activeRowData['ip-addr']);
+
       if(this.props.isUpdateMode) {
-        // check against other existing addresses
         extraProps.isUpdateMode = this.props.isUpdateMode;
-        extraProps.existMacAddressesModel =
-          getModelMacAddresses(this.props.model, this.state.activeRowData['mac-addr']);
-        extraProps.existIPMIAddressesModel =
-          getModelIPMIAddresses(this.props.model, this.state.activeRowData['ilo-ip']);
-        extraProps.existIPAddressesModel =
-          getModelIPAddresses(this.props.model, this.state.activeRowData['ip-addr']);
       }
+    } else {
+      extraProps.ids = [];
+      extraProps.existMacAddressesModel = [];
+      extraProps.existIPMIAddressesModel = [];
+      extraProps.existIPAddressesModel = [];
     }
 
     return (
