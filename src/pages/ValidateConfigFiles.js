@@ -98,16 +98,20 @@ class EditFile extends Component {
         <div className='row'>
           <div className='col-md-12'>
             <div className={editPanelCssClass}>
-              {this.state.loading ?
-                <h3>{translate('loading.pleasewait')}</h3> :
-                <ValidatingInput
-                  inputValue={this.state.contents}
-                  inputName='fileContents'
-                  inputType='textarea'
-                  inputValidate={YamlValidator}
-                  inputAction={this.handleChange}
-                />
-              }
+              <Choose>
+                <When condition={this.state.loading}>
+                  <h3>{translate('loading.pleasewait')}</h3>
+                </When>
+                <Otherwise>
+                  <ValidatingInput
+                    inputValue={this.state.contents}
+                    inputName='fileContents'
+                    inputType='textarea'
+                    inputValidate={YamlValidator}
+                    inputAction={this.handleChange}
+                  />
+                </Otherwise>
+              </Choose>
             </div>
             {errorMsgPanel}
           </div>

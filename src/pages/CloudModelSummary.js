@@ -152,8 +152,6 @@ class CloudModelSummary extends BaseWizardPage {
     if (this.state.activeItem && this.state.activeItem.indexOf('min-count') !== -1) {
       editNodesLabel = translate('model.summary.edit.min.nodes');
     }
-    var additionalLabel = (additionalItems.size > 0) ?
-      <div><h4>{translate('model.summary.additional')}</h4></div> : <div/>;
 
     return (
       <div className='wizard-page'>
@@ -166,7 +164,9 @@ class CloudModelSummary extends BaseWizardPage {
             <div className='section'>
               {mandatoryItems}
             </div>
-            {additionalLabel}
+            <If condition={additionalItems.size > 0}>
+              <div><h4>{translate('model.summary.additional')}</h4></div>
+            </If>
             <div className='section'>
               {additionalItems}
             </div>
@@ -174,8 +174,8 @@ class CloudModelSummary extends BaseWizardPage {
           <div className='details-container top-spacing'>
             {this.getDescription()}
             <p />
-            {this.state.activeItem
-              ? <div className='margin-top-30'>
+            <If condition={this.state.activeItem}>
+              <div className='margin-top-30'>
                 <h4>{editNodesLabel}</h4>
                 <form className='form-inline'>
                   <div className='form-group'>
@@ -187,8 +187,7 @@ class CloudModelSummary extends BaseWizardPage {
                   </div>
                 </form>
               </div>
-              : <div />
-            }
+            </If>
             {this.getChangeNodeWarning()}
           </div>
         </div>
