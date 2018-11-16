@@ -35,7 +35,7 @@ of the ardana-installer-server:
 
 ## Note!
 
-You will need the ardana-service to provide data model information.  The source 
+You will need the ardana-service to provide data model information.  The source
 code for that service resides in the git repo https://github.com/ArdanaCLM/ardana-service.
 
 # Open Build Service (OBS)
@@ -46,3 +46,13 @@ and added to the package.  Run the command:
     ./build_deps.sh
 
 to refresh `node_modules` and create `node_modules.tar.bz2`.
+
+## Generate `package-lock.json` from `yarn.lock` changes
+1. Update `yarn.lock`
+```
+yarn install
+```
+2. generate `package-lock.json`
+```
+npm run generate-package-lock
+```
