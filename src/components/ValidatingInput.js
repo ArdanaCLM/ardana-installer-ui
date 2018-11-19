@@ -21,25 +21,13 @@ export class ValidatingInput extends Component {
     super(props);
     this.state = {
       errorMsg: '',
-      inputValue: props.inputValue,
-      initialValue: props.inputValue,
       showMask: true
-    };
-  }
-
-  static getDerivedStateFromProps(props, state) {
-    const takeFromProps = props.inputValue != state.initialValue && (
-      state.inputValue === props.inputValue
-    );
-    return {
-      ...state,
-      inputValue: takeFromProps ? props.inputValue : state.inputValue
     };
   }
 
   componentDidMount() {
     if(this.props.updateFormValidity) {
-      let isValid = this.validateInput(this.state.inputValue, this.props);
+      let isValid = this.validateInput(this.props.inputValue, this.props);
       //callback function from parent to initially check
       //all inputs
       this.props.updateFormValidity(this.props, isValid);
@@ -144,7 +132,7 @@ export class ValidatingInput extends Component {
             id={this.props.id}
             className='rounded-corner'
             name={this.props.inputName}
-            value={this.state.inputValue}
+            value={this.props.inputValue}
             onChange={(e) => this.handleInputChange(e, this.props)}
             placeholder={placeholder}
             disabled={this.props.disabled}
@@ -162,7 +150,7 @@ export class ValidatingInput extends Component {
             className='rounded-corner'
             type={inputType}
             name={this.props.inputName}
-            value={this.state.inputValue}
+            value={this.props.inputValue}
             onChange={(e) => this.handleInputChange(e, this.props)}
             placeholder={placeholder}
             disabled={this.props.disabled}
