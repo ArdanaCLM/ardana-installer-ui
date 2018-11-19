@@ -40,22 +40,35 @@ class ConnectionCredsInfo extends Component {
       ovTestStatus: TEST_STATUS.UNKNOWN,
       loading: false,
 
-      // may also contain the values: selected, host, username, password
+      // Set the inputValue and isValid maps based on the incoming this.props.data, if any
       inputValue: fromJS({
-        sm: { checked: false, secured: true, port: 443 },
-        ov: { checked: false, secured: true },
+        sm: {
+          checked: this.props.data?.sm?.checked || false,
+          secured: (this.props.data?.sm?.secured === true),
+          sessionKey: this.props.data?.sm?.sessionKey,
+          host: this.props.data?.sm?.creds?.host,
+          port: this.props.data?.sm?.creds?.port || 443,
+          username: this.props.data?.sm?.creds?.username,
+        },
+        ov: {
+          checked: this.props.data?.ov?.checked || false,
+          secured: (this.props.data?.ov?.secured === true),
+          sessionKey: this.props.data?.ov?.sessionKey,
+          host: this.props.data?.ov?.creds?.host,
+          username: this.props.data?.ov?.creds?.username,
+        },
       }),
 
       isValid: fromJS({
         sm: {
-          host: undefined,
-          username: undefined,
+          host: this.props.data?.sm?.creds?.host !== undefined || undefined,
+          username: this.props.data?.sm?.creds?.username !== undefined || undefined,
           password: undefined,
           port: true,
         },
         ov: {
-          host: undefined,
-          username: undefined,
+          host: this.props.data?.ov?.creds?.host !== undefined || undefined,
+          username: this.props.data?.ov?.creds?.username !== undefined || undefined,
           password: undefined,
         },
       }),
@@ -203,22 +216,29 @@ class ConnectionCredsInfo extends Component {
   }
 
   handleDone = () => {
-    let callbackData = {
-      'sm': {'checked': this.state.inputValue.getIn(['sm','checked'])},
-      'ov': {'checked': this.state.inputValue.getIn(['ov','checked'])},
-    };
 
-    if (this.state.inputValue.getIn(['sm','checked'])) {
-      callbackData.sm.creds = this.state.inputValue.get('sm').toJS();
-      callbackData.sm.secured = this.state.inputValue.getIn(['sm','secured']);
-      callbackData.sm.sessionKey = '';    // sm sessionkey
-    }
-    if (this.state.inputValue.getIn(['ov','checked'])) {
-      callbackData.ov.creds = this.state.inputValue.get('ov').toJS();
-      callbackData.ov.secured = this.state.inputValue.getIn(['ov','secured']);
-      callbackData.ov.sessionKey = '';    // sm sessionkey
-    }
+    // Create the data structure needed for the callback
+    let callbackData = {};
+    for (const category of ['sm','ov']) {
+      callbackData[category] = {};
 
+      if (this.state.inputValue.getIn([category,'checked'])) {
+        // Move secured, checked, and sessionKey to he top level
+        callbackData[category].secured = this.state.inputValue.getIn([category,'secured']);
+        callbackData[category].checked = this.state.inputValue.getIn([category,'checked']);
+        callbackData[category].sessionKey = this.state.inputValue.getIn([category,'sessionKey']);
+
+        let creds = this.state.inputValue.get(category)
+          .remove('secured')
+          .remove('checked')
+          .remove('sessionKey');
+
+        callbackData[category].creds = creds.toJS();
+      }
+      else {
+        callbackData[category].checked = false;
+      }
+    }
 
     if(this.state.inputValue.getIn(['sm','checked']) && this.state.smTestStatus === TEST_STATUS.UNKNOWN ||
       this.state.inputValue.getIn(['ov','checked']) && this.state.ovTestStatus === TEST_STATUS.UNKNOWN) {
