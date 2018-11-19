@@ -16,21 +16,16 @@ import React from 'react';
 import { ThreeBounce } from 'better-react-spinkit';
 import '../styles/deployer.less';
 
-export function LoadingMask(props) {
-  if (! props.show)
-    return null;
-
-
-  let text = props.text ?
-    <div className='spinners-text'>{props.text}</div> : '';
-
-  return (
+export const LoadingMask = (props) => (
+  <If condition={props.show}>
     <div className={'spinners-container ' + (props.className || '')}>
-      {text}
+      <If condition={props.text}>
+        <div className='spinners-text'>{props.text}</div>
+      </If>
       <ThreeBounce
         className='spinners'
         size={props.size || 25}
         color='#00C081'/>
     </div>
-  );
-}
+  </If>
+);

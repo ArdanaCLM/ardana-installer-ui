@@ -14,6 +14,7 @@
 **/
 import { translate } from '../localization/localize.js';
 import { safeLoad } from 'js-yaml';
+import { List } from 'immutable';
 
 const IPV4ADDRESS =
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -29,7 +30,6 @@ const PCI_ADDRESS = /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$
 const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
 const CIDR =
   /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
-const STRING_WITH_NO_SPACES = /^\S+$/;
 const NETMASK = new RegExp('' +
   /^((255\.){3}(255|254|252|248|240|224|192|128|0+))|/.source +
   /((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|/.source +
@@ -39,132 +39,46 @@ const NETMASK = new RegExp('' +
 const IPV4ADDRESS_RANGE =
   /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
-export function IpV4AddressValidator(ipAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function IpV4AddressValidator(ipAddress) {
   if(IPV4ADDRESS.exec(ipAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.error');
+    return translate('input.validator.ipv4address.error');
   }
-
-  if(props && props.exist_ip_addresses && props.exist_ip_addresses.includes(ipAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4address.exist.error');
-  }
-
-  if(props && props.exist_availservers_ip_addr_objs) {
-    let found =
-      props.exist_availservers_ip_addr_objs.find(addr => addr['ilo-ip'] === ipAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.ipv4address.availservers.exist.error', found.serverId);
-    }
-  }
-
-  return retValue;
 }
 
-export function MacAddressValidator(macAddress, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
+export function MacAddressValidator(macAddress) {
   if(MACADDRESS.exec(macAddress) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.error');
+    return translate('input.validator.macaddress.error');
   }
-
-  if(props && props.exist_mac_addresses && props.exist_mac_addresses.includes(macAddress)) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.macaddress.exist.error');
-  }
-
-  if(props && props.exist_availservers_mac_addr_objs) {
-    let found =
-      props.exist_availservers_mac_addr_objs.find(mac => mac['mac-addr'] === macAddress);
-    if (found !== undefined) {
-      retValue.isValid = false;
-      retValue.errorMsg =
-        translate('input.validator.macaddress.availserver.exist.error' , found.serverId);
-    }
-  }
-
-  return retValue;
 }
 
 export function PortValidator(port) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(PORT.exec(port) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.port.error');
+    return translate('input.validator.port.error');
   }
-
-  return retValue;
 }
 
 export function IpV4AddressHostValidator(host) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(IPV4ADDRESS_HOST.exec(host) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.ipv4addresshost.error');
+    return translate('input.validator.ipv4addresshost.error');
   }
-
-  return retValue;
 }
 
 export function PCIAddressValidator(str) {
   if(PCI_ADDRESS.exec(str) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.pciaddress.error')
-    };
-  } else {
-    return {
-      isValid: true,
-      errorMsg: ''
-    };
+    return translate('input.validator.pciaddress.error');
   }
 }
 
 export function NetworkInterfaceValidator(str) {
   if(NET_INTERFACE.exec(str) === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.networkinterface.error')
-    };
-  } else {
-    return {
-      isValid: true,
-      errorMsg: ''
-    };
+    return translate('input.validator.networkinterface.error');
   }
 }
 
 export function VLANIDValidator(vlanid) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if(vlanid && vlanid <= 0 || vlanid > 4094) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.vlanid.error');
+    return translate('input.validator.vlanid.error');
   }
-
-  return retValue;
 }
 
 
@@ -179,13 +93,9 @@ function ipAddrToInt(ip) {
 }
 
 export function CidrValidator(cidr) {
-
   const match = CIDR.exec(cidr);
   if(match === null) {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.cidr.error')
-    };
+    return translate('input.validator.cidr.error');
   }
 
   // match[1] is the ip address, match[2] is number of leading bits (the part after the slash)
@@ -195,40 +105,22 @@ export function CidrValidator(cidr) {
   // Verify that all of the values in the IP address portion after the leading
   // bits are zeros.  For example, the CIDR 192.168.1.0/24 would be an integer address
   // value of 0xC0A80100, and the last 8 bits (32-24) are required to be zeros.
-  if ((ip & (0xffffffff >>> bits)) !== 0)
-  {
-    return {
-      isValid: false,
-      errorMsg: translate('input.validator.cidr.error')
-    };
+  if ((ip & (0xffffffff >>> bits)) !== 0) {
+    return translate('input.validator.cidr.error');
   }
-
-  return {
-    isValid: true,
-    errorMsg: ''
-  };
 }
 
 export function AddressesValidator(addresses) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   // just one IPV4 address
   if(addresses && addresses.indexOf('-') === -1) {
     if(IPV4ADDRESS.exec(addresses.trim()) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
     }
   }
 
   if(addresses && addresses.indexOf('-') !== -1) { // just one range
     if (IPV4ADDRESS_RANGE.exec(addresses.trim()) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
     }
 
     var ips = addresses.replace(/\s/g, '').split('-');
@@ -238,83 +130,51 @@ export function AddressesValidator(addresses) {
     var e_ip_num = ipAddrToInt(e_ip);
 
     if (s_ip_num >= e_ip_num) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.addresses.error');
-      return retValue;
+      return translate('input.validator.addresses.error');
+    }
+  }
+}
+
+export const UniqueNameValidator = (names) =>
+  createExcludesValidator(names, translate('input.validator.uniquename.error'));
+export const UniqueIdValidator = (ids) => createExcludesValidator(ids, translate('input.validator.uniqueid.error'));
+
+export function NoWhiteSpaceValidator(errorMessage) {
+  function validator(value) {
+    // if the string contains whitespace
+    if(/\s/.test(value)) {
+      return errorMessage;
     }
   }
 
-  return retValue;
-}
-
-export function UniqueNameValidator(name, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
-  if(props && props.names && props.names.length > 0 &&
-    name && props.names.indexOf(name) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniquename.error');
-  }
-  else if(props && props.check_nospace) {
-    if(STRING_WITH_NO_SPACES.exec(name) === null) {
-      retValue.isValid = false;
-      retValue.errorMsg = translate('input.validator.name.spaces.error');
-    }
-  }
-  return retValue;
-}
-
-export function UniqueIdValidator(id, props) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
-  if(props && props.ids && props.ids.length > 0 &&
-    id && props.ids.indexOf(id) !== -1) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.uniqueid.error');
-    return retValue;
-  }
-
-  // make sure no space in the id
-  if(STRING_WITH_NO_SPACES.exec(id) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.id.spaces.error');
-  }
-  return retValue;
+  return validator;
 }
 
 export function YamlValidator(text) {
   try {
     safeLoad(text);
-    return { isValid: true, errorMsg: '' };
   } catch (e) {
-    return { isValid: false, errorMsg: translate('input.validator.yaml.error')};
+    return translate('input.validator.yaml.error');
   }
 }
 
 export function NetmaskValidator(netmask) {
-  let retValue = {
-    isValid: true,
-    errorMsg: ''
-  };
-
   if (NETMASK.exec(netmask) === null) {
-    retValue.isValid = false;
-    retValue.errorMsg = translate('input.validator.netmask.error');
+    return translate('input.validator.netmask.error');
   }
-  return retValue;
 }
 
-// Validate that the ip address belongs to the netmask
-export function IpInNetmaskValidator(ip, netmask) {
-  const ipInt = ipAddrToInt(ip);
-  const netmaskInt = ipAddrToInt(netmask);
-  return (ipInt & netmaskInt) >>> 0 === ipInt;
+// return a validator that will validate an IP in in the netmask's subnet
+export function IpInNetmaskValidator(netmask) {
+  function validator(ip) {
+    const ipInt = ipAddrToInt(ip);
+    const netmaskInt = ipAddrToInt(netmask);
+    if(((ipInt & netmaskInt) >>> 0) !== ipInt) {
+      return translate('input.validator.netmask.ipinvalid.error');
+    }
+  }
+
+  return validator;
 }
 
 // Return a validator that requires the entered value to
@@ -323,24 +183,35 @@ export function IpInNetmaskValidator(ip, netmask) {
 // Note that the counterpart to this validator, createIncludesValidator,
 // is generally unnecessary, since a pulldown list would normally
 // be used in the situation where there is a fixed set of valid inputs.
-export function createExcludesValidator(values) {
+export function createExcludesValidator(values, errorMsg) {
+
+  console.assert(values !== undefined,                  // eslint-disable-line no-console
+    'Error: createExcludesValidator called without values');
 
   function validator(value) {
 
+    if (values === undefined)
+      return;
+
     let exists;
-    if (typeof(values) === 'object' && values instanceof Set) {
+    // Use the value of the has() function if such a function is present, otherwise use the
+    // exists() function if present. Immutable lists are the exception as they possess both has()
+    // and includes(), and they should use the latter.
+    //
+    // Note that while this is slightly wordier than than compact construct:
+    //    values.has?(value) || value?.includes(value)
+    // this construct was not used since some types (particularly immutable Maps) have both a
+    // 'has' (for checking keys) and an 'includes' (for checking values), and we only want to use
+    // the has; i.e. we don't want to search through the values if the keys are known not to contain
+    // the value.
+    if (values.has && ! List.isList(values)) {
       exists = values.has(value);
-    } else {
+    } else if (values.includes) {
       exists = values.includes(value);
     }
 
     if (exists) {
-      return {
-        isValid: false,
-        errorMsg: translate('duplicate.error', value)
-      };
-    } else {
-      return { isValid: true };
+      return errorMsg || translate('duplicate.error', value);
     }
   }
 
@@ -358,11 +229,10 @@ export function chainValidators(...validators) {
   function chained(value) {
     for (let validator of validators) {
       const result = validator(value);
-      if (! result.isValid) {
+      if (result) {
         return result;
       }
     }
-    return { isValid: true };
   }
 
   return chained;

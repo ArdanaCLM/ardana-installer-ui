@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fetchJson } from '../utils/RestUtils.js';
 import { alphabetically } from '../utils/Sort.js';
-import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ConfirmModal } from '../components/Modals.js';
 import { AlarmDonut } from '../components/Graph';
@@ -367,8 +367,8 @@ class ServiceInfo extends Component {
 
   renderMenuItems = () => {
     const menuItems = [
-      {show: true, key: 'common.details', handleShowModal: this.showDetailsModal},
-      {show: true, key: 'services.run.status', handleShowModal: this.showRunStatusPlaybookModal},
+      {show: true, key: 'common.details', action: this.showDetailsModal},
+      {show: true, key: 'services.run.status', action: this.showRunStatusPlaybookModal},
     ];
     return (
       <ContextMenu show={this.state.showActionMenu} items={menuItems} location={this.state.menuLocation}

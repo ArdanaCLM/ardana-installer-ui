@@ -19,7 +19,7 @@ import BaseServerDetails from './BaseServerDetails.js';
 class SmServerDetails extends BaseServerDetails {
   constructor(props) {
     super(props);
-    this.details = this.props.details ? this.getDetailsData(this.props.details) : undefined;
+    this.details = props.details ? this.getDetailsData(props.details) : undefined;
   }
 
   getIpTableData(ipType, networks) {

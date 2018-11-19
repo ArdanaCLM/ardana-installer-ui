@@ -44,14 +44,16 @@ class EditFile extends Component {
     super(props);
     this.state = {
       contents : '',
-      isValid: true
+      isValid: true,
+      loading: true
     };
   }
 
   componentWillMount() {
+    this.setState({loading: true});
     fetchJson('/api/v1/clm/model/files/' + this.props.file.name)
       .then((response) => {
-        this.setState({contents: response});
+        this.setState({contents: response, loading: false});
       });
   }
 
@@ -59,8 +61,12 @@ class EditFile extends Component {
     this.props.setChanged();
     this.props.doneEditingFile();
 
+    this.setState({loading: true});
     postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
-      .then(() => this.props.loadModel());
+      .then(() => {
+        this.setState({loading: false});
+        this.props.loadModel();
+      });
   }
 
   handleCancel() {
@@ -89,17 +95,26 @@ class EditFile extends Component {
 
       <div>
         <h3>{this.props.file.name}</h3>
-        <div className='col-md-12'>
-          <div className={editPanelCssClass}>
-            <ValidatingInput
-              inputValue={this.state.contents}
-              inputName='fileContents'
-              inputType='textarea'
-              inputValidate={YamlValidator}
-              inputAction={this.handleChange}
-            />
+        <div className='row'>
+          <div className='col-md-12'>
+            <div className={editPanelCssClass}>
+              <Choose>
+                <When condition={this.state.loading}>
+                  <h3>{translate('loading.pleasewait')}</h3>
+                </When>
+                <Otherwise>
+                  <ValidatingInput
+                    inputValue={this.state.contents}
+                    inputName='fileContents'
+                    inputType='textarea'
+                    inputValidate={YamlValidator}
+                    inputAction={this.handleChange}
+                  />
+                </Otherwise>
+              </Choose>
+            </div>
+            {errorMsgPanel}
           </div>
-          {errorMsgPanel}
         </div>
         <div className='btn-row'>
           <ActionButton type='default'
@@ -168,11 +183,13 @@ class DisplayFileList extends Component {
       <div>
         <div className='validate-config-files'>
           <div className='body'>
-            <div className='col-xs-6 verticalLine'>
-              <ul>{list}</ul>
-            </div>
-            <div className='col-xs-6'>
-              {this.getMessage()}
+            <div className='row'>
+              <div className='col-6 verticalLine'>
+                <ul>{list}</ul>
+              </div>
+              <div className='col-6'>
+                {this.getMessage()}
+              </div>
             </div>
           </div>
           <div>
@@ -380,17 +397,19 @@ class ConfigForm extends Component {
     if (this.props.requiresPassword) {
       return (
         <div className='detail-line'>
-          <div className='col-xs-4 label-container'>
-            {translate('validate.config.sshPassphrase')}
-            <HelpText
-              tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
-          </div>
-          <div className='col-xs-8'>
-            <ValidatingInput
-              inputName='sshPassphrase'
-              inputType='password'
-              inputValue={this.state.sshPassphrase}
-              inputAction={this.handleSshPassphrase}/>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.config.sshPassphrase')}
+              <HelpText
+                tooltipText={translate('validate.config.sshPassphrase.tooltip')}/>
+            </div>
+            <div className='col-8'>
+              <ValidatingInput
+                inputName='sshPassphrase'
+                inputType='password'
+                inputValue={this.state.sshPassphrase}
+                inputAction={this.handleSshPassphrase}/>
+            </div>
           </div>
         </div>
       );
@@ -401,61 +420,69 @@ class ConfigForm extends Component {
     return (
       <div className='config-form'>
         <div className='detail-line'>
-          <div className='col-xs-4 label-container'>
-            {translate('validate.deployment.doWipeDisks')}
-            <HelpText tooltipText={translate('validate.deployment.doWipeDisks.tooltip')}/>
-          </div>
-          <div className='col-xs-8 checkbox-line'>
-            <input type='checkbox'
-              value='wipedisks'
-              checked={this.state.wipeDisks}
-              onChange={this.handleWipeDisks}/>
-          </div>
-        </div>
-
-        <div className='detail-line'>
-          <div className='col-xs-4 label-container'>
-            {translate('validate.deployment.encryptKey')}
-            <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
-          </div>
-          <div className='col-xs-8'>
-            <ValidatingInput
-              inputName='encryptKey'
-              inputType='password'
-              inputValue={this.state.encryptKey}
-              inputAction={this.handlePasswordChange}/>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.deployment.doWipeDisks')}
+              <HelpText tooltipText={translate('validate.deployment.doWipeDisks.tooltip')}/>
+            </div>
+            <div className='col-8 checkbox-line'>
+              <input type='checkbox'
+                value='wipedisks'
+                checked={this.state.wipeDisks}
+                onChange={this.handleWipeDisks}/>
+            </div>
           </div>
         </div>
 
         <div className='detail-line'>
-          <div className='col-xs-4 label-container'>
-            {translate('validate.deployment.verbosity')}
-            <HelpText tooltipText={translate('validate.deployment.verbosity.tooltip')}/>
-          </div>
-          <div className='col-xs-8'>
-            <Dropdown
-              value={this.state.verbosity}
-              onChange={(e) => this.setState({verbosity: e.target.value})}
-              emptyOption={translate('none')}>
-              <option key="0" value="0">{translate('validate.deployment.verbosity.lowest')}</option>
-              <option key="1" value="1">1</option>
-              <option key="2" value="2">2</option>
-              <option key="3" value="3">3</option>
-              <option key="4" value="4">{translate('validate.deployment.verbosity.highest')}</option>
-            </Dropdown>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.deployment.encryptKey')}
+              <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
+            </div>
+            <div className='col-8'>
+              <ValidatingInput
+                inputName='encryptKey'
+                inputType='password'
+                inputValue={this.state.encryptKey}
+                inputAction={this.handlePasswordChange}/>
+            </div>
           </div>
         </div>
 
         <div className='detail-line'>
-          <div className='col-xs-4 label-container'>
-            {translate('validate.deployment.clearServers')}
-            <HelpText tooltipText={translate('validate.deployment.clearServers.tooltip')}/>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.deployment.verbosity')}
+              <HelpText tooltipText={translate('validate.deployment.verbosity.tooltip')}/>
+            </div>
+            <div className='col-8'>
+              <Dropdown
+                value={this.state.verbosity}
+                onChange={(e) => this.setState({verbosity: e.target.value})}
+                emptyOption={translate('none')}>
+                <option key="0" value="0">{translate('validate.deployment.verbosity.lowest')}</option>
+                <option key="1" value="1">1</option>
+                <option key="2" value="2">2</option>
+                <option key="3" value="3">3</option>
+                <option key="4" value="4">{translate('validate.deployment.verbosity.highest')}</option>
+              </Dropdown>
+            </div>
           </div>
-          <div className='col-xs-8 checkbox-line'>
-            <input type='checkbox'
-              value='clearServers'
-              checked={this.state.clearServers}
-              onChange={this.handleClearServers}/>
+        </div>
+
+        <div className='detail-line'>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.deployment.clearServers')}
+              <HelpText tooltipText={translate('validate.deployment.clearServers.tooltip')}/>
+            </div>
+            <div className='col-8 checkbox-line'>
+              <input type='checkbox'
+                value='clearServers'
+                checked={this.state.clearServers}
+                onChange={this.handleClearServers}/>
+            </div>
           </div>
         </div>
 

@@ -76,7 +76,7 @@ class BaseWizardPage extends Component {
     if(this.props.back !== undefined) {
       return (
         <BackButton
-          clickAction={this.goBack.bind(this)}
+          clickAction={::this.goBack}
           displayLabel={this.setBackButtonLabel()}
           isDisabled={this.setBackButtonDisabled()}/>
       );
@@ -87,7 +87,7 @@ class BaseWizardPage extends Component {
     if(this.props.next !== undefined) {
       return (
         <NextButton
-          clickAction={this.goForward.bind(this)}
+          clickAction={::this.goForward}
           displayLabel={this.setNextButtonLabel()}
           isDisabled={this.setNextButtonDisabled()}/>
       );

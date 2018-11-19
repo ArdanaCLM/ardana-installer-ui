@@ -13,28 +13,19 @@
 * limitations under the License.
 **/
 
-.replace-server-details {
-  min-height: 50em;
-  .input-button-container {
-    position: absolute;
-    margin-top: 1em;
-    right: 2em;
-    bottom: 1em;
-  }
+import CompleteAddServers from '../AddServers/CompleteAddServers.js';
+import { translate } from '../../localization/localize.js';
 
-  .table>tbody>tr>th {
-    border-top: 0px;
-  }
-
-  .replace-options {
-    margin: 0.5em 0.5em 1.5em 1em;
-    &.more-bottom-margin {
-      margin-bottom: 4em;
-    }
-  }
-
-  .message-line {
-    line-height: 2em;
-    margin: 1em 0 1em 1em;
+// This is the complete page for adding compute servers
+// process. It will display newly deployed server hostname,
+// server ID and IP.
+class CompleteAddCompute extends CompleteAddServers {
+  getCompleteTitle = () => {
+    let heading =
+      this.props.operationProps.activate ?
+        translate('server.deploy.activate.addcompute.complete') : translate('server.deploy.addcompute.complete');
+    return heading;
   }
 }
+
+export default CompleteAddCompute;

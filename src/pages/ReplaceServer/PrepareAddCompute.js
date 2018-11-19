@@ -13,28 +13,21 @@
 * limitations under the License.
 **/
 
-.replace-server-details {
-  min-height: 50em;
-  .input-button-container {
-    position: absolute;
-    margin-top: 1em;
-    right: 2em;
-    bottom: 1em;
+import { translate } from '../../localization/localize.js';
+import  PrepareAddServers from '../AddServers/PrepareAddServers.js';
+
+// This is the prepare page for adding a compute server
+// process during replace compute server.
+// It will first commit the model changes and start
+// the playbook to do pre-deployment.
+class PrepareAddCompute extends PrepareAddServers {
+  getPrepareServerFailureMsg = () => {
+    return translate('server.addcompute.prepare.failure');
   }
 
-  .table>tbody>tr>th {
-    border-top: 0px;
-  }
-
-  .replace-options {
-    margin: 0.5em 0.5em 1.5em 1em;
-    &.more-bottom-margin {
-      margin-bottom: 4em;
-    }
-  }
-
-  .message-line {
-    line-height: 2em;
-    margin: 1em 0 1em 1em;
+  getPrepareServerTitle = () => {
+    return translate('server.addcompute.prepare');
   }
 }
+
+export default PrepareAddCompute;

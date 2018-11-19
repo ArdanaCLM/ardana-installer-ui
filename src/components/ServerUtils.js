@@ -20,10 +20,6 @@ import ServerTable from './ServerTable.js';
 import { isRoleAssignmentValid } from '../utils/ModelUtils.js';
 
 export class SearchBar extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   handleFilterTextInputChange = (e) => {
     e.preventDefault();
     this.props.filterAction(e.target.value);

@@ -23,10 +23,6 @@ import { alphabetically } from '../../utils/Sort.js';
 // process. It will display newly deployed server hostname,
 // server ID and IP.
 class CompleteAddServers extends BaseUpdateWizardPage {
-  constructor(props) {
-    super(props);
-  }
-
   renderServerList() {
     let serverList = this.props.operationProps.newHosts.sort((a, b) => {
       return alphabetically(a['display_hostname'],b['display_hostname']);
@@ -42,20 +38,24 @@ class CompleteAddServers extends BaseUpdateWizardPage {
     });
 
     return (
-      <div className='col-xs-8 addservers-page'>
+      <div className='col-8 addservers-page'>
         <ul className='complete-servernames-list'>{serverList}</ul>
       </div>
     );
   }
 
-  render() {
+  getCompleteTitle = () => {
     let heading =
       this.props.operationProps.activate ?
         translate('server.deploy.activate.addserver.complete') : translate('server.deploy.addserver.complete');
+    return heading;
+  }
+
+  render() {
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
-        <div className='content-header'>{this.renderHeading(heading)}</div>
+        <div className='content-header'>{this.renderHeading(this.getCompleteTitle())}</div>
         <div className='wizard-content'>
           {this.renderServerList()}
         </div>

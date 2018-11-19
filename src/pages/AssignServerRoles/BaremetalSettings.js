@@ -15,7 +15,8 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator } from '../../utils/InputValidators.js';
+import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator, chainValidators }
+  from '../../utils/InputValidators.js';
 import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { fromJS } from 'immutable';
@@ -24,7 +25,7 @@ class BaremetalSettings extends Component {
 
   constructor(props) {
     super(props);
-    const baremetal = this.props.model.getIn(['inputModel', 'baremetal']).toJS();
+    const baremetal = props.model.getIn(['inputModel', 'baremetal']).toJS();
     this.state = {
       subnet: baremetal.subnet,
       netmask: baremetal.netmask,
@@ -36,20 +37,8 @@ class BaremetalSettings extends Component {
 
   handleInputChange = (e, valid, props) => {
     let value = e.target.value;
-    let checkMaskingMsg = '';
-    if (valid) {
-      let key = props.inputName;
-      if (key === 'netmask') {
-        this.setState({netmask: value});
-        checkMaskingMsg = IpInNetmaskValidator(this.state.subnet, value) ? '' :
-          translate('input.validator.netmask.ipinvalid.error');
-      } else {
-        this.setState({subnet: value});
-        checkMaskingMsg = IpInNetmaskValidator(value, this.state.netmask) ? '' :
-          translate('input.validator.netmask.ipinvalid.error');
-      }
-    }
-    this.setState({maskingError: checkMaskingMsg, valid: valid && checkMaskingMsg === ''});
+    let key = props.inputName;
+    this.setState({[key]: value});
   }
 
   checkSettingsChanged = () => {
@@ -90,7 +79,8 @@ class BaremetalSettings extends Component {
         <div className='description-line'>{translate('add.server.set.network.description')}</div>
         <div className='server-details-container'>
           <InputLine isRequired={true} label={'add.server.set.network.subnet'}
-            inputName={'subnet'} inputType={'text'} inputValidate={IpV4AddressValidator}
+            inputName={'subnet'} inputType={'text'}
+            inputValidate={chainValidators(IpV4AddressValidator, IpInNetmaskValidator(this.state.netmask))}
             inputAction={this.handleInputChange} inputValue={this.state.subnet}/>
           <InputLine isRequired={true} label={'add.server.set.network.netmask'}
             inputName={'netmask'} inputType={'text'} inputValidate={NetmaskValidator}

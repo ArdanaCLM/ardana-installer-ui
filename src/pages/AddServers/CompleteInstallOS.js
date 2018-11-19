@@ -22,10 +22,6 @@ import { alphabetically } from '../../utils/Sort.js';
 // This is the complete page for installing SLES OS on compute servers
 // It will display server ID, IP, mac-addr and ilo-ip
 class CompleteInstallOS extends BaseUpdateWizardPage {
-  constructor(props) {
-    super(props);
-  }
-
   renderServerList() {
     let serverList = this.props.operationProps.selectedToInstallOS.sort((a, b) => {
       return alphabetically(a['id'], b['id']);
@@ -42,7 +38,7 @@ class CompleteInstallOS extends BaseUpdateWizardPage {
     });
 
     return (
-      <div className='col-xs-8 addservers-page'>
+      <div className='col-8 addservers-page'>
         <ul className='complete-servernames-list'>{serverList}</ul>
       </div>
     );

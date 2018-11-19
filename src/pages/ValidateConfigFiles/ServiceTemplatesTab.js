@@ -23,10 +23,11 @@ import { ValidatingInput } from '../../components/ValidatingInput.js';
 class EditTemplateFile extends Component {
   constructor(props) {
     super(props);
-    this.state = {original: '', contents: ''};
+    this.state = {original: '', contents: '', loading: true};
   }
 
   componentWillMount() {
+    this.setState({ loading: true });
     fetchJson('/api/v1/clm/service/files/' +  this.props.editFile)
       .then((response) => {
         this.setState({original: response, contents: response});
@@ -37,7 +38,11 @@ class EditTemplateFile extends Component {
             })
             .catch((error) => {
               // it's ok to not have the original file
+            }).finally(() => {
+              this.setState({ loading: false });
             });
+        } else {
+          this.setState({ loading: false });
         }
       });
   }
@@ -76,12 +81,19 @@ class EditTemplateFile extends Component {
   render() {
     return (
       <div className='edit-container file-editor'>
-        <ValidatingInput
-          inputValue={this.state.contents}
-          inputName='fileContents'
-          inputType='textarea'
-          inputAction={this.handleChange}
-        />
+        <Choose>
+          <When condition={this.state.loading}>
+            <h3>{translate('loading.pleasewait')}</h3>
+          </When>
+          <Otherwise>
+            <ValidatingInput
+              inputValue={this.state.contents}
+              inputName='fileContents'
+              inputType='textarea'
+              inputAction={this.handleChange}
+            />
+          </Otherwise>
+        </Choose>
         <div className='btn-row'>
           <ActionButton type='default'
             displayLabel={translate('cancel')}
@@ -177,6 +189,12 @@ class ServiceTemplatesTab extends Component {
     this.props.hasChange(this.hasChange(updatedList));
   }
 
+  getChangedServices = () => {
+    const changedServices = this.state.serviceFiles.filter(srv => srv.changedFiles !== undefined)
+      .map(srv => srv.service);
+    return changedServices;
+  }
+
   removeOrigFiles = () => {
     this.state.serviceFiles.map((val) => {
       if (val.changedFiles) {
@@ -247,7 +265,7 @@ class ServiceTemplatesTab extends Component {
   renderFileSection() {
     if(this.state.editFile) {
       return (
-        <div>
+        <div className='col-12'>
           <h3>{this.state.editServiceName + ' - ' + this.state.editFile}</h3>
           <EditTemplateFile closeAction={this.handleCloseEdit} changeAction={this.recordChangedFile}
             editFile={this.state.editServiceName + '/' + this.state.editFile}
@@ -257,7 +275,7 @@ class ServiceTemplatesTab extends Component {
     }
     else {
       let desc = translate('validate.config.service.info');
-      return (<div className='col-xs-6'><InfoBanner message={desc}/></div>);
+      return (<div className='col-6'><InfoBanner message={desc}/></div>);
     }
   }
 
@@ -310,7 +328,7 @@ class ServiceTemplatesTab extends Component {
       });
 
     return (
-      <div className='col-xs-6 verticalLine'>
+      <div className='col-6 verticalLine'>
         <ul className='all-service-list'>{serviceList}</ul>
       </div>
     );
@@ -319,7 +337,7 @@ class ServiceTemplatesTab extends Component {
   render() {
     return (
       <div className='template-service-files'>
-        <div>
+        <div className='row'>
           {!this.state.editFile && this.renderServiceList()}
           {this.renderFileSection()}
         </div>

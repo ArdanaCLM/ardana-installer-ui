@@ -53,64 +53,69 @@ export class AlarmDonutTest extends Component {
   render() {
 
     return (
-      <div className='alarmdonut-test col-md-12'>
-        <div className='controls col-md-8'>
-
+      <div className='row'>
+        <div className='alarmdonut-test col-md-12'>
           <div className='row'>
-            <div className='name'>Critical</div>
-            <div className='value'>
-              <input type="range" min={0} max={100} value={this.state.critical} name='critical'
-                onChange={this.changed} />
-              <div>{this.state.critical}</div>
+            <div className='controls col-md-8'>
+
+              <div className='irow'>
+                <div className='name'>Critical</div>
+                <div className='value'>
+                  <input type="range" min={0} max={100} value={this.state.critical} name='critical'
+                    onChange={this.changed} />
+                  <div>{this.state.critical}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Warning</div>
+                <div className='value'>
+                  <input type="range" min={0} max={100} value={this.state.warning} name='warning'
+                    onChange={this.changed} />
+                  <div>{this.state.warning}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Unknown</div>
+                <div className='value'>
+                  <input type="range" min={0} max={100} value={this.state.unknown} name='unknown'
+                    onChange={this.changed} />
+                  <div>{this.state.unknown}</div>
+                </div>
+              </div>
+
+              <div className='irow'>
+                <div className='name'>ok</div>
+                <div className='value'>
+                  <input type="range" min={0} max={100} value={this.state.ok} name='ok'
+                    onChange={this.changed} />
+                  <div>{this.state.ok}</div>
+                </div>
+
+              </div>
+
+              <div className='irow'>
+                <div className='name'>Radius</div>
+                <div className='value'>
+                  <input type="range" min={40} max={100} value={this.state.radius} name='radius'
+                    onChange={this.changed} />
+                  <div>{this.state.radius}</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div className='gauge col-md-4'>
+              <AlarmDonut
+                radius={this.state.radius}
+                critical={this.state.critical}
+                warning={this.state.warning}
+                unknown={this.state.unknown}
+                ok={this.state.ok}
+              />
             </div>
           </div>
-
-          <div className='row'>
-            <div className='name'>Warning</div>
-            <div className='value'>
-              <input type="range" min={0} max={100} value={this.state.warning} name='warning'
-                onChange={this.changed} />
-              <div>{this.state.warning}</div>
-            </div>
-          </div>
-
-          <div className='row'>
-            <div className='name'>Unknown</div>
-            <div className='value'>
-              <input type="range" min={0} max={100} value={this.state.unknown} name='unknown'
-                onChange={this.changed} />
-              <div>{this.state.unknown}</div>
-            </div>
-          </div>
-
-          <div className='row'>
-            <div className='name'>ok</div>
-            <div className='value'>
-              <input type="range" min={0} max={100} value={this.state.ok} name='ok'
-                onChange={this.changed} />
-              <div>{this.state.ok}</div>
-            </div>
-
-          </div>
-
-          <div className='row'>
-            <div className='name'>Radius</div>
-            <div className='value'>
-              <input type="range" min={40} max={100} value={this.state.radius} name='radius' onChange={this.changed} />
-              <div>{this.state.radius}</div>
-            </div>
-          </div>
-
-        </div>
-
-        <div className='gauge col-md-4'>
-          <AlarmDonut
-            radius={this.state.radius}
-            critical={this.state.critical}
-            warning={this.state.warning}
-            unknown={this.state.unknown}
-            ok={this.state.ok}
-          />
         </div>
       </div>
     );

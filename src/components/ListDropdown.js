@@ -12,60 +12,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-import React, { Component } from 'react';
+import React from 'react';
+import { isEmpty } from 'lodash';
+import { List } from 'immutable';
 
-export class ListDropdown extends Component {
-  constructor(props) {
-    super(props);
+export function ListDropdown(props) {
 
-    this.state = {
-      value: this.props.value
-    };
-  }
-
-  handleSelect = (e) => {
-    this.setState({value: e.target.value});
-    this.props.selectAction(e.target.value);
-  }
-
-  componentWillReceiveProps(newProps) {
-    if (this.state.value !== newProps.value) {
-      this.setState({value : newProps.value});
+  let options = props.optionList.map((opt) => {
+    if (props.defaultOption && opt === props.defaultOption.value) {
+      return <option key={opt} value={opt}>{props.defaultOption.label}</option>;
+    } else {
+      return <option key={opt} value={opt}>{opt}</option>;
     }
-  }
+  });
 
-  renderOptions() {
-    let options = this.props.optionList.map((opt) => {
-      if (this.props.defaultOption && opt === this.props.defaultOption.value) {
-        return <option key={opt} value={opt}>{this.props.defaultOption.label}</option>;
-      } else {
-        return <option key={opt} value={opt}>{opt}</option>;
-      }
-    });
-
-    if (this.props.emptyOption && (this.state.value === '' || this.state.value === undefined)) {
-      let emptyOption = [
-        <option
-          key='noopt' value={this.props.emptyOption.value}>{this.props.emptyOption.label}
-        </option>
-      ];
-      //add at the beginning
-      options = emptyOption.concat(options);
-    }
-
-    return options;
-  }
-
-  render() {
-    let classname = 'server-detail-select';
-    if (this.props.moreClass) {
-      classname += ' ' + this.props.moreClass;
-    }
-    return (
-      <div className={classname}>
-        <select className='rounded-corner' value={this.state.value} name={this.props.name}
-          onChange={this.handleSelect}>{this.renderOptions()}</select>
-      </div>
+  if (props.emptyOption && isEmpty(props.value)) {
+    // add emptyOption to the beginning of the list if nothing has been selected yet
+    const result = options.unshift(
+      <option
+        key='noopt' value={props.emptyOption.value}>{props.emptyOption.label}
+      </option>
     );
+
+    // With immutable lists, unshift creates a new list with the value inserted, but
+    // with javascript arrays, unshift modifies the array in-place and returns an integer.
+    // Handle the immutableJS case here.
+    if (result instanceof List) {
+      options = result;  // Use the new list with the empty value at the beginning
+    }
   }
+
+  let classname = 'server-detail-select';
+  if (props.moreClass) {
+    classname += ' ' + props.moreClass;
+  }
+  return (
+    <div className={classname}>
+      <select className='rounded-corner' value={props.value} name={props.name}
+        onChange={(e) => props.selectAction(e.target.value)}>{options}</select>
+    </div>
+  );
 }

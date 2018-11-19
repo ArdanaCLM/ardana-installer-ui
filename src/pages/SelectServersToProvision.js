@@ -24,7 +24,7 @@ import TransferTable from '../components/TransferTable.js';
 import { InputLine } from '../components/InputLine.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
 import HelpText from '../components/HelpText.js';
-import { PlaybookProgress } from '../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 
 const OS_INSTALL_STEPS = [

@@ -17,7 +17,7 @@ import React from 'react';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
-import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import { STATUS, INSTALL_PLAYBOOK } from '../../utils/constants.js';
 
@@ -80,7 +80,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     let playbooks = [{
       name: INSTALL_PLAYBOOK,
       payload: {
-        'extraVars': {
+        'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
           'ardanauser_password': this.props.operationProps.osInstallPassword
         }

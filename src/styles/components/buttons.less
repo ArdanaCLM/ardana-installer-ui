@@ -16,6 +16,7 @@
 
 .btn {
   display: inline-block;
+  font-size: 14px;//in bootstrap 3 this is the default, in bootstrap 4 its 1rem which makes the buttons bigger
   font-weight: normal;
   text-align: center;
   vertical-align: middle;
@@ -24,6 +25,7 @@
   white-space: nowrap;
   padding: 6px 12px;
   border-radius: 4px;
+  line-height: 20px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
 }
 
 .btn-primary {
@@ -34,7 +36,7 @@
 
 .btn.btn-primary:active,
 .btn.btn-primary:hover,
-.btn.btn-primary:focus {
+.btn.btn-primary:focus{
   background-color: @active-button-color;
   border: 1px solid @active-button-color;
   outline: 0;
@@ -45,7 +47,9 @@
   opacity: 0.4;
 }
 .btn.btn-primary:disabled:hover,
-.btn.btn-primary[disabled]:hover {
+.btn.btn-primary[disabled]:hover,
+.btn.btn-primary:disabled,
+.btn.btn-primary[disabled] {
   background-color: @preferredcolor;
   border: 1px solid @preferredcolor;
   cursor: not-allowed;

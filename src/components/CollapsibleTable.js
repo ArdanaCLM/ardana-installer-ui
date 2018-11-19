@@ -16,7 +16,6 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import EditServerDetails from './EditServerDetails.js';
 import ViewServerDetails from './ViewServerDetails.js';
-import ReplaceServerDetails from './ReplaceServerDetails.js';
 import ContextMenu from './ContextMenu.js';
 import { BaseInputModal, ConfirmModal } from './Modals.js';
 import { List, Map } from 'immutable';
@@ -31,120 +30,21 @@ class CollapsibleTable extends Component {
     this.state = {
       showEditServerModal: false,
       showServerDetailsModal: false,
-      activeRowData: undefined,
-      model: this.props.model,
-      showReplaceServerModal: false,
-      showMenu: false,
-      menuItems: [],
-      menuLocation: undefined
+
+      // The following variables are needed for rendering the context menu for a
+      // given menu row. These are needed as part of state because they are populated
+      // during a menu click and not used until the subsequent render phase
+      showContextMenu: false,
+      contextMenuRow: undefined,     // info from the row on for which the context menu is shown
+      contextMenuItems: [],          // items in the context menu
+      contextMenuLocation: undefined // screen coordinates where context menu is to be drawn
     };
   }
 
-  componentWillReceiveProps(newProps) {
-    if (this.state.model !== newProps.model) {
-      this.setState({model: newProps.model});
-    }
-  }
-
-  handleDoneEditServer = (server, originId) => {
-    this.props.saveEditServer(server, originId);
-    this.setState({showEditServerModal: false, activeRowData: undefined});
-  }
-
-  handleCancelEditServer = () => {
-    this.setState({showEditServerModal: false, activeRowData: undefined});
-  }
-
-  handleShowEditServer = (rowData) => {
-    this.setState({showEditServerModal: true, activeRowData: rowData});
-  }
-
-  handleCancelServerDetails = () => {
-    this.setState({showServerDetailsModal: false, activeRowData: undefined});
-  }
-
-  handleShowServerDetails = (rowData) => {
-    this.setState({showServerDetailsModal: true, activeRowData: rowData});
-  }
-
-  handleShowMenuServerDetails = () => {
-    this.setState({showServerDetailsModal: true, showMenu: false});
-  }
-
-  handleDoneReplaceServer = (server, wipeDisk, installOS) => {
-    this.props.replaceServer(server, wipeDisk, installOS);
-    this.setState({showReplaceServerModal: false, activeRowData: undefined});
-  }
-
-  handleCancelReplaceServer = () => {
-    this.setState({showReplaceServerModal: false, activeRowData: undefined});
-  }
-
-  handleShowMenuReplaceServer = () => {
-    this.setState({showReplaceServerModal: true, showMenu: false});
-  }
-
-  handleShowMenuServerDetails = () => {
-    this.setState({showServerDetailsModal: true, showMenu: false});
-  }
-
-  handleShowMenuDeleteServer = () => {
-    //TODO
-  }
-
-  handleShowMenuActivateServer = () => {
-    //TODO
-  }
-
-  handleShowMenuDeactivateServer = () => {
-    //TODO
-  }
-
-  handleShowMenu = (event, rowData) => {
-    let role = rowData.role;
-    let items = [];
-    if (role.indexOf('COMPUTE') === -1) { //not compute node
-      items = [{
-        show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails,
-      }];
-
-      //if the UI is not in production mode, include menu options that aren't completed yet
-      if(!isProduction()) {
-        items.push({
-          show: true, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
-        });
-      }
-    }
-    else { //TODO need dynamically show or not show based on the rowData status
-      items = [
-        {
-          show: true, key: 'common.details', handleShowModal: this.handleShowMenuServerDetails
-        }
-      ];
-
-      if (!isProduction()) {
-        // show replace button when there is no process operation going on
-        let showReplaceMenu = !this.props.processOperation;
-        items.push(
-          {
-            show: false, key: 'common.activate', handleShowModal: this.handleShowMenuActivateServer
-          }, {
-            show: false, key: 'common.deactivate', handleShowModal: this.handleShowMenuDeactivateServer
-          }, {
-            show: false, key: 'common.delete', handleShowModal: this.handleShowMenuDeleteServer
-          }, {
-            show: showReplaceMenu, key: 'common.replace', handleShowModal: this.handleShowMenuReplaceServer
-          }
-        );
-      }
-    }
-
-    this.setState({
-      showMenu: true, activeRowData: rowData, menuItems: items,
-      menuLocation: {x: event.pageX, y: event.pageY}
-    });
-  }
-
+  // The details of which groups are shown and which are expanded should
+  // be entirely encapsulated within this component.
+  // TODO: Refactor this to track which groups are expended in THIS component's
+  // state rather than requiring the caller to track them.
   toggleShowHide(event, clickedGroup, wasExpanded) {
     if (wasExpanded) {
       this.props.removeExpandedGroup(clickedGroup);
@@ -163,10 +63,13 @@ class CollapsibleTable extends Component {
   }
 
   formatServerObjects = () => {
-    const servers = this.state.model.getIn(['inputModel','servers']);
+    const servers = this.props.model.getIn(['inputModel','servers']);
     // Create a map of role names to list of servers in each, e.g.
     //   { 'COMPUTE':[{name:'one',...},{name:'two',...},  'CONTROLLER': [...]}
     let groupMap = Map();
+    // TODO: Avoid converting both Maps to javascript objects for *every*
+    // comparison in the sort.  Instead, either create an additional comparison function
+    // for maps, or make byServerNameOrId work for both Maps and objects.
     servers.sort((a,b) => byServerNameOrId(a.toJS(),b.toJS())).forEach(server => {
       groupMap = groupMap.update(server.get('role'),
         new List(),           // create a new list if role is not in groupMap
@@ -212,7 +115,7 @@ class CollapsibleTable extends Component {
   renderEditAction = (server) => {
     return (
       <span className='edit collapsible'
-        onClick={() => this.handleShowEditServer(server)}>
+        onClick={() => this.setState({showEditServerModal: true, contextMenuRow: server})}>
         <i className="material-icons collapsible">edit</i>
       </span>
     );
@@ -221,21 +124,67 @@ class CollapsibleTable extends Component {
   renderViewAction = (server) => {
     return (
       <span className="detail-info collapsible"
-        onClick={() => this.handleShowServerDetails(server)}>
+        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
         <i className="material-icons collapsible">info</i>
       </span>
     );
   }
 
-  renderMenuAction = (server) => {
+  getContextMenuItems = (row) => {
+    let items = [{
+      key: 'common.details', action: () => this.setState({showServerDetailsModal: true})
+    }];
+
+    if (row.role.includes('COMPUTE')) {
+      if (!isProduction()) {
+        // TODO: Add these as they are implemented
+        /*
+            key: 'common.activate', action: ...
+            key: 'common.deactivate', action: ...
+            key: 'common.delete', action: ...
+        */
+        // show replace button when there is no process operation going on
+        if (!this.props.processOperation) {
+          items.push({
+            key: 'common.replace',
+            action: this.props.replaceServer,
+            callbackData: row
+          });
+        }
+      }
+    } else {
+      // not compute node
+      if(!isProduction()) {
+        items.push({
+          key: 'common.replace',
+          action: this.props.replaceServer,
+          callbackData: row
+        });
+      }
+    }
+    return items;
+  }
+
+  prepareContextMenu = (event, row) => {
+    const items = this.getContextMenuItems(row);
+
+    this.setState({
+      showContextMenu: true,
+      contextMenuRow: row,
+      contextMenuItems: items,
+      contextMenuLocation: {x: event.pageX, y: event.pageY}
+    });
+  }
+
+  renderMenuAction = (row) => {
     return (
-      <span className='menu-icon' onClick={(event) => this.handleShowMenu(event, server)}>
+      <span className='menu-icon' onClick={(event) => this.prepareContextMenu(event, row)}>
         <i className='material-icons'>more_horiz</i>
       </span>
     );
   }
 
-  renderServerDataCols(server) {
+  renderRow(server) {
     let count = 0;
     let cols = [];
     this.props.tableConfig.columns.forEach((colDef) => {
@@ -244,6 +193,12 @@ class CollapsibleTable extends Component {
       }
     });
 
+    // TODO: The criteria for rendering actions separately (as in the install wizard)
+    // or as a context menu (as in the update wizard) should not have hardcoded logic
+    // looking for specific items, but should either be directly controllable with a
+    // flag, or determined, say, on the basis of how many items there are ; for example,
+    // if there are less then 3 items, then display them is separate items, otherwise
+    // use a context menu
     cols.push(
       <td key='action-buttons'>
         {this.props.saveEditServer && this.renderEditAction(server)}
@@ -263,7 +218,9 @@ class CollapsibleTable extends Component {
     }
 
     let groupRowClass = 'group-row';
-    groupRowClass = this.isRoleGroupValid(group) ? groupRowClass : groupRowClass + ' has-error';
+    if (! this.isRoleGroupValid(group)) {
+      groupRowClass += ' has-error';
+    }
 
     let groupRows = [<tr className={groupRowClass} key={group.groupName}
       onClick={(event) => this.toggleShowHide(event, group.groupName, group.isExpanded)}>
@@ -273,7 +230,7 @@ class CollapsibleTable extends Component {
       <td className='group-count-col'>{group.members.length}
         <span className='expand-collapse-icon'><i className='material-icons'>{icon}</i></span></td></tr>];
     group.members.forEach((member) => {
-      let cols = this.renderServerDataCols(member);
+      let cols = this.renderRow(member);
       let memberRowClassName = 'member-row';
       memberRowClassName =
         this.isDataRowValid(member) ? memberRowClassName : memberRowClassName + ' required-update';
@@ -284,6 +241,16 @@ class CollapsibleTable extends Component {
     return groupRows;
   }
 
+  hideEditDialog = () => {
+    this.setState({showEditServerModal: false});
+  }
+
+  handleDoneEditServer = (server, originId) => {
+    this.props.saveEditServer(server, originId);
+    this.hideEditDialog();
+  }
+
+
   renderEditServerModal() {
     let theProps = {};
     // check against all the server ids to make sure
@@ -292,43 +259,17 @@ class CollapsibleTable extends Component {
     let ids =
       getAllOtherServerIds(
         this.props.model, this.props.autoServers,
-        this.props.manualServers, this.state.activeRowData.id);
+        this.props.manualServers, this.state.contextMenuRow.id);
     theProps.ids = ids;
     return (
       <BaseInputModal
         show={this.state.showEditServerModal} className='edit-details-dialog'
-        onHide={this.handleCancelEditServer} title={translate('edit.server.details.heading')}>
+        onHide={this.hideEditDialog} title={translate('edit.server.details.heading')}>
         <EditServerDetails
-          cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
+          cancelAction={this.hideEditDialog} doneAction={this.handleDoneEditServer}
           model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-          data={this.state.activeRowData} {...theProps}>
+          data={this.state.contextMenuRow} {...theProps}>
         </EditServerDetails>
-      </BaseInputModal>
-    );
-  }
-
-  renderReplaceServerModal() {
-    let title = translate('server.replace.heading', this.state.activeRowData.id);
-    let newProps = { ...this.props };
-
-    const modelIds = this.props.model.getIn(['inputModel','servers'])
-      .map(server => server.get('uid') || server.get('id'));
-
-    // The servers that can be used for possible replacements are all of those discovered servers (either
-    //   manually or automatic) that are *not* already assigned somewhere in the model
-    const available = [].concat(this.props.manualServers || []).concat(this.props.autoServers || [])
-      .filter(server => ! modelIds.includes(server.uid));
-
-    newProps.availableServers = available;
-
-    return (
-      <BaseInputModal
-        show={this.state.showReplaceServerModal} className='edit-details-dialog'
-        onHide={this.handleCancelReplaceServer} title={title}>
-        <ReplaceServerDetails
-          cancelAction={this.handleCancelReplaceServer} doneAction={this.handleDoneReplaceServer}
-          data={this.state.activeRowData} { ...newProps }>
-        </ReplaceServerDetails>
       </BaseInputModal>
     );
   }
@@ -337,17 +278,18 @@ class CollapsibleTable extends Component {
     return (
       <ConfirmModal
         show={this.state.showServerDetailsModal} className='view-details-dialog' hideFooter
-        onHide={this.handleCancelServerDetails} title={translate('view.server.details.heading')}>
-        <ViewServerDetails data={this.state.activeRowData}/>
+        onHide={() => this.setState({showServerDetailsModal: false})} title={translate('view.server.details.heading')}>
+        <ViewServerDetails data={this.state.contextMenuRow}/>
       </ConfirmModal>
     );
   }
 
-  renderActionItemsMenu() {
+  renderContextMenu() {
     return (
       <ContextMenu
-        show={this.state.showMenu} items={this.state.menuItems} close={() => this.setState({showMenu: false})}
-        location={this.state.menuLocation}>
+        items={this.state.contextMenuItems}
+        close={() => this.setState({showContextMenu: false})}
+        location={this.state.contextMenuLocation}>
       </ContextMenu>
     );
   }
@@ -365,13 +307,16 @@ class CollapsibleTable extends Component {
         <div className='rounded-corner'>
           <table className='full-width'><tbody>{rows}</tbody></table>
         </div>
-        {this.props.saveEditServer && this.state.activeRowData && this.renderEditServerModal()}
-        {this.props.replaceServer && this.state.activeRowData && this.renderReplaceServerModal()}
-        {this.state.activeRowData && this.renderServerDetailsModal()}
-        {this.state.showMenu && this.renderActionItemsMenu()}
+        {this.state.showEditServerModal && this.renderEditServerModal()}
+        {this.state.showServerDetailsModal && this.renderServerDetailsModal()}
+        {this.state.showContextMenu && this.renderContextMenu()}
       </div>
     );
   }
 }
+
+// TODO:
+// Refactor this class so that the caller can register menu items to be shown,
+//   where each item has a callback function, an icon
 
 export default CollapsibleTable;
