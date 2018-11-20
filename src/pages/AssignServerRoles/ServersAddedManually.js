@@ -194,7 +194,7 @@ class ServersAddedManually extends Component {
     );
 
     return (
-      <ConfirmModal show={this.props.show} className={'manual-discover-modal'}
+      <ConfirmModal className={'manual-discover-modal'}
         title={this.props.addAction ? translate('add.server.add') : translate('edit.server')}
         onHide={this.props.closeAction} footer={footer}>
 

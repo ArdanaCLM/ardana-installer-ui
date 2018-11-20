@@ -149,26 +149,6 @@ class DiskModelsTab extends Component {
       </tr>
     );
 
-    let detailsSection = '';
-    if (this.state.showDiskModelDetails) {
-      detailsSection = (<DiskModelDetails model={this.props.model}
-        diskModel={this.state.diskModel} updateGlobalState={this.props.updateGlobalState}
-        closeAction={this.hideDiskModelDetails} extendAction={this.setExtendedDetails}
-        setDataChanged={this.props.setDataChanged} tabIndex={this.props.tabIndex}
-        ref={instance => {this.diskModelDetails = instance;}}/>);
-    }
-
-    let confirmRemoveSection = '';
-    if (this.state.showRemoveConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveConfirmation} title={translate('warning')}
-          yesAction={() => this.removeDiskModel(this.state.diskModelToRemove) }
-          noAction={() => this.setState({showRemoveConfirmation: false})}>
-          {translate('details.disk.model.confirm.remove', this.state.diskModelToRemove)}
-        </YesNoModal>
-      );
-    }
-
     let extendedClass = 'extended-one';
     let widthClass = 'col-12';
     if (this.state.showDiskModelDetails) {
@@ -201,8 +181,20 @@ class DiskModelsTab extends Component {
             </tbody>
           </table>
         </div>
-        {detailsSection}
-        {confirmRemoveSection}
+        <If condition={this.state.showDiskModelDetails}>
+          <DiskModelDetails model={this.props.model}
+            diskModel={this.state.diskModel} updateGlobalState={this.props.updateGlobalState}
+            closeAction={this.hideDiskModelDetails} extendAction={this.setExtendedDetails}
+            setDataChanged={this.props.setDataChanged} tabIndex={this.props.tabIndex}
+            ref={instance => {this.diskModelDetails = instance;}}/>
+        </If>
+        <If condition={this.state.showRemoveConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={() => this.removeDiskModel(this.state.diskModelToRemove) }
+            noAction={() => this.setState({showRemoveConfirmation: false})}>
+            {translate('details.disk.model.confirm.remove', this.state.diskModelToRemove)}
+          </YesNoModal>
+        </If>
       </div>
     );
   }

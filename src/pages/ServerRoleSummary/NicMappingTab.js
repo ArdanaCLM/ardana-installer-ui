@@ -295,19 +295,17 @@ class NicMappingTab extends Component {
     }
   }
 
-  confirmModal = () => {
+  confirmModal() {
     if (this.state.showRemoveConfirmation) {
       const name = this.getRows().getIn([this.state.activeRow, 'name']);
 
       return (
-        <YesNoModal show={true}
-          title={translate('warning')}
+        <YesNoModal title={translate('warning')}
           yesAction={() => {this.deleteNicMapping(this.state.activeRow);
             this.setState({showRemoveConfirmation: false});} }
           noAction={() => this.setState({showRemoveConfirmation: false})}>
           {translate('details.nicmapping.confirm.remove', name)}
         </YesNoModal>
-
       );
     }
   }

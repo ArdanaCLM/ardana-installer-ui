@@ -323,24 +323,27 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   renderValidationErrorModal() {
-    return (
-      <BaseInputModal
-        show={this.state.validationError !== undefined}
-        className='addserver-log-dialog'
-        onHide={this.handleCloseValidationErrorModal}
-        title={translate('server.addserver.validate.error.title')}>
-        <div className='addservers-page'><pre className='log'>{this.state.validationError}</pre></div>
-      </BaseInputModal>
-    );
+    if(this.state.validationError) {
+      return (
+        <BaseInputModal
+          className='addserver-log-dialog'
+          onHide={this.handleCloseValidationErrorModal}
+          title={translate('server.addserver.validate.error.title')}>
+          <div className='addservers-page'><pre className='log'>{this.state.validationError}</pre></div>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderDeployConfirmModal() {
     return (
-      <YesNoModal show={this.state.showDeployConfirmModal} title={translate('warning')}
-        yesAction={this.addServers}
-        noAction={() => this.setState({showDeployConfirmModal: false})}>
-        {translate('server.addserver.deploy.confirm')}
-      </YesNoModal>
+      <If condition={this.state.showDeployConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={this.addServers}
+          noAction={() => this.setState({showDeployConfirmModal: false})}>
+          {translate('server.addserver.deploy.confirm')}
+        </YesNoModal>
+      </If>
     );
   }
 

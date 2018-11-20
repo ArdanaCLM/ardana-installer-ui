@@ -143,25 +143,6 @@ class ServerGroupsTab extends Component {
       </tr>
     );
 
-    let detailsSection = '';
-    if (this.state.showServerGroupDetails) {
-      detailsSection = (<ServerGroupDetails model={this.props.model}
-        value={this.state.value} updateGlobalState={this.props.updateGlobalState}
-        setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}
-        tabIndex={this.props.tabIndex} ref={instance => {this.serverGroupDetails = instance;}}/>);
-    }
-
-    let confirmRemoveSection = '';
-    if (this.state.showRemoveConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveConfirmation} title={translate('warning')}
-          yesAction={() => this.removeServerGroup(this.state.serverGroupToRemove) }
-          noAction={() => this.setState({showRemoveConfirmation: false})}>
-          {translate('details.server.group.confirm.remove', this.state.serverGroupToRemove)}
-        </YesNoModal>
-      );
-    }
-
     return (
       <div className='extended-one'>
         <div className={this.state.showServerGroupDetails ? 'col-8 verticalLine' : 'col-12'}>
@@ -180,8 +161,19 @@ class ServerGroupsTab extends Component {
             </tbody>
           </table>
         </div>
-        {detailsSection}
-        {confirmRemoveSection}
+        <If condition={this.state.showServerGroupDetails}>
+          <ServerGroupDetails model={this.props.model}
+            value={this.state.value} updateGlobalState={this.props.updateGlobalState}
+            setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}
+            tabIndex={this.props.tabIndex} ref={instance => {this.serverGroupDetails = instance;}}/>
+        </If>
+        <If condition={this.state.showRemoveConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={() => this.removeServerGroup(this.state.serverGroupToRemove) }
+            noAction={() => this.setState({showRemoveConfirmation: false})}>
+            {translate('details.server.group.confirm.remove', this.state.serverGroupToRemove)}
+          </YesNoModal>
+        </If>
       </div>
     );
   }

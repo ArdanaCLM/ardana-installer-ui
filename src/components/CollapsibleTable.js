@@ -252,46 +252,52 @@ class CollapsibleTable extends Component {
 
 
   renderEditServerModal() {
-    let theProps = {};
-    // check against all the server ids to make sure
-    // whatever changes on id won't conflict with other
-    // ids.
-    let ids =
-      getAllOtherServerIds(
-        this.props.model, this.props.autoServers,
-        this.props.manualServers, this.state.contextMenuRow.id);
-    theProps.ids = ids;
-    return (
-      <BaseInputModal
-        show={this.state.showEditServerModal} className='edit-details-dialog'
-        onHide={this.hideEditDialog} title={translate('edit.server.details.heading')}>
-        <EditServerDetails
-          cancelAction={this.hideEditDialog} doneAction={this.handleDoneEditServer}
-          model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-          data={this.state.contextMenuRow} {...theProps}>
-        </EditServerDetails>
-      </BaseInputModal>
-    );
+    if (this.state.showEditServerModal) {
+      let theProps = {};
+      // check against all the server ids to make sure
+      // whatever changes on id won't conflict with other
+      // ids.
+      let ids =
+        getAllOtherServerIds(
+          this.props.model, this.props.autoServers,
+          this.props.manualServers, this.state.contextMenuRow.id);
+      theProps.ids = ids;
+      return (
+        <BaseInputModal className='edit-details-dialog'
+          onHide={this.hideEditDialog} title={translate('edit.server.details.heading')}>
+          <EditServerDetails
+            cancelAction={this.hideEditDialog} doneAction={this.handleDoneEditServer}
+            model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+            data={this.state.contextMenuRow} {...theProps}>
+          </EditServerDetails>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderServerDetailsModal() {
-    return (
-      <ConfirmModal
-        show={this.state.showServerDetailsModal} className='view-details-dialog' hideFooter
-        onHide={() => this.setState({showServerDetailsModal: false})} title={translate('view.server.details.heading')}>
-        <ViewServerDetails data={this.state.contextMenuRow}/>
-      </ConfirmModal>
-    );
+    if (this.state.showServerDetailsModal) {
+      return (
+        <ConfirmModal
+          className='view-details-dialog' hideFooter
+          onHide={() => this.setState({showServerDetailsModal: false})}
+          title={translate('view.server.details.heading')}>
+          <ViewServerDetails data={this.state.contextMenuRow}/>
+        </ConfirmModal>
+      );
+    }
   }
 
   renderContextMenu() {
-    return (
-      <ContextMenu
-        items={this.state.contextMenuItems}
-        close={() => this.setState({showContextMenu: false})}
-        location={this.state.contextMenuLocation}>
-      </ContextMenu>
-    );
+    if (this.state.showContextMenu) {
+      return (
+        <ContextMenu
+          items={this.state.contextMenuItems}
+          close={() => this.setState({showContextMenu: false})}
+          location={this.state.contextMenuLocation}>
+        </ContextMenu>
+      );
+    }
   }
 
   render() {
@@ -307,9 +313,9 @@ class CollapsibleTable extends Component {
         <div className='rounded-corner'>
           <table className='full-width'><tbody>{rows}</tbody></table>
         </div>
-        {this.state.showEditServerModal && this.renderEditServerModal()}
-        {this.state.showServerDetailsModal && this.renderServerDetailsModal()}
-        {this.state.showContextMenu && this.renderContextMenu()}
+        {this.renderEditServerModal()}
+        {this.renderServerDetailsModal()}
+        {this.renderContextMenu()}
       </div>
     );
   }

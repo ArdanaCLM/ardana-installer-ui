@@ -276,7 +276,7 @@ class AssignServerRoles extends BaseWizardPage {
   renderAddServerManuallyModal = () => {
     if (this.state.showAddServerManuallyModal) {
       return (
-        <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
+        <ServersAddedManually model={this.props.model}
           closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
           addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
           rolesLimit={this.props.rolesLimit}
@@ -305,7 +305,7 @@ class AssignServerRoles extends BaseWizardPage {
     }
     if (this.state.showEditServerAddedManuallyModal) {
       return (
-        <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
+        <ServersAddedManually model={this.props.model}
           closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
           updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
           rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
@@ -1269,11 +1269,13 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderBaremetalSettings = () => {
-    return (
-      <BaremetalSettings show={this.state.showBaremetalSettings}
-        model={this.props.model} cancelAction={this.closeBaremetalSettings}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showBaremetalSettings) {
+      return (
+        <BaremetalSettings
+          model={this.props.model} cancelAction={this.closeBaremetalSettings}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderAvailableServersTabs() {
@@ -1458,46 +1460,52 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderCredsInputModal() {
-    return (
-      <BaseInputModal
-        show={this.state.showCredsModal}
-        className='creds-dialog'
-        onHide={this.handleCancelCredsInput}
-        title={translate('add.server.connection.creds')}>
+    if (this.state.showCredsModal) {
+      return (
+        <BaseInputModal
+          className='creds-dialog'
+          onHide={this.handleCancelCredsInput}
+          title={translate('add.server.connection.creds')}>
 
-        <ConnectionCredsInfo
-          cancelAction={this.handleCancelCredsInput}
-          doneAction={credsData => this.handleDoneCredsInput(credsData)}
-          data={this.connections}>
-        </ConnectionCredsInfo>
-      </BaseInputModal>
-    );
+          <ConnectionCredsInfo
+            cancelAction={this.handleCancelCredsInput}
+            doneAction={credsData => this.handleDoneCredsInput(credsData)}
+            data={this.connections}>
+          </ConnectionCredsInfo>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderServerDetailsModal() {
-    //if the activeRowData is from the right side table...it doesn't have the
-    //source ...need to find source data which has the details
-    let sourceData =
-      this.getSourceData(this.state.activeRowData, this.activeTableId);
+    if(this.state.showServerDetailsModal) {
+      //if the activeRowData is from the right side table...it doesn't have the
+      //source ...need to find source data which has the details
+      let sourceData =
+        this.getSourceData(this.state.activeRowData, this.activeTableId);
 
-    let extraProps = {};
-    let dialogClass = 'view-details-dialog ';
-    if(sourceData && (sourceData.source === 'sm' || sourceData.source === 'ov')) {
-      extraProps.tableId = this.activeTableId;
-      extraProps.source = sourceData.source;
-      extraProps.details = sourceData.details;
-      dialogClass = dialogClass + 'more-width';
+      let extraProps = {};
+      let dialogClass = 'view-details-dialog ';
+      if(sourceData && (sourceData.source === 'sm' || sourceData.source === 'ov')) {
+        extraProps.tableId = this.activeTableId;
+        extraProps.source = sourceData.source;
+        extraProps.details = sourceData.details;
+        dialogClass = dialogClass + 'more-width';
+      }
+
+      return (
+        <ConfirmModal className={dialogClass} hideFooter
+          onHide={this.handleCloseServerDetails} title={translate('view.server.details.heading')}>
+          <ViewServerDetails data={this.state.activeRowData} {...extraProps}/>
+        </ConfirmModal>
+      );
     }
-
-    return (
-      <ConfirmModal show={this.state.showServerDetailsModal} className={dialogClass} hideFooter
-        onHide={this.handleCloseServerDetails} title={translate('view.server.details.heading')}>
-        <ViewServerDetails data={this.state.activeRowData} {...extraProps}/>
-      </ConfirmModal>
-    );
   }
 
   renderEditServerDetailsModal() {
+    if (!this.state.showEditServerModal) {
+      return;
+    }
     let extraProps = {};
     if(this.state.activeRowData) {
       // check against all the server ids to make sure
@@ -1529,7 +1537,6 @@ class AssignServerRoles extends BaseWizardPage {
 
     return (
       <BaseInputModal
-        show={this.state.showEditServerModal}
         className='edit-details-dialog'
         onHide={this.handleCancelEditServer}
         title={translate('edit.server.details.heading')}>
@@ -1547,13 +1554,14 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderCloudSettings() {
-    return (
-      <EditCloudSettings
-        show={this.state.showCloudSettings}
-        onHide={() => this.setState({showCloudSettings: false})}
-        model={this.props.model}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showCloudSettings) {
+      return (
+        <EditCloudSettings
+          onHide={() => this.setState({showCloudSettings: false})}
+          model={this.props.model}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderInstallContentHeading() {
@@ -1582,18 +1590,22 @@ class AssignServerRoles extends BaseWizardPage {
       <div className='wizard-page'>
         {!this.props.isUpdateMode && this.renderCloudSettings()}
         {!this.props.isUpdateMode && this.renderInstallContentHeading()}
-        <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
-          yesAction={this.deleteServer}
-          noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
-          {translate('server.delete.server.confirm', serverId)}
-        </YesNoModal>
-        <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
-          yesAction={this.saveImportedServers}
-          noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
-          {this.props.isUpdateMode ?
-            translate('server.import.server.confirm.limit.conflict') :
-            translate('server.import.server.confirm')}
-        </YesNoModal>
+        <If condition={this.state.showDeleteServerConfirmModal}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.deleteServer}
+            noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
+            {translate('server.delete.server.confirm', serverId)}
+          </YesNoModal>
+        </If>
+        <If condition={this.state.showImportServerConfirmModal}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.saveImportedServers}
+            noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
+            {this.props.isUpdateMode ?
+              translate('server.import.server.confirm.limit.conflict') :
+              translate('server.import.server.confirm')}
+          </YesNoModal>
+        </If>
         <div id='AssignServerRoleId' className={contentClass}>
           {this.renderServerRoleContent()}
           {this.renderCredsInputModal()}

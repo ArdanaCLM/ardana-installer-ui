@@ -436,12 +436,14 @@ class CloudModelPicker extends BaseWizardPage {
           {this.renderErrorMessage()}
         </div>
         {this.renderNavButtons()}
-        <YesNoModal show={this.state.showChangeModelConfirmation} title={translate('warning')}
-          yesAction={this.closeChangeModelConfirmation}
-          noAction={() => this.setState({showChangeModelConfirmation: false,
-            selectedModelName: this.props.model.get('name')})}>
-          {translate('model.picker.change.model.confirm')}
-        </YesNoModal>
+        <If condition={this.state.showChangeModelConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.closeChangeModelConfirmation}
+            noAction={() => this.setState({showChangeModelConfirmation: false,
+              selectedModelName: this.props.model.get('name')})}>
+            {translate('model.picker.change.model.confirm')}
+          </YesNoModal>
+        </If>
       </div>
     );
   }
