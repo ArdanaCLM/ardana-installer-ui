@@ -139,9 +139,9 @@ export function importCSV(file, restrictedValues, callback) {
           // If the field has a validator func, verify that it passes
           if (val && field_defs[field].validator) {
             const retValue = field_defs[field].validator(val);
-            if (!retValue.isValid) {
+            if (retValue !== undefined) {
               results.errors.push(
-                translate('server.import.value.invalid', id, val, field, retValue.errorMsg)
+                translate('server.import.value.invalid', id, val, field, retValue)
               );
               validRow = false;
             }
