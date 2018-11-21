@@ -45,8 +45,6 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
 
-    this.playbooks = [];
-
     this.state = {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       processErrorBanner: '',
@@ -71,13 +69,14 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   }
 
   renderPlaybookProgress () {
-    this.playbooks = [{
+    let playbooks = [{
       name: 'commit',
       action: ((logger) => {
         const commitMessage = {'message': 'Committed via Ardana Installer'};
         return postJson('/api/v1/clm/model/commit', commitMessage)
           .then((response) => {
-            logger('Model committed\n');
+            let msg = translate('update.commit.success');
+            logger(msg + '\n');
           })
           .catch((error) => {
             const message = translate('update.commit.failure', error.toString());
@@ -91,8 +90,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     return (
       <PlaybookProgress
         updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-        playbookStatus = {this.props.playbookStatus} steps = {PLAYBOOK_STEPS}
-        playbooks = {this.playbooks} isUpdateMode = {true}/>
+        playbookStatus = {this.props.playbookStatus} steps = {PLAYBOOK_STEPS} playbooks = {playbooks}/>
     );
   }
 
