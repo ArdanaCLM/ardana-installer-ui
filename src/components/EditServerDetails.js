@@ -24,6 +24,7 @@ import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
   from '../utils/InputValidators.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups, genUID } from '../utils/ModelUtils.js';
+import { ConfirmModal } from './Modals.js';
 
 class EditServerDetails extends Component {
   constructor(props) {
@@ -238,14 +239,16 @@ class EditServerDetails extends Component {
 
   render() {
     return (
-      <div className='edit-server-details'>
-        {this.renderServerContent()}
-        {this.renderFooter()}
-        <If condition={!this.props.isUpdateMode}>
-          {this.renderAddServerGroup()}
-          {this.renderAddNicMapping()}
-        </If>
-      </div>
+      <ConfirmModal className={this.props.className} title={this.props.title}
+        onHide={this.props.cancelAction} footer={this.renderFooter()}>
+        <div className='edit-server-details'>
+          {this.renderServerContent()}
+          <If condition={!this.props.isUpdateMode}>
+            {this.renderAddServerGroup()}
+            {this.renderAddNicMapping()}
+          </If>
+        </div>
+      </ConfirmModal>
     );
   }
 }

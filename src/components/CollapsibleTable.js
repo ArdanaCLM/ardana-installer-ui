@@ -17,7 +17,7 @@ import { translate } from '../localization/localize.js';
 import EditServerDetails from './EditServerDetails.js';
 import ViewServerDetails from './ViewServerDetails.js';
 import ContextMenu from './ContextMenu.js';
-import { BaseInputModal, ConfirmModal } from './Modals.js';
+import { ConfirmModal } from './Modals.js';
 import { List, Map } from 'immutable';
 import { byServerNameOrId } from '../utils/Sort.js';
 import {
@@ -273,14 +273,12 @@ class CollapsibleTable extends Component {
         getModelIPAddresses(this.props.model, this.state.contextMenuRow['ip-addr']);
 
       return (
-        <BaseInputModal className='edit-details-dialog'
-          onHide={this.hideEditDialog} title={translate('edit.server.details.heading')}>
-          <EditServerDetails
-            cancelAction={this.hideEditDialog} doneAction={this.handleDoneEditServer}
-            model={this.props.model} updateGlobalState={this.props.updateGlobalState}
-            data={this.state.contextMenuRow} {...extraProps}>
-          </EditServerDetails>
-        </BaseInputModal>
+        <EditServerDetails className='edit-details-dialog'
+          title={translate('edit.server.details.heading')}
+          cancelAction={this.hideEditDialog} doneAction={this.handleDoneEditServer}
+          model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+          data={this.state.contextMenuRow} {...extraProps}>
+        </EditServerDetails>
       );
     }
   }

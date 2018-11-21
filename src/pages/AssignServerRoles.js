@@ -1536,20 +1536,12 @@ class AssignServerRoles extends BaseWizardPage {
     }
 
     return (
-      <BaseInputModal
-        className='edit-details-dialog'
-        onHide={this.handleCancelEditServer}
-        title={translate('edit.server.details.heading')}>
-
-        <EditServerDetails
-          cancelAction={this.handleCancelEditServer}
-          doneAction={this.handleDoneEditServer}
-          model={this.props.model}
-          updateGlobalState={this.props.updateGlobalState}
-          data={this.state.activeRowData}
-          {...extraProps}>
-        </EditServerDetails>
-      </BaseInputModal>
+      <EditServerDetails className='edit-details-dialog'
+        title={translate('edit.server.details.heading')}
+        cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
+        model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+        data={this.state.activeRowData} {...extraProps}>
+      </EditServerDetails>
     );
   }
 
