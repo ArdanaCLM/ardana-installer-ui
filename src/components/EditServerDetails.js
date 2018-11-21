@@ -13,6 +13,8 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { Map } from 'immutable';
+import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
@@ -20,7 +22,6 @@ import { ListDropdown } from '../components/ListDropdown.js';
 import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
   chainValidators, NoWhiteSpaceValidator, createExcludesValidator }
   from '../utils/InputValidators.js';
-import { INPUT_STATUS } from '../utils/constants.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups, genUID } from '../utils/ModelUtils.js';
 
@@ -28,19 +29,9 @@ class EditServerDetails extends Component {
   constructor(props) {
     super(props);
 
-    this.allInputsStatus = {
-      'id': INPUT_STATUS.UNKNOWN,
-      'ip-addr': INPUT_STATUS.UNKNOWN,
-      'ilo-user': INPUT_STATUS.UNKNOWN,
-      'ilo-password': INPUT_STATUS.UNKNOWN,
-      'ilo-ip': INPUT_STATUS.UNKNOWN,
-      'mac-addr': INPUT_STATUS.UNKNOWN
-    };
-
-    this.initData();
-
     this.state = {
-      isFormValid: false,
+      inputValues: this.initInputValues(props),
+      isValid: this.initInputValid(props),
       showAddServerGroup: false,
       showAddNicMapping: false,
       nicMappings: getNicMappings(props.model),
@@ -48,84 +39,56 @@ class EditServerDetails extends Component {
     };
   }
 
-  makeDeepCopy(srcData) {
-    return JSON.parse(JSON.stringify(srcData));
+  initInputValues = (props) => {
+    return Map({
+      'id': props.data.id,
+      'ip-addr': props.data['ip-addr'] || '',
+      'server-group': props.data['server-group'] || '',
+      'nic-mapping': props.data['nic-mapping'] || '',
+      'ilo-ip': props.data['ilo-ip'] || '',
+      'ilo-user': props.data['ilo-user'] || '',
+      'ilo-password': props.data['ilo-password'] || '',
+      'mac-addr': props.data['mac-addr'] || '',
+      'uid': props.data.uid || genUID('manual'),
+      'role': props.data['role']
+    });
   }
 
-  initData() {
-    this.data = this.makeDeepCopy(this.props.data);
-    // the data is for the fake server which is in the example template
-    // need to use the origin id to find the item in the model if id changed.
-    if(!this.data.uid) {
-      this.originId = this.data.id;
-      this.data.uid = genUID();
-    }
+  initInputValid = (props) => {
+    return  Map({
+      'id': !isEmpty(props.data.id),
+      'ip-addr': !isEmpty(props.data['ip-addr']),
+      'server-group': !isEmpty(props.data['server-group']),
+      'nic-mapping': !isEmpty(props.data['nic-mapping']),
+      'ilo-ip': !isEmpty(props.data['ilo-ip']) ? true : undefined,
+      'ilo-user': !isEmpty(props.data['ilo-user']) ? true : undefined,
+      'ilo-password': !isEmpty(props.data['ilo-password']) ? true : undefined,
+      'mac-addr': !isEmpty(props.data['mac-addr']) ? true : undefined,
+    });
   }
 
-  isFormTextInputValid() {
-    let isAllValid = true;
-    let values = Object.values(this.allInputsStatus);
-    isAllValid =
-      (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;}));
-
-    return isAllValid;
-  }
-
-  isFormDropdownValid() {
-    let isValid = true;
-    if(this.data['server-group'] === '' ||
-    this.data['server-group'] === undefined ||
-    this.data['server-group'] === 'noopt') {
-      isValid = false;
-    }
-
-    if(isValid) {
-      if(this.data['nic-mapping'] === '' ||
-      this.data['nic-mapping'] === undefined ||
-      this.data['nic-mapping'] === 'noopt') {
-        isValid = false;
-      }
-    }
-    return isValid;
-  }
-
-  updateFormValidity = (props, isValid) => {
-    this.allInputsStatus[props.inputName] = isValid ? INPUT_STATUS.VALID : INPUT_STATUS.INVALID;
-    this.setState({isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()});
+  isFormInputValid = () => {
+    return this.state.isValid.every((value, key) => value === true || (value === undefined &&
+      key !== 'id' && key !== 'ip-addr' && key !== 'nic-mapping' && key !== 'server-group'));
   }
 
   handleDone = () => {
-    this.props.doneAction(this.data, this.originId);
+    this.props.doneAction(this.state.inputValues.toJS(), this.props.data.id);
   }
 
-  handleCancel = () => {
-    this.props.cancelAction();
-  }
-
-  handleSelectGroup = (groupName) => {
-    this.data['server-group'] = groupName;
-    this.setState({isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()});
-  }
-
-  handleSelectNicMapping = (nicMapName) => {
-    this.data['nic-mapping'] = nicMapName;
-    this.setState({isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()});
-  }
-
-  handleInputChange = (e, isValid, props) => {
-    let value = e.target.value;
-    this.updateFormValidity(props, isValid);
-    if (isValid) {
-      this.data[props.inputName] = value;
-    }
+  handleInputChange = (value, isValid, name) => {
+    this.setState((prev) => ({
+      isValid: prev.isValid.set(name, isValid),
+      inputValues: prev.inputValues.set(name, value)
+    }));
   }
 
   renderInput(name, type, isRequired, title, validate) {
     return (
       <InputLine
         isRequired={isRequired} inputName={name} inputType={type} label={title}
-        inputValidate={validate} inputValue={this.data[name] ? this.data[name] : ''} moreClass={'has-button'}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity} />
+        inputValidate={validate} inputValue={this.state.inputValues.get(name)} moreClass={'has-button'}
+        inputAction={(e, valid) => this.handleInputChange(e.target.value, valid, name)}/>
     );
   }
 
@@ -174,7 +137,7 @@ class EditServerDetails extends Component {
 
   renderDropDown(name, list, handler, isRequired, title, buttonLabel, addAction) {
     let emptyOptProps = '';
-    if(this.data[name] === '' || this.data[name] === undefined) {
+    if(isEmpty(this.state.inputValues.get(name))) {
       emptyOptProps = {
         label: translate('server.please.select'),
         value: 'noopt'
@@ -185,9 +148,12 @@ class EditServerDetails extends Component {
         <div className='detail-heading'>{translate(title) + '*'}</div>
         <div className='input-body'>
           <div className='input-with-button'>
-            <ListDropdown name={this.props.name} value={this.data[name]} moreClass={'has-button'}
-              optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
-            {!this.props.isUpdateMode && this.renderButtonForDropDown(addAction, buttonLabel)}
+            <ListDropdown name={this.props.name} value={this.state.inputValues.get(name)} moreClass={'has-button'}
+              optionList={list} emptyOption={emptyOptProps}
+              selectAction={(value)=>handler(value, true, name)}/>
+            <If condition={!this.props.isUpdateMode}>
+              {this.renderButtonForDropDown(addAction, buttonLabel)}
+            </If>
           </div>
         </div>
       </div>
@@ -214,7 +180,7 @@ class EditServerDetails extends Component {
               UniqueIdValidator(this.props.ids)
             )
           )}
-          {this.renderTextLine('server.role.prompt', this.data.role)}
+          {this.renderTextLine('server.role.prompt', this.state.inputValues.get('role'))}
           {this.renderInput(
             'ip-addr', 'text', true, 'server.ip.prompt',
             chainValidators(
@@ -225,9 +191,9 @@ class EditServerDetails extends Component {
               IpV4AddressValidator
             )
           )}
-          {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup, true,
+          {this.renderDropDown('server-group', this.state.serverGroups, this.handleInputChange, true,
             'server.group.prompt', 'server.group.prompt', this.addServerGroup)}
-          {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping, true,
+          {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleInputChange, true,
             'server.nicmapping.prompt', 'server.nicmapping.prompt', this.addNicMapping)}
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
@@ -262,9 +228,9 @@ class EditServerDetails extends Component {
     return (
       <div className='btn-row input-button-container'>
         <ActionButton type='default'
-          clickAction={this.handleCancel} displayLabel={translate('cancel')}/>
+          clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
-          isDisabled={!this.state.isFormValid}
+          isDisabled={!this.isFormInputValid()}
           clickAction={this.handleDone} displayLabel={translate('done')}/>
       </div>
     );
@@ -275,8 +241,10 @@ class EditServerDetails extends Component {
       <div className='edit-server-details'>
         {this.renderServerContent()}
         {this.renderFooter()}
-        {!this.props.isUpdateMode && this.renderAddServerGroup()}
-        {!this.props.isUpdateMode && this.renderAddNicMapping()}
+        <If condition={!this.props.isUpdateMode}>
+          {this.renderAddServerGroup()}
+          {this.renderAddNicMapping()}
+        </If>
       </div>
     );
   }
