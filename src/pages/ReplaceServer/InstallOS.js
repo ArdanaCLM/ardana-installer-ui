@@ -51,16 +51,16 @@ class InstallOS extends BaseUpdateWizardPage {
 
   renderPlaybookProgress(serverId) {
     const steps  = [{
-      label: translate('install.progress.step1'),
+      label: 'install.progress.step1',
       playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
     }, {
-      label: translate('install.progress.step2'),
+      label: 'install.progress.step2',
       playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
     }, {
-      label: translate('install.progress.step3'),
+      label: 'install.progress.step3',
       playbooks: [BM_REIMAGE + '.yml']
     }, {
-      label: translate('install.progress.step4'),
+      label: 'install.progress.step4',
       playbooks: [INSTALL_PLAYBOOK + '.yml']
     }];
 

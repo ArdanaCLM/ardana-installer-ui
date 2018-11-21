@@ -14,7 +14,6 @@
 **/
 import React from 'react';
 import { ThreeBounce } from 'better-react-spinkit';
-import '../styles/deployer.less';
 
 export const LoadingMask = (props) => (
   <If condition={props.show}>

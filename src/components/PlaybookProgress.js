@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 
 import { translate } from '../localization/localize.js';
-import { getAppConfig } from '../utils/ConfigHelper.js';
+import { config } from '../utils/ConfigHelper.js';
 import { fetchJson, postJson, deleteJson } from '../utils/RestUtils.js';
 import { STATUS } from '../utils/constants.js';
 import { sleep } from '../utils/MiscUtils.js';
@@ -264,10 +264,10 @@ class PlaybookProgress extends Component {
 
       const statusClass = this.getStatusCSSClass(status);
       if (status === STATUS.COMPLETE) {
-        return (<li key={index} className={statusClass}>{step.label}
+        return (<li key={index} className={statusClass}>{translate(step.label)}
           <i className='material-icons succeed-icon'>check_circle</i></li>);
       } else {
-        return (<li key={index} className={statusClass}>{step.label}</li>);
+        return (<li key={index} className={statusClass}>{translate(step.label)}</li>);
       }
     });
 
@@ -278,7 +278,7 @@ class PlaybookProgress extends Component {
     // Note that this function is only called after a fetch has completed, and thus
     // the application config has already completed loading, so getAppConfig can
     // be safely used here
-    this.socket = io(getAppConfig('shimurl'));
+    this.socket = io(config['shimurl']);
     this.socket.on('playbook-start', this.playbookStarted);
     this.socket.on(
       'playbook-stop',

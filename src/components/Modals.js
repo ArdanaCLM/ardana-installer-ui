@@ -20,7 +20,6 @@ import { postJson } from '../utils/RestUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
 import HelpText from '../components/HelpText.js';
-import '../styles/deployer.less';
 
 export function ConfirmModal(props) {
   return (

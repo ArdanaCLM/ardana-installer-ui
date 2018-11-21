@@ -14,15 +14,14 @@
 **/
 import '@babel/polyfill';
 import 'whatwg-fetch';
-import { AppContainer } from 'react-hot-loader';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import Deployer from './src/Deployer';
 import './src/styles/deployer.less';
-import './src/images/favicon.ico';
+import { loadBundle } from './src/localization/localize';
+import { PRODUCTION } from './src/utils/ConfigHelper';
 
-const render = Component => {
+const render = () => {
   let root = document.getElementById('root');
   if (! root) {
     // If there is not already a root div, create one, since react warns against
@@ -31,17 +30,11 @@ const render = Component => {
     root.id = 'root';
     document.body.append(root);
   }
-  ReactDOM.render(
-    <AppContainer>
-      <Component />
-    </AppContainer>,
-    root
-  );
+  ReactDOM.render(<Deployer />, root);
 };
 
-render(Deployer);
+loadBundle().then(render);
 
-
-if (module.hot) {
-  module.hot.accept('./src/Deployer', () => { render(Deployer); });
+if (!PRODUCTION && module.hot) {
+  module.hot.accept(render);
 }

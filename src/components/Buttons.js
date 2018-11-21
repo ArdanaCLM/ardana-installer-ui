@@ -13,7 +13,6 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 
 export function BackButton(props) {

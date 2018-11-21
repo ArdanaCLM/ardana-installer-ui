@@ -13,7 +13,6 @@
 * limitations under the License.
 **/
 import React from 'react';
-import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage.js';
 

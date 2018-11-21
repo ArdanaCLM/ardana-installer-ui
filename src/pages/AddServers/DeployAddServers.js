@@ -27,26 +27,26 @@ import { fetchJson } from '../../utils/RestUtils.js';
 
 const PLAYBOOK_POSSIBLE_STEPS = [{
   name: WIPE_DISKS_PLAYBOOK,
-  label: translate('server.deploy.progress.wipe-disks'),
+  label: 'server.deploy.progress.wipe-disks',
   playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
   payload: {limit: {}}
 }, {
   name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
-  label: translate('server.deploy.progress.gen-hosts-file'),
+  label: 'server.deploy.progress.gen-hosts-file',
   playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
 }, {
   name: SITE_PLAYBOOK,
-  label: translate('server.deploy.progress.addserver.deploy'),
+  label: 'server.deploy.progress.addserver.deploy',
   playbooks: [SITE_PLAYBOOK + '.yml'],
   payload: {limit: {}}
 }, {
   name: MONASCA_DEPLOY_PLAYBOOK,
-  label: translate('server.deploy.progress.update-monasca'),
+  label: 'server.deploy.progress.update-monasca',
   playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
   payload: {tags: 'active_ping_checks'}
 }, {
   name: ARDANA_START_PLAYBOOK,
-  label: translate('server.deploy.progress.activate'),
+  label: 'server.deploy.progress.activate',
   playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
   payload: {limit: {}}
 }];

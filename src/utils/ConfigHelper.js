@@ -13,29 +13,9 @@
 * limitations under the License.
 **/
 
-// NOTE: The variable PRODUCTION is set by webpack to identify whether
-// we are in a production or development environment.
-import { config as configDev } from '../../config.dev.js';
-import { config as configProd } from '../../config.prod.js';
-
-var config;
-if (PRODUCTION) { // eslint-disable-line no-undef
-  config = configProd;
-} else {
-  config = configDev;
-}
-
-export function getAppConfig(key) {
-  return config[key];
-}
-
-/**
- * if the app is in production mode, return true, otherwise return false
- * @returns {boolean}
- */
-export function isProduction() {
-  if (PRODUCTION) { // eslint-disable-line no-undef
-    return true;
-  }
-  return false;
-}
+// NOTE: The variable PRODUCTION by NODE_ENV env var
+// At build time the `process.env.NODE_ENV` value is substituted with the a string literal
+export const PRODUCTION = process.env.NODE_ENV === 'production';
+import { config as configDev } from '../../config.dev';
+import { config as configProd } from '../../config.prod';
+export const config = PRODUCTION ? configProd : configDev;

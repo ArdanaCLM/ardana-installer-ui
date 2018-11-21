@@ -23,19 +23,19 @@ import { STATUS, INSTALL_PLAYBOOK } from '../../utils/constants.js';
 
 let PLAYBOOK_STEPS = [
   {
-    label: translate('install.progress.step1'),
+    label: 'install.progress.step1',
     playbooks: ['bm-power-status.yml']
   },
   {
-    label: translate('install.progress.step2'),
+    label: 'install.progress.step2',
     playbooks: ['cobbler-deploy.yml']
   },
   {
-    label: translate('install.progress.step3'),
+    label: 'install.progress.step3',
     playbooks: ['bm-reimage.yml']
   },
   {
-    label: translate('install.progress.step4'),
+    label: 'install.progress.step4',
     playbooks: [INSTALL_PLAYBOOK + '.yml']
   }
 ];

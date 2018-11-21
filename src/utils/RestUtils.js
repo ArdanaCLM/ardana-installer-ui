@@ -12,7 +12,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import { getAppConfig } from './ConfigHelper.js';
+import { config } from './ConfigHelper.js';
 import { redirectToLogin } from './RouteUtils.js';
 import { getAuthToken } from './Auth.js';
 
@@ -184,7 +184,7 @@ function buildUrl(url) {
   if (url.startsWith('http')) {
     return url;
   } else {
-    const baseUrl = getAppConfig('shimurl');
+    const baseUrl = config['shimurl'];
     // prepend the baseUrl if we receive a URL without a scheme.  Note that the
     // incoming url may contain a leading / but is not required to.
     return baseUrl + '/' + url.replace(/^\//, '');

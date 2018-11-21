@@ -14,7 +14,6 @@
 **/
 
 import React, { Component } from 'react';
-import '../styles/deployer.less';
 
 import { translate } from '../localization/localize.js';
 

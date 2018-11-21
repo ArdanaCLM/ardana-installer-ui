@@ -17,7 +17,7 @@ import React, { Component } from 'react';
 import { HashRouter as Router, Link } from 'react-router-dom';
 import Route from 'react-router-dom/Route';
 import { translate } from '../localization/localize.js';
-import { isProduction } from '../utils/ConfigHelper.js';
+import { PRODUCTION } from '../utils/ConfigHelper.js';
 import { clearAuthToken } from '../utils/Auth.js';
 import { redirectToLogin } from '../utils/RouteUtils.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
@@ -34,7 +34,7 @@ class NavMenu extends Component {
         path={e.slug}
         children={({ match }) => (
           <li >
-            <Link className={match ? 'active' : ''} to={e.items[0].slug}>{e.name}</Link>
+            <Link className={match ? 'active' : ''} to={e.items[0].slug}>{translate(e.name)}</Link>
           </li>)}
       />
     ));
@@ -47,12 +47,12 @@ class NavMenu extends Component {
         path={e.slug}
         render={props => {
           const items = e.items.map((sub, subidx) => {
-            if(!(isProduction() && sub.unfinished)) return (
+            if(!(PRODUCTION && sub.unfinished)) return (
               <Route
                 key={subidx}
                 path={sub.slug}
                 children={({match}) => (
-                  <Link className={match ? 'active' : ''} to={sub.slug}>{sub.name}</Link>
+                  <Link className={match ? 'active' : ''} to={sub.slug}>{translate(sub.name)}</Link>
                 )}
               />
             );

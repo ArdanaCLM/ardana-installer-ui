@@ -14,7 +14,6 @@
 **/
 
 import React, { Component } from 'react';
-import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
 import OpenStackPackages from '../pages/OpenStackPackages';
 import ArdanaPackages from '../pages/ArdanaPackages';
@@ -33,7 +32,7 @@ import Services from '../pages/topology/Services.js';
 import Network from '../pages/topology/Networks.js';
 import Servers from '../pages/topology/Servers.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
-import { isProduction } from './ConfigHelper.js';
+import { PRODUCTION } from './ConfigHelper.js';
 
 class ServerSummary extends  Component {
   render() {
@@ -55,34 +54,34 @@ class AddServersPage extends  Component {
  * Define all fixed entries on the navigation menu
  */
 export const routes = [
-  { name: translate('services'), slug: '/services',
+  { name: 'services', slug: '/services',
     items: [
-      { name: translate('information'), slug: '/services/info', component: ServiceInfo },
-      { name: translate('packages.openstack'), slug: '/services/openstack-packages', component: OpenStackPackages },
-      { name: translate('packages.ardana'), slug: '/services/openstack-ardana', component: ArdanaPackages },
-      { name: translate('configuration'), slug: '/services/configuration', component: ServiceConfiguration },
-      { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
+      { name: 'information', slug: '/services/info', component: ServiceInfo },
+      { name: 'packages.openstack', slug: '/services/openstack-packages', component: OpenStackPackages },
+      { name: 'packages.ardana', slug: '/services/openstack-ardana', component: ArdanaPackages },
+      { name: 'configuration', slug: '/services/configuration', component: ServiceConfiguration },
+      { name: 'roles', slug: '/services/roles', component: ServicesPerRole },
     ]
   },
-  { name: translate('topology'), slug: '/topology',
+  { name: 'topology', slug: '/topology',
     items: [
-      { name: translate('control_planes'), slug: '/topology/control_planes', component: ControlPlanes },
-      { name: translate('regions'), slug: '/topology/regions', component: Regions },
-      { name: translate('services'), slug: '/topology/services', component: Services },
-      { name: translate('networks'), slug: '/topology/networks', component: Network },
-      { name: translate('servers'), slug: '/topology/servers', component: Servers },
-      { name: translate('roles'), slug: '/topology/roles', component: ServerRoles },
+      { name: 'control_planes', slug: '/topology/control_planes', component: ControlPlanes },
+      { name: 'regions', slug: '/topology/regions', component: Regions },
+      { name: 'services', slug: '/topology/services', component: Services },
+      { name: 'networks', slug: '/topology/networks', component: Network },
+      { name: 'servers', slug: '/topology/servers', component: Servers },
+      { name: 'roles', slug: '/topology/roles', component: ServerRoles },
     ]
   },
-  { name: translate('servers'), slug: '/servers',
+  { name: 'servers', slug: '/servers',
     items: [
-      { name: translate('common.summary'), slug: '/servers/server-summary', component: ServerSummary },
-      { name: translate('add_server'), slug: '/servers/add-server', component: AddServersPage }
+      { name: 'common.summary', slug: '/servers/server-summary', component: ServerSummary },
+      { name: 'add_server', slug: '/servers/add-server', component: AddServersPage }
     ]
   }
 ];
 
-if(!isProduction()) {
+if(!PRODUCTION) {
   routes.push(
     // Avoid the hassle of creating translations for this disposable code:
     { name: 'Example', slug: '/example',

@@ -13,8 +13,6 @@
 * limitations under the License.
 **/
 
-const config = {
+export const config = {
   'shimurl': 'http://localhost:9085',
 };
-
-export { config };

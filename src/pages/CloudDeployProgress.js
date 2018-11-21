@@ -33,39 +33,39 @@ import { ErrorBanner } from '../components/Messages.js';
 
 const PLAYBOOK_STEPS = [
   {
-    label: translate('deploy.progress.config-processor-run'),
+    label: 'deploy.progress.config-processor-run',
     playbooks: ['config-processor-run.yml']
   },
   {
-    label: translate('deploy.progress.ready-deployment'),
+    label: 'deploy.progress.ready-deployment',
     playbooks: ['ready-deployment.yml']
   },
   {
-    label: translate('deploy.progress.predeployment'),
+    label: 'deploy.progress.predeployment',
     playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
   },
   {
-    label: translate('deploy.progress.step1'),
+    label: 'deploy.progress.step1',
     playbooks: ['network_interface-deploy.yml']
   },
   {
-    label: translate('deploy.progress.step2'),
+    label: 'deploy.progress.step2',
     playbooks: ['nova-deploy.yml', 'ironic-deploy.yml', 'magnum-deploy.yml']
   },
   {
-    label: translate('deploy.progress.step3'),
+    label: 'deploy.progress.step3',
     playbooks: ['monasca-agent-deploy.yml', 'monasca-deploy.yml', 'monasca-transform-deploy.yml']
   },
   {
-    label: translate('deploy.progress.step4'),
+    label: 'deploy.progress.step4',
     playbooks: ['ceph-deploy.yml', 'cinder-deploy.yml', 'swift-deploy.yml']
   },
   {
-    label: translate('deploy.progress.step5'),
+    label: 'deploy.progress.step5',
     playbooks: ['ardana-status.yml']
   },
   {
-    label: translate('deploy.progress.step6'),
+    label: 'deploy.progress.step6',
     playbooks: ['site.yml', DAYZERO_SITE_PLAYBOOK + '.yml'], //either site.yml or installui-wipe-and-site.yml
     orCondition: true
   }

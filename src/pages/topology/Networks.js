@@ -15,7 +15,6 @@
 import React, { Component, Fragment } from 'react';
 import { HashLink } from 'react-router-hash-link';
 import { translate } from '../../localization/localize.js';
-import '../../styles/deployer.less';
 import { getInternalModel, noHyphenWrap } from './TopologyUtils.js';
 import { ErrorBanner } from '../../components/Messages';
 import { LoadingMask } from '../../components/LoadingMask';

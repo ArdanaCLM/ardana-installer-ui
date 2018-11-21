@@ -23,7 +23,7 @@ import { byServerNameOrId } from '../utils/Sort.js';
 import {
   getAllOtherServerIds, getModelIPAddresses, getModelIPMIAddresses, getModelMacAddresses
 } from '../utils/ModelUtils.js';
-import { isProduction } from '../utils/ConfigHelper.js';
+import { PRODUCTION } from '../utils/ConfigHelper.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -142,7 +142,7 @@ class CollapsibleTable extends Component {
     }];
 
     if (row.role.includes('COMPUTE')) {
-      if (!isProduction()) {
+      if (!PRODUCTION) {
         // TODO: Add these as they are implemented
         /*
             key: 'common.delete', action: ...

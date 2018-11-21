@@ -24,16 +24,16 @@ import { postJson } from '../../utils/RestUtils.js';
 
 
 const PLAYBOOK_STEPS = [{
-  label: translate('deploy.progress.commit'),
+  label: 'deploy.progress.commit',
   playbooks: ['commit']
 }, {
-  label: translate('deploy.progress.config-processor-run'),
+  label: 'deploy.progress.config-processor-run',
   playbooks: ['config-processor-run.yml']
 }, {
-  label: translate('deploy.progress.ready-deployment'),
+  label: 'deploy.progress.ready-deployment',
   playbooks: ['ready-deployment.yml']
 }, {
-  label: translate('deploy.progress.predeployment'),
+  label: 'deploy.progress.predeployment',
   playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml', ]
 }];
 
