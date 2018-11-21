@@ -164,7 +164,7 @@ class ServerGroupsTab extends Component {
 
     return (
       <div className='extended-one'>
-        <div className={this.state.showServerGroupDetails ? 'col-xs-8 verticalLine' : 'col-xs-12'}>
+        <div className={this.state.showServerGroupDetails ? 'col-8 verticalLine' : 'col-12'}>
           <table className='table'>
             <thead>
               <tr>

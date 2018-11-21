@@ -21,8 +21,19 @@ export class ValidatingInput extends Component {
     super(props);
     this.state = {
       errorMsg: '',
-      inputValue: this.props.inputValue,
+      inputValue: props.inputValue,
+      initialValue: props.inputValue,
       showMask: true
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    const takeFromProps = props.inputValue != state.initialValue && (
+      state.inputValue === props.inputValue
+    );
+    return {
+      ...state,
+      inputValue: takeFromProps ? props.inputValue : state.inputValue
     };
   }
 
@@ -35,48 +46,30 @@ export class ValidatingInput extends Component {
     }
   }
 
-  componentWillReceiveProps(newProps) {
-    if (this.props.inputValue !== newProps.inputValue) {
-      this.setState({inputValue : newProps.inputValue});
-      this.validateInput(newProps.inputValue, newProps);
-    }
-  }
-
   isRequired = () => TRUTHY.includes(this.props.isRequired) || TRUTHY.includes(this.props.required)
 
   validateInput(val, extraProps) {
-    let retValid = false;
-
-    if(this.isRequired()) {
-      if(val === undefined || val.length === 0) {
-        this.setState({errorMsg: translate('input.required.error')});
-        return retValid;
-      }
+    if(this.isRequired() && (val === undefined || val.length === 0)) {
+      this.setState({errorMsg: translate('input.required.error')});
+      return false;
     }
 
     if(this.props.inputValidate && val !== '' && val !== undefined) {//have a validator and have some values
-      let validateObject = this.props.inputValidate(val, extraProps);
-      if (validateObject) {
-        if(validateObject.isValid) {
-          this.setState({errorMsg: ''});
-          retValid = true;
-        }
-        else {
-          this.setState({
-            errorMsg: validateObject.errorMsg
-          });
-        }
-      }
-      else {
+      let err;
+      try {
+        err = this.props.inputValidate(val, extraProps);
+      } catch(e) {
         this.setState({errorMsg: translate('input.validator.error')});
+        return false;
       }
-    }
-    else {  //don't have validator
-      retValid = true;
-      this.setState({ errorMsg: ''});
+      if (err) {
+        this.setState({ errorMsg: err });
+        return false;
+      }
     }
 
-    return retValid;
+    this.setState({errorMsg: undefined});
+    return true;
   }
 
   handleInputChange = (e, props) => {

@@ -21,7 +21,8 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator
+  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator, NoWhiteSpaceValidator,
+  chainValidators
 } from '../../utils/InputValidators.js';
 import { MODE, INPUT_STATUS } from '../../utils/constants.js';
 import HelpText from '../../components/HelpText.js';
@@ -29,7 +30,7 @@ import HelpText from '../../components/HelpText.js';
 class UpdateNetworks extends Component {
   constructor(props) {
     super(props);
-    this.networkGroups = this.getNetworkGroups();
+    this.networkGroups = this.getNetworkGroups(props);
     this.allInputsStatus = {
       'name': INPUT_STATUS.UNKNOWN,
       'vlanid': INPUT_STATUS.UNKNOWN,
@@ -39,7 +40,7 @@ class UpdateNetworks extends Component {
 
     this.allAddressesStatus = [];
 
-    let networks = this.props.mode === MODE.EDIT ? this.getNetworkData(this.props.networkName) : {};
+    let networks = props.mode === MODE.EDIT ? this.getNetworkData(props) : {};
     networks.addresses = this.initAddresses(networks);
     this.state = {
       isFormValid: false,
@@ -67,9 +68,10 @@ class UpdateNetworks extends Component {
     return retAddresses;
   }
 
-  getNetworkData(name) {
+  getNetworkData(props) {
+    const name = props.networkName;
     let network =
-      this.props.model.getIn(['inputModel','networks']).find(net => net.get('name') === name);
+      props.model.getIn(['inputModel','networks']).find(net => net.get('name') === name);
     return JSON.parse(JSON.stringify(network));
   }
 
@@ -187,8 +189,8 @@ class UpdateNetworks extends Component {
     });
   }
 
-  getNetworkGroups = () => {
-    return this.props.model.getIn(['inputModel','network-groups']).map(e => e.get('name'))
+  getNetworkGroups = (props) => {
+    return props.model.getIn(['inputModel','network-groups']).map(e => e.get('name'))
       .toJS()
       .sort(alphabetically);
   }
@@ -239,16 +241,16 @@ class UpdateNetworks extends Component {
               isRequired='false' placeholder={translate('network.addresses')}/>
           </div>
           <div className='plus-minus-container'>
-            { idx > 0 || (addr !== '') ?
+            <If condition={idx > 0 || (addr !== '')}>
               <span key={'address_minus'} onClick={() => this.removeAddress(idx)}>
                 <i className='material-icons left-sign'>remove</i>
               </span>
-              : ''}
-            { lastRow && (this.allAddressesStatus[idx] !== INPUT_STATUS.INVALID && addr !== '') ?
+            </If>
+            <If condition={lastRow && this.allAddressesStatus[idx] !== INPUT_STATUS.INVALID && addr !== ''}>
               <span key={'address_plus'} onClick={this.addAddress}>
                 <i className='material-icons right-sign'>add</i>
               </span>
-              : ''}
+            </If>
           </div>
         </div>
       );
@@ -263,19 +265,6 @@ class UpdateNetworks extends Component {
     if(type === 'number') {
       extraProps.min = 1;
       extraProps.max = 4094;
-    }
-
-    if(name === 'name') {
-      extraProps.names =
-        this.props.model.getIn(['inputModel','networks']).map(e => e.get('name'))
-          .toJS();
-      if(this.props.mode === MODE.EDIT) {
-        //remove current name so won't check against it
-        let idx = this.props.model.getIn(['inputModel','networks']).findIndex(
-          net => net.get('name') === this.props.networkName);
-        extraProps.names.splice(idx, 1);
-      }
-      extraProps.check_nospace=true;
     }
 
     if(this.props.mode === MODE.EDIT) {
@@ -332,11 +321,26 @@ class UpdateNetworks extends Component {
   render() {
     let title =
       this.props.mode === MODE.EDIT ? translate('network.update') : translate('network.add');
+
+    let names = this.props.model.getIn(['inputModel','networks'])
+      .map(e => e.get('name')).toJS();
+    if(this.props.mode === MODE.EDIT) {
+      //remove current name so won't check against it
+      let idx = this.props.model.getIn(['inputModel','networks']).findIndex(
+        net => net.get('name') === this.props.networkName);
+      names.splice(idx, 1);
+    }
     return (
       <div className='details-section network-section'>
         <div className='details-header'>{title}</div>
         <div className='details-body'>
-          {this.renderNetworkInput('name', 'text', true, translate('network.name') + '*', UniqueNameValidator)}
+          {this.renderNetworkInput(
+            'name', 'text', true, translate('network.name') + '*',
+            chainValidators(
+              NoWhiteSpaceValidator(translate('input.validator.name.spaces.error')),
+              UniqueNameValidator(names)
+            )
+          )}
           <div className='details-group-title'>{translate('vlanid') + '*:'}
             <HelpText tooltipText={translate('tooltip.network.vlanid')}/></div>
           {this.renderNetworkInput('vlanid', 'number', true, translate('vlanid'), VLANIDValidator)}

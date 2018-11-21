@@ -34,7 +34,6 @@ import { EditCloudSettings } from './ServerRoleSummary/EditCloudSettings.js';
 import { importCSV } from '../utils/CsvImporter.js';
 import { fromJS } from 'immutable';
 import { isEmpty } from 'lodash';
-import $ from 'jquery';
 import {
   getServerRoles, isRoleAssignmentValid,  getNicMappings, getServerGroups, getMergedServer,
   updateServersInModel, getAllOtherServerIds, genUID, getCleanedServer, getModelServerIds,
@@ -43,9 +42,10 @@ import {
 import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 import { YesNoModal } from '../components/Modals.js';
 import HelpText from '../components/HelpText.js';
+import '../utils/MiscUtils';
 
-const AUTODISCOVER_TAB = 1;
-const MANUALADD_TAB = 2;
+const AUTODISCOVER_TAB = '1';
+const MANUALADD_TAB = '2';
 const COOKIES = new Cookies();
 
 class AssignServerRoles extends BaseWizardPage {
@@ -274,13 +274,15 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderAddServerManuallyModal = () => {
-    return (
-      <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
-        closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
-        addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
-        rolesLimit={this.props.rolesLimit}
-        rawDiscoveredServers={this.state.rawDiscoveredServers}/>
-    );
+    if (this.state.showAddServerManuallyModal) {
+      return (
+        <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
+          closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
+          addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
+          rolesLimit={this.props.rolesLimit}
+          rawDiscoveredServers={this.state.rawDiscoveredServers}/>
+      );
+    }
   }
 
   closeAddServerManuallyModal = () => {
@@ -301,14 +303,16 @@ class AssignServerRoles extends BaseWizardPage {
     if(this.props.isUpdateMode) {
       extraProps.rolesLimit = this.props.rolesLimit;
     }
-    return (
-      <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
-        closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
-        updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
-        rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
-        {...extraProps}
-      />
-    );
+    if (this.state.showEditServerAddedManuallyModal) {
+      return (
+        <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
+          closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
+          updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
+          rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
+          {...extraProps}
+        />
+      );
+    }
   }
 
   closeEditServerAddedManuallyModal = () => {
@@ -957,14 +961,18 @@ class AssignServerRoles extends BaseWizardPage {
    * @param {event} event - the browser event from dragEnter
    */
   highlightDrop = (event) => {
-    let element = $(event.target); // eslint-disable-line no-undef
-    if(!element.hasClass('server-dropzone')) {
-      element = element.closest('.server-dropzone');
+    let { target } = event;
+    if (target && !target.classList.contains('server-dropzone')) {
+      target = target.closest('.server-dropzone');
     }
-    element.css('prevoutline', element.css('outline'));
-    element.css('prevmargin', element.css('margin'));
-    element.css('outline', '2px #00C081 dashed');
-    element.css('margin', '2px');
+    if (target) {
+      if (!target.style.outline.includes('dashed'))
+        target.setAttribute('data-prevoutline', target.style.outline);
+      target.style.outline = '2px #00C081 dashed';
+      if (!target.style.margin.includes('2px'))
+        target.setAttribute('data-prevmargin', target.style.margin);
+      target.style.margin = '2px';
+    }
   }
 
   /**
@@ -976,17 +984,18 @@ class AssignServerRoles extends BaseWizardPage {
    * @param {boolean} forceclear (optional) - whether to forcibly remove the highlighting
    */
   unHighlightDrop = (event, forceclear) => {
-    let element = $(event.target); // eslint-disable-line no-undef
-    if(!element.hasClass('server-dropzone')) {
-      element = element.closest('.server-dropzone');
+    let { target } = event;
+    if(target && !target.classList.contains('server-dropzone')) {
+      target = target.closest('.server-dropzone');
     }
-    if(forceclear ||
-       element.offset().left > event.pageX ||
-       element.offset().left + element.width() < event.pageX ||
-       element.offset().top >= event.pageY ||
-       element.offset().top + element.height() <= event.pageY) {
-      element.css('outline', element.css('prevoutline') || '');
-      element.css('margin', element.css('prevmargin') || '');
+    const offset = target?.getBoundingClientRect();
+    if(target && (forceclear ||
+       offset.left > event.pageX ||
+       offset.left + offset.width < event.pageX ||
+       offset.top >= event.pageY ||
+       offset.top + offset.height <= event.pageY)) {
+      target.style.outline = target.getAttribute('data-prevoutline') || '';
+      target.style.margin = target.getAttribute('data-prevmargin') || '';
     }
   }
 
@@ -1500,16 +1509,22 @@ class AssignServerRoles extends BaseWizardPage {
           this.state.serversAddedManually, this.state.activeRowData.id);
       extraProps.ids = ids;
 
+      // check against other existing addresses
+      extraProps.existMacAddressesModel =
+        getModelMacAddresses(this.props.model, this.state.activeRowData['mac-addr']);
+      extraProps.existIPMIAddressesModel =
+        getModelIPMIAddresses(this.props.model, this.state.activeRowData['ilo-ip']);
+      extraProps.existIPAddressesModel =
+        getModelIPAddresses(this.props.model, this.state.activeRowData['ip-addr']);
+
       if(this.props.isUpdateMode) {
-        // check against other existing addresses
         extraProps.isUpdateMode = this.props.isUpdateMode;
-        extraProps.existMacAddressesModel =
-          getModelMacAddresses(this.props.model, this.state.activeRowData['mac-addr']);
-        extraProps.existIPMIAddressesModel =
-          getModelIPMIAddresses(this.props.model, this.state.activeRowData['ilo-ip']);
-        extraProps.existIPAddressesModel =
-          getModelIPAddresses(this.props.model, this.state.activeRowData['ip-addr']);
       }
+    } else {
+      extraProps.ids = [];
+      extraProps.existMacAddressesModel = [];
+      extraProps.existIPMIAddressesModel = [];
+      extraProps.existIPAddressesModel = [];
     }
 
     return (

@@ -17,10 +17,6 @@ import { translate } from '../localization/localize.js';
 import { maskPassword } from '../utils/ModelUtils.js';
 
 class ModelServerDetails extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   renderTextLine(title, value) {
     return (
       <div className='detail-line'>

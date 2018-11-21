@@ -18,10 +18,6 @@ import { IS_MS_EDGE, IS_MS_IE } from '../utils/constants.js';
 import { hasConflictAddresses } from '../utils/ModelUtils.js';
 
 class ServerRowItem extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   /**
    * drag and drop support for server assignment, assigns the current set of data properties
    * to the dataTransfer (payload) of the drag event so it can be picked up by the drop handler

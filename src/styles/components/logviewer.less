@@ -21,6 +21,18 @@
     min-height: 45em;
     max-height: 45em;
     overflow: auto;
+    font-size: 13px;
+    //below here are bootstrap4 overrides that were not needed with bs3
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 9.5px;
+  }
+  //bootstrap 4 has a default background color for 'pre' that needs to be overwritten
+  //above and that value needs to be cancelled out for modals that include
+  //the rounded-corner class
+  pre.rounded-corner{
+    background-color: white;
   }
 }
 

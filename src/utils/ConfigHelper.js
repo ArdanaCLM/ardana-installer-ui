@@ -19,7 +19,7 @@ import { config as configDev } from '../../config.dev.js';
 import { config as configProd } from '../../config.prod.js';
 
 var config;
-if (PRODUCTION) {
+if (PRODUCTION) { // eslint-disable-line no-undef
   config = configProd;
 } else {
   config = configDev;
@@ -34,7 +34,7 @@ export function getAppConfig(key) {
  * @returns {boolean}
  */
 export function isProduction() {
-  if (PRODUCTION) {
+  if (PRODUCTION) { // eslint-disable-line no-undef
     return true;
   }
   return false;

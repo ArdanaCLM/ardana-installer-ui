@@ -118,8 +118,15 @@ class Servers extends Component {
       cells = [<td key="c1"><HashLink to={'/topology/networks#'+net_group}>{net_group}</HashLink></td>]
         .concat(countedGroups.map(g => {
           const name = g['network-groups'][net_group];
-          const link = name ? <HashLink to={'/topology/networks#'+name}>{name}</HashLink> : undefined;
-          return <td key={g.name} colSpan={g.leafs}>{link}</td>;
+          return (
+            <td key={g.name} colSpan={g.leafs}>
+              <If condition={name}>
+                <HashLink to={`/topology/networks#${name}`}>
+                  {name}
+                </HashLink>
+              </If>
+            </td>
+          );
         }));
 
       rows.push(<tr key={net_group}>{cells}</tr>);

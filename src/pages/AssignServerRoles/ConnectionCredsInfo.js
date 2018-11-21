@@ -51,10 +51,10 @@ class ConnectionCredsInfo extends Component {
     };
 
     this.state = {
-      isOvChecked: !!(this.props.data.ov && this.props.data.ov.checked),
-      isSmChecked: !!(this.props.data.sm && this.props.data.sm.checked),
-      isOvSecured: !!(this.props.data.ov && this.props.data.ov.secured),
-      isSmSecured: !!(this.props.data.sm && this.props.data.sm.secured),
+      isOvChecked: !!(props.data.ov && props.data.ov.checked),
+      isSmChecked: !!(props.data.sm && props.data.sm.checked),
+      isOvSecured: !!(props.data.ov && props.data.ov.secured),
+      isSmSecured: !!(props.data.sm && props.data.sm.secured),
       smTestStatus: TEST_STATUS.UNKNOWN,
       ovTestStatus: TEST_STATUS.UNKNOWN,
       loading: false,

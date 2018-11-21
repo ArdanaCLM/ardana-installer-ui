@@ -12,7 +12,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import { Map } from 'immutable';
+import { Map, fromJS } from 'immutable';
+import { isEmpty } from 'lodash';
 import { alphabetically, byServerNameOrId } from './Sort.js';
 import { MODEL_SERVER_PROPS_ALL } from './constants.js';
 
@@ -66,37 +67,23 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   let modelIds= model.getIn(['inputModel','servers'])
     .map(server => server.get('id')).toJS();
 
-  if(theId) {
-    let idx = model.getIn(['inputModel', 'servers']).findIndex(
-      server => server.get('id') === theId
-    );
-    //if have current id, remove current id so won't check against it
-    if (idx !== -1) {
-      modelIds.splice(idx, 1);
-    }
+  if(!isEmpty(theId)) {
+    modelIds = modelIds.filter(id => id != theId);
   }
 
   let autoServerIds = [];
   if (autoServers && autoServers.length > 0) {
     autoServerIds = autoServers.map(server => server.id);
-    if(theId) {
-      let idx = autoServerIds.findIndex(id => id === theId);
-      // if have it in auto discovered servers, remove it.
-      if (idx !== -1) {
-        autoServerIds.splice(idx, 1);
-      }
+    if(!isEmpty(theId)) {
+      autoServerIds = autoServerIds.filter(id => id !== theId);
     }
   }
 
   let manualServerIds = [];
   if(manualServers && manualServers.length > 0) {
     manualServerIds = manualServers.map(server => server.id);
-    if(theId) {
-      let idx = manualServerIds.findIndex(id => id === theId);
-      // if have it in manual added servers, remove it.
-      if (idx !== -1) {
-        manualServerIds.splice(idx, 1);
-      }
+    if(!isEmpty(theId)) {
+      manualServerIds = manualServerIds.filter(id => id !== theId);
     }
   }
   retIds = modelIds.concat(autoServerIds);
@@ -264,6 +251,20 @@ export function updateServersInModel(server, model, props, originId) {
   return retModel;
 }
 
+export function addServerInModel(server, model, props) {
+  let new_server = getCleanedServer(server, props);
+
+  // Append the server to the input model
+  return model.updateIn(['inputModel', 'servers'], list => list.push(fromJS(new_server)));
+}
+
+export function removeServerFromModel(server, model) {
+  return model.updateIn(
+    ['inputModel', 'servers'], list => list.filterNot(
+      svr => svr.get('uid') === server.uid || svr.get('id') === server.id)
+  );
+}
+
 export function genUID(prefix) {
   function hex4() {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -302,4 +303,8 @@ export function hasConflictAddresses(theServer, serverList) {
       (theServer['ilo-ip'] && theServer['ilo-ip']  === server['ilo-ip'])
     );
   });
+}
+
+export function isComputeNode(server) {
+  return server['role'].includes('COMPUTE');
 }

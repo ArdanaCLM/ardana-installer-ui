@@ -196,26 +196,6 @@ class UpdateWizard extends InstallWizard {
     }
   }
 
-  /**
-   * merged the extraOpProps into global operationProps
-   * @param extraOpProps
-   */
-  mergeOperationProps = (extraOpProps) => {
-    //retain all other operationProps if there are any
-    let opProps = {};
-    if (this.state.operationProps) {
-      opProps = Object.assign({}, this.state.operationProps);
-      Object.keys(extraOpProps).forEach((key => {
-        opProps[key] = extraOpProps[key];
-      }));
-    }
-    else {
-      opProps = extraOpProps;
-    }
-
-    return opProps;
-  }
-
   // this uses the infrastructure of the exiting logic to
   // dynamically render the progress pages on the fly
   // this is triggered when start the update processes
@@ -225,20 +205,17 @@ class UpdateWizard extends InstallWizard {
     let steps = pages.map(page => { return {'name': page.name}; });
     //get the first one start
     steps[0].stepProgress = STATUS.IN_PROGRESS;
-    let newStates = {
+
+    this.setState(prev => ({
+      operationProps: Object.assign({}, prev.operationProps, extraOpProps),
       currentStep: 0,
       pages: pages,
       steps: steps,
       processMenuName: this.props.menuName,
       processOperation: operation,
       playbookStatus: undefined
-    };
-
-    if(extraOpProps) {
-      let opProps = this.mergeOperationProps(extraOpProps);
-      newStates.operationProps = opProps;
-    }
-    this.setState(newStates, this.persistState);
+    }),
+    this.persistState);
   }
 
   // successfully updated, close to go back to the page where
@@ -257,17 +234,9 @@ class UpdateWizard extends InstallWizard {
 
   // has something wrong with update, cancel to go back to
   // the page where the update process is originated
-  // TODO need some other process to deal with cancel??
   cancelUpdate = () => {
-    this.setState({
-      steps: undefined,
-      currentStep : undefined,
-      processMenuName: undefined,
-      processOperation: undefined,
-      playbookStatus: undefined,
-      operationProps: undefined,
-      pages: undefined
-    }, this.persistState);
+    // TODO Is there a need additional cancel logic?
+    this.closeUpdate();
   }
 
   renderProgressBar() {

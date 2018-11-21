@@ -39,7 +39,7 @@ class InstallWizard extends Component {
       // later step had an error even though it is no longer the current step.
       //
       // when install, the steps are derived from the static pages
-      steps: this.props.pages,
+      steps: props.pages,
 
       // The remaining values capture the state of the user's progress through the wizard.  A primary
       // function of these values is so that if the user were to close the browser and then re-open it,
@@ -345,12 +345,12 @@ class InstallWizard extends Component {
   saveModel = () => postJson('/api/v1/clm/model', this.state.model);
 
   renderTitle() {
-    const selectedModelLine = (this.state.currentStep >= 2 && this.state.model.get('name')) ?
-      <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3> : '';
     return (
       <div className='top-line'>
         <h1>{translate('openstack.cloud.deployer.title')}</h1>
-        {selectedModelLine}
+        <If condition={this.state.currentStep >= 2 && this.state.model.get('name')}>
+          <h3 className='right-corner'>{translateModelName(this.state.model.get('name'))}</h3>
+        </If>
       </div>
     );
   }

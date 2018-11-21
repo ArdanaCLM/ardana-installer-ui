@@ -23,11 +23,6 @@ import { translate } from '../localization/localize.js';
  * This base class handles the functions common to update process
  */
 class BaseUpdateWizardPage extends BaseWizardPage {
-
-  constructor(props) {
-    super(props);
-  }
-
   goForward(e) {
     e.preventDefault();
     this.props.updateGlobalState('playbookStatus', undefined); //clean up playbook status

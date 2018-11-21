@@ -17,26 +17,25 @@ import React from 'react';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
-import { PlaybookProgress } from '../../components/PlaybookProcess.js';
+import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
 
 
-const PLAYBOOK_STEPS = [
-  {
-    label: translate('deploy.progress.config-processor-run'),
-    playbooks: ['config-processor-run.yml']
-  },
-  {
-    label: translate('deploy.progress.ready-deployment'),
-    playbooks: ['ready-deployment.yml']
-  },
-  {
-    label: translate('deploy.progress.predeployment'),
-    playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml', ]
-  }
-];
+const PLAYBOOK_STEPS = [{
+  label: translate('deploy.progress.commit'),
+  playbooks: ['commit']
+}, {
+  label: translate('deploy.progress.config-processor-run'),
+  playbooks: ['config-processor-run.yml']
+}, {
+  label: translate('deploy.progress.ready-deployment'),
+  playbooks: ['ready-deployment.yml']
+}, {
+  label: translate('deploy.progress.predeployment'),
+  playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml', ]
+}];
 
 // This is the prepare page for adding compute servers
 // process. It will first commit the model changes and start
@@ -50,62 +49,45 @@ class PrepareAddServers extends BaseUpdateWizardPage {
 
     this.state = {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
-      showPlabybookProcess: false,
       processErrorBanner: '',
-      // this loading indicator
-      loading: false
     };
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
 
-  componentDidMount() {
-    //go commit model changes if playbook has not been run
-    if(!this.props.playbookStatus) {
-      this.setState({loading: true});
-      const commitMessage = {'message': 'Committed via Ardana DayTwo Installer'};
-      postJson('/api/v1/clm/model/commit', commitMessage)
-        .then((response) => {
-          if (this.props.enableNextButton) {
-            this.props.enableNextButton(true);
-          }
-          this.setState({showPlabybookProcess: true, loading: false});
-        })
-        .catch((error) => {
-          this.setState({
-            overallStatus: STATUS.FAILED,
-            processErrorBanner: translate('update.commit.failure', error.toString()),
-            loading: false
-          });
-          if (this.props.enableNextButton) {
-            this.props.enableNextButton(false);
-          }
-        });
-    }
-    else { // playbook has been started
-      this.setState({showPlabybookProcess: true});
-    }
+  getPrepareServerFailureMsg = () => {
+    return translate('server.addserver.prepare.failure');
+  }
+
+  getPrepareServerTitle = () => {
+    return translate('server.addserver.prepare');
   }
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
-      this.setState({processErrorBanner: translate('server.addserver.prepare.failure')});
+      this.setState({processErrorBanner: this.getPrepareServerFailureMsg()});
     }
   }
 
-  toShowLoadingMask = () => {
-    return this.props.wizardLoading || this.state.loading;
-  }
-
-  isValidToRenderPlaybookProgress = () => {
-    return (
-      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading
-    );
-  }
-
   renderPlaybookProgress () {
-    this.playbooks = [{name: PRE_DEPLOYMENT_PLAYBOOK}];
+    this.playbooks = [{
+      name: 'commit',
+      action: ((logger) => {
+        const commitMessage = {'message': 'Committed via Ardana Installer'};
+        return postJson('/api/v1/clm/model/commit', commitMessage)
+          .then((response) => {
+            logger('Model committed\n');
+          })
+          .catch((error) => {
+            const message = translate('update.commit.failure', error.toString());
+            logger(message+'\n');
+            throw new Error(message);
+          });
+      }),
+    }, {
+      name: PRE_DEPLOYMENT_PLAYBOOK
+    }];
     return (
       <PlaybookProgress
         updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
@@ -128,12 +110,12 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     let cancel =  this.state.overallStatus === STATUS.FAILED;
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.toShowLoadingMask()}/>
+        <LoadingMask show={this.props.wizardLoading}/>
         <div className='content-header'>
-          {this.renderHeading(translate('server.addserver.prepare'))}
+          {this.renderHeading(this.getPrepareServerTitle())}
         </div>
         <div className='wizard-content'>
-          {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
+          {!this.props.wizardLoading && this.renderPlaybookProgress()}
           {cancel && this.renderProcessError()}
         </div>
         {this.renderNavButtons(cancel)}
