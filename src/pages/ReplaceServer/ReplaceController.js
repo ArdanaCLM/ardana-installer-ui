@@ -192,7 +192,7 @@ class ReplaceController extends BaseUpdateWizardPage {
             event: INSTALL_PLAYBOOK + '.yml'
           }],
           playbook: INSTALL_PLAYBOOK,
-          payload: {'extra-vars': {'nodelist': [serverId], 'ardanauser_password': installPass}}
+          payload: {'extra-vars': {'nodelist': serverId, 'ardanauser_password': installPass}}
         },
       );
     }
