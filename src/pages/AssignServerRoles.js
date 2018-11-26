@@ -111,10 +111,10 @@ class AssignServerRoles extends BaseWizardPage {
       importedResults: {},
 
       // add server, wipedisk for all newly added servers
-      isWipeDiskChecked: props.operationProps && props.operationProps.wipeDisk || false,
+      isWipeDiskChecked: props.operationProps?.wipeDisk || false,
 
       // add server, activate for all newly added servers
-      isActivateChecked: props.operationProps && props.operationProps.activate || false,
+      isActivateChecked: props.operationProps?.activate || false,
     };
   }
 
@@ -142,7 +142,7 @@ class AssignServerRoles extends BaseWizardPage {
     let promise = new Promise((resolve, reject) => {
       this.getSmServersData(tokenKey, smUrl, secured)
         .then((rawServerData) => {
-          if (rawServerData && rawServerData.length > 0) {
+          if (rawServerData?.length > 0) {
             let ids = rawServerData.map((srv) => {
               return srv.id;
             });
@@ -173,7 +173,7 @@ class AssignServerRoles extends BaseWizardPage {
     let promise = new Promise((resolve, reject) => {
       this.getOvServersData(tokenKey, ovUrl, secured)
         .then((rawServerData) => {
-          if (rawServerData && rawServerData.members && rawServerData.members.length > 0) {
+          if (rawServerData?.members?.length > 0) {
             let servers = this.updateOvServerData(rawServerData.members);
             resolve(servers);
           }
@@ -381,7 +381,7 @@ class AssignServerRoles extends BaseWizardPage {
       // update manually added servers list
       // find previously imported server with same id and overwrite it
       let sIndex = manualServers.findIndex(svr => {
-        return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
+        return svr['uid']?.startsWith('import') && svr['id'] === server.id;
       });
       if(sIndex < 0) {
         newServers.push(server);
@@ -399,7 +399,7 @@ class AssignServerRoles extends BaseWizardPage {
       }
       // look for previously imported server in the model
       const mIndex = model.getIn(['inputModel', 'servers']).findIndex(svr => {
-        return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
+        return svr.get('uid')?.startsWith('import') && svr.get('id') === server.id;
       });
       // it is not in the model
       if (mIndex < 0) {
@@ -415,7 +415,7 @@ class AssignServerRoles extends BaseWizardPage {
         if(server.role) {
           // Overwrite the existing imported server in input model
           model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
-            if (svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id) {
+            if (svr.get('uid')?.startsWith('import') && svr.get('id') === server.id) {
               return fromJS(server); //overwrite the exiting with imported one
             }
             else
@@ -553,7 +553,7 @@ class AssignServerRoles extends BaseWizardPage {
     let saveConnect =
       this.props.connectionInfo ? JSON.parse(JSON.stringify(this.props.connectionInfo)) : {
         sm: {checked: false, secured: true}, ov: {checked: false, secured: true}};
-    if (credsData.sm && credsData.sm.checked) {
+    if (credsData.sm?.checked) {
       let smConn = this.setSmCredentials(credsData);
       saveConnect.sm = smConn;
     }
@@ -562,7 +562,7 @@ class AssignServerRoles extends BaseWizardPage {
       this.connections.sm.checked = false;
     }
 
-    if (credsData.ov && credsData.ov.checked) {
+    if (credsData.ov?.checked) {
       let ovConn = this.setOvCredentials(credsData);
       saveConnect.ov = ovConn;
     }
@@ -676,9 +676,9 @@ class AssignServerRoles extends BaseWizardPage {
     details.forEach((srvDetail) => {
       // promise could return empty detail
       // only pick up non empty detail.
-      if(srvDetail && srvDetail.id) {
+      if(srvDetail?.id) {
         let nkdevice = srvDetail.network_devices.find((device) => {
-          return device.interface && device.interface.startsWith('eth') && device.ip !== '';
+          return device.interface?.startsWith('eth') && device.ip !== '';
         });
         // still can not find ip address, try one more time
         if (!nkdevice) {
@@ -841,7 +841,7 @@ class AssignServerRoles extends BaseWizardPage {
       model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
         // use uid if sever has uid, if it doesn't have uid like the example one, will use
         // id.
-        if ((svr.get('uid') && svr.get('uid') === server.uid) || svr.get('id' === server.id))
+        if (svr.get('uid') === server.uid || svr.get('id') === server.id)
           return svr.set('role', role);
         else
           return svr;
@@ -962,17 +962,17 @@ class AssignServerRoles extends BaseWizardPage {
    */
   highlightDrop = (event) => {
     let { target } = event;
-    if (target && !target.classList.contains('server-dropzone')) {
+    if (!target)
+      return;
+    if (!target.classList.contains('server-dropzone')) {
       target = target.closest('.server-dropzone');
     }
-    if (target) {
-      if (!target.style.outline.includes('dashed'))
-        target.setAttribute('data-prevoutline', target.style.outline);
-      target.style.outline = '2px #00C081 dashed';
-      if (!target.style.margin.includes('2px'))
-        target.setAttribute('data-prevmargin', target.style.margin);
-      target.style.margin = '2px';
-    }
+    if (!target.style.outline.includes('dashed'))
+      target.setAttribute('data-prevoutline', target.style.outline);
+    target.style.outline = '2px #00C081 dashed';
+    if (!target.style.margin.includes('2px'))
+      target.setAttribute('data-prevmargin', target.style.margin);
+    target.style.margin = '2px';
   }
 
   /**
@@ -985,15 +985,17 @@ class AssignServerRoles extends BaseWizardPage {
    */
   unHighlightDrop = (event, forceclear) => {
     let { target } = event;
-    if(target && !target.classList.contains('server-dropzone')) {
+    if(!target)
+      return;
+    if(!target.classList.contains('server-dropzone')) {
       target = target.closest('.server-dropzone');
     }
     const offset = target?.getBoundingClientRect();
-    if(target && (forceclear ||
+    if(forceclear ||
        offset.left > event.pageX ||
        offset.left + offset.width < event.pageX ||
        offset.top >= event.pageY ||
-       offset.top + offset.height <= event.pageY)) {
+       offset.top + offset.height <= event.pageY) {
       target.style.outline = target.getAttribute('data-prevoutline') || '';
       target.style.margin = target.getAttribute('data-prevmargin') || '';
     }
@@ -1190,8 +1192,8 @@ class AssignServerRoles extends BaseWizardPage {
       servers.filter((server) => {
         // search text applied to name , ip-addr and mac-addr
         if(!(server.id.indexOf(this.state.searchFilterText) !== -1 ||
-          (server['ip-addr'] && server['ip-addr'].indexOf(this.state.searchFilterText) !== -1) ||
-          (server['mac-addr'] && server['mac-addr'].indexOf(this.state.searchFilterText) !== -1))) {
+          (server['ip-addr']?.indexOf(this.state.searchFilterText) !== -1) ||
+          (server['mac-addr']?.indexOf(this.state.searchFilterText) !== -1))) {
           return false;
         }
 
@@ -1433,7 +1435,7 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderServerRoleContent() {
     let serverRoles = getServerRoles(this.props.model, this.props.rolesLimit);
-    let isValidToRenderAccordion = serverRoles && serverRoles.length > 0;
+    let isValidToRenderAccordion = serverRoles?.length > 0;
     return (
       <div className='assign-server-role body-container'>
         <div className='server-container'>
@@ -1480,7 +1482,7 @@ class AssignServerRoles extends BaseWizardPage {
 
       let extraProps = {};
       let dialogClass = 'view-details-dialog ';
-      if(sourceData && (sourceData.source === 'sm' || sourceData.source === 'ov')) {
+      if(sourceData?.source === 'sm' || sourceData?.source === 'ov') {
         extraProps.tableId = this.activeTableId;
         extraProps.source = sourceData.source;
         extraProps.details = sourceData.details;
@@ -1569,7 +1571,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   render() {
-    let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
+    let serverId = this.state.activeRowData?.id || '';
     const contentClass =
       'wizard-content' + (this.props.isUpdateMode ? ' smaller-margin' : '');
     return (

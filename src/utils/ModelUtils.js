@@ -72,7 +72,7 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   }
 
   let autoServerIds = [];
-  if (autoServers && autoServers.length > 0) {
+  if (autoServers?.length > 0) {
     autoServerIds = autoServers.map(server => server.id);
     if(!isEmpty(theId)) {
       autoServerIds = autoServerIds.filter(id => id !== theId);
@@ -80,7 +80,7 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   }
 
   let manualServerIds = [];
-  if(manualServers && manualServers.length > 0) {
+  if(manualServers?.length > 0) {
     manualServerIds = manualServers.map(server => server.id);
     if(!isEmpty(theId)) {
       manualServerIds = manualServerIds.filter(id => id !== theId);
@@ -127,10 +127,10 @@ export function getModelIPAddresses (model, excludeIPAddr) {
 
 export function getMacIPMIAddrObjs(autoServers, manualServers) {
   let allAvailableServers = [];
-  if (autoServers && autoServers.length > 0) {
+  if (autoServers?.length > 0) {
     allAvailableServers = allAvailableServers.concat(autoServers);
   }
-  if(manualServers && manualServers.length > 0) {
+  if(manualServers?.length > 0) {
     allAvailableServers = allAvailableServers.concat(manualServers);
   }
 

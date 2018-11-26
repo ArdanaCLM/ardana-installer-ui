@@ -136,7 +136,7 @@ class UpdateWizard extends InstallWizard {
    */
   getPages = (steps) => {
     let pages = undefined;
-    if(this.props.pageSet && steps && steps.length > 0) {
+    if(this.props.pageSet && steps?.length > 0) {
       pages = steps.map(step => {
         return {
           name: step.name,
@@ -242,7 +242,7 @@ class UpdateWizard extends InstallWizard {
   renderProgressBar() {
     if(this.state.processMenuName === this.props.menuName &&
          this.state.currentStep !== undefined  &&
-         this.state.steps && this.state.steps.length > 1) {
+         this.state.steps?.length > 1) {
       return (<WizardProgress steps={this.state.steps}/>);
     }
   }

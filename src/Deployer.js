@@ -63,7 +63,7 @@ class Deployer extends Component {
       } else {
 
         // Go to NavMenu unless the url specifically requests the installer
-        if (search.has('start') && search.get('start').startsWith('installer')) {
+        if (search.get('start')?.startsWith('installer')) {
           defaultPath = <InstallWizard pages={pages}/>;
         } else {
           defaultPath = <NavMenu routes={routes}/>;
@@ -71,7 +71,7 @@ class Deployer extends Component {
       }
     } else {
       // Go to installer unless the url specifically requests the menu
-      if (search.has('start') && search.get('start').startsWith('menu')) {
+      if (search.get('start')?.startsWith('menu')) {
         // If in secured (post-install) mode with a valid auth token, display menu
         defaultPath = <NavMenu routes={routes}/>;
       } else {

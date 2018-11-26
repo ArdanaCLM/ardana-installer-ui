@@ -316,10 +316,10 @@ class ServiceTemplatesTab extends Component {
 
   renderServiceList() {
     let serviceList = [];
-    this.state.serviceFiles && this.state.serviceFiles
-      .sort((a,b) => alphabetically(a['service'], b['service']))
-      .forEach((item, index) => {
-        if(item.files && item.files.length > 0) {
+    this.state.serviceFiles
+      ?.sort((a,b) => alphabetically(a['service'], b['service']))
+      ?.forEach((item, index) => {
+        if(item.files?.length > 0) {
           if(item.expanded === undefined) {
             item.expanded = false;
           }

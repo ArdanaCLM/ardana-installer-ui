@@ -106,7 +106,7 @@ class ServiceConfiguration extends Component {
   getPlaybooks = () => {
     let playbooksToRun = {};
     const changedServices = this.serviceTemplatesTab.getChangedServices();
-    if (changedServices && changedServices.length > 0) {
+    if (changedServices?.length > 0) {
       playbooksToRun.steps = [{
         label: translate('deploy.progress.config-processor-run'),
         playbooks: ['config-processor-run.yml']

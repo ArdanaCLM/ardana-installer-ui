@@ -19,7 +19,7 @@ import { ValidatingInput } from '../components/ValidatingInput.js';
 class InlineAddRemoveDropdown extends Component {
   constructor(props) {
     super(props);
-    if (props.values && props.values.length > 0) {
+    if (props.values?.length > 0) {
       this.state = {
         items: props.values,
         selectedItem: props.values[props.values.length - 1]
@@ -183,7 +183,7 @@ class InlineAddRemoveDropdown extends Component {
 class InlineAddRemoveInput extends Component {
   constructor(props) {
     super(props);
-    if (props.values && props.values.length > 0) {
+    if (props.values?.length > 0) {
       this.state = {
         items: props.values,
         selectedItem: props.values[props.values.length - 1]
