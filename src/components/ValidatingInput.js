@@ -25,15 +25,6 @@ export class ValidatingInput extends Component {
     };
   }
 
-  componentDidMount() {
-    if(this.props.updateFormValidity) {
-      let isValid = this.validateInput(this.props.inputValue, this.props);
-      //callback function from parent to initially check
-      //all inputs
-      this.props.updateFormValidity(this.props, isValid);
-    }
-  }
-
   isRequired = () => TRUTHY.includes(this.props.isRequired) || TRUTHY.includes(this.props.required)
 
   validateInput(val, extraProps) {
@@ -67,9 +58,7 @@ export class ValidatingInput extends Component {
       inputValue: val
     });
 
-    //call back function from parent to handle the
-    //change...also it will call updateFormValidity
-    //to check all the inputs
+    //call back function from parent to handle the change
     this.props.inputAction(e, valid, props);
   }
 
