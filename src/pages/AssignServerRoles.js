@@ -20,7 +20,7 @@ import { translate } from '../localization/localize.js';
 import { fetchJson, postJson, putJson, deleteJson } from '../utils/RestUtils.js';
 import { ActionButton, LoadFileButton } from '../components/Buttons.js';
 import { SearchBar, ServerRolesAccordion } from '../components/ServerUtils.js';
-import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
+import { ConfirmModal } from '../components/Modals.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import ConnectionCredsInfo from './AssignServerRoles/ConnectionCredsInfo.js';
 import ServersAddedManually from './AssignServerRoles/ServersAddedManually.js';
@@ -1462,17 +1462,11 @@ class AssignServerRoles extends BaseWizardPage {
   renderCredsInputModal() {
     if (this.state.showCredsModal) {
       return (
-        <BaseInputModal
-          className='creds-dialog'
-          onHide={this.handleCancelCredsInput}
-          title={translate('add.server.connection.creds')}>
-
-          <ConnectionCredsInfo
-            cancelAction={this.handleCancelCredsInput}
-            doneAction={credsData => this.handleDoneCredsInput(credsData)}
-            data={this.connections}>
-          </ConnectionCredsInfo>
-        </BaseInputModal>
+        <ConnectionCredsInfo className='creds-dialog'
+          title={translate('add.server.connection.creds')}
+          cancelAction={this.handleCancelCredsInput}
+          doneAction={credsData => this.handleDoneCredsInput(credsData)}
+          data={this.connections}/>
       );
     }
   }

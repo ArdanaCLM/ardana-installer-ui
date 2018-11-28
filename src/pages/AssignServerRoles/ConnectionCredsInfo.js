@@ -25,6 +25,7 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { isEmpty } from 'lodash';
 import { INPUT_STATUS } from '../../utils/constants.js';
 import { fromJS } from 'immutable';
+import {ConfirmModal} from '../../components/Modals';
 
 const TEST_STATUS = INPUT_STATUS;
 
@@ -46,16 +47,16 @@ class ConnectionCredsInfo extends Component {
           checked: this.props.data?.sm?.checked || false,
           secured: (this.props.data?.sm?.secured === true),
           sessionKey: this.props.data?.sm?.sessionKey,
-          host: this.props.data?.sm?.creds?.host,
+          host: this.props.data?.sm?.creds?.host || '',
           port: this.props.data?.sm?.creds?.port || 443,
-          username: this.props.data?.sm?.creds?.username,
+          username: this.props.data?.sm?.creds?.username || '',
         },
         ov: {
           checked: this.props.data?.ov?.checked || false,
           secured: (this.props.data?.ov?.secured === true),
           sessionKey: this.props.data?.ov?.sessionKey,
-          host: this.props.data?.ov?.creds?.host,
-          username: this.props.data?.ov?.creds?.username,
+          host: this.props.data?.ov?.creds?.host || '',
+          username: this.props.data?.ov?.creds?.username || '',
         },
       }),
 
@@ -354,15 +355,17 @@ class ConnectionCredsInfo extends Component {
 
   render() {
     return (
-      <div className='connection-creds-info'>
-        {this.renderMessage()}
-        <form onSubmit={::this.handleTest}>
-          {this.renderCredentials('sm')}
-          {this.renderCredentials('ov')}
-        </form>
-        {this.renderFooter()}
-        {this.renderLoadingMask()}
-      </div>
+      <ConfirmModal className={this.props.className} title={this.props.title}
+        onHide={this.props.cancelAction} footer={this.renderFooter()}>
+        <div className='connection-creds-info'>
+          {this.renderMessage()}
+          <form onSubmit={::this.handleTest}>
+            {this.renderCredentials('sm')}
+            {this.renderCredentials('ov')}
+          </form>
+          {this.renderLoadingMask()}
+        </div>
+      </ConfirmModal>
     );
   }
 }
