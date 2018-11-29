@@ -40,7 +40,7 @@ class ContextMenu extends Component {
   render() {
     const items = this.props.items.map((item => {
       return (
-        <div className='menu-item' key={item.key} onClick={() => {item.action(item.callbackData);}}>
+        <div className='menu-item' key={item.key} onClick={() => {item.action?.(item.callbackData);}}>
           {translate(item.key)}
         </div>
       );

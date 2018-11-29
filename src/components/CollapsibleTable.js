@@ -141,8 +141,6 @@ class CollapsibleTable extends Component {
       if (!isProduction()) {
         // TODO: Add these as they are implemented
         /*
-            key: 'common.activate', action: ...
-            key: 'common.deactivate', action: ...
             key: 'common.delete', action: ...
         */
         // show replace button when there is no process operation going on
@@ -152,6 +150,26 @@ class CollapsibleTable extends Component {
             action: this.props.replaceServer,
             callbackData: row
           });
+          if (this.props.serverStatuses
+              && this.props.serverStatuses[row.id]
+              && typeof this.props.serverStatuses[row.id].status
+                === 'boolean') {
+            if (this.props.serverStatuses[row.id].status) {
+              items.push({
+                key: 'common.deactivate',
+                action: this.props.deactivateComputeHost,
+                active: true,
+                callbackData: row.id
+              });
+            } else if (!this.props.serverStatuses[row.id].status) {
+              items.push({
+                key: 'common.activate',
+                action: this.props.activateComputeHost,
+                active: true,
+                callbackData: row.id
+              });
+            }
+          }
         }
       }
     } else {

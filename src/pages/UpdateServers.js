@@ -32,6 +32,8 @@ import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
 import { genUID } from '../utils/ModelUtils.js';
+import { getInternalModel } from './topology/TopologyUtils';
+import { fromJS } from 'immutable';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -62,6 +64,7 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
+    //TODO this is ugly, we souldn't be waiting for things to load like this
     if (this.props.model !== prevProps.model)
     {
       const allGroups =
@@ -71,6 +74,23 @@ class UpdateServers extends BaseUpdateWizardPage {
       } else if (allGroups.size > 0) {
         this.setState({expandedGroup: [allGroups.sort().first()]});
       }
+
+      this.setState({
+        loading: ''
+      });
+
+      getInternalModel()
+        .then(model => {
+          this.setState({ internalModel: fromJS(model) });
+        })
+        .then(::this.getServerStatuses)
+        .then(() => this.setState({ loading: undefined }))
+        .catch(error => {
+          this.setState({
+            errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
+            loading: undefined
+          });
+        });
     }
   }
 
@@ -93,6 +113,32 @@ class UpdateServers extends BaseUpdateWizardPage {
           };
         });
       });
+  }
+
+  async getServerStatuses() {
+    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
+    let servers = this.props.model.getIn(['inputModel','servers']).toJS()
+      .filter(s => s.role.includes('COMPUTE'))
+      .map(s => {
+        const internalServer = internalModelServers.filter(sev => sev.id === s.id)[0];
+        return {
+          ...s,
+          internal: internalServer,
+          hostname: internalServer.hostname
+        };
+      });
+
+    let serversStatus = servers.map(s => fetchJson(`/api/v1/clm/compute/services/${s.hostname}`));
+    const values = await Promise.all(serversStatus);
+    let serverStatuses = {};
+    for(const [index, status] of values.entries()) {
+      const server = servers[index];
+      serverStatuses[server.id] = {
+        ...server,
+        status: status['nova-compute']
+      };
+    }
+    this.setState({serverStatuses});
   }
 
   expandAll() {
@@ -276,6 +322,119 @@ class UpdateServers extends BaseUpdateWizardPage {
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
         });
     }
+  }
+
+  async performDeactivateComputeHost() {
+    let id = this.state.confirmDeactivate?.id;
+    let status = this.state.serverStatuses[id];
+    if (!status) return;
+    try {
+      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+      await postJson(
+        '/api/v1/clm/playbooks/nova-stop',
+        { limit: status.hostname }
+      );
+      this.setState({
+        serverStatuses: {
+          ...this.state.serverStatuses,
+          [id]: {
+            ...status,
+            status: false
+          }
+        },
+        confirmDeactivate: undefined
+      });
+    } catch (error) {
+      let msg = translate('server.deactivate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDeactivate: undefined
+      });
+    }
+  }
+
+  async activateComputeHost(id) {
+    let internalHostname = this.state.serverStatuses[id].hostname;
+    try {
+      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+      await postJson(
+        '/api/v1/clm/playbooks/ardana-start',
+        { limit: internalHostname }
+      );
+      this.setState({
+        serverStatuses: {
+          ...this.state.serverStatuses,
+          [id]: {
+            ...this.state[id],
+            status: true
+          }
+        }
+      });
+    } catch (error) {
+      let msg = translate('server.activate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ]
+      });
+    }
+  }
+
+  async deactivateComputeHost(id) {
+    let status = this.state.serverStatuses[id];
+    this.setState({
+      confirmDeactivate: {
+        show: true,
+        loading: true,
+        id: status.id
+      }
+    });
+    try {
+      let instances = await fetchJson(`/api/v1/clm/compute/instances/${status.hostname}`);
+      this.setState({
+        confirmDeactivate: {
+          ...this.state.confirmDeactivate,
+          loading: false,
+          instances
+        }
+      });
+    } catch (error) {
+      let msg = translate('server.deactivate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDeactivate: undefined
+      });
+    }
+  }
+
+  renderDeactivateConfirmModal() {
+    if (!this.state.confirmDeactivate || !this.state.confirmDeactivate.show) return;
+    let { id, instances, loading } = this.state.confirmDeactivate;
+    return (
+      <YesNoModal
+        title={translate('server.deactivate.confirm.title', id)} yesAction={::this.performDeactivateComputeHost}
+        noAction={() => this.setState({confirmDeactivate: undefined})}
+        disableYes={loading}>
+        <h3>
+          <If condition={loading}>
+            {translate('loading.pleasewait')}
+          </If>
+          <If condition={!loading && instances?.length > 0}>
+            {translate('server.deactivate.confirm.message_instances', id, instances.length)}
+          </If>
+          <If condition={!loading && instances?.length === 0}>
+            {translate('server.deactivate.confirm.message', id)}
+          </If>
+        </h3>
+      </YesNoModal>
+    );
   }
 
   handleCloseMessage = (idx) => {
@@ -483,7 +642,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         replaceServer={this.checkPrereqs} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
-        processOperation={this.props.processOperation}/>
+        processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
+        activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}/>
     );
   }
 
@@ -523,6 +683,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.renderPowerOffWarning()}
         {this.renderNoMigrationWarning()}
         {this.renderValidationErrorModal()}
+        {this.renderDeactivateConfirmModal()}
       </div>
     );
   }
