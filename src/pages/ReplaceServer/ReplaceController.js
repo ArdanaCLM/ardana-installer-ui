@@ -103,7 +103,7 @@ class ReplaceController extends BaseUpdateWizardPage {
         label: translate('deploy.progress.commit'),
         action: ((logger) => {
           const commitMessage = {'message': 'Committed via Ardana Installer'};
-          return postJson('/api/v1/clm/model/commit', commitMessage)
+          return postJson('/api/v2/model/commit', commitMessage)
             .then((response) => {
               logger('Model committed\n');
             })
@@ -125,7 +125,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.rm-cobbler'),
         action: ((logger) => {
-          return fetchJson('/api/v1/clm/cobbler/servers')
+          return fetchJson('/api/v2/cobbler/servers')
             .then((response) => {
               const cobbler_server = response.find((e) =>
                 e.ip === this.props.operationProps.server.ip ||
@@ -133,7 +133,7 @@ class ReplaceController extends BaseUpdateWizardPage {
               if (cobbler_server) {
                 const name = cobbler_server.name;
 
-                return deleteJson('/api/v1/clm/cobbler/servers/' + name)
+                return deleteJson('/api/v2/cobbler/servers/' + name)
                   .then((response) => {
                     logger('Host removed from cobbler\n');
                   })
@@ -157,7 +157,7 @@ class ReplaceController extends BaseUpdateWizardPage {
             return Promise.resolve();
           }
 
-          return deleteJson('/api/v1/clm/known_hosts/' + server.hostname)
+          return deleteJson('/api/v2/known_hosts/' + server.hostname)
             .then((response) => {
               logger(server.hostname+' removed from known_hosts\n');
             })

@@ -78,7 +78,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // empty string loading indicates loading mask without
     // text
     this.setState({loading: ''});
-    fetchJson('/api/v1/server?source=sm,ov,manual')
+    fetchJson('/api/v2/server?source=sm,ov,manual')
       .then(servers => {
         this.setState({
           servers: servers,
@@ -128,7 +128,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     let old = this.state.servers.find(s => server.uid === s.uid);
     if (old) {
       const updated_server = getMergedServer(old, server, this.getReplaceProps());
-      putJson('/api/v1/server', updated_server)
+      putJson('/api/v2/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
@@ -138,7 +138,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // to saved servers
     else if(isComputeNode(this.state.serverToReplace)) {
       server['source'] = 'manual';
-      postJson('/api/v1/server', [server])
+      postJson('/api/v2/server', [server])
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
@@ -230,7 +230,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     if(isComputeNode(this.state.serverToReplace)) {
       this.setState({loading: translate('server.validating')});
-      postJson('/api/v1/clm/config_processor')
+      postJson('/api/v2/config_processor')
         .then(() => {
           this.setState({loading: undefined});
           this.props.startUpdateProcess('ReplaceServer', pages, theProps);
@@ -264,7 +264,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       let servers = this.state.servers.filter(s => server.uid !== s.uid);
       servers.push(updated_server);
       this.setState({'servers': servers});
-      putJson('/api/v1/server', updated_server)
+      putJson('/api/v2/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
@@ -317,7 +317,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // on the old compute node first, therefore it should be reachable.
     // If it is not reachable, show a warning indicating that instances can not
     // be migrated.
-    fetchJson('api/v1/ips')
+    fetchJson('/api/v2/ips')
       .then(ips => {
         if (ips.includes(server['ip-addr'])) {
           this.setState({showSharedWarning: true});
@@ -326,7 +326,7 @@ class UpdateServers extends BaseUpdateWizardPage {
           // Display the load mask without loading text
           this.setState({loading: ''});
 
-          postJson('api/v1/connection_test', {host: server['ip-addr']})
+          postJson('api/v2/connection_test', {host: server['ip-addr']})
             .then(result => {
               if(isComputeNode(server)) {
                 this.setState({

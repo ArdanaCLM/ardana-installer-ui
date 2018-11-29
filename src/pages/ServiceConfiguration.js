@@ -47,7 +47,7 @@ class ServiceConfiguration extends Component {
     // remove original files and commit configuration changes
     this.serviceTemplatesTab.removeOrigFiles();
     const commitMessage = {'message': 'Committed via CLM Admin Console'};
-    postJson('/api/v1/clm/model/commit', commitMessage)
+    postJson('/api/v2/model/commit', commitMessage)
       .then(() => {
         this.setState({showUpdateProgress: true, updateCompleted: false});
       })

@@ -35,7 +35,7 @@ class ArdanaPackages extends Component {
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/packages')
+    fetchJson('/api/v2/packages')
       .then(responseData => {
         this.setState({packages: responseData.cloud_installed_packages, showLoadingMask: false});
       })

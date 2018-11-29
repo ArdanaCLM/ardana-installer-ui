@@ -21,7 +21,7 @@ import { fetchJson } from '../../utils/RestUtils.js';
 var modelPromise;
 
 function loadInternalModel() {
-  return fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml');
+  return fetchJson('/api/v2/model/cp_internal/CloudModel.yaml');
 }
 
 // Prevent wrapping on hyphens by replacing normal hyphen characters with the non-wrapping-hyphen character

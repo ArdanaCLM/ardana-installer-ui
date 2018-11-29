@@ -51,7 +51,7 @@ class EditFile extends Component {
 
   componentWillMount() {
     this.setState({loading: true});
-    fetchJson('/api/v1/clm/model/files/' + this.props.file.name)
+    fetchJson('/api/v2/model/files/' + this.props.file.name)
       .then((response) => {
         this.setState({contents: response, loading: false});
       });
@@ -62,7 +62,7 @@ class EditFile extends Component {
     this.props.doneEditingFile();
 
     this.setState({loading: true});
-    postJson('/api/v1/clm/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
+    postJson('/api/v2/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => {
         this.setState({loading: false});
         this.props.loadModel();
@@ -217,7 +217,7 @@ class ValidateConfigFiles extends Component {
     };
 
     // retrieve a list of yml files
-    fetchJson('/api/v1/clm/model/files')
+    fetchJson('/api/v2/model/files')
       .then((responseData) => {
         this.setState({
           configFiles: responseData
@@ -246,7 +246,7 @@ class ValidateConfigFiles extends Component {
       } else {
         // set the password and validate
         let password = {'password': this.props.sshPassphrase};
-        postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+        postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
           .then(() => {
             this.props.setRequiresPassword(false);
             this.testAndCommit();
@@ -265,11 +265,11 @@ class ValidateConfigFiles extends Component {
   }
 
   testAndCommit = () => {
-    postJson('/api/v1/clm/config_processor')
+    postJson('/api/v2/config_processor')
       .then(() => {
         //go commit model changes
         const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
-        postJson('/api/v1/clm/model/commit', commitMessage)
+        postJson('/api/v2/model/commit', commitMessage)
           .then(() => {
             this.setState({valid: VALID, commit: STATUS.COMPLETE});
             this.props.disableTab(false);
@@ -507,7 +507,7 @@ class ConfigPage extends BaseWizardPage {
   }
 
   componentWillMount() {
-    fetchJson('/api/v1/clm/sshagent/requires_password')
+    fetchJson('/api/v2/sshagent/requires_password')
       .then((responseData) => {
         this.setState({
           requiresPassword: responseData['requires_password']

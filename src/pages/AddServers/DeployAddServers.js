@@ -86,7 +86,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     if(!this.props.operationProps.newHosts) {
       this.setState({loading: true});
       fetchJson(
-        '/api/v1/clm/model/cp_internal/CloudModel.yaml', undefined, true, true
+        '/api/v2/model/cp_internal/CloudModel.yaml', undefined, true, true
       )
         .then((cloudModel) => {
           let newHosts = this.getAddedComputeHosts(cloudModel);

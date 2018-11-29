@@ -39,7 +39,7 @@ class ServerRoleSummary extends BaseWizardPage {
   }
 
   componentWillMount() {
-    fetchJson('/api/v1/server?source=sm,ov')
+    fetchJson('/api/v2/server?source=sm,ov')
       .then((rawServerData) => {
         if(rawServerData) {
           this.setState({autoServers : rawServerData});
@@ -47,7 +47,7 @@ class ServerRoleSummary extends BaseWizardPage {
       });
 
     // get manually added servers
-    fetchJson('/api/v1/server?source=manual')
+    fetchJson('/api/v2/server?source=manual')
       .then((responseData) => {
         if (responseData.length > 0) {
           this.setState({manualServers : responseData});
@@ -81,7 +81,7 @@ class ServerRoleSummary extends BaseWizardPage {
       if(this.state[list]) {
         this.state[list].filter(s => server.uid === s.uid).forEach(match => {
           const updated_server = getMergedServer(match, server, MODEL_SERVER_PROPS);
-          putJson('/api/v1/server', JSON.stringify(updated_server));
+          putJson('/api/v2/server', JSON.stringify(updated_server));
         });
       }
     }

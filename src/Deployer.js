@@ -35,7 +35,7 @@ class Deployer extends Component {
   }
 
   componentDidMount = () => {
-    fetchJson('/api/v1/clm/is_secured')
+    fetchJson('/api/v2/is_secured')
       .then(response => {
         this.setState({isSecured: response['isSecured']});
       });

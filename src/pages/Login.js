@@ -55,7 +55,7 @@ class LoginPage extends Component {
 
     this.setState({showLoadMask: true});
 
-    postJson('/api/v1/clm/login', payload, undefined, false)
+    postJson('/api/v2/login', payload, undefined, false)
       .then(response => {
 
         // Capture the returned token and use it for subsequent calls. If it
@@ -64,7 +64,7 @@ class LoginPage extends Component {
         setAuthToken(response.token, expires);
 
         // Attempt a typical operation to validate the token against the policy
-        return fetchJson('/api/v1/clm/user', undefined, false);
+        return fetchJson('/api/v2/user', undefined, false);
       })
       .then(response => {
         this.setState({show: false, errorMsg: '', showLoadMask: false});

@@ -100,7 +100,7 @@ class SelectServersToProvision extends BaseWizardPage {
 
   componentWillMount() {
     // retrieve a list of servers that have roles
-    fetchJson('/api/v1/clm/model/entities/servers')
+    fetchJson('/api/v2/model/entities/servers')
       .then(responseData => {
         let allServers = responseData;
         if(this.props.isUpdateMode) {
@@ -115,17 +115,17 @@ class SelectServersToProvision extends BaseWizardPage {
           leftList: allServers.map(svr => svr.id).sort()
         });
       })
-      .then(() => fetchJson('/api/v1/ips'))
+      .then(() => fetchJson('/api/v2/ips'))
       .then(data => {this.ips = data;});
 
-    fetchJson('/api/v1/clm/user')
+    fetchJson('/api/v2/user')
       .then(responseData => {
         this.setState({
           osInstallUsername: responseData['username']
         });
       });
 
-    fetchJson('/api/v1/clm/sshagent/requires_password')
+    fetchJson('/api/v2/sshagent/requires_password')
       .then((responseData) => {
         let passRequired = responseData['requires_password'];
         this.setState({
@@ -216,7 +216,7 @@ class SelectServersToProvision extends BaseWizardPage {
   startInstalling = () => {
     if (this.state.requiresPassword) {
       let password = {'password': this.state.sshPassphrase};
-      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+      postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
         .then(() => {
           this.setState({
             requiresPassword: false, showModal: false, hasError: false, errorMsg: '', installing: true

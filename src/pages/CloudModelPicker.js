@@ -64,7 +64,7 @@ class CloudModelPicker extends BaseWizardPage {
     this.setState({loading: true});
 
     // Load overview for all templates
-    fetchJson('/api/v1/clm/templates')
+    fetchJson('/api/v2/templates')
       .then((templates) => {
         this.templates = templates;
 
@@ -124,7 +124,7 @@ class CloudModelPicker extends BaseWizardPage {
     if (this.saveRequired) {
       this.setState({loading: true});
       // Load the full template, update the global model, and save it
-      fetchJson('/api/v1/clm/templates/' + this.state.selectedModelName)
+      fetchJson('/api/v2/templates/' + this.state.selectedModelName)
         .then(model => this.props.updateGlobalState('model', fromJS(model), this.props.next))
         .catch(error => {
           this.setState({

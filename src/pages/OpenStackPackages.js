@@ -33,7 +33,7 @@ class OpenStackPackages extends Component {
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/packages')
+    fetchJson('/api/v2/packages')
       .then(responseData => {
         this.setState({packages: responseData.openstack_venv_packages, showLoadingMask: false});
       })
