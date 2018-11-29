@@ -158,6 +158,21 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         lines = items.map(item => JSON.stringify(item)).join('\n');
         logger(lines + '\n');
       }
+      if(response.migrating) {
+        logger('migrating:\n');
+        items = response.migrating;
+        lines = items.map(item => JSON.stringify(item)).join('\n');
+        logger(lines + '\n');
+      }
+    }
+  }
+
+  logError = (logger, error, msg) => {
+    logger(msg + '\n');
+    if (error.value?.contents?.failed) {
+      let failedLines =
+        error.value.contents.failed.map(item => JSON.stringify(item)).join('\n');
+      logger('\n' + failedLines);
     }
   }
 
@@ -168,21 +183,10 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     logger('\nPUT ' + apiUrl + '\n');
     return putJson(apiUrl)
       .then((response) => {
-        const msg =
-          translate(
-            'server.deploy.progress.response.disable_compute_service',
-            this.props.operationProps.oldServer.hostname);
+        const msg = translate(
+          'server.deploy.progress.response.disable_compute_service',
+          this.props.operationProps.oldServer.hostname);
         this.logResponse(logger, response, msg);
-        // response has partial failure
-        if(response['failed']) {
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.disable_compute_service.hasfailed',
-              response.failed);
-          });
-        }
       })
       .catch((error) => {
         // have no compute service for the old compute node
@@ -193,12 +197,27 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             this.props.operationProps.oldServer.hostname);
           logger(msg + '\n');
         }
+        else if(error.status === 500 &&
+          error.value?.contents?.failed && error.value?.contents?.disabled?.length > 0) {
+          const msg = translate(
+            'server.deploy.progress.response.disable_compute_service',
+            this.props.operationProps.oldServer.hostname);
+          this.logResponse(logger, error.value.contents, msg);
+          // have partial failure
+          // pop up message for user to confirm
+          return new Promise((resolve, reject) => {
+            this.showPartialFailedConfirmation(
+              resolve, reject,
+              logger, 'server.deploy.progress.disable_compute_service.hasfailed',
+              error.value.contents.failed);
+          });
+        }
         else {
           const msg =
             translate(
               'server.deploy.progress.disable_compute_service.failure',
               this.props.operationProps.oldServer.hostname, error.toString());
-          logger(msg + '\n');
+          this.logError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -210,21 +229,10 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     logger('\nDELETE ' + apiUrl + '\n');
     return deleteJson(apiUrl)
       .then((response) => {
-        const msg =
-          translate(
-            'server.deploy.progress.response.remove_from_aggregates',
-            this.props.operationProps.oldServer.hostname);
+        const msg = translate(
+          'server.deploy.progress.response.remove_from_aggregates',
+          this.props.operationProps.oldServer.hostname);
         this.logResponse(logger, response, msg);
-        // response has partial failure
-        if (response['failed']) {
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.remove_from_aggregates.hasfailed',
-              response.failed);
-          });
-        }
       })
       .catch((error) => {
         // have no compute service for the old compute node
@@ -234,12 +242,26 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             this.props.operationProps.oldServer.hostname);
           logger(msg + '\n');
         }
-        else {
+        else if(error.status === 500 &&
+          error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
+          const msg = translate(
+            'server.deploy.progress.response.remove_from_aggregates',
+            this.props.operationProps.oldServer.hostname);
+          this.logResponse(logger, error.value.contents, msg);
+          // have partial failure
+          // pop up message for user to confirm
+          return new Promise((resolve, reject) => {
+            this.showPartialFailedConfirmation(
+              resolve, reject,
+              logger, 'server.deploy.progress.remove_from_aggregates.hasfailed',
+              error.value.contents.failed);
+          });
+        } else {
           const msg =
             translate('server.deploy.progress.remove_from_aggregates.failure',
               this.props.operationProps.oldServer.hostname,
               error.toString());
-          logger(msg + '\n');
+          this.logError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -258,29 +280,18 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             this.props.operationProps.oldServer.hostname,
             this.props.operationProps.server.hostname);
         this.logResponse(logger, response, msg);
-        // response has partial failure
-        if (response['failed']) {
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.migrate_instances.hasfailed',
-              response.failed, response.migrating);
+        //poll to find out migration is done
+        logger('\n' + translate('server.deploy.progress.monitor_migration') + '\n');
+        return new Promise((resolve, reject) => {
+          this.setState({
+            'migrationMonitorModal': {
+              'resolve': resolve,
+              'reject': reject,
+              'logger': logger
+            },
+            'migrationData': response
           });
-        }
-        else { //poll to find out migration is done
-          logger('\n' + translate('server.deploy.progress.monitor_migration') + '\n');
-          return new Promise((resolve, reject) => {
-            this.setState({
-              'migrationMonitorModal': {
-                'resolve': resolve,
-                'reject': reject,
-                'logger': logger
-              },
-              'migrationData': response
-            });
-          });
-        }
+        });
       })
       .catch((error) => {
         // have no compute service for the old compute node
@@ -289,12 +300,29 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             this.props.operationProps.oldServer.hostname);
           logger(msg + '\n');
         }
+        else if(error.status === 500 &&
+          error.value?.contents?.failed && error.value?.contents?.migrating?.length > 0) {
+          const msg =
+          translate(
+            'server.deploy.progress.response.migrate_instances',
+            this.props.operationProps.oldServer.hostname,
+            this.props.operationProps.server.hostname);
+          this.logResponse(logger, error.value.contents, msg);
+          // has partial failure
+          // pop up message for user to confirm
+          return new Promise((resolve, reject) => {
+            this.showPartialFailedConfirmation(
+              resolve, reject,
+              logger, 'server.deploy.progress.migrate_instances.hasfailed',
+              error.value.contents.failed, error.value.contents.migrating);
+          });
+        }
         else {
           const msg =
             translate('server.deploy.progress.migrate_instances.failure',
               this.props.operationProps.oldServer.hostname,
               this.props.operationProps.server.hostname, error.toString());
-          logger(msg + '\n');
+          this.logError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -307,10 +335,9 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     logger('\nPUT ' + apiUrl + '\n');
     return putJson(apiUrl)
       .then((response) => {
-        const msg =
-          translate(
-            'server.deploy.progress.response.disable_network_agents',
-            this.props.operationProps.oldServer.hostname);
+        const msg = translate(
+          'server.deploy.progress.response.disable_network_agents',
+          this.props.operationProps.oldServer.hostname);
         this.logResponse(logger, response, msg);
         // response has partial failure
         if(response['failed']) {
@@ -331,12 +358,27 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             'server.deploy.progress.no_network_agents', this.props.operationProps.oldServer.hostname);
           logger(msg + '\n');
         }
+        else if(error.status === 500 &&
+          error.value?.contents?.failed && error.value?.contents?.disabled?.length > 0) {
+          const msg = translate(
+            'server.deploy.progress.response.disable_network_agents',
+            this.props.operationProps.oldServer.hostname);
+          this.logResponse(logger, error.value.contents, msg);
+          // have partial failure
+          // pop up message for user to confirm
+          return new Promise((resolve, reject) => {
+            this.showPartialFailedConfirmation(
+              resolve, reject,
+              logger, 'server.deploy.progress.disable_network_agents.hasfailed',
+              error.value.contents.failed);
+          });
+        }
         else {
           const msg =
             translate('server.deploy.progress.disable_network_agents.failure',
               this.props.operationProps.oldServer.hostname,
               error.toString());
-          logger(msg + '\n');
+          this.logError(logger, error, msg);
           throw new Error(msg);
         }
       });
