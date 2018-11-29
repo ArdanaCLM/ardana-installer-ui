@@ -21,7 +21,7 @@ describe('basic sanity tests', function() {
   });
 
   it('loads the app', function() {
-    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Deployer');
+    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Installer');
   });
 
   it('has the first step selected by default', function() {
