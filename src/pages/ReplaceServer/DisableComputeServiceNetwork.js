@@ -44,7 +44,6 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
       showPlabybookProcess: false,
       processErrorBanner: '',
-      // this loading indicator
       loading: false,
       // confirmation dialog when results contain failed
       partialFailedConfirmation: undefined,
@@ -458,7 +457,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         <InstanceMigrationMonitor
           title={translate('server.deploy.progress.monitor_migration.heading')}
           cancelAction={handleCancel} doneAction={handleDone}
-          data={this.state.migrationData} {...this.props}/>
+          migrationData={this.state.migrationData} {...this.props}/>
       );
     }
   }

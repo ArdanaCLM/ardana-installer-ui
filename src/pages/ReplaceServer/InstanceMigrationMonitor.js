@@ -31,16 +31,18 @@ class InstanceMigrationMonitor extends Component {
       loading: false,
       errorMsg: undefined,
       migrated: 0,
-      migrating: props.data.length,
-      now: new Date()
+      migrating: props.migrationData.length, //list of instances with migration started
+      pollingTime: new Date()
     };
     // time out after 30 minutes
-    this.expired = new Date(this.state.now);
-    this.expired.setMinutes(this.state.now.getMinutes() + 30);
+    this.expired = new Date(this.state.pollingTime);
+    this.expired.setMinutes(this.state.pollingTime.getMinutes() + 30);
   }
 
   componentDidMount() {
+    // init fetch
     this.fetchInstances();
+    // set up a timer to poll instances
     this.timer = setInterval(() => this.fetchInstances(), 5000);
   }
 
@@ -53,7 +55,7 @@ class InstanceMigrationMonitor extends Component {
   }
 
   fetchInstances = () => {
-    if(this.isTimeOut() || this.state.migrated === this.props.data.length) {
+    if(this.isTimeOut() || this.state.migrated === this.props.migrationData.length) {
       // unset polling timer
       if(this.timer) {
         clearInterval(this.timer);
@@ -62,7 +64,7 @@ class InstanceMigrationMonitor extends Component {
       return;
     }
 
-    this.setState({now: new Date()});
+    this.setState({pollingTime: new Date()});
     if (!this.state.loading) {
       let apiUrl =
         '/api/v1/clm/compute/instances/' + this.props.operationProps.oldServer.hostname;
@@ -71,7 +73,7 @@ class InstanceMigrationMonitor extends Component {
         .then(response => {
           this.setState({
             migrating: response.length,
-            migrated: this.props.data.length - response.length,
+            migrated: this.props.migrationData.length - response.length,
             loading: false
           });
         })
@@ -99,7 +101,7 @@ class InstanceMigrationMonitor extends Component {
   }
 
   handleHide = () => {
-    if(this.state.migrated === this.props.data.length) {
+    if(this.state.migrated === this.props.migrationData.length) {
       this.handleDone();
     }
     else {
@@ -108,13 +110,13 @@ class InstanceMigrationMonitor extends Component {
   }
 
   isTimeOut = () => {
-    return this.state.now.getTime() > this.expired.getTime();
+    return this.state.pollingTime.getTime() > this.expired.getTime();
   }
 
   isDoneDisabled = () => {
     return (
       this.state.loading ||
-      this.state.migrated < this.props.data.length ||
+      this.state.migrated < this.props.migrationData.length ||
       this.isTimeOut()
     );
   }
@@ -122,7 +124,7 @@ class InstanceMigrationMonitor extends Component {
   isCancelDisabled = () => {
     return (
       this.state.loading ||
-      this.state.migrated === this.props.data.length
+      this.state.migrated === this.props.migrationData.length
     );
   }
 
@@ -131,7 +133,7 @@ class InstanceMigrationMonitor extends Component {
       <table className='table table-condensed'>
         <tbody>
           <tr><th>{translate('server.deploy.progress.migration_started')}</th>
-            <td>{this.props.data.length}</td></tr>
+            <td>{this.props.migrationData.length}</td></tr>
           <tr><th>{translate('server.deploy.progress.migration_inprogress')}</th>
             <td>{this.state.migrating}</td></tr>
           <tr><th>{translate('server.deploy.progress.migration_migrated')}</th>
@@ -169,7 +171,7 @@ class InstanceMigrationMonitor extends Component {
 
   render() {
     const migratedPct =
-      parseFloat(this.state.migrated / this.props.data.length).toFixed(2) * 100;
+      parseFloat(this.state.migrated / this.props.migrationData.length).toFixed(2) * 100;
     return (
       <ConfirmModal
         title={this.props.title}
@@ -179,7 +181,7 @@ class InstanceMigrationMonitor extends Component {
             this.props.operationProps.oldServer.hostname, this.props.operationProps.server.hostname)}
           </div>
           <div className='message-line'>{this.renderMigrationProgressInfo()}</div>
-          <ProgressBar animated={this.state.migrated < this.props.data.length}
+          <ProgressBar animated={this.state.migrated < this.props.migrationData.length}
             striped now={migratedPct}
             label={translate('server.deploy.progress.migration_pct', migratedPct)}/>
           {this.renderErrorMessage()}

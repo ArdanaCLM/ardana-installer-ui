@@ -593,7 +593,7 @@
     "server.retrieve.manual.servers.error": "Failed to retrieve manually added servers. {0}",
     "server.validating": "Validating Changes...",
     "server.addserver.skip.emptyhostnames": "The following hosts are skipped for further processes because of empty hostname \n {0}",
-    "server.addserver.emptyhostnames": "There are no valid server(s) with hostname(s) to run deployement",
+    "server.addserver.emptyhostnames": "There are no valid server(s) with hostname(s) to run deployment",
     "server.addserver.prepare": "Preparing Servers",
     "server.addserver.prepare.failure": "Failed to prepare for adding servers",
     "server.addcompute.prepare": "Preparing Compute Server",
