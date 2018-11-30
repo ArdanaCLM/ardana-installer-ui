@@ -138,9 +138,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
   }
 
   getAddedComputeHosts = (cloudModel) => {
-    let deployedServerIds =
-      this.props.operationProps && this.props.operationProps.deployedServers ?
-        this.props.operationProps.deployedServers.map(server => server.id) : [];
+    let deployedServerIds = this.props.operationProps?.deployedServers.map(server => server.id) || [];
 
     // get new hostnames for compute nodes
     let hosts = cloudModel['internal']['servers'];

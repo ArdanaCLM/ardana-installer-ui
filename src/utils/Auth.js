@@ -54,7 +54,7 @@ class MemoryToken extends TokenStore {
     this.expires = expires;
   }
   getAuthToken = () => {
-    if (this.expires && this.expires > Date.now()) {
+    if (this.expires > Date.now()) {
       return this.token;
     } else {
       return undefined;

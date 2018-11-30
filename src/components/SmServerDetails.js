@@ -55,7 +55,7 @@ class SmServerDetails extends BaseServerDetails {
   getDetailsData = (details) => {
     let retData = {};
     let nkdevice = details.network_devices.find((device) => {
-      return device.interface && device.interface.startsWith('eth') && device.ip !== '';
+      return device.interface?.startsWith('eth') && device.ip !== '';
     });
     // still can not find ip address, try one more time
     if (!nkdevice) {
@@ -68,7 +68,7 @@ class SmServerDetails extends BaseServerDetails {
       ip: nkdevice ? nkdevice.ip : ''
     },{
       id: details.id,
-      ipv6: nkdevice && nkdevice.ipv6 && nkdevice.ipv6[0] ? nkdevice.ipv6[0].address : '',
+      ipv6: nkdevice?.ipv6?.[0]?.address || '',
     },
     {
       os: details.release,

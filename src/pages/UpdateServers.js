@@ -498,10 +498,10 @@ class UpdateServers extends BaseUpdateWizardPage {
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
           </div>
-          {this.props.model && this.props.model.size > 0 && this.renderGlobalButtons()}
+          {this.props.model?.size > 0 && this.renderGlobalButtons()}
         </div>
         <div className='wizard-content unlimited-height'>
-          {this.props.model && this.props.model.size > 0 && this.renderCollapsibleTable()}
+          {this.props.model?.size > 0 && this.renderCollapsibleTable()}
           {!this.props.wizardLoading && this.props.wizardLoadingErrors &&
            this.renderWizardLoadingErrors(
              this.props.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}

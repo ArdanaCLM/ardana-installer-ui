@@ -112,13 +112,13 @@ export function CidrValidator(cidr) {
 
 export function AddressesValidator(addresses) {
   // just one IPV4 address
-  if(addresses && addresses.indexOf('-') === -1) {
+  if(addresses?.indexOf('-') === -1) {
     if(IPV4ADDRESS.exec(addresses.trim()) === null) {
       return translate('input.validator.addresses.error');
     }
   }
 
-  if(addresses && addresses.indexOf('-') !== -1) { // just one range
+  if(addresses?.indexOf('-') !== -1) { // just one range
     if (IPV4ADDRESS_RANGE.exec(addresses.trim()) === null) {
       return translate('input.validator.addresses.error');
     }

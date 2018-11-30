@@ -315,7 +315,7 @@ class CloudModelPicker extends BaseWizardPage {
 
     const hSource = this.state.currentFilter === 'hypervisor-type' ? this.filteredTemplates : templates;
     const hypervisors = hSource.map((template) => {
-      return (template.metadata && template.metadata.hypervisor) ? template.metadata.hypervisor : [];
+      return template.metadata?.hypervisor || [];
     });
     const uniqueHypervisors = this.getUniqueValues(hypervisors).sort();
     const hOptions = uniqueHypervisors.length > 0 ? ['none'].concat(uniqueHypervisors) : ['none'];
@@ -324,7 +324,7 @@ class CloudModelPicker extends BaseWizardPage {
 
     const nSource = this.state.currentFilter === 'network-type' ? this.filteredTemplates : templates;
     let networks = nSource.map((template) => {
-      return (template.metadata && template.metadata.network) ? template.metadata.network : undefined;
+      return template.metadata?.network || undefined;
     }).filter(network => network !== undefined);
     const uniqueNetworks = [...new Set(networks)].sort();
     const nOptions = uniqueNetworks.length ? ['none'].concat(uniqueNetworks) : ['none'];
