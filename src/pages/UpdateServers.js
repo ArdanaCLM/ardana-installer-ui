@@ -161,8 +161,12 @@ class UpdateServers extends BaseUpdateWizardPage {
         component: UpdateServerPages.DeployAddCompute
       });
       pages.push({
-        name: 'CompleteAddCompute',
-        component: UpdateServerPages.CompleteAddCompute
+        name: 'DisableComputeServiceNetwork',
+        component: UpdateServerPages.DisableComputeServiceNetwork
+      });
+      pages.push({
+        name: 'CompleteReplaceCompute',
+        component: UpdateServerPages.CompleteReplaceCompute
       });
     } else {
       pages.push({
@@ -215,13 +219,15 @@ class UpdateServers extends BaseUpdateWizardPage {
     // new server id and ip-addr for a new compute node
     // for replacing a compute node, also recorded oldServer's id
     // and ip-addr
-    // id and ip-addr can be used to retriev hostname in CloudModel.yml
+    // id and ip-addr can be used to retrieve hostname in CloudModel.yml
     theProps.server = {id: repServer.id, 'ip': repServer['ip-addr']};
 
     // save the oldServer information for later process when replace compute
     if(isComputeNode(this.state.serverToReplace)) {
       theProps.oldServer = {
-        id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr']};
+        id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr'],
+        isReachable: this.state.isOldServerReachable
+      };
       // will always activate the newly added compute server
       theProps.activate = true;
     }
@@ -382,6 +388,11 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.handleCancelReplaceServer();
   }
 
+  proceedOldComputeNotReachable = () => {
+    this.setState({
+      showNoMigrationWarning: false, showReplaceModal: true, isOldServerReachable: false});
+  }
+
   renderSharedWarning() {
     if (this.state.showSharedWarning) {
       return (
@@ -410,7 +421,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     if (this.state.showNoMigrationWarning) {
       return (
         <YesNoModal title={translate('warning')}
-          yesAction={() => this.setState({showNoMigrationWarning: false, showReplaceModal: true})}
+          yesAction={this.proceedOldComputeNotReachable}
           noAction={() => this.setState({showNoMigrationWarning: false, serverToReplace: undefined})}>
           {translate('replace.server.nomigration.warning',
             this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'])}

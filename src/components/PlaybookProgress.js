@@ -168,8 +168,6 @@ class PlaybookProgress extends Component {
     //
     //   payload - body of REST call when invoking all playbooks.
     //
-    //   isUpdateMode - Mostly used for determining whether playbooks is an array of objects
-    //      or an array of strings.   Also used to hardcode certain password-related extra-vars
     //
     //   steps - array of objects, each of which contains:
     //     label     - string to display on the UI page

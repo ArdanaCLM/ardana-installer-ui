@@ -308,3 +308,18 @@ export function hasConflictAddresses(theServer, serverList) {
 export function isComputeNode(server) {
   return server['role'].includes('COMPUTE');
 }
+
+export function getHostFromCloudModel(cloudModel, serverId) {
+  const matches =
+    cloudModel.internal.servers.filter(s => s.id == serverId).map(s => {
+      return {
+        'hostname': s['hostname'],
+        'id': s['id'],
+        'ip': s['addr'],
+        'ansible_hostname': s['ardana_ansible_host']
+      };
+    });
+  if (matches.length > 0) {
+    return matches[0];
+  }
+}

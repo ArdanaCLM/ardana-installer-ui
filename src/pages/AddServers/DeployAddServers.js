@@ -85,6 +85,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     // will request with no-cache
     if(!this.props.operationProps.newHosts) {
       this.setState({loading: true});
+      // fetchJson with url, init=undefined, forceLogin=true, noCache=true
       fetchJson(
         '/api/v1/clm/model/cp_internal/CloudModel.yaml', undefined, true, true
       )
