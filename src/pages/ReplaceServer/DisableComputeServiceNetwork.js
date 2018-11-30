@@ -176,6 +176,18 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }
   }
 
+  partialFailureDialogPromise = (logger, error, logMsg, dialogMsgKey) => {
+    this.logResponse(logger, error.value.contents, logMsg);
+    // have partial failure
+    // pop up message for user to confirm
+    return new Promise((resolve, reject) => {
+      this.showPartialFailedConfirmation(
+        resolve, reject, logger, dialogMsgKey,
+        // always have failed, migrating could be undefined
+        error.value.contents.failed, error.value.contents.migrating);
+    });
+  }
+
   disableCompServices = (logger) => {
     const apiUrl =
       '/api/v1/clm/compute/services/' + this.props.operationProps.oldServer.hostname +
@@ -202,15 +214,9 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.response.disable_compute_service',
             this.props.operationProps.oldServer.hostname);
-          this.logResponse(logger, error.value.contents, msg);
-          // have partial failure
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.disable_compute_service.hasfailed',
-              error.value.contents.failed);
-          });
+          let test = this.partialFailureDialogPromise(
+            logger, error, msg, 'server.deploy.progress.disable_compute_service.hasfailed');
+          return test;
         }
         else {
           const msg =
@@ -247,16 +253,10 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.response.remove_from_aggregates',
             this.props.operationProps.oldServer.hostname);
-          this.logResponse(logger, error.value.contents, msg);
-          // have partial failure
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.remove_from_aggregates.hasfailed',
-              error.value.contents.failed);
-          });
-        } else {
+          return this.partialFailureDialogPromise(
+            logger, error, msg, 'server.deploy.progress.remove_from_aggregates.hasfailed');
+        }
+        else {
           const msg =
             translate('server.deploy.progress.remove_from_aggregates.failure',
               this.props.operationProps.oldServer.hostname,
@@ -307,15 +307,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             'server.deploy.progress.response.migrate_instances',
             this.props.operationProps.oldServer.hostname,
             this.props.operationProps.server.hostname);
-          this.logResponse(logger, error.value.contents, msg);
-          // has partial failure
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.migrate_instances.hasfailed',
-              error.value.contents.failed, error.value.contents.migrating);
-          });
+          return this.partialFailureDialogPromise(
+            logger, error, msg, 'server.deploy.progress.migrate_instances.hasfailed');
         }
         else {
           const msg =
@@ -363,15 +356,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.response.disable_network_agents',
             this.props.operationProps.oldServer.hostname);
-          this.logResponse(logger, error.value.contents, msg);
-          // have partial failure
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.disable_network_agents.hasfailed',
-              error.value.contents.failed);
-          });
+          return this.partialFailureDialogPromise(
+            logger, error, msg, 'server.deploy.progress.disable_network_agents.hasfailed');
         }
         else {
           const msg =
