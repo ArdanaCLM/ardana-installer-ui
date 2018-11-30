@@ -214,9 +214,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.response.disable_compute_service',
             this.props.operationProps.oldServer.hostname);
-          let test = this.partialFailureDialogPromise(
+          return this.partialFailureDialogPromise(
             logger, error, msg, 'server.deploy.progress.disable_compute_service.hasfailed');
-          return test;
         }
         else {
           const msg =
