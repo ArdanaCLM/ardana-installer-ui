@@ -34,7 +34,7 @@ fi
 
 # Check out a local copy of the installer server
 if [ ! -d run ] ; then
-    git clone https://github.com/ArdanaCLM/ardana-installer-server run
+    git clone https://github.com/ArdanaCLM/ardana-service run
 fi
 
 cd run
