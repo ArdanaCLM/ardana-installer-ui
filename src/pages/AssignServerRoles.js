@@ -1061,7 +1061,7 @@ class AssignServerRoles extends BaseWizardPage {
       }
     }
     // remove server from right table
-    if (deleted_server.role !== '') {
+    if (!isEmpty(deleted_server.role)) {
       let index = this.props.model.getIn(['inputModel', 'servers']).findIndex(
         server => server.get('id') === deleted_server.id);
       let newModel = this.props.model.removeIn(['inputModel', 'servers', index]);
