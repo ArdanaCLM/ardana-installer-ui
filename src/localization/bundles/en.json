@@ -670,5 +670,13 @@
     "server.deploy.progress.migration_info": "The followings are the progress regarding live migration of instances from {0} to {1}. Once migration is all done, you can continue by clicking Done. However certain instances might not be able to migrated. \n Click Cancel to cancel the process, click Done to continue the process.",
     "server.deploy.progress.migration_pct": "{0}%",
     "server.deploy.progress.get_instances.error": "Failed to get instances {0}",
-    "server.deploy.progress.migration_monitor_done": "Monitoring instances migration is done"
+    "server.deploy.progress.migration_monitor_done": "Monitoring instances migration is done",
+
+    "server.activate.error": "Failed to activate server {0}",
+    "server.deactivate.error": "Failed to deactivate server {0}",
+    "server.deactivate.confirm.title": "Deactivate {0}?",
+    "server.deactivate.confirm.message": "Are you sure you want to deactivate this compute server, {0}?",
+    "server.deactivate.confirm.message_instances": "Are you sure you want to deactivate this compute server, {0} it is currently hosting {1} instances?",
+    "server.retreive.serverstatus.error": "Failed to retreive compute server status: {0}"
+
 }
