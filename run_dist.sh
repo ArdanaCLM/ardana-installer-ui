@@ -32,9 +32,9 @@ fi
 # build the neccessary UI files
 ./build_ui.sh || die "building UI files failed, exiting"
 
-# Check out a local copy of the installer server
+# Check out a local copy of the ardana service
 if [ ! -d run ] ; then
-    git clone https://github.com/ArdanaCLM/ardana-installer-server run
+    git clone https://github.com/ArdanaCLM/ardana-service run
 fi
 
 cd run
