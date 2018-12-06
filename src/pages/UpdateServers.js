@@ -135,7 +135,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       this.setState({monasca: false});
       fetchJson('/api/v2/monasca/is_installed')
         .then(responseData => {
-          if(responseData.installed) {
+          if(responseData.installed === 'true') {
             this.setState({monasca: true}, () => this.getServerMonascaStatuses());
           }
         }).catch((error) => {
