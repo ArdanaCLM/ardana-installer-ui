@@ -72,7 +72,7 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   }
 
   let autoServerIds = [];
-  if (autoServers && autoServers.length > 0) {
+  if (autoServers?.length > 0) {
     autoServerIds = autoServers.map(server => server.id);
     if(!isEmpty(theId)) {
       autoServerIds = autoServerIds.filter(id => id !== theId);
@@ -80,7 +80,7 @@ export function getAllOtherServerIds (model, autoServers, manualServers, theId) 
   }
 
   let manualServerIds = [];
-  if(manualServers && manualServers.length > 0) {
+  if(manualServers?.length > 0) {
     manualServerIds = manualServers.map(server => server.id);
     if(!isEmpty(theId)) {
       manualServerIds = manualServerIds.filter(id => id !== theId);
@@ -127,10 +127,10 @@ export function getModelIPAddresses (model, excludeIPAddr) {
 
 export function getMacIPMIAddrObjs(autoServers, manualServers) {
   let allAvailableServers = [];
-  if (autoServers && autoServers.length > 0) {
+  if (autoServers?.length > 0) {
     allAvailableServers = allAvailableServers.concat(autoServers);
   }
-  if(manualServers && manualServers.length > 0) {
+  if(manualServers?.length > 0) {
     allAvailableServers = allAvailableServers.concat(manualServers);
   }
 
@@ -307,4 +307,19 @@ export function hasConflictAddresses(theServer, serverList) {
 
 export function isComputeNode(server) {
   return server['role'].includes('COMPUTE');
+}
+
+export function getHostFromCloudModel(cloudModel, serverId) {
+  const matches =
+    cloudModel.internal.servers.filter(s => s.id == serverId).map(s => {
+      return {
+        'hostname': s['hostname'],
+        'id': s['id'],
+        'ip': s['addr'],
+        'ansible_hostname': s['ardana_ansible_host']
+      };
+    });
+  if (matches.length > 0) {
+    return matches[0];
+  }
 }

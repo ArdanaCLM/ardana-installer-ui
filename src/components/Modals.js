@@ -48,8 +48,10 @@ export function ConfirmModal(props) {
 export function YesNoModal(props) {
   const footer = (
     <div className="btn-row">
-      <ActionButton type='default' clickAction={props.noAction} displayLabel={translate('no')}/>
-      <ActionButton clickAction={props.yesAction} displayLabel={translate('yes')}/>
+      <ActionButton
+        type='default' clickAction={props.noAction} displayLabel={translate('no')} isDisabled={props.disableNo}/>
+      <ActionButton
+        clickAction={props.yesAction} displayLabel={translate('yes')} isDisabled={props.disableYes}/>
     </div>
   );
 

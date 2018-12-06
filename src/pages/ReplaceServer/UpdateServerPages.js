@@ -17,7 +17,8 @@ import ReplaceController from './ReplaceController.js';
 import InstallOS from './InstallOS.js';
 import PrepareAddCompute from './PrepareAddCompute.js';
 import DeployAddCompute from './DeployAddCompute.js';
-import CompleteAddCompute from './CompleteAddCompute.js';
+import DisableComputeServiceNetwork from './DisableComputeServiceNetwork.js';
+import CompleteReplaceCompute from './CompleteReplaceCompute.js';
 
 // potential pages for all kinds of server replacement pages
 export const UpdateServerPages = {
@@ -25,5 +26,6 @@ export const UpdateServerPages = {
   'InstallOS': InstallOS,
   'PrepareAddCompute': PrepareAddCompute,
   'DeployAddCompute': DeployAddCompute,
-  'CompleteAddCompute': CompleteAddCompute
+  'DisableComputeServiceNetwork': DisableComputeServiceNetwork,
+  'CompleteReplaceCompute': CompleteReplaceCompute
 };

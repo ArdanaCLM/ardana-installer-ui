@@ -73,7 +73,7 @@ class LoginPage extends Component {
           navigateBack();
         } else {
           const search = new URLSearchParams(window.location.search);
-          if (search.has('start') && search.get('start').startsWith('installer')) {
+          if (search.get('start')?.startsWith('installer')) {
             navigateTo('/', undefined, search.toString());
           } else {
             navigateTo('/services/info');

@@ -212,14 +212,14 @@ class AddServers extends BaseUpdateWizardPage {
 
   //check if we can deploy the new servers
   isDeployable = () => {
-    if(this.props.model && this.props.model.size > 0) {
+    if(this.props.model?.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the deploy button when all servers are valid
       // and have new servers added and do not have existing processOperation
       // going on
       return (
         !this.props.wizardLoadingErrors &&
-        newIds && newIds.length > 0 && !this.props.processOperation &&
+        newIds?.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers() &&
         getServerRoles(this.props.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
@@ -232,14 +232,14 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    if(this.props.model && this.props.model.size > 0) {
+    if(this.props.model?.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the install button when all servers are valid for installing os
       // and have new servers added and do not have existing processOperation
       // going on
       return (
         !this.props.wizardLoadingErrors &&
-        newIds && newIds.length > 0 && !this.props.processOperation &&
+        newIds?.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers(true)
       );
     }
@@ -252,7 +252,7 @@ class AddServers extends BaseUpdateWizardPage {
     return (
       // render the servers content when  model loaded, have no errors of deployed servers
       // and have no model loading errors and wizard loading is done
-      this.props.model && this.props.model.size > 0 && !this.state.errorBanner &&
+      this.props.model?.size > 0 && !this.state.errorBanner &&
       (!this.state.wizardLoadingErrors || !this.state.wizardLoadingErrors.get('modelError')) &&
       !this.props.wizardLoading
     );

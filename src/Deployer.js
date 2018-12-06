@@ -24,6 +24,7 @@ import LoginPage from './pages/Login.js';
 import { fetchJson } from './utils/RestUtils.js';
 import { getAuthToken } from './utils/Auth.js';
 import { routes } from './utils/RouteConfig.js';
+import { ErrorBanner } from './components/Messages.js';
 
 class Deployer extends Component {
   constructor(props) {
@@ -34,11 +35,14 @@ class Deployer extends Component {
     };
   }
 
-  componentDidMount = () => {
-    fetchJson('/api/v2/is_secured')
-      .then(response => {
-        this.setState({isSecured: response['isSecured']});
-      });
+  async componentDidMount() {
+    try {
+      let response = await fetchJson('/api/v2/is_secured');
+      this.setState({ isSecured: response['isSecured'] });
+    } catch(error) {
+      console.error(`Could not get \`is_secured\` flag (${error})`); // eslint-disable-line no-console
+      this.setState({ isSecuredError: error});
+    }
   }
 
   render() {
@@ -50,6 +54,10 @@ class Deployer extends Component {
     const search = new URLSearchParams(window.location.search);
 
     let defaultPath;
+
+    if(this.state.isSecuredError) {
+      return <ErrorBanner message={this.state.isSecuredError.toString?.()} show={true}/>;
+    }
 
     if (this.state.isSecured === undefined) {
       // If the REST call has not yet completed, then show a loading page (briefly)
@@ -63,7 +71,7 @@ class Deployer extends Component {
       } else {
 
         // Go to NavMenu unless the url specifically requests the installer
-        if (search.has('start') && search.get('start').startsWith('installer')) {
+        if (search.get('start')?.startsWith('installer')) {
           defaultPath = <InstallWizard pages={pages}/>;
         } else {
           defaultPath = <NavMenu routes={routes}/>;
@@ -71,7 +79,7 @@ class Deployer extends Component {
       }
     } else {
       // Go to installer unless the url specifically requests the menu
-      if (search.has('start') && search.get('start').startsWith('menu')) {
+      if (search.get('start')?.startsWith('menu')) {
         // If in secured (post-install) mode with a valid auth token, display menu
         defaultPath = <NavMenu routes={routes}/>;
       } else {

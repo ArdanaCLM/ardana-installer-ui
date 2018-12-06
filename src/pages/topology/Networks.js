@@ -68,10 +68,7 @@ class Networks extends Component {
 
         let net_list = [];
         for(const [net_name, net_data] of Object.entries(nw_groups[nw_group_name])) {
-          if (net_data['control_planes'][cp_name] &&
-              net_data['control_planes'][cp_name]['clusters'] &&
-              net_data['control_planes'][cp_name]['clusters'][cluster_name]) {
-
+          if (net_data['control_planes'][cp_name]?.['clusters']?.[cluster_name]) {
             net_list.push(net_name);
           }
         }
@@ -87,10 +84,7 @@ class Networks extends Component {
       for (const resource_name of resource_names) {
         let net_list = [];
         for(const [net_name, net_data] of Object.entries(nw_groups[nw_group_name])) {
-          if (net_data['control_planes'][cp_name] &&
-              net_data['control_planes'][cp_name]['resources'] &&
-              net_data['control_planes'][cp_name]['resources'][resource_name]) {
-
+          if (net_data['control_planes'][cp_name]?.['resources']?.[resource_name]) {
             net_list.push(net_name);
           }
         }
