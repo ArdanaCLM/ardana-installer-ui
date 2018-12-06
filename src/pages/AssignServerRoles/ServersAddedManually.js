@@ -111,12 +111,12 @@ class ServersAddedManually extends Component {
 
     // Call the callback props and update the server list in the shim
     if (this.props.addAction) {
-      postJson('/api/v1/server', [server])
+      postJson('/api/v2/server', [server])
         .then(() =>
           this.props.addAction(server.toJS())
         );
     } else {
-      putJson('/api/v1/server', server)
+      putJson('/api/v2/server', server)
         .then(() =>
           this.props.updateAction(server.toJS())
         );

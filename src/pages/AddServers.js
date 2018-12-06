@@ -77,7 +77,7 @@ class AddServers extends BaseUpdateWizardPage {
   getDeployedServers = () => {
     this.setState({loading: true});
     // fetchJson(url, init, forceLogin, noCache)
-    fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
+    fetchJson('/api/v2/model/deployed_servers', undefined, true, true)
       .then((servers) => {
         if (servers) {
           this.setState({deployedServers: servers, loading: false});
@@ -132,7 +132,7 @@ class AddServers extends BaseUpdateWizardPage {
     // validate and update CloudModel.yml so we
     // can have hostnames ready for newly added servers
     this.setState({validating: true, showDeployConfirmModal: false});
-    postJson('/api/v1/clm/config_processor')
+    postJson('/api/v2/config_processor')
       .then(() => {
         this.setState({validating: false});
         let pages = this.assembleDeployProcessPages();

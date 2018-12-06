@@ -113,7 +113,7 @@ class ConnectionCredsInfo extends Component {
     }
 
     return (
-      postJson('/api/v1/sm/connection_test', sm, {
+      postJson('/api/v2/sm/connection_test', sm, {
         headers: {
           'Secured': sm.get('secured')
         },
@@ -152,7 +152,7 @@ class ConnectionCredsInfo extends Component {
     const host = this.state.inputValue.getIn(['ov', 'host']);
     this.setState(prev => ({inputValue: prev.inputValue.removeIn(['ov','sessionKey'])}));
     return (
-      postJson('/api/v1/ov/connection_test', this.state.inputValue.get('ov'), {
+      postJson('/api/v2/ov/connection_test', this.state.inputValue.get('ov'), {
         headers: {
           'Secured': this.state.inputValue.getIn(['ov', 'secured'])
         }

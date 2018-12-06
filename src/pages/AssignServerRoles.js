@@ -119,7 +119,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getSmServersData(tokenKey, smUrl, secured) {
-    return fetchJson('/api/v1/sm/servers', {
+    return fetchJson('/api/v2/sm/servers', {
       headers: {
         'Auth-Token': tokenKey,
         'Suse-Manager-Url': smUrl,
@@ -129,7 +129,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getOvServersData(tokenKey, ovUrl, secured) {
-    return fetchJson('/api/v1/ov/servers', {
+    return fetchJson('/api/v2/ov/servers', {
       headers: {
         'Auth-Token': tokenKey,
         'Ov-Url': ovUrl,
@@ -216,7 +216,7 @@ class AssignServerRoles extends BaseWizardPage {
   saveAllDiscoveredServers(servers) {
     this.deleteDiscoveredServers()
       .then((response) => {
-        postJson('/api/v1/server', JSON.stringify(servers))
+        postJson('/api/v2/server', JSON.stringify(servers))
           .then((response) => {})
           .catch((error) => {
             let msg = translate('server.discover.save.error');
@@ -390,7 +390,7 @@ class AssignServerRoles extends BaseWizardPage {
         // use the existing imported server's uid
         server.uid = manualServers[sIndex].uid;
         manualServers[sIndex] = server;
-        putJson('/api/v1/server', JSON.stringify(server))
+        putJson('/api/v2/server', JSON.stringify(server))
           .catch((error) => {
             let msg = translate('server.import.update.error', server.id);
             this.setState(prev => {
@@ -438,7 +438,7 @@ class AssignServerRoles extends BaseWizardPage {
     // have some imported server, need to add to backend
     if(newServers.length > 0) {
       manualServers = manualServers.concat(newServers);
-      postJson('/api/v1/server', JSON.stringify(newServers))
+      postJson('/api/v2/server', JSON.stringify(newServers))
         .catch((error) => {
           let msg = translate('server.import.add.error');
           this.setState(prev => { return {
@@ -626,7 +626,7 @@ class AssignServerRoles extends BaseWizardPage {
       //pass
     }
 
-    fetchJson('/api/v1/server?source=sm,ov')
+    fetchJson('/api/v2/server?source=sm,ov')
       .then((rawServerData) => {
         if(rawServerData) {
           this.setState({rawDiscoveredServers : rawServerData});
@@ -643,7 +643,7 @@ class AssignServerRoles extends BaseWizardPage {
       });
 
     // get manually added servers
-    fetchJson('/api/v1/server?source=manual')
+    fetchJson('/api/v2/server?source=manual')
       .then((responseData) => {
         if (responseData.length > 0) {
           this.setState({serversAddedManually: responseData});
@@ -652,7 +652,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   deleteDiscoveredServers() {
-    return deleteJson('/api/v1/server?source=sm,ov');
+    return deleteJson('/api/v2/server?source=sm,ov');
   }
 
   checkUpdateServerDataToMatchModel = (serverData, modelServers) => {
@@ -807,7 +807,7 @@ class AssignServerRoles extends BaseWizardPage {
   getSmAllServerDetailsData = (serverIds, smTokenKey, smUrl, secured) => {
     let tasks = [];
     serverIds.forEach((id) => {
-      let shimUrlPath = '/api/v1/sm/servers/' + id;
+      let shimUrlPath = '/api/v2/sm/servers/' + id;
       tasks.push(this.getSmOneServerDetailData(shimUrlPath, smTokenKey, smUrl, secured));
     });
 
@@ -928,7 +928,7 @@ class AssignServerRoles extends BaseWizardPage {
           return {serversAddedManually: prevState.serversAddedManually.concat([server])};
         });
         // save to the backend
-        postJson('/api/v1/server', JSON.stringify([server]))
+        postJson('/api/v2/server', JSON.stringify([server]))
           .catch((error) => {
             let msg = translate('server.save.error', server.id);
             this.setState(prev => { return {
@@ -1019,7 +1019,7 @@ class AssignServerRoles extends BaseWizardPage {
           tempList.splice(idx, 1, updated_server);
           return {[list]: tempList};
         }, () => {
-          putJson('/api/v1/server', JSON.stringify(updated_server))
+          putJson('/api/v2/server', JSON.stringify(updated_server))
             .catch((error) => {
               let msg = translate('server.discover.update.error', updated_server.id);
               this.setState(prev => { return {
@@ -1048,7 +1048,7 @@ class AssignServerRoles extends BaseWizardPage {
           return {[list]: prev[list]};
         }, () => {
           deleteJson(
-            '/api/v1/server?source=' + deleted_server.source +'&uid=' + deleted_server.uid)
+            '/api/v2/server?source=' + deleted_server.source +'&uid=' + deleted_server.uid)
             .catch((error) => {
               let msg = translate('server.discover.delete.server.error', deleted_server.id);
               this.setState(prev => { return {

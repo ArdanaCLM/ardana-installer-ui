@@ -403,7 +403,7 @@ class PlaybookProgress extends Component {
     }
 
     // go get logs
-    fetchJson('/api/v1/clm/plays/' + playbook.playId + '/log')
+    fetchJson('/api/v2/plays/' + playbook.playId + '/log')
       .then(response => {
         const message = response.trimRight('\n');
         this.logsReceived = List(message);
@@ -417,7 +417,7 @@ class PlaybookProgress extends Component {
       });
 
     // update the UI status
-    fetchJson('/api/v1/clm/plays/' + playbook.playId + '/events')
+    fetchJson('/api/v2/plays/' + playbook.playId + '/events')
       .then(response => {
         for (let evt of response) {
           if (evt.event === 'playbook-stop')
@@ -452,7 +452,7 @@ class PlaybookProgress extends Component {
       const progressPlay = inProgressPlaybooks[0];  // there will only be one playbook in progress
       // if have completes, process completed logs first
       //check the in progress one
-      fetchJson('/api/v1/clm/plays/' + progressPlay.playId, {
+      fetchJson('/api/v2/plays/' + progressPlay.playId, {
         // Note: Use no-cache in order to get an up-to-date response
         headers: {
           'pragma': 'no-cache',
@@ -566,7 +566,7 @@ class PlaybookProgress extends Component {
 
     } else {
       const playbookName = this.getPlaybookName(playbook);
-      postJson('/api/v1/clm/playbooks/' + playbookName, payload)
+      postJson('/api/v2/playbooks/' + playbookName, payload)
         .then(response => {
           const playId = response['id'];
           this.monitorSocket(playbookName, playId);
@@ -591,7 +591,7 @@ class PlaybookProgress extends Component {
     this.setState({showConfirmationDlg: false});
     const running = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS)[0];
     if (running) {
-      deleteJson('/api/v1/clm/plays/' + running.playId)
+      deleteJson('/api/v2/plays/' + running.playId)
         .then(response => {
           if (this.props.modalMode) {
             this.logMessage(translate('deploy.cancel.message'));

@@ -113,7 +113,7 @@ class ServiceDetails extends Component {
   componentWillMount() {
     this.props.setLoadingMask(true);
     let serviceNameObj = this.getServiceName();
-    fetchJson('/api/v1/clm/packages')
+    fetchJson('/api/v2/packages')
       .then(responseData => {
         this.setState({version: this.getVersion(responseData, serviceNameObj), packageDataLoaded: true});
         this.checkLoadingMask();
@@ -126,7 +126,7 @@ class ServiceDetails extends Component {
     const lookupName =  MONASCA_SERVICES_MAP[this.props.service.name.toLowerCase()];
     if (lookupName) {
       const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
-      fetchJson('/api/v1/clm/monasca/passthru/alarms/count?' + query)
+      fetchJson('/api/v2/monasca/passthru/alarms/count?' + query)
         .then(responseData => {
           this.processAlarms(responseData.counts);
           this.setState({alarmDataLoaded: true});
@@ -240,7 +240,7 @@ class ServiceInfo extends Component {
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/endpoints')
+    fetchJson('/api/v2/endpoints')
       .then(responseData => {
         this.setState({services: responseData, showLoadingMask: false});
       })
@@ -254,7 +254,7 @@ class ServiceInfo extends Component {
         });
       });
 
-    fetchJson('/api/v1/clm/monasca/service_status')
+    fetchJson('/api/v2/monasca/service_status')
       .then(responseData => {
         this.setState({statusList: responseData});
       })
@@ -262,7 +262,7 @@ class ServiceInfo extends Component {
         // no need to show error for this case
       });
 
-    fetchJson('/api/v1/clm/sshagent/requires_password')
+    fetchJson('/api/v2/sshagent/requires_password')
       .then((responseData) => {
         this.setState({
           requiresPassphrase: responseData['requires_password']

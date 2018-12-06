@@ -54,7 +54,7 @@ class ReplaceServerDetails extends Component {
   }
 
   componentDidMount() {
-    fetchJson('/api/v1/clm/user')
+    fetchJson('/api/v2/user')
       .then(responseData => {
         this.setState({
           osInstallUsername: responseData['username']

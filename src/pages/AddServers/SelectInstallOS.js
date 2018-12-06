@@ -65,7 +65,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
     this.setState({showInstallConfirmModal : false});
     if (this.props.operationProps.sshPassphraseRequired) {
       let password = {'password': this.props.operationProps.sshPassphrase};
-      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+      postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
         .then(() => {
           super.goForward(e);
         })

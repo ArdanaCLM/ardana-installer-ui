@@ -99,7 +99,7 @@ export class GetSshPassphraseModal extends Component {
   setPassphrase(event) {
     event?.preventDefault();
     let password = {'password': this.state.passphrase};
-    postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+    postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
       .then(this.props.doneAction)
       .catch((error) => {
         this.props.cancelAction();

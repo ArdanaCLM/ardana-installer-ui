@@ -37,7 +37,7 @@ class Deployer extends Component {
 
   async componentDidMount() {
     try {
-      let response = await fetchJson('/api/v1/clm/is_secured');
+      let response = await fetchJson('/api/v2/is_secured');
       this.setState({ isSecured: response['isSecured'] });
     } catch(error) {
       console.error(`Could not get \`is_secured\` flag (${error})`); // eslint-disable-line no-console

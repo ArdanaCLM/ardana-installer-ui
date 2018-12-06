@@ -113,7 +113,7 @@ class InstallWizard extends Component {
 
     this.setState({wizardLoading: true});
     // Load the current state information from the backend
-    fetchJson('/api/v1/clm/model')
+    fetchJson('/api/v2/model')
       .then(responseData => {
         this.setState({'model': fromJS(responseData)});
       })
@@ -123,7 +123,7 @@ class InstallWizard extends Component {
         this.setState({wizardLoadingErrors: Map({modelError: ErrorMsg})});
         console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
       })
-      .then(() => fetchJson('/api/v1/progress')
+      .then(() => fetchJson('/api/v2/progress')
         .then((responseData) => {
           this.loadProgress(responseData, forcedReset);
           this.setState({wizardLoading: false});
@@ -137,7 +137,7 @@ class InstallWizard extends Component {
       )
       .then(() => {
         if (forcedReset) {
-          return deleteJson('/api/v1/server?source=sm,ov,manual');
+          return deleteJson('/api/v2/server?source=sm,ov,manual');
         }
       });
   }
@@ -211,7 +211,7 @@ class InstallWizard extends Component {
       toPersist[v] = this.state[v];
     }
 
-    return postJson('/api/v1/progress', toPersist);
+    return postJson('/api/v2/progress', toPersist);
   }
 
   /**
@@ -331,7 +331,7 @@ class InstallWizard extends Component {
   // Pages within the installer may request that the model be forceably loaded
   // from disk, espcially when a change is made to directly to the model files
   // to the model.  Returns a promise
-  loadModel = () => fetchJson('/api/v1/clm/model')
+  loadModel = () => fetchJson('/api/v2/model')
     .then(responseData => {
       this.setState({'model': fromJS(responseData)});
     })
@@ -342,7 +342,7 @@ class InstallWizard extends Component {
   // Pages within the installer may request that the model be saved to disk,
   // which is especially important when some significant change has been made
   // to the model.  Returns a promise
-  saveModel = () => postJson('/api/v1/clm/model', this.state.model);
+  saveModel = () => postJson('/api/v2/model', this.state.model);
 
   renderTitle() {
     return (
