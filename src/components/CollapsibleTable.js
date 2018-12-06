@@ -58,7 +58,11 @@ class CollapsibleTable extends Component {
   getSeverData = (server) => {
     let retData = {};
     this.props.tableConfig.columns.forEach((colDef) => {
-      retData[colDef.name] = server.get(colDef.name);
+      if(colDef.foundInProp) {
+        retData[colDef.name] = this.props[colDef.foundInProp][server.get('id')];
+      } else {
+        retData[colDef.name] = server.get(colDef.name);
+      }
     });
 
     return retData;

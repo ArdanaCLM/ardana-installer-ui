@@ -114,19 +114,22 @@ class ServerRoleSummary extends BaseWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
+        {name: 'status', propsource: 'serverMonascaStatus'},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
         {name: 'role', hidden: true}
       ]
     };
+    debugger;
     return (
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         saveEditServer={this.saveEditServer} checkInputs={this.checkInputs}
         autoServers={this.state.autoServers} manualServers={this.state.manualServers}
-        updateGlobalState={this.props.updateGlobalState}/>
+        updateGlobalState={this.props.updateGlobalState}
+        serverMonascaStatus={this.state.serverMonascaStatus} />
     );
   }
 
