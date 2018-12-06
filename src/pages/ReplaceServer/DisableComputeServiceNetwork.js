@@ -59,7 +59,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       this.setState({loading: true});
       // fetchJson with url, init=undefined, forceLogin=true, noCache=true
       fetchJson(
-        '/api/v1/clm/model/cp_internal/CloudModel.yaml', undefined, true, true
+        '/api/v2/model/cp_internal/CloudModel.yaml', undefined, true, true
       )
         .then((cloudModel) => {
           this.setState({loading: false});
@@ -190,7 +190,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
 
   disableCompServices = (logger) => {
     const apiUrl =
-      '/api/v1/clm/compute/services/' + this.props.operationProps.oldServer.hostname +
+      '/api/v2/compute/services/' + this.props.operationProps.oldServer.hostname +
       '/disable';
     logger('\nPUT ' + apiUrl + '\n');
     return putJson(apiUrl)
@@ -230,7 +230,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
 
   removeAggregates = (logger) => {
     const apiUrl =
-      '/api/v1/clm/compute/aggregates/' + this.props.operationProps.oldServer.hostname;
+      '/api/v2/compute/aggregates/' + this.props.operationProps.oldServer.hostname;
     logger('\nDELETE ' + apiUrl + '\n');
     return deleteJson(apiUrl)
       .then((response) => {
@@ -268,7 +268,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
 
   migrateInstances = (logger) => {
     const apiUrl =
-      '/api/v1/clm/compute/instances/' + this.props.operationProps.oldServer.hostname +
+      '/api/v2/compute/instances/' + this.props.operationProps.oldServer.hostname +
       '/' + this.props.operationProps.server.hostname + '/migrate';
     logger('\nPUT ' + apiUrl + '\n');
     return putJson(apiUrl)
@@ -322,7 +322,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
 
   disableNetworkAgents = (logger) => {
     const apiUrl =
-      '/api/v1/clm/network/agents/' + this.props.operationProps.oldServer.hostname +
+      '/api/v2/network/agents/' + this.props.operationProps.oldServer.hostname +
       '/disable';
     logger('\nPUT ' + apiUrl + '\n');
     return putJson(apiUrl)

@@ -67,7 +67,7 @@ class InstanceMigrationMonitor extends Component {
     this.setState({pollingTime: new Date()});
     if (!this.state.loading) {
       let apiUrl =
-        '/api/v1/clm/compute/instances/' + this.props.operationProps.oldServer.hostname;
+        '/api/v2/compute/instances/' + this.props.operationProps.oldServer.hostname;
       this.setState({loading: true});
       fetchJson(apiUrl)
         .then(response => {

@@ -128,7 +128,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         };
       });
 
-    let serversStatus = servers.map(s => fetchJson(`/api/v1/clm/compute/services/${s.hostname}`));
+    let serversStatus = servers.map(s => fetchJson(`/api/v2/compute/services/${s.hostname}`));
     const values = await Promise.all(serversStatus);
     let serverStatuses = {};
     for(const [index, status] of values.entries()) {
@@ -331,7 +331,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     try {
       // TODO (SCRD-5292) allow user to specify encryption key before this playbook
       await postJson(
-        '/api/v1/clm/playbooks/nova-stop',
+        '/api/v2/playbooks/nova-stop',
         { limit: status.hostname }
       );
       this.setState({
@@ -361,7 +361,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     try {
       // TODO (SCRD-5292) allow user to specify encryption key before this playbook
       await postJson(
-        '/api/v1/clm/playbooks/ardana-start',
+        '/api/v2/playbooks/ardana-start',
         { limit: internalHostname }
       );
       this.setState({
@@ -394,7 +394,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       }
     });
     try {
-      let instances = await fetchJson(`/api/v1/clm/compute/instances/${status.hostname}`);
+      let instances = await fetchJson(`/api/v2/compute/instances/${status.hostname}`);
       this.setState({
         confirmDeactivate: {
           ...this.state.confirmDeactivate,
