@@ -1,5 +1,5 @@
 exports.config = {
-  specs: ['./test/e2e/specs/*.spec.js'],
+  specs: ['./test/e2e/suites/day0/*.spec.js'],
   capabilities: {
     browserName: 'chrome'
   },

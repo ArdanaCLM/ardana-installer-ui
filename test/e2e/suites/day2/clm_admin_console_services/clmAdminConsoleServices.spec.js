@@ -30,6 +30,7 @@ describe('CLM Admin Console Services', function() {
 
   beforeEach(function() {
     browser.get('http://localhost:2209/#/login');
+    browser.sleep(3000);
   });
 
   it('loads the app', function() {
@@ -41,6 +42,7 @@ describe('CLM Admin Console Services', function() {
     commonObjects.username.sendKeys('admin');
     commonObjects.password.sendKeys('password');
     commonObjects.login.click();
+    browser.sleep(5000);
     browser.wait(condition, 100000);
     expect(browser.getTitle()).toEqual('CLM Admin Console');
     SignInPage.openStackPackages.click();
