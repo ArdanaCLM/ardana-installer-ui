@@ -121,7 +121,6 @@ class ServerRoleSummary extends BaseWizardPage {
         {name: 'role', hidden: true}
       ]
     };
-    debugger;
     return (
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
