@@ -46,6 +46,7 @@ exports.config = {
 
   onPrepare: function() {
     browser.ignoreSynchronization = true;
+    browser.driver.manage().window().maximize();
 
     // Add a screenshot reporter and store screenshots to `/tmp/screenshots`:
     jasmine.getEnv().addReporter(new HtmlReporter({
