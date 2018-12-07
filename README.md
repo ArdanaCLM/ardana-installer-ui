@@ -19,7 +19,11 @@ To run the selenium tests:
    need to be done each time)
 2. start the app in another terminal `npm start`
 3. run the tests `npm run protractor-day0` (for running day0 Installer tests)
+<<<<<<< HEAD
 4. run the tests `npm run protractor-day2` (for running day2 CLM Admin Console tests)
+=======
+4. run the tests `npm run protractor-day20` (for running day2 CLM Admin Console tests)
+>>>>>>> 79a726a830e0295eaf77e70657ebd4fffec3c427
 
 For more information on protractor/selenium locators see http://www.protractortest.org/#/locators
 
