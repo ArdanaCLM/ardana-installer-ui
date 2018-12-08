@@ -93,11 +93,13 @@ class EditServerDetails extends Component {
     );
   }
 
-  addServerGroup() {
+  addServerGroup(event) {
+    event?.preventDefault();
     this.setState({showAddServerGroup: true});
   }
 
-  addNicMapping() {
+  addNicMapping(event) {
+    event?.preventDefault();
     this.setState({showAddNicMapping: true});
   }
 
@@ -110,23 +112,19 @@ class EditServerDetails extends Component {
   }
 
   renderAddServerGroup() {
-    if (this.state.showAddServerGroup) {
-      return (
-        <EditCloudSettings model={this.props.model}
-          oneTab='server-group' onHide={::this.closeAddServerGroup}
-          updateGlobalState={this.props.updateGlobalState}/>
-      );
-    }
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='server-group' onHide={::this.closeAddServerGroup}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
   }
 
   renderAddNicMapping() {
-    if (this.state.showAddNicMapping) {
-      return (
-        <EditCloudSettings model={this.props.model}
-          oneTab='nic-mapping' onHide={::this.closeAddNicMapping}
-          updateGlobalState={this.props.updateGlobalState}/>
-      );
-    }
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='nic-mapping' onHide={::this.closeAddNicMapping}
+        updateGlobalState={this.props.updateGlobalState}/>
+    );
   }
 
   renderButtonForDropDown(addAction, buttonLabel) {
@@ -245,8 +243,10 @@ class EditServerDetails extends Component {
           <form onSubmit={::this.handleDone}>
             {this.renderServerContent()}
           </form>
-          <If condition={!this.props.isUpdateMode}>
+          <If condition={!this.props.isUpdateMode && this.state.showAddServerGroup}>
             {this.renderAddServerGroup()}
+          </If>
+          <If condition={!this.props.isUpdateMode && this.state.showAddNicMapping}>
             {this.renderAddNicMapping()}
           </If>
         </div>
