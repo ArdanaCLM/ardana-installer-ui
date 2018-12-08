@@ -37,7 +37,7 @@ class ReplaceServerDetails extends Component {
     super(props);
 
     this.state = {
-      isInstallOsSelected: false,
+      isInstallOsSelected: true,
       isWipeDiskSelected: false,
       isUseAvailServersSelected: false,
       inputValue: this.initInputs(props),
@@ -428,7 +428,8 @@ class ReplaceServerDetails extends Component {
   }
 
   renderServerContent() {
-    const modelServers = this.props.model.getIn(['inputModel','servers']);
+    const modelServers = this.props.model.getIn(['inputModel','servers'])
+      .filter(s => s.get('id') != this.props.data.id);
 
     const existingMacAddreses = modelServers.map(server => server.get('mac-addr'));
 

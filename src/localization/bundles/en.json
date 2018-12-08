@@ -610,6 +610,8 @@
     "server.deploy.progress.gen-hosts-file": "Generate Host Files",
     "server.deploy.progress.addserver.deploy": "Deploy New Server(s)",
     "server.deploy.progress.update-monasca": "Update Monasca",
+    "server.deploy.progress.powerup": "Power up server",
+    "server.deploy.progress.waitssh": "Wait for server to become available",
     "server.deploy.addserver.complete": "Successfully Added Compute Servers",
     "server.deploy.addcompute.complete": "Successfully Added a Compute Server",
     "server.addserver.validate.error.title": "Failure of validating newly added servers",

@@ -169,9 +169,10 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
     ];
 
+    const serverId = this.props.operationProps.server.id;
+
     if(this.props.operationProps.installOS) {
       const installPass = this.props.operationProps.osInstallPassword || '';
-      const serverId = this.props.operationProps.server.id;
       // The following steps will all be performed via the INSTALL_PLAYBOOK
       playbook_steps.push(
         {
@@ -195,6 +196,21 @@ class ReplaceController extends BaseUpdateWizardPage {
           payload: {'extra-vars': {'nodelist': serverId, 'ardanauser_password': installPass}}
         },
       );
+    } else {
+      /*
+      playbook_steps.push(
+        {
+          label: translate('server.deploy.progress.powerup'),
+          playbook: 'bm-power-up.yml',
+          payload: {'extra-vars': {'nodelist': serverId}}
+        },
+        {
+          label: translate('server.deploy.progress.waitssh'),
+          playbook: 'bm-wait-for-ssh.yml',
+          payload: {'extra-vars': {'nodelist': serverId}}
+        }
+      );
+      */
     }
 
     playbook_steps.push(
