@@ -178,13 +178,11 @@ class CollapsibleTable extends Component {
       }
     } else {
       // not compute node
-      if(!isProduction()) {
-        items.push({
-          key: 'common.replace',
-          action: this.props.replaceServer,
-          callbackData: row
-        });
-      }
+      items.push({
+        key: 'common.replace',
+        action: this.props.replaceServer,
+        callbackData: row
+      });
     }
     return items;
   }
