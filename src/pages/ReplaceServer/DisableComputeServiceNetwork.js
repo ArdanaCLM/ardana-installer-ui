@@ -26,6 +26,7 @@ import { putJson, deleteJson, fetchJson } from '../../utils/RestUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import InstanceMigrationMonitor from './InstanceMigrationMonitor.js';
+import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
 
 const DISABLE_COMPUTE_SERVICE = 'disable_compute_service';
 const REMOVE_FROM_AGGREGATES = 'remove_from_aggregates';
@@ -131,53 +132,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     });
   }
 
-  logResponse = (logger, response, msg) => {
-    logger(msg + '\n');
-    let lines = '';
-    if (Array.isArray(response)) {
-      lines = response.map(item => JSON.stringify(item)).join('\n');
-      logger(lines + '\n');
-    }
-    else {
-      let items;
-      if (response.failed) {
-        logger('failed:\n');
-        items = response.failed;
-        lines = items.map(item => JSON.stringify(item)).join('\n');
-        logger(lines + '\n');
-      }
-      if (response.disabled) {
-        logger('disabled:\n');
-        items = response.disabled;
-        lines = items.map(item => JSON.stringify(item)).join('\n');
-        logger(lines + '\n');
-      }
-      if (response.deleted) {
-        logger('deleted:\n');
-        items = response.deleted;
-        lines = items.map(item => JSON.stringify(item)).join('\n');
-        logger(lines + '\n');
-      }
-      if(response.migrating) {
-        logger('migrating:\n');
-        items = response.migrating;
-        lines = items.map(item => JSON.stringify(item)).join('\n');
-        logger(lines + '\n');
-      }
-    }
-  }
-
-  logError = (logger, error, msg) => {
-    logger(msg + '\n');
-    if (error.value?.contents?.failed) {
-      let failedLines =
-        error.value.contents.failed.map(item => JSON.stringify(item)).join('\n');
-      logger('\n' + failedLines);
-    }
-  }
-
   partialFailureDialogPromise = (logger, error, logMsg, dialogMsgKey) => {
-    this.logResponse(logger, error.value.contents, logMsg);
+    logProgressResponse(logger, error.value.contents, logMsg);
     // have partial failure
     // pop up message for user to confirm
     return new Promise((resolve, reject) => {
@@ -198,7 +154,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         const msg = translate(
           'server.deploy.progress.response.disable_compute_service',
           this.props.operationProps.oldServer.hostname);
-        this.logResponse(logger, response, msg);
+        logProgressResponse(logger, response, msg);
       })
       .catch((error) => {
         // have no compute service for the old compute node
@@ -222,7 +178,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             translate(
               'server.deploy.progress.disable_compute_service.failure',
               this.props.operationProps.oldServer.hostname, error.toString());
-          this.logError(logger, error, msg);
+          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -237,7 +193,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         const msg = translate(
           'server.deploy.progress.response.remove_from_aggregates',
           this.props.operationProps.oldServer.hostname);
-        this.logResponse(logger, response, msg);
+        logProgressResponse(logger, response, msg);
       })
       .catch((error) => {
         // have no compute service for the old compute node
@@ -260,7 +216,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             translate('server.deploy.progress.remove_from_aggregates.failure',
               this.props.operationProps.oldServer.hostname,
               error.toString());
-          this.logError(logger, error, msg);
+          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -278,7 +234,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             'server.deploy.progress.response.migrate_instances',
             this.props.operationProps.oldServer.hostname,
             this.props.operationProps.server.hostname);
-        this.logResponse(logger, response, msg);
+        logProgressResponse(logger, response, msg);
         //poll to find out migration is done
         logger('\n' + translate('server.deploy.progress.monitor_migration') + '\n');
         return new Promise((resolve, reject) => {
@@ -314,7 +270,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             translate('server.deploy.progress.migrate_instances.failure',
               this.props.operationProps.oldServer.hostname,
               this.props.operationProps.server.hostname, error.toString());
-          this.logError(logger, error, msg);
+          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -330,17 +286,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         const msg = translate(
           'server.deploy.progress.response.disable_network_agents',
           this.props.operationProps.oldServer.hostname);
-        this.logResponse(logger, response, msg);
-        // response has partial failure
-        if(response['failed']) {
-          // pop up message for user to confirm
-          return new Promise((resolve, reject) => {
-            this.showPartialFailedConfirmation(
-              resolve, reject,
-              logger, 'server.deploy.progress.disable_network_agents.hasfailed',
-              response.failed);
-          });
-        }
+        logProgressResponse(logger, response, msg);
       })
       .catch((error) => {
         // have no network agents for the old compute node
@@ -363,7 +309,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             translate('server.deploy.progress.disable_network_agents.failure',
               this.props.operationProps.oldServer.hostname,
               error.toString());
-          this.logError(logger, error, msg);
+          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });

@@ -172,7 +172,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     const serverId = this.props.operationProps.server.id;
 
     if(this.props.operationProps.installOS) {
-      const installPass = this.props.operationProps.osInstallPassword || '';
+      const installPass = this.props.operationProps.osPassword || '';
       // The following steps will all be performed via the INSTALL_PLAYBOOK
       playbook_steps.push(
         {

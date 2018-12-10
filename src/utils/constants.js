@@ -58,4 +58,10 @@ export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
 export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
 export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';
 export const ARDANA_START_PLAYBOOK = 'ardana-start';
+export const NOVA_STOP_PLAYBOOK = 'nova-stop';
+export const NEUTRON_STOP_PLAYBOOK = 'neutron-stop';
+export const BM_POWER_DOWN_PLAYBOOK = 'bm-power-down';
+export const COBBLER_DEPLOY_PLAYBOOK = 'cobbler-deploy';
+export const BM_REIMAGE = 'bm-reimage';
+export const BM_POWER_STATUS_PLAYBOOK = 'bm-power-status';
 
