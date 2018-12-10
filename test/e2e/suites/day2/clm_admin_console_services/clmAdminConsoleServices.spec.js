@@ -22,15 +22,22 @@ describe('CLM Admin Console Services', function() {
   var default_timeout;
 
   var EC = protractor.ExpectedConditions;
+  var isInformationVisible = EC.visibilityOf(commonObjects.information);
+  var isArdanaVisible = EC.visibilityOf(commonObjects.ardana);
+  var isLogoutVisible =  EC.visibilityOf(commonObjects.logout);
   var isSpinnerInvisible = EC.invisibilityOf(commonObjects.spinner);
   var isHeaderVisible = EC.visibilityOf(commonObjects.headerTitle);
   var isLoadingInvisible =  EC.invisibilityOf(commonObjects.loading);
   var errorMessage = EC.visibilityOf(commonObjects.errorModal)
-  var condition = EC.and(isLoadingInvisible, isSpinnerInvisible, isHeaderVisible);
+
+  //condition to handle page loading
+  var condition = EC.and(isLoadingInvisible, isSpinnerInvisible,
+                            isHeaderVisible, isLogoutVisible);
+
 
   beforeEach(function() {
-    browser.get('http://localhost:2209/#/login');
-    browser.sleep(3000);
+    browser.get('https://10.84.43.68:9085');
+    browser.sleep(5000);
   });
 
   it('loads the app', function() {
@@ -40,12 +47,13 @@ describe('CLM Admin Console Services', function() {
   it('should open details of ardana service', function() {
     //todo: username and password needs to be pulled from service.osrc
     commonObjects.username.sendKeys('admin');
-    commonObjects.password.sendKeys('password');
+    commonObjects.password.sendKeys('iGxa2mRD');
     commonObjects.login.click();
-    browser.sleep(5000);
     browser.wait(condition, 100000);
     expect(browser.getTitle()).toEqual('CLM Admin Console');
-    SignInPage.openStackPackages.click();
+    browser.wait(isInformationVisible, 100000);
+    browser.wait(isArdanaVisible, 100000);
+    commonObjects.openStackPackages.click();
     browser.wait(condition, 100000);
     commonObjects.suseOpenStackCloudPackages.click();
     browser.wait(condition, 100000);

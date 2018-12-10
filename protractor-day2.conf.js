@@ -21,7 +21,25 @@ exports.config = {
   },
 
   capabilities: {
+    //Chrome browser settings. Uncomment browserName.
     browserName: 'chrome',
+
+    //Enable below chromeOptions if you want to run in headless mode
+    //chromeOptions: {
+    //    args: [ "--headless", "--window-size=1800x1600" ]
+    //},
+
+    //Firefox browser settings. Uncomment browserName and marionette
+    //browserName: 'firefox',
+    //marionette : true,
+
+    //Enable below firefoxOptions if you want to run in headless mode
+    //'moz:firefoxOptions': {
+    // args: [ "--headless" ]
+    //},
+
+    //For bypassing ssl cert
+    acceptInsecureCerts : true,
 
     // allows different specs to run in parallel.
     // If this is set to be true, specs will be sharded by file
@@ -32,16 +50,16 @@ exports.config = {
     // Maximum number of browser instances that can run in parallel for this
     // set of capabilities. This is only needed if shardTestFiles is true.
     // Default is 1.
-    maxInstances: 1,
+    maxInstances: 3,
    },
 
  // Options to be passed to Jasmine-node
- jasmineNodeOpts: {
+  jasmineNodeOpts: {
     showColors: true, // Use colors in the command line report.
-    defaultTimeoutInterval: 100000, // set timeout for async calls
+    defaultTimeoutInterval: 200000, // set timeout for async calls
   },
 
-  baseUrl: 'http://localhost:2209',
+  baseUrl: 'http://localhost:9085',
   framework: 'jasmine',
 
   onPrepare: function() {

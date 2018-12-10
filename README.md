@@ -15,7 +15,7 @@ the express server
 You will get the express server (UI) running on `localhost:2209`.
 
 To run the selenium tests:
-1. perform initial setup `npm run protractor-setup` (once, does not
+1. Assuming `npm install` is already run, perform initial setup `npm run protractor-setup` (once, does not
    need to be done each time)
 2. start the app in another terminal `npm start`
 3. run the tests `npm run protractor-day0` (for running day0 Installer tests)

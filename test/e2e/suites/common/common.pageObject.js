@@ -25,16 +25,16 @@ var commonObjects = function() {
   this.firstIndicator   = this.stateLineWrapperContainer.all(by.css('.progress')).first();
   this.lastIndicator    = this.stateLineWrapperContainer.all(by.css('.progress')).last();
 
+
   this.headerTitle = element(by.css('aside > header'));
-  this.spinner = $('.spinners-container');
-  this.loading = $('.spinners-container details-modal-mask');
+  //this.spinner = $('.spinners-container');
+  //this.loading = $('.spinners-container details-modal-mask');
+  this.spinner = element(by.css('span[class^="spinners"]'));
+  this.loading = element(by.css('.spinners-container'));
   this.errorModal = $('Error');
 
   this.toggle = $('.btn-toggle');
   this.adminConsoleSideBar = $('.main-menu');
-  this.pageHeader = $('.heading');
-
-  this.pickerContainer = $('.picker-container');
   this.detailsContainer = $('.details-container');
   this.footerContainer = $('.btn-row.footer-container');
   this.buttonsAll = $$('.btn-row.footer-container');
@@ -54,6 +54,9 @@ var commonObjects = function() {
   this.suseOpenStackCloudPackages   = element(by.xpath('//a[text()= "SUSE OpenStack Cloud Packages"]'));
   this.configuration                = element(by.xpath('//a[text()= "Configuration"]'));
   this.roles                        = element(by.xpath('//a[text()= "Roles"]'));
+
+  //Service Information details
+  this.ardana = element(by.xpath('//*[@id="root"]/div/section/section[2]/div/table/tbody/tr[1]/td[1]'));
 
  };
 
