@@ -155,18 +155,33 @@ class UpdateServers extends BaseUpdateWizardPage {
     let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
     for (const server_id of serverIds.values()) {
       let server = internalModelServers.find(s => s.id == server_id);
+      if (!server) continue;
       try {
         const responseData = await fetchJson('/api/v2/monasca/server_status/' + server.hostname);
-        this.setState(prevState => {
-          let serverMonascaStatuses = prevState.serverMonascaStatuses;
-          serverMonascaStatuses[server_id] = translate('server.details.status.' + responseData.status);
-          return { 'serverMonascaStatuses' : serverMonascaStatuses };
-        });
+        this.setMonascaStatus(server_id, responseData.status);
       } catch(error) {
+        this.setMonascaStatus(server_id);
         console.log('error getting server status for:' + server.hostname + // eslint-disable-line no-console
           ' -- error is:' + error);
       }
     }
+  }
+
+  /**
+   * Update the translated status of a server status
+   * @param {String} server_id The id of the server
+   * @param {String} status The current status of the server
+   */
+  setMonascaStatus(server_id, status) {
+    this.setState(prevState => {
+      let { serverMonascaStatuses } = prevState,
+        translationKey = `server.details.status.${status}`;
+      serverMonascaStatuses[server_id] = status ? translate(translationKey) : null;
+      if(serverMonascaStatuses[server_id] === null || serverMonascaStatuses[server_id] === translationKey) {
+        serverMonascaStatuses[server_id] = translate('server.details.status.unknown');
+      }
+      return { serverMonascaStatuses };
+    });
   }
 
   /**
