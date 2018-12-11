@@ -31,13 +31,13 @@ class CompleteReplaceCompute extends BaseUpdateWizardPage {
     let servers = [
       (<li key={1}>{translate('server.deploy.compute.oldserver', this.props.operationProps.oldServer['hostname'])}
         <ul className='complete-serverdetails'>
-          <li key={1}> {translate('server.id.prompt') + ': ' + this.props.operationProps.oldServer['id']} </li>
+          <li key={1}> {translate('id.with_colon') + ' ' + this.props.operationProps.oldServer['id']} </li>
           <li key={2}> {translate('server.details.ip') + ' ' + this.props.operationProps.oldServer['ip']} </li>
         </ul>
       </li>),
       (<li key={2}>{translate('server.deploy.compute.newserver', this.props.operationProps.server['hostname'])}
         <ul className='complete-serverdetails'>
-          <li key={1}> {translate('server.id.prompt') + ': ' + this.props.operationProps.server['id']} </li>
+          <li key={1}> {translate('id.with_colon') + ' ' + this.props.operationProps.server['id']} </li>
           <li key={2}> {translate('server.details.ip') + ' ' + this.props.operationProps.server['ip']} </li>
         </ul>
       </li>),

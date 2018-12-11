@@ -30,7 +30,7 @@ class CompleteAddServers extends BaseUpdateWizardPage {
       return (
         <li key={idx}>{host['display_hostname']}
           <ul className='complete-serverdetails'>
-            <li key={1}> {translate('server.id.prompt') + ': ' + host['id']} </li>
+            <li key={1}> {translate('id.with_colon') + ' ' + host['id']} </li>
             <li key={2}> {translate('server.details.ip') + ' ' + host['ip']} </li>
           </ul>
         </li>

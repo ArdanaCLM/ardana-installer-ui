@@ -18,6 +18,7 @@ import InstallOS from './InstallOS.js';
 import PrepareAddCompute from './PrepareAddCompute.js';
 import DeployAddCompute from './DeployAddCompute.js';
 import DisableComputeServiceNetwork from './DisableComputeServiceNetwork.js';
+import DeleteCompute from './DeleteCompute.js';
 import CompleteReplaceCompute from './CompleteReplaceCompute.js';
 
 // potential pages for all kinds of server replacement pages
@@ -27,5 +28,6 @@ export const UpdateServerPages = {
   'PrepareAddCompute': PrepareAddCompute,
   'DeployAddCompute': DeployAddCompute,
   'DisableComputeServiceNetwork': DisableComputeServiceNetwork,
+  'DeleteCompute': DeleteCompute,
   'CompleteReplaceCompute': CompleteReplaceCompute
 };

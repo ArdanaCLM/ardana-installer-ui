@@ -39,3 +39,48 @@ if (!Element.prototype.closest) {
     return null;
   };
 }
+
+/**
+ * Helper function used when run API action through PlaybookProgress
+ * @param logger a logging handler which records the messages to the log
+ *        window during playbook/API progress.
+ * @param response either a success response or contents of an error response
+ *        from API call
+ * @param msg a message
+ */
+export function logProgressResponse (logger, response, msg)  {
+  if(msg) {
+    logger(msg + '\n');
+  }
+  let lines = '';
+  if (Array.isArray(response)) {
+    lines = response.map(item => JSON.stringify(item)).join('\n');
+    logger(lines + '\n');
+  }
+  else {
+    for (const category of ['failed','disabled','deleted','migrating']) {
+      if(response[category]) {
+        const lines = response[category].map(item => JSON.stringify(item)).join('\n');
+        logger(category + ':\n' + lines + '\n');
+      }
+    }
+  }
+}
+
+/**
+ * Helper function used when run API action through PlaybookProgress
+ * @param logger a logging handler which records the messages to the log
+ *        window during playbook/API progress.
+ * @param error error response
+ * @param msg a message
+ */
+export function logProgressError(logger, error, msg)  {
+  logger(msg + '\n');
+  if (error.value?.contents?.failed) {
+    let failedLines =
+      error.value.contents.failed.map(item => JSON.stringify(item)).join('\n');
+    logger('\n' + failedLines);
+  }
+}
+
+

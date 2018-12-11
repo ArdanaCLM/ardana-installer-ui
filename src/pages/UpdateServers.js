@@ -69,8 +69,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     //TODO this is ugly, we souldn't be waiting for things to load like this
-    if (this.props.model !== prevProps.model)
-    {
+    if (this.props.model !== prevProps.model) {
       const allGroups =
         this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
       if (allGroups.includes('COMPUTE-ROLE')) {
@@ -79,23 +78,27 @@ class UpdateServers extends BaseUpdateWizardPage {
         this.setState({expandedGroup: [allGroups.sort().first()]});
       }
 
-      this.setState({
-        loading: ''
-      });
-
-      getInternalModel()
-        .then(model => {
-          this.setState({ internalModel: fromJS(model) });
-        })
-        .then(::this.getServerStatuses)
-        .then(::this.checkMonasca)
-        .then(() => this.setState({ loading: undefined }))
-        .catch(error => {
-          this.setState({
-            errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
-            loading: undefined
-          });
+      // will not get internal model when other loading for example model validation
+      // is still going
+      if(this.state.loading === undefined) {
+        this.setState({
+          loading: ''
         });
+
+        getInternalModel()
+          .then(model => {
+            this.setState({ internalModel: fromJS(model) });
+          })
+          .then(::this.getServerStatuses)
+          .then(::this.checkMonasca)
+          .then(() => this.setState({ loading: undefined }))
+          .catch(error => {
+            this.setState({
+              errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
+              loading: undefined
+            });
+          });
+      }
     }
   }
 
@@ -267,6 +270,12 @@ class UpdateServers extends BaseUpdateWizardPage {
     let pages = [];
 
     if(isComputeNode(this.state.serverToReplace)) {
+      if(theProps.installOS) {
+        pages.push({
+          name: 'InstallOS',
+          component: UpdateServerPages.InstallOS
+        });
+      }
       pages.push({
         name: 'PrepareAddCompute',
         component: UpdateServerPages.PrepareAddCompute
@@ -278,6 +287,10 @@ class UpdateServers extends BaseUpdateWizardPage {
       pages.push({
         name: 'DisableComputeServiceNetwork',
         component: UpdateServerPages.DisableComputeServiceNetwork
+      });
+      pages.push({
+        name: 'DeleteCompute',
+        component: UpdateServerPages.DeleteCompute
       });
       pages.push({
         name: 'CompleteReplaceCompute',
@@ -294,7 +307,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   // server includes server info and ipmi info
   // theProps includes zero or more of the items like
-  // wipeDisk, installOS, osInstallUsername, osInstallPassword,
+  // wipeDisk, installOS, osUsername, osPassword,
   // selectedServerId
   replaceServer = (server, theProps) =>  {
     let model;
@@ -526,7 +539,6 @@ class UpdateServers extends BaseUpdateWizardPage {
           onHide={this.handleCloseValidationErrorModal}
           title={translate('server.addcompute.validate.error.title')}>
           <div className='addservers-page'>
-            <pre>{translate('server.addcompute.validate.error.msg')}</pre>
             <pre className='log'>{this.state.validationError}</pre></div>
         </BaseInputModal>
       );
@@ -663,7 +675,6 @@ class UpdateServers extends BaseUpdateWizardPage {
       return;
     }
 
-    let title = translate('server.replace.heading', this.state.serverToReplace.id);
     let newProps = { ...this.props };
 
     const modelIds = this.props.model.getIn(['inputModel','servers'])
@@ -672,16 +683,13 @@ class UpdateServers extends BaseUpdateWizardPage {
     newProps.availableServers = this.state.servers.filter(server => ! modelIds.includes(server.uid));
 
     return (
-      <BaseInputModal
-        className='edit-details-dialog'
-        onHide={this.handleCancelReplaceServer} title={title}>
-        <ReplaceServerDetails
-          cancelAction={this.handleCancelReplaceServer}
-          doneAction={this.handleDoneReplaceServer}
-          data={this.state.serverToReplace}
-          { ...newProps }>
-        </ReplaceServerDetails>
-      </BaseInputModal>
+      <ReplaceServerDetails className='edit-details-dialog'
+        title={translate('server.replace.heading', this.state.serverToReplace.id)}
+        cancelAction={this.handleCancelReplaceServer}
+        doneAction={this.handleDoneReplaceServer}
+        data={this.state.serverToReplace}
+        {...newProps}>
+      </ReplaceServerDetails>
     );
   }
 
