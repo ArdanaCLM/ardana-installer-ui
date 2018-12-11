@@ -171,7 +171,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
     const serverId = this.props.operationProps.server.id;
 
-    if(this.props.operationProps.installOS) {
+    if (this.props.operationProps.installOS) {
       const installPass = this.props.operationProps.osPassword || '';
       // The following steps will all be performed via the INSTALL_PLAYBOOK
       playbook_steps.push(
@@ -197,7 +197,6 @@ class ReplaceController extends BaseUpdateWizardPage {
         },
       );
     } else {
-      /*
       playbook_steps.push(
         {
           label: translate('server.deploy.progress.powerup'),
@@ -210,7 +209,15 @@ class ReplaceController extends BaseUpdateWizardPage {
           payload: {'extra-vars': {'nodelist': serverId}}
         }
       );
-      */
+    }
+
+    if (this.props.operationProps.wipeDisk) {
+      playbook_steps.push(
+        {
+          label: translate('server.deploy.progress.wipe-disks'),
+          playbook: 'wipe_disks.yml',
+          payload: {limit: server.hostname}
+        });
     }
 
     playbook_steps.push(
