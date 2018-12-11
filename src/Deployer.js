@@ -74,7 +74,11 @@ class Deployer extends Component {
         if (search.get('start')?.startsWith('installer')) {
           defaultPath = <InstallWizard pages={pages}/>;
         } else {
-          defaultPath = <NavMenu routes={routes}/>;
+          defaultPath = <>
+            <NavMenu routes={routes}/>
+            {/* redirect to the default page, when already logged in a blank page is shown otherwise */}
+            <Redirect to='/services/info'/>
+          </>;
         }
       }
     } else {
