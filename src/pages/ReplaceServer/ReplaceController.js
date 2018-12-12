@@ -62,10 +62,11 @@ class ReplaceController extends BaseUpdateWizardPage {
       });
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
-      this.setState({invalidMsg: translate('server.replace.prepare.failure')});
+      const errorMsg = error?.message || '';
+      this.setState({invalidMsg: translate('server.replace.prepare.failure', errorMsg)});
     }
   }
 
@@ -105,11 +106,11 @@ class ReplaceController extends BaseUpdateWizardPage {
           const commitMessage = {'message': 'Committed via Ardana Installer'};
           return postJson('/api/v2/model/commit', commitMessage)
             .then((response) => {
-              logger('Model committed\n');
+              logger(translate('deploy.progress.commit'));
             })
             .catch((error) => {
               const message = translate('update.commit.failure', error.toString());
-              logger(message+'\n');
+              logger(message);
               throw new Error(message);
             });
         }),
@@ -135,16 +136,16 @@ class ReplaceController extends BaseUpdateWizardPage {
 
                 return deleteJson('/api/v2/cobbler/servers/' + name)
                   .then((response) => {
-                    logger('Host removed from cobbler\n');
+                    logger(translate('update.remove_cobbler'));
                   })
                   .catch((error) => {
                     const message = translate('update.remove_cobbler.failure', error.toString());
-                    logger(message+'\n');
+                    logger(message);
                     throw new Error(message);
                   });
 
               } else {
-                logger('Host not present in cobbler, continuing\n');
+                logger(translate('update.cobbler.nohost'));
               }
             });
         }),
@@ -153,17 +154,17 @@ class ReplaceController extends BaseUpdateWizardPage {
         label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
           if (isEmpty(server.hostname)) {
-            logger('No hostname found to remove from known_hosts, continuing\n');
+            logger(translate('update.known_hosts.nohost'));
             return Promise.resolve();
           }
 
           return deleteJson('/api/v2/known_hosts/' + server.hostname)
             .then((response) => {
-              logger(server.hostname+' removed from known_hosts\n');
+              logger(translate('update.known_hosts.host.removed', server.hostname));
             })
             .catch((error) => {
               const message = translate('update.known_hosts.failure', error.toString());
-              logger(message+'\n');
+              logger(message);
               throw new Error(message);
             }); }),
       },

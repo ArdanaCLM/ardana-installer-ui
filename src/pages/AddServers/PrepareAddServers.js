@@ -76,11 +76,11 @@ class PrepareAddServers extends BaseUpdateWizardPage {
         return postJson('/api/v2/model/commit', commitMessage)
           .then((response) => {
             let msg = translate('update.commit.success');
-            logger(msg + '\n');
+            logger(msg);
           })
           .catch((error) => {
             const message = translate('update.commit.failure', error.toString());
-            logger(message+'\n');
+            logger(message);
             throw new Error(message);
           });
       }),

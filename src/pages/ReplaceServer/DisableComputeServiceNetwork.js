@@ -99,12 +99,13 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
+      const errorMsg = error?.message || '';
       this.setState({
         processErrorBanner:
-          translate('server.deploy.progress.disable_compute_service_network.failure')
+          translate('server.deploy.progress.disable_compute_service_network.failure', errorMsg)
       });
     }
   }
@@ -148,7 +149,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     const apiUrl =
       '/api/v2/compute/services/' + this.props.operationProps.oldServer.hostname +
       '/disable';
-    logger('\nPUT ' + apiUrl + '\n');
+    logger('PUT ' + apiUrl);
     return putJson(apiUrl)
       .then((response) => {
         const msg = translate(
@@ -163,7 +164,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.no_compute_service',
             this.props.operationProps.oldServer.hostname);
-          logger(msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.disabled?.length > 0) {
@@ -187,7 +188,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   removeAggregates = (logger) => {
     const apiUrl =
       '/api/v2/compute/aggregates/' + this.props.operationProps.oldServer.hostname;
-    logger('\nDELETE ' + apiUrl + '\n');
+    logger('DELETE ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
         const msg = translate(
@@ -201,7 +202,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         if (error.status === 410) {
           const msg = translate('server.deploy.progress.no_aggregates',
             this.props.operationProps.oldServer.hostname);
-          logger(msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
@@ -226,7 +227,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     const apiUrl =
       '/api/v2/compute/instances/' + this.props.operationProps.oldServer.hostname +
       '/' + this.props.operationProps.server.hostname + '/migrate';
-    logger('\nPUT ' + apiUrl + '\n');
+    logger('PUT ' + apiUrl);
     return putJson(apiUrl)
       .then((response) => {
         const msg =
@@ -236,7 +237,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             this.props.operationProps.server.hostname);
         logProgressResponse(logger, response, msg);
         //poll to find out migration is done
-        logger('\n' + translate('server.deploy.progress.monitor_migration') + '\n');
+        logger(translate('server.deploy.progress.monitor_migration'));
         return new Promise((resolve, reject) => {
           this.setState({
             'migrationMonitorModal': {
@@ -253,7 +254,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         if (error.status === 410) {
           const msg = translate('server.deploy.progress.no_instances',
             this.props.operationProps.oldServer.hostname);
-          logger(msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.migrating?.length > 0) {
@@ -280,7 +281,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     const apiUrl =
       '/api/v2/network/agents/' + this.props.operationProps.oldServer.hostname +
       '/disable';
-    logger('\nPUT ' + apiUrl + '\n');
+    logger('PUT ' + apiUrl);
     return putJson(apiUrl)
       .then((response) => {
         const msg = translate(
@@ -294,7 +295,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         if(error.status === 410) {
           const msg = translate(
             'server.deploy.progress.no_network_agents', this.props.operationProps.oldServer.hostname);
-          logger(msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.disabled?.length > 0) {
@@ -396,8 +397,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         else {
           this.state.migrationMonitorModal.reject();
         }
-        this.state.migrationMonitorModal.logger(
-          '\n' + translate('server.deploy.progress.abort') + '\n');
+        this.state.migrationMonitorModal.logger(translate('server.deploy.progress.abort'));
         if(migrationInfo) {
           migrationInfo.started = this.state.migrationData.length;
           this.state.migrationMonitorModal.logger(JSON.stringify(migrationInfo) + '\n');
@@ -420,9 +420,9 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
           this.state.migrationMonitorModal.resolve();
         }
         this.state.migrationMonitorModal.logger(
-          '\n' + translate('server.deploy.progress.migration_monitor_done') + '\n');
+          translate('server.deploy.progress.migration_monitor_done'));
         migrationInfo.started = this.state.migrationData.length;
-        this.state.migrationMonitorModal.logger(JSON.stringify(migrationInfo) + '\n');
+        this.state.migrationMonitorModal.logger(JSON.stringify(migrationInfo));
         this.setState({migrationMonitorModal: undefined, migrationData: undefined});
       };
 
@@ -439,8 +439,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     if (this.state.partialFailedConfirmation) {
       const handleNo = () => {
         this.state.partialFailedConfirmation.reject();
-        this.state.partialFailedConfirmation.logger(
-          '\n' + translate('server.deploy.progress.abort') + '\n');
+        this.state.partialFailedConfirmation.logger(translate('server.deploy.progress.abort'));
         this.setState({
           partialFailedConfirmation: undefined, partialFailedConfirmMsg: undefined});
       };
@@ -451,7 +450,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         // migrationMonitorModal done or cancel.
         if(this.state.migrationData) {
           let logger = this.state.partialFailedConfirmation.logger;
-          logger('\n' + translate('server.deploy.progress.monitor_migration') + '\n');
+          logger(translate('server.deploy.progress.monitor_migration'));
           this.setState({'migrationMonitorModal': {'logger': logger}});
         }
         else { // don't have instances migration

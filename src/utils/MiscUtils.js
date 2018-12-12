@@ -50,18 +50,19 @@ if (!Element.prototype.closest) {
  */
 export function logProgressResponse (logger, response, msg)  {
   if(msg) {
-    logger(msg + '\n');
+    logger(msg);
   }
   let lines = '';
   if (Array.isArray(response)) {
     lines = response.map(item => JSON.stringify(item)).join('\n');
-    logger(lines + '\n');
+    logger(lines);
   }
   else {
     for (const category of ['failed','disabled','deleted','migrating']) {
       if(response[category]) {
         const lines = response[category].map(item => JSON.stringify(item)).join('\n');
-        logger(category + ':\n' + lines + '\n');
+        logger(category + ':');
+        logger(lines);
       }
     }
   }
@@ -75,11 +76,11 @@ export function logProgressResponse (logger, response, msg)  {
  * @param msg a message
  */
 export function logProgressError(logger, error, msg)  {
-  logger(msg + '\n');
+  logger(msg);
   if (error.value?.contents?.failed) {
     let failedLines =
       error.value.contents.failed.map(item => JSON.stringify(item)).join('\n');
-    logger('\n' + failedLines);
+    logger(failedLines);
   }
 }
 

@@ -76,12 +76,13 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
+      const errorMsg = error?.message || '';
       this.setState({
         processErrorBanner:
-          translate('server.deploy.progress.delete_compute.failure')
+          translate('server.deploy.progress.delete_compute.failure', errorMsg)
       });
     }
   }
@@ -123,7 +124,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
   deleteComputeService = (logger) => {
     const apiUrl =
       '/api/v2/compute/services/' + this.props.operationProps.oldServer.hostname;
-    logger('\nDELETE ' + apiUrl + '\n');
+    logger('DELETE ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
         const msg = translate(
@@ -138,7 +139,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.no_compute_service',
             this.props.operationProps.oldServer.hostname);
-          logger('\n' + msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
@@ -162,7 +163,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
   deleteNetworkAgents = (logger) => {
     const apiUrl =
       '/api/v2/network/agents/' + this.props.operationProps.oldServer.hostname;
-    logger('\nPUT ' + apiUrl + '\n');
+    logger('PUT ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
         const msg = translate(
@@ -177,7 +178,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
           const msg = translate(
             'server.deploy.progress.no_network_agents',
             this.props.operationProps.oldServer.hostname);
-          logger('\n' + msg + '\n');
+          logger(msg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
@@ -218,7 +219,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
               let msg =
                 translate('server.deploy.progress.update_server.warning',
                   this.props.operationProps.oldServer.id,  error.toString());
-              logger('\n' + msg + '\n');
+              logger(msg);
               // if cannot update the deleted server info in the saved servers
               // for some reason, still let it go
               resolve();
@@ -237,7 +238,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
               let msg =
                 translate('server.deploy.progress.add_server.warning',
                   this.props.operationProps.oldServer.id, error.toString());
-              logger('\n' + msg + '\n');
+              logger(msg);
               // if cannot update the deleted server info in the saved servers
               // for some reason, still let it go
               resolve();
@@ -247,14 +248,14 @@ class DeleteCompute extends BaseUpdateWizardPage {
       else {
         //this.state.servers is not defined, skip saving or updating saved servers
         let msg = translate('server.deploy.progress.no_servers.warning');
-        logger('\n' + msg + '\n');
+        logger(msg);
         resolve();
       }
     }
     else { // old compute server is not in the model. Should not happen, just in case
       let msg =
         translate('server.deploy.progress.not_in_model.warning', this.props.operationProps.oldServer.id);
-      logger('\n' + msg + '\n');
+      logger(msg);
       resolve();
     }
   }
@@ -268,7 +269,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
       })
       .catch((error) => {
         const message = translate('update.commit.failure', error.toString());
-        logger('\n' + message+'\n');
+        logger(message);
         throw new Error(message);
       });
   }
@@ -276,7 +277,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
   removeFromCobbler = (logger) => {
     const apiUrl =
       '/api/v2/cobbler/servers/' + this.props.operationProps.oldServer.id;
-    logger('\nDELETE ' + apiUrl + '\n');
+    logger('DELETE ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
         const msg =
@@ -290,7 +291,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
           translate('server.deploy.progress.remove_from_cobbler.failure',
             this.props.operationProps.oldServer.hostname,
             error.toString());
-        logger('\n' + msg + '\n');
+        logger(msg);
         throw new Error(msg);
       });
   }
@@ -494,8 +495,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     if(this.state.manualShutdownConfirmation) {
       const handleCancel = () => {
         this.state.manualShutdownConfirmation.reject();
-        this.state.manualShutdownConfirmation.logger(
-          '\n' + translate('server.deploy.progress.abort') + '\n');
+        this.state.manualShutdownConfirmation.logger(translate('server.deploy.progress.abort'));
         this.setState({manualShutdownConfirmation: undefined});
       };
       const handleDone = () => {
