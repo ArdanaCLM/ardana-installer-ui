@@ -51,7 +51,8 @@ class Deployer extends Component {
     //    the ardana service is running in secured mode and whether
     //    we have a valid auth token
 
-    const search = new URLSearchParams(window.location.search);
+    const search = new URLSearchParams(window.location.search),
+      path = window.location.hash.replace('#', '');
 
     let defaultPath;
 
@@ -77,7 +78,9 @@ class Deployer extends Component {
           defaultPath = <>
             <NavMenu routes={routes}/>
             {/* redirect to the default page, when already logged in a blank page is shown otherwise */}
-            <Redirect to='/services/info'/>
+            <If condition={path === '/'}>
+              <Redirect to='/services/info'/>
+            </If>
           </>;
         }
       }
