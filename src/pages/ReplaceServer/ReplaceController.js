@@ -62,10 +62,11 @@ class ReplaceController extends BaseUpdateWizardPage {
       });
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
-      this.setState({invalidMsg: translate('server.replace.prepare.failure')});
+      const errorMsg = error?.message || '';
+      this.setState({invalidMsg: translate('server.replace.prepare.failure', errorMsg)});
     }
   }
 
@@ -105,11 +106,12 @@ class ReplaceController extends BaseUpdateWizardPage {
           const commitMessage = {'message': 'Committed via Ardana Installer'};
           return postJson('/api/v2/model/commit', commitMessage)
             .then((response) => {
-              logger('Model committed\n');
+              logger('Model committed');
             })
             .catch((error) => {
+              const logMsg = 'Failed to commit update changes. ' + error.toString();
+              logger(logMsg);
               const message = translate('update.commit.failure', error.toString());
-              logger(message+'\n');
               throw new Error(message);
             });
         }),
@@ -135,16 +137,17 @@ class ReplaceController extends BaseUpdateWizardPage {
 
                 return deleteJson('/api/v2/cobbler/servers/' + name)
                   .then((response) => {
-                    logger('Host removed from cobbler\n');
+                    logger('Host removed from cobbler');
                   })
                   .catch((error) => {
+                    const logMsg = 'Unable to remove system from cobbler.' + error.toString();
+                    logger(logMsg);
                     const message = translate('update.remove_cobbler.failure', error.toString());
-                    logger(message+'\n');
                     throw new Error(message);
                   });
 
               } else {
-                logger('Host not present in cobbler, continuing\n');
+                logger('Host not present in cobbler, continuing');
               }
             });
         }),
@@ -153,17 +156,19 @@ class ReplaceController extends BaseUpdateWizardPage {
         label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
           if (isEmpty(server.hostname)) {
-            logger('No hostname found to remove from known_hosts, continuing\n');
+            logger('No hostname found to remove from known_hosts, continuing');
             return Promise.resolve();
           }
 
           return deleteJson('/api/v2/known_hosts/' + server.hostname)
             .then((response) => {
-              logger(server.hostname+' removed from known_hosts\n');
+              logger(server.hostname + ' removed from known_hosts');
             })
             .catch((error) => {
+              const logMsg =
+                'Unable to remove server from known_hosts file.' + error.toString();
+              logger(logMsg);
               const message = translate('update.known_hosts.failure', error.toString());
-              logger(message+'\n');
               throw new Error(message);
             }); }),
       },
