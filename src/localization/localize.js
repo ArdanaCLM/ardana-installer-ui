@@ -12,56 +12,55 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import LocalizedStrings from 'react-localization';
 import React from 'react';
 
+import * as en_bundle from './bundles/en.json';
+import * as en_bundle_branding from './bundles/en_branding.json';
+import * as ja_bundle from './bundles/ja.json';
+import * as ja_bundle_branding from './bundles/ja_branding.json';
 
-var supportedLangs = ['en', 'ja'];
-var translationData, bundlename, brandingData, bundlebrandingname, allTranslatedData, catalog = {};
+export const en = 'en';
+export const ja = 'ja';
 
-for (var i = 0; i < supportedLangs.length; i++) {
-  bundlename = './bundles/' + supportedLangs[i] + '.json';
-  //require doesn't interpret this as a string correctly unless its converted
-  //easiest conversion is to use + ''
-  translationData = require(bundlename + '');
+const bundles = {
+  [en]: {
+    ...en_bundle.default,
+    ...en_bundle_branding.default,
+  },
+  [ja]: {
+    ...ja_bundle.default,
+    ...ja_bundle_branding.default,
+  }
+};
 
-  // for branding
-  bundlebrandingname = './bundles/' + supportedLangs[i] + '_branding.json';
-  brandingData = require(bundlebrandingname + '');
+const supportedLangs = [en, ja],
+  fallbackLang = en;
 
-  // combine branding bundle
-  allTranslatedData = Object.assign(translationData, brandingData);
-  catalog[supportedLangs[i]] = allTranslatedData;
-}
-
-// window.navigator.language is the language that user sets at the top of
-// installed and enabled languages like en-US, en, ja-JP, ja, zh-CN, zh
-// since we have language without country like en or ja as supported languages,
-// need to find an exact match or a match of the language part
-var strings = new LocalizedStrings(catalog);
-
-var findLang =
+var foundLang =
   supportedLangs.find(sLang => window.navigator.language === sLang) ||
   supportedLangs.find(sLang => window.navigator.language.substring(0, 2) === sLang.substring(0, 2));
 
-if(findLang) {
-  strings.setLanguage(findLang);
-}
-else { //default
-  strings.setLanguage('en');
+const catalog = foundLang && bundles[foundLang] ? bundles[foundLang] : bundles[fallbackLang];
+
+function formatString(string, args) {
+  let result = string;
+  args.forEach((arg, index) => {
+    result = result.replace(`{${index}}`, arg.toString());
+  });
+  return result;
 }
 
-export function translate(key, ...args) {
-
+function translateInner(key, catalog, ...args) {
   const hasReact = args && args.some(arg => React.isValidElement(arg));
+  let result;
 
   try {
-    // React components cannot be handled with String.formatString, so if any
+    // React components cannot be handled with formatString, so if any
     // args are react components, then manually parse the format string and
     // build up the result with
     if (hasReact) {
       // Find any references in the key (e.g. {0})
-      let matches = strings[key].split(/(\{\d\})/);
+      let matches = catalog[key].split(/(\{\d\})/);
       let pieces = [];
       for (const piece of matches) {
         let ref = piece.match(/\{(\d)\}/);
@@ -76,17 +75,35 @@ export function translate(key, ...args) {
       // Add a unique key to each part of the translated result.  Symbol() is a JavaScript feature
       // that will yield unique keys.
       const keyed = pieces.map((p) => <React.Fragment key={Symbol(p).toString()}>{p}</React.Fragment>);
-      return (<>{keyed}</>);
+      result = (<>{keyed}</>);
     } else {
-      // Note!
-      // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
-      // The join() corrects this by joining the elements into a single string.
-      return strings.formatString(strings[key], ...args).join('');
+      result = formatString(catalog[key], args);
     }
   } catch (e) {
-    console.error('Unable to translate '+key); // eslint-disable-line no-console
-    return key;
+    console.error(`caught error while translating ${key} : ${e.message || e}`); // eslint-disable-line no-console
   }
+  if(result === undefined || result.length === 0) {
+    if(foundLang !== fallbackLang) {
+      // fallback if we are not already trying the fallback language
+      console.warn(`falling back to '${fallbackLang}' for ${key}`); // eslint-disable-line no-console
+      return translateInner(key, bundles[fallbackLang], ...args);
+    } else {
+      console.warn(`failed to translate ${key}`); // eslint-disable-line no-console
+      return key;
+    }
+  }
+  return result;
+}
+
+export const translateForceLang = (key, language, ...args) => translateInner(key, bundles[language], ...args);
+export const translate = (key, ...args) => translateInner(key, catalog, ...args);
+
+function titleize(key) {
+  if(!key) return '';
+  return key.replace(/[-_.]/g, ' ')                    // change _, - and . to space
+    .split(' ')                                        // split into words
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1))  // capitalize the first letter of each word
+    .join(' ');                                        // join elements back together into a single string
 }
 
 export function translateModelName(key) {
@@ -94,15 +111,10 @@ export function translateModelName(key) {
   // the translation of these names needs to have some human readable fallbacks the situations where
   // there is no pre-existing translation
   try {
-    // Note!
-    // For some bizarre reason, strings.formatString returns an array of strings rather than a single string.
-    // The join() corrects this by joining the elements into a signle string.
-    return strings.formatString(strings['model.name.' + key]).join('');
-  } catch (e) {
-    return (key || '')
-      .replace(/[-_.]/g, ' ')                            // change _, - and . to space
-      .split(' ')                                        // split into words
-      .map(s => s.charAt(0).toUpperCase() + s.slice(1))  // capitalize the first letter of each word
-      .join(' ');                                        // join elements back together into a single string
+    let translation = catalog['model.name.' + key];
+    return translation || titleize(key);
+  } catch(e) {
+    console.warn(`Unable to translate modelname "${key}"`); // eslint-disable-line no-console
+    return titleize(key);
   }
 }
