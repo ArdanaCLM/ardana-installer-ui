@@ -110,7 +110,7 @@ class ServiceDetails extends Component {
     return version;
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.props.setLoadingMask(true);
     let serviceNameObj = this.getServiceName();
     fetchJson('/api/v2/packages')
@@ -125,17 +125,23 @@ class ServiceDetails extends Component {
 
     const lookupName =  MONASCA_SERVICES_MAP[this.props.service.name.toLowerCase()];
     if (lookupName) {
-      const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
-      fetchJson('/api/v2/monasca/passthru/alarms/count?' + query)
-        .then(responseData => {
+      const responseData = await fetchJson('/api/v2/monasca/is_installed');
+      //only query for Monasca alarm counts if monasca is installed
+      if(responseData.installed) {
+        const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
+        fetchJson('/api/v2/monasca/passthru/alarms/count?' + query)
+            .then(responseData => {
           this.processAlarms(responseData.counts);
           this.setState({alarmDataLoaded: true});
           this.checkLoadingMask();
-        })
-        .catch((error) => {
+        }).catch((error) => {
           this.setState({alarmDataLoaded: true});
           this.checkLoadingMask();
         });
+      } else {
+        this.setState({alarmDataLoaded: true});
+        this.checkLoadingMask();
+      }
     } else {
       this.setState({alarmDataLoaded: true});
       this.checkLoadingMask();
@@ -238,7 +244,7 @@ class ServiceInfo extends Component {
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.setState({showLoadingMask: true});
     fetchJson('/api/v2/endpoints')
       .then(responseData => {
@@ -254,13 +260,17 @@ class ServiceInfo extends Component {
         });
       });
 
-    fetchJson('/api/v2/monasca/service_status')
-      .then(responseData => {
+    const responseData = await fetchJson('/api/v2/monasca/is_installed');
+    //only query for Monasca service_status if monasca is installed
+    if(responseData.installed) {
+      fetchJson('/api/v2/monasca/service_status')
+        .then(responseData => {
         this.setState({statusList: responseData});
-      })
-      .catch((error) => {
+      }).catch((error) => {
         // no need to show error for this case
       });
+    }
+
 
     fetchJson('/api/v2/sshagent/requires_password')
       .then((responseData) => {
