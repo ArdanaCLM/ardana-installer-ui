@@ -294,38 +294,31 @@ class InstallWizard extends Component {
     }
   }
 
-  // Setter functions for all state variables that need to be modified within pages.
-  // If this list gets long, consider replacing it with a more generic function
-  // that provides access to any
-  updateGlobalState = (key, value, callback) => {
+  // Return a promise that updates the global state and persist any other progress values
+  updateGlobalState = (key, value) => {
 
-    let modelChanged = false;
+    return new Promise((resolve, reject) => {
 
-    function mycallback() {
-      let p;
-      if (modelChanged) {
-        // save the model
-        p = this.saveModel();
-      } else if (this.persistedStateVars.includes(key)) {
-        // save the other state variables
-        p = this.persistState();
-      } else {
-        // don't save it anywhere
-        p = Promise.resolve(true);
-      }
+      let modelChanged = false;
 
-      p.then(() => {
-        if (callback)
-          callback();
+      this.setState(prevState => {
+        modelChanged = (key == 'model' && value !== prevState.model);
+        let updatedState = {};
+        updatedState[key] = value;
+        return updatedState;
+      }, () => {
+        if (modelChanged) {
+          // save the model
+          this.saveModel().then(resolve, reject);
+        } else if (this.persistedStateVars.includes(key)) {
+          // save the other state variables
+          this.persistState().then(resolve, reject);
+        } else {
+          // don't save it anywhere
+          resolve(true);
+        }
       });
-    }
-
-    this.setState(prevState => {
-      modelChanged = (key == 'model' && value !== prevState.model);
-      let updatedState = {};
-      updatedState[key] = value;
-      return updatedState;
-    }, mycallback);
+    });
   }
 
   // Pages within the installer may request that the model be forceably loaded
