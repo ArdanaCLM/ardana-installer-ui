@@ -22,11 +22,12 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { getHostFromCloudModel } from '../../utils/ModelUtils.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
-import { putJson, deleteJson, fetchJson } from '../../utils/RestUtils.js';
+import { putJson, deleteJson } from '../../utils/RestUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import InstanceMigrationMonitor from './InstanceMigrationMonitor.js';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
 
 const DISABLE_COMPUTE_SERVICE = 'disable_compute_service';
 const REMOVE_FROM_AGGREGATES = 'remove_from_aggregates';
@@ -58,10 +59,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   componentDidMount() {
     if (!this.props.operationProps.oldServer.hostname) {
       this.setState({loading: true});
-      // fetchJson with url, init=undefined, forceLogin=true, noCache=true
-      fetchJson(
-        '/api/v2/model/cp_internal/CloudModel.yaml', undefined, true, true
-      )
+      getInternalModel()
         .then((cloudModel) => {
           this.setState({loading: false});
           let oldHost =
