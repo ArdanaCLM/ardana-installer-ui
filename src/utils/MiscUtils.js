@@ -56,6 +56,7 @@ export function logProgressResponse (logger, response, msg)  {
   if (Array.isArray(response)) {
     lines = response.map(item => JSON.stringify(item)).join('\n');
     logger(lines);
+    logger('');
   }
   else {
     for (const category of ['failed','disabled','deleted','migrating']) {
@@ -63,6 +64,7 @@ export function logProgressResponse (logger, response, msg)  {
         const lines = response[category].map(item => JSON.stringify(item)).join('\n');
         logger(category + ':');
         logger(lines);
+        logger('');
       }
     }
   }
@@ -81,6 +83,7 @@ export function logProgressError(logger, error, msg)  {
     let failedLines =
       error.value.contents.failed.map(item => JSON.stringify(item)).join('\n');
     logger(failedLines);
+    logger('');
   }
 }
 

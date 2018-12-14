@@ -785,14 +785,13 @@ class PlaybookProgress extends Component {
     }
   }
 
-  logMessage = (message, notAppendNewLine) => {
-    // if have not specified not to append new line break
-    // then if the message does not contain a new line
-    // break append new line break
-    if (!notAppendNewLine) {
+  logMessage = (message, addNewlineIfMissing=true) => {
+    // if the message does not contain a new line
+    // append a new line break
+    if (addNewlineIfMissing) {
       var hasNewLine = /\r|\n/.exec(message);
       if (!hasNewLine) {
-        message = '\n' + message + '\n';
+        message = message + '\n';
       }
     }
     this.logsReceived = this.logsReceived.push(message);

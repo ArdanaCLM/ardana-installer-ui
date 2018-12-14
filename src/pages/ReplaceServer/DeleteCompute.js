@@ -213,6 +213,8 @@ class DeleteCompute extends BaseUpdateWizardPage {
       server = server.toJS();
       let model = removeServerFromModel(server, this.props.model);
       this.props.updateGlobalState('model', model);
+      logger(
+        'Removed compute host ' + this.props.operationProps.oldServer.id + ' from model.');
       // save the changes to the saved servers
       if(this.state.servers) {
         server['role'] = '';
@@ -271,7 +273,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     const commitMessage = {'message': 'Committed via Ardana Installer'};
     return postJson('/api/v2/model/commit', commitMessage)
       .then((response) => {
-        logger('Successfully committed model changes');
+        logger('Successfully committed model changes.');
       })
       .catch((error) => {
         const logMsg = 'Failed to commit update changes. ' + error.toString();
