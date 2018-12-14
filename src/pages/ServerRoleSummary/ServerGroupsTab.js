@@ -68,7 +68,7 @@ class ServerGroupsTab extends Component {
     serverGroupList =[...new Set([].concat(...serverGroupList))];
     // get some more details from internalModel
     let serverGroupsModel = internalModel['internal']['server-groups'];
-    let serverGroups = [];
+    let serverGroups;
     if(serverGroupsModel) {
       serverGroups = serverGroupList.map(sgName => {
         return {
