@@ -55,7 +55,7 @@ class CollapsibleTable extends Component {
     }
   }
 
-  getSeverData = (server) => {
+  getServerData = (server) => {
     let retData = {};
     this.props.tableConfig.columns.forEach((colDef) => {
       if(colDef.foundInProp) {
@@ -80,7 +80,7 @@ class CollapsibleTable extends Component {
       groupMap = groupMap.update(server.get('role'),
         new List(),           // create a new list if role is not in groupMap
         list => list.push(    // append this server to the role's list
-          this.getSeverData(server)
+          this.getServerData(server)
         ));
     });
 
@@ -251,6 +251,8 @@ class CollapsibleTable extends Component {
       <td></td>
       <td className='group-count-col'>{group.members.length}
         <span className='expand-collapse-icon'><i className='material-icons'>{icon}</i></span></td></tr>];
+
+    groupRows.push(this.renderHeaders(group.isExpanded, group.groupName));
     group.members.forEach((member) => {
       let cols = this.renderRow(member);
       let memberRowClassName = 'member-row';
@@ -324,6 +326,30 @@ class CollapsibleTable extends Component {
           close={() => this.setState({showContextMenu: false})}
           location={this.state.contextMenuLocation}>
         </ContextMenu>
+      );
+    }
+  }
+
+  renderHeaders(show, groupName) {
+    if (show) {
+      let headers = [];
+      let columnName = '';
+      for (let column of this.props.tableConfig.columns) {
+        if(!column.hidden) {
+          columnName = translate('table.column.header.' + column.name);
+          if(columnName.startsWith('table.column.header.')) {
+            columnName = column.name;
+          }
+          headers.push(columnName);
+        }
+      }
+
+      return (
+        <tr className='member-row' key={groupName + 'headerrow'}>
+          {headers.map(header => <td key={groupName + header} className='subheading'> {header} </td>)}
+          {/* the table has action menus in other rows, need an empty column to match */}
+          <td key={groupName + 'action-menu-header'}></td>
+        </tr>
       );
     }
   }

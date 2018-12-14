@@ -114,7 +114,6 @@ class ServerRoleSummary extends BaseWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
-        {name: 'status', propsource: 'serverMonascaStatus'},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
