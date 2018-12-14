@@ -22,6 +22,9 @@ import { List, Map } from 'immutable';
 import { NetworkInterfaceValidator, PCIAddressValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { fetchJson } from '../../utils/RestUtils.js';
+import { ErrorMessage } from '../../components/Messages.js';
+import { LoadingMask } from '../../components/LoadingMask.js';
 
 class NicMappingTab extends Component {
 
@@ -38,7 +41,31 @@ class NicMappingTab extends Component {
       // Since many fields on the form can be edited at the same time, the validity of
       // each field is tracked separately within the detail row entry
       detailRows: undefined,
+      // check against nic-mappings in use when
+      // isUpdateMode
+      nicMappingsInUse: undefined,
+      loading: false,
+      errorMsg: undefined
     };
+  }
+
+  componentDidMount() {
+    if(this.props.isUpdateMode) {
+      this.setState({loading: true});
+      // fetchJson(url, init, forceLogin, noCache)
+      fetchJson('/api/v2/model/nic_mappings_in_use', undefined, true, true)
+        .then((nic_mappings) => {
+          if (nic_mappings) {
+            this.setState({nicMappingsInUse: nic_mappings, loading: false});
+          }
+        })
+        .catch(error => {
+          let msg =
+            translate(
+              'edit.server.groups.get.nicmappings_inuse.error', error.toString());
+          this.setState({errorMsg: msg, loading: false});
+        });
+    }
   }
 
   resetData = () => {
@@ -203,14 +230,21 @@ class NicMappingTab extends Component {
     this.closeDetails();
   }
 
-  renderDetailRows() {
+  renderDetailRows(nicMappingInUse) {
     return this.state.detailRows.map((row, idx, arr) => {
       const lastRow = (idx === arr.size-1);
+      // if have nicMappingInUse and it has this logical-name
+      // this logic-name is in use
+      let isInUse =
+        nicMappingInUse ?
+          nicMappingInUse['physical-ports'].map(port => port['logical-name'])
+            .includes(row.get('logical-name')): false;
 
       return (
         <div key={idx} className='dropdown-plus-minus'>
           <div className="field-container">
             <ValidatingInput
+              disabled={isInUse}
               inputAction={(e, valid) => this.updateDetailRow(idx, 'logical-name', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('logical-name')}
@@ -219,6 +253,7 @@ class NicMappingTab extends Component {
               placeholder={translate('port.logical.name') + '*'} />
 
             <ValidatingInput
+              disabled={isInUse}
               inputAction={(e, valid) => this.updateDetailRow(idx, 'bus-address', e.target.value, valid)}
               inputType='text'
               inputValue={row.get('bus-address')}
@@ -228,7 +263,7 @@ class NicMappingTab extends Component {
           </div>
 
           <div className='plus-minus-container'>
-            <If condition={idx > 0 || row.get('logical-name') || row.get('bus-address')}>
+            <If condition={(idx > 0 || row.get('logical-name') || row.get('bus-address')) && !isInUse}>
               <span key={this.props.name + 'minus'} onClick={() => this.removeDetailRow(idx)}>
                 <i className='material-icons left-sign'>remove</i>
               </span>
@@ -259,7 +294,11 @@ class NicMappingTab extends Component {
       } else {
         title = translate('add.nic.mapping');
       }
-
+      // if nicMappingsInUse has this nic mapping name,
+      // return nic mapping in use when isUpdateMode to check against
+      // logical-name in use
+      let nicMappingInUse = this.props.isUpdateMode &&
+        this.state.nicMappingsInUse?.filter(mp=>mp['name'] === this.state.nicMappingName)[0];
       return (
         <div className='col-4'>
           <div className='details-section'>
@@ -267,6 +306,7 @@ class NicMappingTab extends Component {
             <div className='details-body'>
 
               <ValidatingInput isRequired='true' placeholder={translate('nic.mapping.name') + '*'}
+                disabled={nicMappingInUse}
                 inputValue={this.state.nicMappingName} inputName='name' inputType='text'
                 inputAction={this.handleNameChange} />
               <div className="field-title-container">
@@ -275,7 +315,7 @@ class NicMappingTab extends Component {
                 <div className='details-group-title column-title'>
                   {translate('pci.address') + '* :'}</div>
               </div>
-              {this.renderDetailRows()}
+              {this.renderDetailRows(nicMappingInUse)}
 
               <div className='btn-row details-btn'>
                 <div className='btn-container'>
@@ -325,6 +365,10 @@ class NicMappingTab extends Component {
 
     const rows = this.getRows()
       .map((m,idx) => {
+        // if nicMappingsInUse has this nic mapping name,
+        // this nic mapping is in use when isUpdateMode
+        let isInUse = this.props.isUpdateMode &&
+          this.state.nicMappingsInUse?.map((mp)=> mp['name']).includes(m.get('name'));
         const portList = m.get('physical-ports').toJS();
         const tooltipText = portList.map(p => p['logical-name']).join(',\n');
         const tooltip = (<Tooltip id='physical-ports' className='cell-tooltip'>{tooltipText}</Tooltip>);
@@ -341,9 +385,11 @@ class NicMappingTab extends Component {
                 <span onClick={(e) => this.editNicMapping(e, idx)}>
                   <i className={editClass}>edit</i>
                 </span>
-                <span onClick={(e) => this.setState({activeRow: idx, showRemoveConfirmation: true})}>
-                  <i className={removeClass}>delete</i>
-                </span>
+                <If condition={!isInUse}>
+                  <span onClick={(e) => this.setState({activeRow: idx, showRemoveConfirmation: true})}>
+                    <i className={removeClass}>delete</i>
+                  </span>
+                </If>
               </div>
             </td>
           </tr>);
@@ -375,6 +421,16 @@ class NicMappingTab extends Component {
             </tbody>
           </table>
         </div>
+        <If condition={this.state.errorMsg}>
+          <div className='notification-message-container'>
+            <ErrorMessage
+              message={this.state.errorMsg}
+              closeAction={() => this.setState({errorMsg: undefined})}/>
+          </div>
+        </If>
+        <If condition={this.state.loading}>
+          <LoadingMask className='input-modal-mask' show={this.state.loading}></LoadingMask>
+        </If>
         {this.renderDetails()}
         {this.confirmModal()}
       </div>

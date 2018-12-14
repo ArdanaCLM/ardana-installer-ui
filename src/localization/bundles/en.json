@@ -293,6 +293,8 @@
     "edit.cloud.config": "Cloud Configuration",
     "edit.nic.mappings": "NIC Mappings",
     "edit.server.groups": "Server Groups",
+    "edit.server.groups.get.servergroups_inuse.error": "Failed to get server groups in use {0}",
+    "edit.server.groups.get.nicmappings_inuse.error": "Failed to get nic mappings in use {0}",
     "edit.networks": "Networks",
     "edit.disk.models": "Disk Models",
     "edit.interface.models": "Interface Models",

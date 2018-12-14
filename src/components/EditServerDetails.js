@@ -115,7 +115,8 @@ class EditServerDetails extends Component {
     return (
       <EditCloudSettings model={this.props.model}
         oneTab='server-group' onHide={::this.closeAddServerGroup}
-        updateGlobalState={this.props.updateGlobalState}/>
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={this.props.isUpdateMode}/>
     );
   }
 
@@ -123,7 +124,8 @@ class EditServerDetails extends Component {
     return (
       <EditCloudSettings model={this.props.model}
         oneTab='nic-mapping' onHide={::this.closeAddNicMapping}
-        updateGlobalState={this.props.updateGlobalState}/>
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={this.props.isUpdateMode}/>
     );
   }
 
@@ -150,9 +152,7 @@ class EditServerDetails extends Component {
             <ListDropdown name={this.props.name} value={this.state.inputValues.get(name)} moreClass={'has-button'}
               optionList={list} emptyOption={emptyOptProps}
               selectAction={(value)=>handler(value, true, name)}/>
-            <If condition={!this.props.isUpdateMode}>
-              {this.renderButtonForDropDown(addAction, buttonLabel)}
-            </If>
+            {this.renderButtonForDropDown(addAction, buttonLabel)}
           </div>
         </div>
       </div>
@@ -243,10 +243,10 @@ class EditServerDetails extends Component {
           <form onSubmit={::this.handleDone}>
             {this.renderServerContent()}
           </form>
-          <If condition={!this.props.isUpdateMode && this.state.showAddServerGroup}>
+          <If condition={this.state.showAddServerGroup}>
             {this.renderAddServerGroup()}
           </If>
-          <If condition={!this.props.isUpdateMode && this.state.showAddNicMapping}>
+          <If condition={this.state.showAddNicMapping}>
             {this.renderAddNicMapping()}
           </If>
         </div>
