@@ -130,14 +130,14 @@ class ServiceDetails extends Component {
       if(responseData.installed) {
         const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
         fetchJson('/api/v2/monasca/passthru/alarms/count?' + query)
-            .then(responseData => {
-          this.processAlarms(responseData.counts);
-          this.setState({alarmDataLoaded: true});
-          this.checkLoadingMask();
-        }).catch((error) => {
-          this.setState({alarmDataLoaded: true});
-          this.checkLoadingMask();
-        });
+          .then(responseData => {
+            this.processAlarms(responseData.counts);
+            this.setState({alarmDataLoaded: true});
+            this.checkLoadingMask();
+          }).catch((error) => {
+            this.setState({alarmDataLoaded: true});
+            this.checkLoadingMask();
+          });
       } else {
         this.setState({alarmDataLoaded: true});
         this.checkLoadingMask();
@@ -265,10 +265,10 @@ class ServiceInfo extends Component {
     if(responseData.installed) {
       fetchJson('/api/v2/monasca/service_status')
         .then(responseData => {
-        this.setState({statusList: responseData});
-      }).catch((error) => {
-        // no need to show error for this case
-      });
+          this.setState({statusList: responseData});
+        }).catch((error) => {
+          // no need to show error for this case
+        });
     }
 
 

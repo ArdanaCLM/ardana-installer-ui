@@ -26,8 +26,47 @@ class ModelServerDetails extends Component {
     );
   }
 
+  /**
+   * creates the jsx entries for the network interfaces of a server
+   */
+  renderNetworkBlurb(network) {
+    return(
+      <div className='network' key={network.name}>
+        {network.name}
+        <table>
+          <tbody>
+            <tr>
+              <td>{translate('server.details.ip')}</td>
+              <td>{network.ip}</td>
+            </tr>
+            <tr>
+              <td>{translate('cidr')}:</td>
+              <td>{network.cidr}</td>
+            </tr>
+            <tr>
+              <td>{translate('gateway')}:</td>
+              <td>{network.gateway}</td>
+            </tr>
+            <tr>
+              <td>{translate('vlanid')}:</td>
+              <td>{network.vlanid}</td>
+            </tr>
+            <tr>
+              <td>{translate('tagged-vlan')}:</td>
+              <td>{network.tagged}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   renderDetailsContent = () => {
     if(this.props.data) {
+      let network_info;
+      if(this.props.data.networks) {
+        network_info = this.props.data.networks.map(network => this.renderNetworkBlurb(network));
+      }
       return (
         <div className='server-details-container'>
           {this.renderTextLine('server.id.prompt', this.props.data.id)}
@@ -39,6 +78,10 @@ class ModelServerDetails extends Component {
           {this.renderTextLine('server.ipmi.ip.prompt', this.props.data['ilo-ip'])}
           {this.renderTextLine('server.ipmi.username.prompt', this.props.data['ilo-user'])}
           {this.renderTextLine('server.ipmi.password.prompt', maskPassword(this.props.data['ilo-password']))}
+          {network_info ? translate('network.interfaces') : ''}
+          <div className='inetFaces'>
+            {network_info}
+          </div>
         </div>
       );
     }
