@@ -741,7 +741,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
         activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}
-        serverMonascaStatuses={this.state.serverMonascaStatuses} />
+        serverMonascaStatuses={this.state.serverMonascaStatuses}
+        internalModel={this.state.internalModel} />
     );
   }
 

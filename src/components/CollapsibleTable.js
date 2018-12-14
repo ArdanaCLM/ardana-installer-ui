@@ -126,18 +126,65 @@ class CollapsibleTable extends Component {
     );
   }
 
+  /**
+   * renders the view server action during the Day 0 mode of the install,
+   * this function is not called during Day2 operations due to changes in how
+   * the table handles actions after install (see getContextMenuItems)
+   */
   renderViewAction = (server) => {
     return (
       <span className="detail-info collapsible"
-        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
+        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server},
+          this.loadServerDetails(server))}>
         <i className="material-icons collapsible">info</i>
       </span>
     );
   }
 
+  /**
+   * query the backend for extra server details that are not loaded by default
+   * since loading them for every server would be intensive
+   */
+  loadServerDetails = (server, retries) => {
+    //the internalModel is not necessarily loaded right away,
+    //check again after 1 second if not already loaded
+    if(this.props.internalModel !== undefined) {
+      let internalModelServers = this.props.internalModel.getIn(['internal', 'servers']).toJS();
+      let fullModelServer = internalModelServers.find(s => s.id == server.id);
+      let server_networks_list = [];
+      for (let inet in fullModelServer.interfaces) {
+        for (let network in fullModelServer.interfaces[inet].networks) {
+          let net = fullModelServer.interfaces[inet].networks[network];
+          server_networks_list.push({
+            'name': net.name + ' (' + fullModelServer.interfaces[inet].device.name + ')',
+            'ip': net.addr,
+            'gateway': net['gateway-ip'],
+            'cidr': net.cidr,
+            'vlanid': net.vlanid,
+            'tagged': (net['tagged-vlan'] === undefined ? '' : net['tagged-vlan'].toString())
+          });
+        }
+      }
+      let updatedMenuRow = this.state.contextMenuRow;
+      updatedMenuRow.networks = server_networks_list;
+      this.setState({'contextMenuRow' : updatedMenuRow});
+    } else {
+      //retry up to 10 times, after that, assume the internal model isnt going to load for some reason
+      if(retries < 10) {
+        setTimeout(this.loadServerDetails(server, retries + 1));
+      }
+    }
+  }
+
+  /**
+   * gets the list of action menu items for a specific row based on attributes for that row (i.e. hosts
+   * that are activated cannot be activated again, etc...)
+   * this method is only called during day2 operations. During the install renderViewAction is used instead
+   */
   getContextMenuItems = (row) => {
     let items = [{
-      key: 'common.details', action: () => this.setState({showServerDetailsModal: true})
+      key: 'common.details', action: () => this.setState(
+        {showServerDetailsModal: true}, () => {this.loadServerDetails(row, 0);})
     }];
 
     if (row.role.includes('COMPUTE')) {
