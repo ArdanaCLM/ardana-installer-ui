@@ -76,12 +76,13 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
+      const errorMsg = error?.message || '';
       this.setState({
         processErrorBanner:
-          translate('server.deploy.progress.delete_compute.failure')
+          translate('server.deploy.progress.delete_compute.failure', errorMsg)
       });
     }
   }
@@ -123,37 +124,40 @@ class DeleteCompute extends BaseUpdateWizardPage {
   deleteComputeService = (logger) => {
     const apiUrl =
       '/api/v2/compute/services/' + this.props.operationProps.oldServer.hostname;
-    logger('\nDELETE ' + apiUrl + '\n');
+    logger('DELETE ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
-        const msg = translate(
-          'server.deploy.progress.response.delete_compute_service',
-          this.props.operationProps.oldServer.hostname);
-        logProgressResponse(logger, response, msg);
+        const logMsg =
+          'Got response from deleting compute services for compute host ' +
+          this.props.operationProps.oldServer.hostname;
+        logProgressResponse(logger, response, logMsg);
       })
       .catch((error) => {
         // have no compute service for the old compute node
         // move on
         if(error.status === 410) {
-          const msg = translate(
-            'server.deploy.progress.no_compute_service',
-            this.props.operationProps.oldServer.hostname);
-          logger('\n' + msg + '\n');
+          const logMsg =
+            'Warning: No compute service found for compute host ' +
+            this.props.operationProps.oldServer.hostname + ', continue...';
+          logger(logMsg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
-          const msg = translate(
-            'server.deploy.progress.response.delete_compute_service',
-            this.props.operationProps.oldServer.hostname);
+          const logMsg =
+            'Got response from deleting compute services for compute host ' +
+            this.props.operationProps.oldServer.hostname;
           return this.partialFailureDialogPromise(
-            logger, error, msg, 'server.deploy.progress.delete_compute_service.hasfailed');
+            logger, error, logMsg, 'server.deploy.progress.delete_compute_service.hasfailed');
         }
         else {
+          const logMsg =
+            'Error: Failed to delete compute services for compute host ' +
+            this.props.operationProps.oldServer.hostname + '. ' + error.toString();
+          logProgressError(logger, error, logMsg);
           const msg =
             translate(
               'server.deploy.progress.delete_compute_service.failure',
               this.props.operationProps.oldServer.hostname, error.toString());
-          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -162,37 +166,40 @@ class DeleteCompute extends BaseUpdateWizardPage {
   deleteNetworkAgents = (logger) => {
     const apiUrl =
       '/api/v2/network/agents/' + this.props.operationProps.oldServer.hostname;
-    logger('\nPUT ' + apiUrl + '\n');
+    logger('PUT ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
-        const msg = translate(
-          'server.deploy.progress.response.delete_network_agents',
-          this.props.operationProps.oldServer.hostname);
-        logProgressResponse(logger, response, msg);
+        const logMsg =
+          'Got response from deleting network agents for compute host ' +
+          this.props.operationProps.oldServer.hostname;
+        logProgressResponse(logger, response, logMsg);
       })
       .catch((error) => {
         // have no network agents for the old compute node
         // move on
         if (error.status === 410) {
-          const msg = translate(
-            'server.deploy.progress.no_network_agents',
-            this.props.operationProps.oldServer.hostname);
-          logger('\n' + msg + '\n');
+          const logMsg =
+            'No network agents found for compute host ' +
+            this.props.operationProps.oldServer.hostname + ', continue...';
+          logger(logMsg);
         }
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
-          const msg = translate(
-            'server.deploy.progress.response.delete_network_agents',
-            this.props.operationProps.oldServer.hostname);
+          const logMsg =
+            'Got response from deleting network agents for compute host ' +
+            this.props.operationProps.oldServer.hostname;
           return this.partialFailureDialogPromise(
-            logger, error, msg, 'server.deploy.progress.delete_network_agents.hasfailed');
+            logger, error, logMsg, 'server.deploy.progress.delete_network_agents.hasfailed');
         }
         else {
+          const logMsg =
+            'Error: Failed to delete network agents for compute host ' +
+            this.props.operationProps.oldServer.hostname + '. ' + error.toString();
+          logProgressError(logger, error, logMsg);
           const msg =
             translate('server.deploy.progress.delete_network_agents.failure',
               this.props.operationProps.oldServer.hostname,
               error.toString());
-          logProgressError(logger, error, msg);
           throw new Error(msg);
         }
       });
@@ -206,6 +213,8 @@ class DeleteCompute extends BaseUpdateWizardPage {
       server = server.toJS();
       let model = removeServerFromModel(server, this.props.model);
       this.props.updateGlobalState('model', model);
+      logger(
+        'Removed compute host ' + this.props.operationProps.oldServer.id + ' from model.');
       // save the changes to the saved servers
       if(this.state.servers) {
         server['role'] = '';
@@ -215,10 +224,11 @@ class DeleteCompute extends BaseUpdateWizardPage {
           putJson('/api/v2/server', updated_server)
             .then(() => resolve())
             .catch(error => {
-              let msg =
-                translate('server.deploy.progress.update_server.warning',
-                  this.props.operationProps.oldServer.id,  error.toString());
-              logger('\n' + msg + '\n');
+              let logMsg =
+                'Warning: failed to update the deleted compute server ' +
+                this.props.operationProps.oldServer.id + ' information in the saved servers. ' +
+                error.toString();
+              logger(logMsg);
               // if cannot update the deleted server info in the saved servers
               // for some reason, still let it go
               resolve();
@@ -234,10 +244,10 @@ class DeleteCompute extends BaseUpdateWizardPage {
           postJson('/api/v2/server', [server])
             .then(() => resolve())
             .catch(error => {
-              let msg =
-                translate('server.deploy.progress.add_server.warning',
-                  this.props.operationProps.oldServer.id, error.toString());
-              logger('\n' + msg + '\n');
+              const logMsg =
+                'Warning: failed to save the deleted compute server ' +
+                this.props.operationProps.oldServer.id + ' information. ' + error.toString();
+              logger(logMsg);
               // if cannot update the deleted server info in the saved servers
               // for some reason, still let it go
               resolve();
@@ -246,15 +256,15 @@ class DeleteCompute extends BaseUpdateWizardPage {
       }
       else {
         //this.state.servers is not defined, skip saving or updating saved servers
-        let msg = translate('server.deploy.progress.no_servers.warning');
-        logger('\n' + msg + '\n');
+        logger('Warning: No saved servers, will skip updating saved servers');
         resolve();
       }
     }
     else { // old compute server is not in the model. Should not happen, just in case
-      let msg =
-        translate('server.deploy.progress.not_in_model.warning', this.props.operationProps.oldServer.id);
-      logger('\n' + msg + '\n');
+      const logMsg =
+        'Warning: the old compute server ' +  this.props.operationProps.oldServer.id +
+        ' is not in the cloud model';
+      logger(logMsg);
       resolve();
     }
   }
@@ -263,34 +273,36 @@ class DeleteCompute extends BaseUpdateWizardPage {
     const commitMessage = {'message': 'Committed via Ardana Installer'};
     return postJson('/api/v2/model/commit', commitMessage)
       .then((response) => {
-        let msg = translate('update.commit.success');
-        logger('\n' + msg + '\n');
+        logger('Successfully committed model changes.');
       })
       .catch((error) => {
-        const message = translate('update.commit.failure', error.toString());
-        logger('\n' + message+'\n');
-        throw new Error(message);
+        const logMsg = 'Failed to commit update changes. ' + error.toString();
+        logger(logMsg);
+        const msg = translate('update.commit.failure', error.toString());
+        throw new Error(msg);
       });
   }
 
   removeFromCobbler = (logger) => {
     const apiUrl =
       '/api/v2/cobbler/servers/' + this.props.operationProps.oldServer.id;
-    logger('\nDELETE ' + apiUrl + '\n');
+    logger('DELETE ' + apiUrl);
     return deleteJson(apiUrl)
       .then((response) => {
-        const msg =
-          translate(
-            'server.deploy.progress.response.remove_from_cobbler',
-            this.props.operationProps.oldServer.hostname);
-        logProgressResponse(logger, response, msg);
+        const logMsg =
+          'Got response from deleting server from cobbler for compute host ' +
+          this.props.operationProps.oldServer.hostname;
+        logProgressResponse(logger, response, logMsg);
       })
       .catch((error) => {
+        const logMsg =
+          'Error: Failed to remove server from cobbler for compute host ' +
+          this.props.operationProps.oldServer.hostname + '. ' + error.toString();
+        logger(logMsg);
         const msg =
           translate('server.deploy.progress.remove_from_cobbler.failure',
             this.props.operationProps.oldServer.hostname,
             error.toString());
-        logger('\n' + msg + '\n');
         throw new Error(msg);
       });
   }
@@ -464,8 +476,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     if (this.state.partialFailedConfirmation) {
       const handleNo = () => {
         this.state.partialFailedConfirmation.reject();
-        this.state.partialFailedConfirmation.logger(
-          '\n' + translate('server.deploy.progress.abort') + '\n');
+        this.state.partialFailedConfirmation.logger('User aborted processes');
         this.setState({
           partialFailedConfirmation: undefined, partialFailedConfirmMsg: undefined});
       };
@@ -494,8 +505,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     if(this.state.manualShutdownConfirmation) {
       const handleCancel = () => {
         this.state.manualShutdownConfirmation.reject();
-        this.state.manualShutdownConfirmation.logger(
-          '\n' + translate('server.deploy.progress.abort') + '\n');
+        this.state.manualShutdownConfirmation.logger('User aborted processes.');
         this.setState({manualShutdownConfirmation: undefined});
       };
       const handleDone = () => {

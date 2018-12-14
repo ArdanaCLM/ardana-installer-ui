@@ -75,12 +75,12 @@ class PrepareAddServers extends BaseUpdateWizardPage {
         const commitMessage = {'message': 'Committed via Ardana Installer'};
         return postJson('/api/v2/model/commit', commitMessage)
           .then((response) => {
-            let msg = translate('update.commit.success');
-            logger(msg + '\n');
+            logger('Successfully committed model changes');
           })
           .catch((error) => {
+            const logMsg = 'Failed to commit update changes. ' + error.toString();
+            logger(logMsg);
             const message = translate('update.commit.failure', error.toString());
-            logger(message+'\n');
             throw new Error(message);
           });
       }),

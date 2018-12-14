@@ -561,7 +561,7 @@ class PlaybookProgress extends Component {
           }
         })
         .catch((error) => {
-          this.playbookError(playbook.name, playbook.name, 0);
+          this.playbookError(playbook.name, playbook.name, 0, error);
         });
 
     } else {
@@ -594,7 +594,7 @@ class PlaybookProgress extends Component {
       deleteJson('/api/v2/plays/' + running.playId)
         .then(response => {
           if (this.props.modalMode) {
-            this.logMessage(translate('deploy.cancel.message'));
+            this.logMessage('Playbook cancelled.');
           } else {
             // update local this.globalPlaybookStatus and also update global state playbookSatus
             this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
@@ -766,7 +766,7 @@ class PlaybookProgress extends Component {
    * @param playbookName
    * @param playId
    */
-  playbookError = (stepPlaybook, playbookName, playId) => {
+  playbookError = (stepPlaybook, playbookName, playId, error) => {
     let failed = false;
 
     this.setState((prevState) => {
@@ -781,11 +781,19 @@ class PlaybookProgress extends Component {
         this.updateGlobalPlaybookStatus(playbookName, playId, STATUS.FAILED);
       }
       // if failed update caller page immediately
-      this.props.updatePageStatus(STATUS.FAILED);
+      this.props.updatePageStatus(STATUS.FAILED, error);
     }
   }
 
-  logMessage = (message) => {
+  logMessage = (message, addNewlineIfMissing=true) => {
+    // if the message does not contain a new line
+    // append a new line break
+    if (addNewlineIfMissing) {
+      var hasNewLine = /\r|\n/.exec(message);
+      if (!hasNewLine) {
+        message = message + '\n';
+      }
+    }
     this.logsReceived = this.logsReceived.push(message);
     this.updateState(this.logsReceived);
   }
