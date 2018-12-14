@@ -13,15 +13,16 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { YesNoModal } from '../../components/Modals.js';
 import ServerGroupDetails from './ServerGroupDetails.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { fetchJson } from '../../utils/RestUtils.js';
 import { ErrorMessage } from '../../components/Messages.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
 
 class ServerGroupsTab extends Component {
 
@@ -43,10 +44,10 @@ class ServerGroupsTab extends Component {
   componentDidMount() {
     if(this.props.isUpdateMode) {
       this.setState({loading: true});
-      // fetchJson(url, init, forceLogin, noCache)
-      fetchJson('/api/v2/model/server_groups_in_use', undefined, true, true)
-        .then((server_groups) => {
-          if (server_groups) {
+      getInternalModel()
+        .then((internalModel) => {
+          if (internalModel) {
+            let server_groups = this.getServerGroupsInUse(internalModel);
             this.setState({serverGroupsInUse: server_groups, loading: false});
           }
         })
@@ -58,6 +59,25 @@ class ServerGroupsTab extends Component {
         });
     }
   }
+
+  getServerGroupsInUse = (internalModel) => {
+    let serverGroupList =
+      internalModel['internal']['servers']?.filter(server => !isEmpty(server['ardana_ansible_host']))
+        .map(server => server['server-group-list']);
+    // flat and remove the duplicates
+    serverGroupList =[...new Set([].concat(...serverGroupList))];
+    // get some more details from internalModel
+    let serverGroupsModel = internalModel['internal']['server-groups'];
+    let serverGroups = serverGroupList.map(sgName => {
+      return {
+        'name': serverGroupsModel[sgName]['name'],
+        'server-groups': serverGroupsModel[sgName]['server-groups'],
+        'networks': serverGroupsModel[sgName]['networks']
+      };
+    });
+
+    return serverGroups;
+  };
 
   resetData = () => {
     this.setState({

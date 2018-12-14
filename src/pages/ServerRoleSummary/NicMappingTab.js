@@ -13,6 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { MODE } from '../../utils/constants.js';
@@ -22,9 +23,9 @@ import { List, Map } from 'immutable';
 import { NetworkInterfaceValidator, PCIAddressValidator } from '../../utils/InputValidators.js';
 import { YesNoModal } from '../../components/Modals.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { fetchJson } from '../../utils/RestUtils.js';
 import { ErrorMessage } from '../../components/Messages.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
 
 class NicMappingTab extends Component {
 
@@ -52,10 +53,10 @@ class NicMappingTab extends Component {
   componentDidMount() {
     if(this.props.isUpdateMode) {
       this.setState({loading: true});
-      // fetchJson(url, init, forceLogin, noCache)
-      fetchJson('/api/v2/model/nic_mappings_in_use', undefined, true, true)
-        .then((nic_mappings) => {
-          if (nic_mappings) {
+      getInternalModel()
+        .then((internalModel) => {
+          if (internalModel) {
+            let nic_mappings = this.getNicMappingsInUse(internalModel);
             this.setState({nicMappingsInUse: nic_mappings, loading: false});
           }
         })
@@ -67,6 +68,17 @@ class NicMappingTab extends Component {
         });
     }
   }
+
+  getNicMappingsInUse = (internalModel) => {
+    let nicmappings =
+      internalModel['internal']['servers']?.filter(server => !isEmpty(server['ardana_ansible_host']))
+        .map(server => server['nic_map']);
+    // remove the duplicates
+    nicmappings =
+      [...new Set(nicmappings.map(nMapping => JSON.stringify(nMapping)))]
+        .map(mappingStr => JSON.parse(mappingStr));
+    return nicmappings;
+  };
 
   resetData = () => {
     this.setState({
@@ -236,9 +248,8 @@ class NicMappingTab extends Component {
       // if have nicMappingInUse and it has this logical-name
       // this logic-name is in use
       let isInUse =
-        nicMappingInUse ?
-          nicMappingInUse['physical-ports'].map(port => port['logical-name'])
-            .includes(row.get('logical-name')): false;
+        (nicMappingInUse && nicMappingInUse['physical-ports'].map(port => port['logical-name'])
+          .includes(row.get('logical-name')));
 
       return (
         <div key={idx} className='dropdown-plus-minus'>
