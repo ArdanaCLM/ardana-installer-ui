@@ -289,7 +289,12 @@ class PlaybookProgress extends Component {
     });
     this.socket.on('log', this.logMessage);
     this.socket.on('end', this.processEndMonitorPlaybook);
-    this.socket.emit('join', playId);
+    this.socket.on('connect', () => { this.socket.emit('join', playId); });
+    this.socket.on('disconnect', (reason) => {
+      if (reason === 'transport close') {
+        console.log('Connection lost, trying to reconnect...'); // eslint-disable-line no-console
+      }
+    });
   }
 
   // "Playbooks" come in a couple varieties. Originally they were just names, but
