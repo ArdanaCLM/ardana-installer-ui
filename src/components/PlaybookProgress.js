@@ -275,21 +275,20 @@ class PlaybookProgress extends Component {
   }
 
   monitorSocket = (playbookName, playId) => {
+
     // Note that this function is only called after a fetch has completed, and thus
     // the application config has already completed loading, so getAppConfig can
     // be safely used here
     this.socket = io(getAppConfig('shimurl'));
     this.socket.on('playbook-start', this.playbookStarted);
-    this.socket.on(
-      'playbook-stop',
-      (stepPlaybook) => { this.playbookStopped(stepPlaybook, playbookName, playId); });
-    this.socket.on(
-      'playbook-error',
-      (stepPlaybook) => { this.playbookError(stepPlaybook, playbookName, playId); });
+    this.socket.on('playbook-stop', (stepPlaybook) => {
+      this.playbookStopped(stepPlaybook, playbookName, playId);
+    });
+    this.socket.on('playbook-error', (stepPlaybook) => {
+      this.playbookError(stepPlaybook, playbookName, playId);
+    });
     this.socket.on('log', this.logMessage);
-    this.socket.on(
-      'end',
-      () => { this.processEndMonitorPlaybook(playbookName); });
+    this.socket.on('end', this.processEndMonitorPlaybook);
     this.socket.emit('join', playId);
   }
 
