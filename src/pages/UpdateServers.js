@@ -324,7 +324,7 @@ class UpdateServers extends BaseUpdateWizardPage {
   // theProps includes zero or more of the items like
   // wipeDisk, installOS, osUsername, osPassword,
   // selectedServerId
-  replaceServer = (server, theProps) =>  {
+  replaceServer = async (server, theProps) =>  {
     let model;
 
     let repServer = Object.assign({}, server);
@@ -356,7 +356,9 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     this.updateServerForReplaceServer(repServer);
 
-    this.props.updateGlobalState('model', model);
+    // Update the global state. Since this saves the model and updates the state, wait for
+    // it to complete before moving on.
+    await this.props.updateGlobalState('model', model);
 
     // existing server id and ip-addr for non-compute node
     // new server id and ip-addr for a new compute node
@@ -638,8 +640,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
   }
 
-  handleDoneReplaceServer = (server, theProps) => {
-    this.replaceServer(server, theProps);
+  handleDoneReplaceServer = async (server, theProps) => {
+    await this.replaceServer(server, theProps);
     this.handleCancelReplaceServer();
   }
 

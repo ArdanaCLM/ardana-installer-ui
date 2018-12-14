@@ -113,7 +113,8 @@ class CloudModelSummary extends BaseWizardPage {
 
     // Update the control plane in the global model, save it, and move to the next page
     let model = this.props.model.updateIn(this.PATH_TO_CONTROL_PLANE, val => this.state.controlPlane);
-    this.props.updateGlobalState('model', model, this.props.next);
+    this.props.updateGlobalState('model', model)
+      .then(() => this.props.next());
   }
 
   renderItems = (section) => {

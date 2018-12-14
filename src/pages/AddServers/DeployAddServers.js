@@ -23,7 +23,7 @@ import {
   STATUS, WIPE_DISKS_PLAYBOOK, ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
   SITE_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK, ARDANA_START_PLAYBOOK
 } from '../../utils/constants.js';
-import { fetchJson } from '../../utils/RestUtils.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
 
 const PLAYBOOK_POSSIBLE_STEPS = [{
   name: WIPE_DISKS_PLAYBOOK,
@@ -85,10 +85,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     // will request with no-cache
     if(!this.props.operationProps.newHosts) {
       this.setState({loading: true});
-      // fetchJson with url, init=undefined, forceLogin=true, noCache=true
-      fetchJson(
-        '/api/v2/model/cp_internal/CloudModel.yaml', undefined, true, true
-      )
+      getInternalModel()
         .then((cloudModel) => {
           let newHosts = this.getAddedComputeHosts(cloudModel);
           let cleanedHosts = newHosts.filter(host => host['hostname'] !== undefined);
