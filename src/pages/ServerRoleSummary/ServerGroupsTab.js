@@ -65,7 +65,11 @@ class ServerGroupsTab extends Component {
       internalModel['internal']['servers']?.filter(server => !isEmpty(server['ardana_ansible_host']))
         .map(server => server['server-group-list']);
     // flat and remove the duplicates
+    // serverGroupList could be like
+    // [["rack1","AZ1","CLOUD"],["rack1","AZ1","CLOUD"],
+    // ["rack1","AZ1","CLOUD"],["rack1","AZ1","CLOUD"]],
     serverGroupList =[...new Set([].concat(...serverGroupList))];
+
     // get some more details from internalModel
     let serverGroupsModel = internalModel['internal']['server-groups'];
     let serverGroups;

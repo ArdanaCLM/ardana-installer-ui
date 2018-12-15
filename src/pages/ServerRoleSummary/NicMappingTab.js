@@ -70,14 +70,20 @@ class NicMappingTab extends Component {
   }
 
   getNicMappingsInUse = (internalModel) => {
-    let nicmappings =
+    let nicNames =
       internalModel['internal']['servers']?.filter(server => !isEmpty(server['ardana_ansible_host']))
-        .map(server => server['nic_map']);
+        .map(server => server['nic_map']['name']);
     // remove the duplicates
-    nicmappings =
-      [...new Set(nicmappings.map(nMapping => JSON.stringify(nMapping)))]
-        .map(mappingStr => JSON.parse(mappingStr));
-    return nicmappings;
+    // nicNames could be like ['HP-DL360-6PORT', 'HP-DL360-6PORT']
+    nicNames = [...new Set(nicNames)];
+
+    // get details from internalModel
+    let nicMappingsModel = internalModel['internal']['nic_mappings'];
+    let nicMappings;
+    if(nicMappingsModel) {
+      nicMappings = nicNames.map(nName => nicMappingsModel[nName]);
+    }
+    return nicMappings;
   };
 
   resetData = () => {
