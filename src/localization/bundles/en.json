@@ -586,7 +586,7 @@
     "replace.server.poweroff.warning": "The controller node must be powered off before it can be replaced since the new node will re-use the same IP address.\nPower off this node and continue",
     "replace.server.nomigration.warning": "The compute host {0} with IP {1} is not reachable, the replacement process won't be able to migrate instances. \n\n Do you still want to procceed?",
     "replace.server.compute.validate.error.title": "Validation of the newly added compute server failed",
-    "server.replace.unsafe.warning": "Unchecking safe mode will allow you do delete and modify existing servers. Deleting or modifying existing servers can potentially corrupt the cloud. \n\nDo you want to use unsafe mode?",
+    "server.replace.unsafe.warning": "Unchecking safe mode will allow you to delete and modify the existing servers. Deleting or modifying existing servers can potentially corrupt the cloud. \n\nDo you want to use unsafe mode?",
     "server.replace.details.select.message": "Check and select from the available servers to fill out inputs.",
     "server.replace": "Server Replacement in Progress",
     "server.replace.complete.heading": "Completed Server Replacement",
