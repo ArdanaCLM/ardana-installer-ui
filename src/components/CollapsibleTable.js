@@ -23,7 +23,6 @@ import { byServerNameOrId } from '../utils/Sort.js';
 import {
   getAllOtherServerIds, getModelIPAddresses, getModelIPMIAddresses, getModelMacAddresses
 } from '../utils/ModelUtils.js';
-import { isProduction } from '../utils/ConfigHelper.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -142,37 +141,35 @@ class CollapsibleTable extends Component {
     }];
 
     if (row.role.includes('COMPUTE')) {
-      if (!isProduction()) {
-        // TODO: Add these as they are implemented
-        /*
-            key: 'common.delete', action: ...
-        */
-        // show replace button when there is no process operation going on
-        if (!this.props.processOperation) {
-          items.push({
-            key: 'common.replace',
-            action: this.props.replaceServer,
-            callbackData: row
-          });
-          if (this.props.serverStatuses
-              && this.props.serverStatuses[row.id]
-              && typeof this.props.serverStatuses[row.id].status
-                === 'boolean') {
-            if (this.props.serverStatuses[row.id].status) {
-              items.push({
-                key: 'common.deactivate',
-                action: this.props.deactivateComputeHost,
-                active: true,
-                callbackData: row.id
-              });
-            } else if (!this.props.serverStatuses[row.id].status) {
-              items.push({
-                key: 'common.activate',
-                action: this.props.activateComputeHost,
-                active: true,
-                callbackData: row.id
-              });
-            }
+      // TODO: Add these as they are implemented
+      /*
+          key: 'common.delete', action: ...
+      */
+      // show replace button when there is no process operation going on
+      if (!this.props.processOperation) {
+        items.push({
+          key: 'common.replace',
+          action: this.props.replaceServer,
+          callbackData: row
+        });
+        if (this.props.serverStatuses
+            && this.props.serverStatuses[row.id]
+            && typeof this.props.serverStatuses[row.id].status
+              === 'boolean') {
+          if (this.props.serverStatuses[row.id].status) {
+            items.push({
+              key: 'common.deactivate',
+              action: this.props.deactivateComputeHost,
+              active: true,
+              callbackData: row.id
+            });
+          } else if (!this.props.serverStatuses[row.id].status) {
+            items.push({
+              key: 'common.activate',
+              action: this.props.activateComputeHost,
+              active: true,
+              callbackData: row.id
+            });
           }
         }
       }
