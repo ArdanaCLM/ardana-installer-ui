@@ -115,6 +115,10 @@ class AssignServerRoles extends BaseWizardPage {
 
       // add server, activate for all newly added servers
       isActivateChecked: props.operationProps?.activate || false,
+
+      // add server, safeMode
+      isSafeModeChecked: props.safeMode !== undefined ? props.safeMode : true,
+      showUnSafeWarning: false
     };
   }
 
@@ -1110,6 +1114,27 @@ class AssignServerRoles extends BaseWizardPage {
 
   setNextButtonDisabled = () => !this.isValid();
 
+  proceedUnsafeMode = () => {
+    this.setState(prev => {
+      this.props.updateGlobalState('safeMode', false);
+      return {isSafeModeChecked: false, showUnSafeWarning: false};
+    });
+  }
+
+  handleSafeModeCheck = () => {
+    this.setState(prev => {
+      let isChecked = !prev.isSafeModeChecked;
+      if (!isChecked) {
+        return {showUnSafeWarning: true};
+      }
+      else {
+        // save to the global
+        this.props.updateGlobalState('safeMode', isChecked);
+        return {isSafeModeChecked: isChecked};
+      }
+    });
+  }
+
   handleWipeDiskCheck = () => {
     this.setState(prev => {
       let isChecked = !prev.isWipeDiskChecked;
@@ -1379,6 +1404,8 @@ class AssignServerRoles extends BaseWizardPage {
       extraProps.checkNewDupAddresses = {
         modelServerAddresses: modelServerAddresses
       };
+
+      extraProps.isSafeMode = this.state.isSafeModeChecked;
     }
     return (
       <ServerRolesAccordion
@@ -1396,12 +1423,38 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
+  renderUnSafeWarning() {
+    if (this.state.showUnSafeWarning) {
+      return (
+        <YesNoModal key='unsafe' title={translate('warning')}
+          yesAction={this.proceedUnsafeMode}
+          noAction={() => this.setState({showUnSafeWarning: false})}>
+          {translate('server.replace.unsafe.warning')}
+        </YesNoModal>
+      );
+    }
+  }
+
+  renderSafeMode() {
+    let className =
+      'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
+    return (
+      <div  key='safemode' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
+          type='checkbox' value='safemode'
+          checked={this.state.isSafeModeChecked} onChange={this.handleSafeModeCheck}/>
+        {translate('common.safemode')}
+        <HelpText tooltipText={translate('server.addserver.safemode.message')}/>
+      </div>
+    );
+  }
+
   renderWipeDisk() {
     let className =
       'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
-      <div className={className}>
-        <input disabled={this.toDisableCheckboxes()} className='wipe-disk-option'
+      <div  key='wipedisk' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
           type='checkbox' value='wipedisk'
           checked={this.state.isWipeDiskChecked} onChange={this.handleWipeDiskCheck}/>
         {translate('common.wipedisk')}
@@ -1414,9 +1467,9 @@ class AssignServerRoles extends BaseWizardPage {
     let className =
       'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
-      <div className={className}>
-        <input disabled={this.toDisableCheckboxes()}
-          className='wipe-disk-option' type='checkbox' value='activate'
+      <div key='activate' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
+          type='checkbox' value='activate'
           checked={this.state.isActivateChecked} onChange={this.handleActivateCheck}/>
         {translate('common.activate')}
         <HelpText tooltipText={translate('server.addserver.activate.message')}/>
@@ -1453,8 +1506,12 @@ class AssignServerRoles extends BaseWizardPage {
             {isValidToRenderAccordion && this.renderServerRolesAccordion(serverRoles)}
             {this.props.isUpdateMode && !isValidToRenderAccordion && this.renderEmptyRolesInfo()}
           </div>
-          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderWipeDisk()}
-          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderActivate()}
+          <If condition={this.props.isUpdateMode && isValidToRenderAccordion}>
+            {this.renderActivate()}
+            {this.renderWipeDisk()}
+            {this.renderSafeMode()}
+            {this.renderUnSafeWarning()}
+          </If>
         </div>
 
       </div>

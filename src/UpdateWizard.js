@@ -69,7 +69,7 @@ class UpdateWizard extends InstallWizard {
     // ['playbookStatus', 'model', 'connectionInfo', 'deployConfig', 'wizardLoading', 'wizardLoadingErrors'];
     this.globalStateVars =
       this.globalStateVars.concat([
-        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps'
+        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode'
       ]);
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
@@ -77,7 +77,7 @@ class UpdateWizard extends InstallWizard {
     // ['currentStep', 'steps', 'playbookStatus', 'connectionInfo', 'deployConfig']
     this.persistedStateVars =
       this.persistedStateVars.concat([
-        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps'
+        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode'
       ]);
   }
 

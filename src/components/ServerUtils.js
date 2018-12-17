@@ -82,6 +82,7 @@ export class ServerRolesAccordion extends Component {
       extraProps.isUpdateMode = this.props.isUpdateMode;
       extraProps.deployedServers = this.props.deployedServers;
       extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
+      extraProps.isSafeMode = this.props.isSafeMode;
     }
 
     return (
