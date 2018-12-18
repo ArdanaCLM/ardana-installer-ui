@@ -595,7 +595,8 @@ class UpdateServers extends BaseUpdateWizardPage {
                 this.setState({
                   loading: undefined,
                   showReplaceModal: true,
-                  serverToReplace: server
+                  serverToReplace: server,
+                  isOldServerReachable: true
                 });
               }
               else {
@@ -610,6 +611,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                   this.setState({
                     loading: undefined,
                     serverToReplace: server,
+                    isOldServerReachable: false,
                     showNoMigrationWarning: true});
                 }
                 else {
@@ -647,7 +649,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   proceedOldComputeNotReachable = () => {
     this.setState({
-      showNoMigrationWarning: false, showReplaceModal: true, isOldServerReachable: false});
+      showNoMigrationWarning: false, showReplaceModal: true});
   }
 
   renderSharedWarning() {

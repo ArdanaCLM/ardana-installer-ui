@@ -337,7 +337,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       playbooks: [REMOVE_FROM_AGGREGATES]
     }];
 
-    if (!this.props.operationProps.oldServer.isReachable) {
+    if (this.props.operationProps.oldServer.isReachable) {
       steps.push({
         label: translate('server.deploy.progress.migrate_instances'),
         playbooks: [MIGRATE_INSTANCES]
@@ -373,7 +373,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }];
 
     // migrate instances when old compute host is reachable
-    if(!this.props.operationProps.oldServer.isReachable) {
+    if(this.props.operationProps.oldServer.isReachable) {
       playbooks.push({
         name: MIGRATE_INSTANCES,
         action: ((logger) => {

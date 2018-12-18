@@ -691,6 +691,7 @@
     "server.deploy.progress.delete_compute_service.failure": "Error: Failed to delete compute services for compute host {0}. {1}",
     "server.deploy.progress.delete_network_agents.hasfailed": "Deleting network agents for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
     "server.deploy.progress.delete_network_agents.failure": "Error: Failed to delete network agents for compute host {0}. {1}",
+    "server.deploy.installos.failure": "Failed to install SLES OS on compute host {0}.",
 
     "table.column.header.id" : "Server ID",
     "table.column.header.ip-addr" : "IP Address",

@@ -38,6 +38,11 @@ class InstallOS extends BaseUpdateWizardPage {
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
+    if (status === STATUS.FAILED) {
+      this.setState({
+        processErrorBanner:
+          translate('server.deploy.installos.failure', this.props.operationProps.server.id)});
+    }
   }
 
   renderProcessError() {
@@ -69,7 +74,7 @@ class InstallOS extends BaseUpdateWizardPage {
       name: INSTALL_PLAYBOOK,
       payload: {
         'extra-vars': {
-          'nodelist': [this.props.operationProps.server.id],
+          'nodelist': this.props.operationProps.server.id,
           'ardanauser_password': installPass
         }
       }
