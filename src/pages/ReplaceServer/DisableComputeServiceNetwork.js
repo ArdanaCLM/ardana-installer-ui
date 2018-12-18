@@ -303,7 +303,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         if(error.status === 410) {
           const logMsg =
             'No network agents found for compute host ' +
-            this.props.operationProps.oldServer.hostname + ', continue...'
+            this.props.operationProps.oldServer.hostname + ', continue...';
           logger(logMsg);
         }
         else if(error.status === 500 &&

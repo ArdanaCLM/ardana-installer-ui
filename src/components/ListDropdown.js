@@ -49,6 +49,7 @@ export function ListDropdown(props) {
   return (
     <div className={classname}>
       <select className='rounded-corner' value={props.value} name={props.name}
+        disabled={props.disabled}
         onChange={(e) => props.selectAction(e.target.value)}>{options}</select>
     </div>
   );
