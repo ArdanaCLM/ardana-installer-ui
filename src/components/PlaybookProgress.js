@@ -288,7 +288,7 @@ class PlaybookProgress extends Component {
       this.playbookError(stepPlaybook, playbookName, playId);
     });
     this.socket.on('log', this.logMessage);
-    this.socket.on('end', this.processEndMonitorPlaybook);
+    this.socket.on('end', () => this.processEndMonitorPlaybook(playbookName));
     this.socket.on('connect', () => { this.socket.emit('join', playId); });
     this.socket.on('disconnect', (reason) => {
       if (reason === 'transport close') {
