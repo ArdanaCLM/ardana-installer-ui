@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import { ListDropdown } from './ListDropdown.js';
 import { translate } from '../localization/localize.js';
+import {ActionButton} from "./Buttons";
 
 export class LabeledDropdown extends Component {
   render() {
@@ -28,6 +29,27 @@ export class LabeledDropdown extends Component {
             optionList={this.props.optionList} emptyOption={this.props.emptyOption}
             selectAction={this.props.selectAction} defaultOption={this.props.defaultOption}
             moreClass={this.props.moreClass}/>
+        </div>
+      </div>
+    );
+  }
+}
+
+export class LabeledDropdownWithButton extends Component {
+  render() {
+    let labelStr = this.props.label ? translate(this.props.label) : '';
+    let label = this.props.label ? ((this.props.isRequired) ? labelStr + '*' : labelStr) : '';
+    return (
+      <div className='detail-line'>
+        <div className='detail-heading'>{label}</div>
+        <div className='input-body'>
+          <div className='input-with-button'>
+            <ListDropdown name={this.props.name} value={this.props.value} moreClass={'has-button'}
+              optionList={this.props.optionList} emptyOption={this.props.emptyOption}
+              selectAction={this.props.selectAction}/>
+            <ActionButton type={'default'} clickAction={this.props.buttonAction} moreClass={'inline-button'}
+              displayLabel={translate(this.props.buttonLabel) + ' ...'}/>
+          </div>
         </div>
       </div>
     );

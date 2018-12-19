@@ -16,9 +16,9 @@ import React, { Component } from 'react';
 import { Map } from 'immutable';
 import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
-import { ActionButton } from '../components/Buttons.js';
-import { InputLine } from '../components/InputLine.js';
-import { ListDropdown } from '../components/ListDropdown.js';
+import { ActionButton } from './Buttons.js';
+import { InputLine } from './InputLine.js';
+import { LabeledDropdownWithButton } from './LabeledDropdown.js';
 import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
   chainValidators, NoWhiteSpaceValidator, createExcludesValidator }
   from '../utils/InputValidators.js';
@@ -136,7 +136,7 @@ class EditServerDetails extends Component {
     );
   }
 
-  renderDropDown(name, list, handler, isRequired, title, buttonLabel, addAction) {
+  renderDropdownLineWithButton(required, title, name, list, buttonLabel, buttonAction) {
     let emptyOptProps = '';
     if(isEmpty(this.state.inputValues.get(name))) {
       emptyOptProps = {
@@ -145,17 +145,10 @@ class EditServerDetails extends Component {
       };
     }
     return (
-      <div className='detail-line'>
-        <div className='detail-heading'>{translate(title) + '*'}</div>
-        <div className='input-body'>
-          <div className='input-with-button'>
-            <ListDropdown name={this.props.name} value={this.state.inputValues.get(name)} moreClass={'has-button'}
-              optionList={list} emptyOption={emptyOptProps}
-              selectAction={(value)=>handler(value, true, name)}/>
-            {this.renderButtonForDropDown(addAction, buttonLabel)}
-          </div>
-        </div>
-      </div>
+      <LabeledDropdownWithButton
+        label={title} name={name} value={this.state.inputValues.get(name)} optionList={list}
+        isRequired={required} selectAction={(value) => this.handleInputChange(value, true, name)}
+        emptyOption={emptyOptProps} buttonAction={buttonAction} buttonLabel={buttonLabel}/>
     );
   }
 
@@ -190,10 +183,12 @@ class EditServerDetails extends Component {
               IpV4AddressValidator
             )
           )}
-          {this.renderDropDown('server-group', this.state.serverGroups, ::this.handleInputChange, true,
-            'server.group.prompt', 'server.group.prompt', ::this.addServerGroup)}
-          {this.renderDropDown('nic-mapping', this.state.nicMappings, ::this.handleInputChange, true,
-            'server.nicmapping.prompt', 'server.nicmapping.prompt', ::this.addNicMapping)}
+          {this.renderDropdownLineWithButton(
+            true, 'server.group.prompt', 'server-group', this.state.serverGroups,
+            'server.group.prompt', ::this.addServerGroup)}
+          {this.renderDropdownLineWithButton(
+            true, 'server.nicmapping.prompt', 'nic-mapping', this.state.nicMappings,
+            'server.nicmapping.prompt', ::this.addNicMapping)}
         </div>
         <div className='message-line'>{translate('server.ipmi.message')}</div>
         <div className='server-details-container'>
