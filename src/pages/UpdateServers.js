@@ -721,7 +721,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
-        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses'},
+        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses', hidden: !this.state.monasca},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
