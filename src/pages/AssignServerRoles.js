@@ -283,7 +283,7 @@ class AssignServerRoles extends BaseWizardPage {
         <ServersAddedManually model={this.props.model}
           closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
           addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
-          rolesLimit={this.props.rolesLimit}
+          rolesLimit={this.props.rolesLimit} isUpdateMode={this.props.isUpdateMode}
           rawDiscoveredServers={this.state.rawDiscoveredServers}/>
       );
     }
@@ -303,17 +303,13 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderEditServerAddedManuallyModal = () => {
-    let extraProps = {};
-    if(this.props.isUpdateMode) {
-      extraProps.rolesLimit = this.props.rolesLimit;
-    }
     if (this.state.showEditServerAddedManuallyModal) {
       return (
         <ServersAddedManually model={this.props.model}
           closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
           updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
           rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
-          {...extraProps}
+          rolesLimit={this.props.rolesLimit} isUpdateMode={this.props.isUpdateMode}
         />
       );
     }
