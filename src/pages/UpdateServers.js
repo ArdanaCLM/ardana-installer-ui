@@ -34,6 +34,7 @@ import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.j
 import { genUID } from '../utils/ModelUtils.js';
 import { getInternalModel } from './topology/TopologyUtils';
 import { fromJS } from 'immutable';
+import { isMonascaInstalled } from '../utils/MonascaUtils.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -127,7 +128,7 @@ class UpdateServers extends BaseUpdateWizardPage {
    * checks to see if Monasca is installed, and if it is, triggers a call to the status
    * of each server in the model
    */
-  checkMonasca() {
+  async checkMonasca() {
     if(this.state.monasca === undefined) {
       //default state.monasca to false, primarily to short circuit additional checks
       //this is because componentDidMount and componentDidUpdate both call into this
@@ -136,14 +137,10 @@ class UpdateServers extends BaseUpdateWizardPage {
       //usually being called twice, setting the state to false (from its original value of
       //undefined) prevents the 2nd call from duplicating the check and model load
       this.setState({monasca: false});
-      fetchJson('/api/v2/monasca/is_installed')
-        .then(responseData => {
-          if(responseData.installed) {
-            this.setState({monasca: true}, () => this.getServerMonascaStatuses());
-          }
-        }).catch((error) => {
-          console.log('error checking if Monasca is installed:' + error);// eslint-disable-line no-console
-        });
+      let isInstalled = await isMonascaInstalled();
+      if(isInstalled) {
+        this.setState({monasca: true}, () => this.getServerMonascaStatuses());
+      }
     } else if(this.state.monasca === true) {
       //if monasca is installed, get the server statuses
       this.getServerMonascaStatuses();

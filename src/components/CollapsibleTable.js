@@ -23,6 +23,7 @@ import { byServerNameOrId } from '../utils/Sort.js';
 import {
   getAllOtherServerIds, getModelIPAddresses, getModelIPMIAddresses, getModelMacAddresses
 } from '../utils/ModelUtils.js';
+import { loadServerDiskUtilization } from '../utils/MonascaUtils.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -134,8 +135,7 @@ class CollapsibleTable extends Component {
   renderViewAction = (server) => {
     return (
       <span className="detail-info collapsible"
-        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server},
-          this.loadServerDetails(server))}>
+        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
         <i className="material-icons collapsible">info</i>
       </span>
     );
@@ -145,7 +145,7 @@ class CollapsibleTable extends Component {
    * query the backend for extra server details that are not loaded by default
    * since loading them for every server would be intensive
    */
-  loadServerDetails = (server, retries) => {
+  async loadServerDetails (server, retries) {
     //the internalModel is not necessarily loaded right away,
     //check again after 1 second if not already loaded
     if(this.props.internalModel !== undefined) {
@@ -165,8 +165,14 @@ class CollapsibleTable extends Component {
           });
         }
       }
+      //TODO - consider passing in the volume groups here and using the size specifications
+      // from the datamodel to match up the monasca used disk values for accurate used/free
+      // disk measurements in absolute size rather than just percentage
+      let diskUtilization = await loadServerDiskUtilization(fullModelServer.hostname);
+
       let updatedMenuRow = this.state.contextMenuRow;
       updatedMenuRow.networks = server_networks_list;
+      updatedMenuRow.diskUtilization = diskUtilization;
       this.setState({'contextMenuRow' : updatedMenuRow});
     } else {
       //retry up to 10 times, after that, assume the internal model isnt going to load for some reason
@@ -175,6 +181,7 @@ class CollapsibleTable extends Component {
       }
     }
   }
+
 
   /**
    * gets the list of action menu items for a specific row based on attributes for that row (i.e. hosts

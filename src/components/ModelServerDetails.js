@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { maskPassword } from '../utils/ModelUtils.js';
+import { ProgressBar } from 'react-bootstrap';
 
 class ModelServerDetails extends Component {
   renderTextLine(title, value) {
@@ -61,12 +62,30 @@ class ModelServerDetails extends Component {
     );
   }
 
+  renderDiskUtilization(mountpoint) {
+    //reactJs complains if the bsStyle or bsClass attributes are used in the ProgressBar,
+    //so instead the css styling is done via the inner classes of progress and progress-bar
+    return(
+      <tr key={mountpoint.name}>
+        <td>{mountpoint.name}</td>
+        <td>
+          <ProgressBar now={mountpoint.usedpct} label={mountpoint.usedpct + '%'} />
+        </td>
+      </tr>
+    );
+  }
+
   renderDetailsContent = () => {
     if(this.props.data) {
       let network_info;
+      let disk_info;
       if(this.props.data.networks) {
         network_info = this.props.data.networks.map(network => this.renderNetworkBlurb(network));
       }
+      if(this.props.data.diskUtilization) {
+        disk_info = this.props.data.diskUtilization.map(mountpoint => this.renderDiskUtilization(mountpoint));
+      }
+
       return (
         <div className='server-details-container'>
           {this.renderTextLine('server.id.prompt', this.props.data.id)}
@@ -78,10 +97,17 @@ class ModelServerDetails extends Component {
           {this.renderTextLine('server.ipmi.ip.prompt', this.props.data['ilo-ip'])}
           {this.renderTextLine('server.ipmi.username.prompt', this.props.data['ilo-user'])}
           {this.renderTextLine('server.ipmi.password.prompt', maskPassword(this.props.data['ilo-password']))}
-          {network_info ? translate('network.interfaces') : ''}
+          {network_info?.length > 0 ? translate('network.interfaces') : ''}
           <div className='inetFaces'>
             {network_info}
           </div>
+          {disk_info?.length > 0 ? translate('disk.filesystems.util') : ''}
+          <table className='fsutils'>
+            <thead></thead>
+            <tbody>
+              {disk_info}
+            </tbody>
+          </table>
         </div>
       );
     }

@@ -422,6 +422,7 @@
     "interface.model": "Interface Model",
     "interface.name": "Network Interface Name",
     "network.interfaces": "Network Interfaces",
+    "disk.filesystems.util": "Filesystem Utilization",
     "bond.device.name": "Bond Device Name",
     "bond.options": "Bond Options",
     "details.interfacemodel.confirm.remove": "You've selected to remove the interface model: {0}.\n\n Are you sure you want to proceed?",
