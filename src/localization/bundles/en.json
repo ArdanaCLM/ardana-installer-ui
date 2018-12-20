@@ -659,7 +659,7 @@
     "server.deploy.compute.oldserver": "Deleted old Compute Server - {0}",
     "server.deploy.compute.newserver": "Added new Compute Server - {0}",
     "server.deploy.progress.disable_compute_service.hasfailed": "Disabling compute services for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
-    "server.deploy.progress.remove_from_aggregates.hasfailed": "Removing from aggregates for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
+    "server.deploy.progress.remove_from_aggregates.hasfailed": "Removing host aggregates for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
     "server.deploy.progress.migrate_instances.hasfailed": "Starting instances live migration for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
     "server.deploy.progress.disable_network_agents.hasfailed": "Disabling network agents for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
     "server.deploy.progress.try": "Try {0} : {1}",
