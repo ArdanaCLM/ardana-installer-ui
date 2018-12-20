@@ -208,22 +208,32 @@ class UpdateServers extends BaseUpdateWizardPage {
       .filter(s => s.role.includes('COMPUTE'))
       .map(s => {
         const internalServer = internalModelServers.filter(sev => sev.id === s.id)[0];
-        return {
-          ...s,
-          internal: internalServer,
-          hostname: internalServer.hostname
-        };
+        if(internalServer !== undefined) {
+          return {
+            ...s,
+            internal: internalServer,
+            hostname: internalServer.hostname
+          };
+        } else {
+          console.log('possible model inconsistency, internal model missing server id:' + s.id);
+        }
       });
 
-    let serversStatus = servers.map(s => fetchJson(`/api/v2/compute/services/${s.hostname}`));
+    let serversStatus = servers.map(s => {
+      if(s) {
+        return fetchJson(`/api/v2/compute/services/${s.hostname}`);
+      }
+    });
     const values = await Promise.all(serversStatus);
     let serverStatuses = {};
     for(const [index, status] of values.entries()) {
       const server = servers[index];
-      serverStatuses[server.id] = {
-        ...server,
-        status: status['nova-compute']
-      };
+      if(server) {
+        serverStatuses[server.id] = {
+          ...server,
+          status: status['nova-compute']
+        };
+      }
     }
     this.setState({serverStatuses});
   }
@@ -721,7 +731,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
-        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses'},
+        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses', hidden: !this.state.monasca},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},

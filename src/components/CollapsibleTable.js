@@ -279,7 +279,17 @@ class CollapsibleTable extends Component {
     let icon = group.isExpanded ? 'expand_more' : 'expand_less';
 
     let fillerTds = [];
-    for (let i=0; i<Object.keys(group.members[0]).length - 7; i++) {
+    let numberOfVisbileColumns = 0;
+    for (let column of this.props.tableConfig.columns) {
+      if (!column.hidden) {
+        numberOfVisbileColumns++;
+      }
+    }
+
+    //the number of columns in the header
+    const headerColumnCount = 2;
+    //fill in extra td entries to match the columns from the rest of the table
+    for (let i=0; i< (numberOfVisbileColumns - headerColumnCount); i++) {
       fillerTds.push(<td key={i}></td>);
     }
 
