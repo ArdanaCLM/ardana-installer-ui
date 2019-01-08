@@ -152,6 +152,22 @@
       }
     }
   }
+
+  .fsutils{
+    width: 100%;
+    td:last-child {
+      width: 100%;
+      padding-left: 10px;
+    }
+    .progress{
+      margin: 3px 0px;
+      .progress-bar {
+        color: #000;//make the text in the progress bars black, the default white is hard to read when meter is low
+        background-color: @defaultshadow;
+        padding-left: 5px; //prevents the text from smooshing against the left side when meter is low
+      }
+    }
+  }
 }
 
 .message-line {
