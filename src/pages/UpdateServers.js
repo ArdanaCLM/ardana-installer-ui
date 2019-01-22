@@ -42,9 +42,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
-      // this loading indicator, the possible value could
-      // be undefined, '', 'Validating Changes'
-      loading: undefined,
+      loading: false,
+      validating: undefined, // Will have a text when validating
       errorMessages: [],
 
       // Track which groups the user has expanded
@@ -79,12 +78,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         this.setState({expandedGroup: [allGroups.sort().first()]});
       }
 
-      // will not get internal model when other loading for example model validation
-      // is still going
-      if(this.state.loading === undefined) {
-        this.setState({
-          loading: ''
-        });
+      if(this.state.loading === false) {
+        this.setState({loading: true});
 
         getInternalModel()
           .then(model => {
@@ -92,11 +87,11 @@ class UpdateServers extends BaseUpdateWizardPage {
           })
           .then(::this.getServerStatuses)
           .then(::this.checkMonasca)
-          .then(() => this.setState({ loading: undefined }))
+          .then(() => this.setState({ loading: false }))
           .catch(error => {
             this.setState({
               errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
-              loading: undefined
+              loading: false
             });
           });
       }
@@ -106,19 +101,19 @@ class UpdateServers extends BaseUpdateWizardPage {
   componentDidMount() {
     // empty string loading indicates loading mask without
     // text
-    this.setState({loading: ''});
+    this.setState({loading: true});
     fetchJson('/api/v2/server?source=sm,ov,manual')
       .then(servers => {
         this.setState({
           servers: servers,
-          loading: undefined});
+          loading: false});
       })
       .catch(error => {
         let msg = translate('server.retrieve.discovered.servers.error', error.toString());
         this.setState(prev => {
           return {
             errorMessages: prev.errorMessages.concat([msg]),
-            loading: undefined
+            loading: false
           };
         });
       });
@@ -387,16 +382,16 @@ class UpdateServers extends BaseUpdateWizardPage {
     let pages = this.assembleProcessPages(theProps);
 
     if(isComputeNode(this.state.serverToReplace)) {
-      this.setState({loading: translate('server.validating')});
+      this.setState({validating: translate('server.validating')});
       postJson('/api/v2/config_processor')
         .then(() => {
-          this.setState({loading: undefined});
+          this.setState({validating: undefined});
           this.props.startUpdateProcess('ReplaceServer', pages, theProps);
         })
         .catch((error) => {
           // when validation failed, show error messages and
           // instruct users to update and do replace again.
-          this.setState({loading: undefined});
+          this.setState({validating: undefined});
           this.setState({validationError: error.value ? error.value.log : error.toString()});
           // remove the server from model
           // remove role of the server in the availabe server list
@@ -594,13 +589,13 @@ class UpdateServers extends BaseUpdateWizardPage {
         }
         else {
           // Display the load mask without loading text
-          this.setState({loading: ''});
+          this.setState({loading: true});
 
           postJson('api/v2/connection_test', {host: server['ip-addr']})
             .then(result => {
               if(isComputeNode(server)) {
                 this.setState({
-                  loading: undefined,
+                  loading: false,
                   showReplaceModal: true,
                   serverToReplace: server,
                   isOldServerReachable: true
@@ -609,14 +604,14 @@ class UpdateServers extends BaseUpdateWizardPage {
               else {
                 // If the node is still reachable, then display a message to the user to have them
                 // power it down.
-                this.setState({loading: undefined, showPowerOffWarning: true});
+                this.setState({loading: false, showPowerOffWarning: true});
               }
             })
             .catch(error => {
               if (error.status == 404) {
                 if(isComputeNode(server)) {
                   this.setState({
-                    loading: undefined,
+                    loading: false,
                     serverToReplace: server,
                     isOldServerReachable: false,
                     showNoMigrationWarning: true});
@@ -628,7 +623,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                   // 404 means the server is not found, which is the state that we *want* to be in.
                   // Proceed with the modal for entering the replacement info.
                   this.setState({
-                    loading: undefined,
+                    loading: false,
                     showReplaceModal: true,
                     serverToReplace: server
                   });
@@ -637,7 +632,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                 let msg = translate('server.save.error', error.toString());
                 this.setState(prev => ({
                   errorMessages: prev.errorMessages.concat(msg),
-                  loading: undefined
+                  loading: false
                 }));
               }
             });
@@ -769,8 +764,8 @@ class UpdateServers extends BaseUpdateWizardPage {
   render() {
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.props.wizardLoading || this.state.loading !== undefined}
-          text={this.state.loading}/>
+        <LoadingMask show={this.props.wizardLoading || this.state.loading || this.state.validating}
+          text={this.state.validating}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
