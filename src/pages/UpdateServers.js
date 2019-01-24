@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import CollapsibleTable from '../components/CollapsibleTable.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
-import { UpdateServerPages } from './ReplaceServer/UpdateServerPages.js';
+import UpdateServerPages from './UpdateServerPages';
 import {
   MODEL_SERVER_PROPS_ALL, MODEL_SERVER_PROPS, REPLACE_SERVER_MAC_IPMI_PROPS }
   from '../utils/constants.js';
@@ -28,13 +28,32 @@ import {
   updateServersInModel, getMergedServer, addServerInModel, isComputeNode,
   removeServerFromModel }
   from '../utils/ModelUtils.js';
-import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
+import { fetchJson, postJson, putJson, getReachability } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
 import { genUID } from '../utils/ModelUtils.js';
 import { getInternalModel } from './topology/TopologyUtils';
 import { fromJS } from 'immutable';
 import { isMonascaInstalled } from '../utils/MonascaUtils.js';
+
+const DeleteServerProcessPages = [
+    {
+      name: 'DeleteCompute',
+      component: UpdateServerPages.DeleteCompute
+    }
+  ],
+  DeactivateServerProcessPages = [
+    {
+      name: 'DeactivateComputeHost',
+      component: UpdateServerPages.DeactivateComputeHost
+    }
+  ],
+  ActivateServerProcessPages = [
+    {
+      name: 'ActivateComputeHost',
+      component: UpdateServerPages.ActivateComputeHost
+    }
+  ];
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -203,11 +222,16 @@ class UpdateServers extends BaseUpdateWizardPage {
         if(internalServer !== undefined) {
           return {
             ...s,
-            internal: internalServer,
+            internal: {
+              ...internalServer,
+              ansible_hostname: internalServer.hostname
+            },
             hostname: internalServer.hostname
           };
         } else {
-          console.log('possible model inconsistency, internal model missing server id:' + s.id);
+          console.log( // eslint-disable-line no-console
+            `possible model inconsistency, internal model missing server id: ${s.id}`
+          );
         }
       });
 
@@ -283,7 +307,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // save to saved servers
   }
 
-  assembleProcessPages = (theProps) => {
+  assembleReplaceServerProcessPages = (theProps) => {
     let pages = [];
 
     if(isComputeNode(this.state.serverToReplace)) {
@@ -379,7 +403,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       theProps.activate = true;
     }
 
-    let pages = this.assembleProcessPages(theProps);
+    let pages = this.assembleReplaceServerProcessPages(theProps);
 
     if(isComputeNode(this.state.serverToReplace)) {
       this.setState({validating: translate('server.validating')});
@@ -425,84 +449,68 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
-  async performDeactivateComputeHost() {
-    let id = this.state.confirmDeactivate?.id;
-    let status = this.state.serverStatuses[id];
-    if (!status) return;
-    try {
-      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
-      await postJson(
-        '/api/v2/playbooks/nova-stop',
-        { limit: status.hostname }
-      );
-      this.setState({
-        serverStatuses: {
-          ...this.state.serverStatuses,
-          [id]: {
-            ...status,
-            status: false
-          }
-        },
-        confirmDeactivate: undefined
-      });
-    } catch (error) {
-      let msg = translate('server.deactivate.error', error.toString());
-      this.setState({
-        errorMessages: [
-          ...this.state.errorMessages,
-          msg
-        ],
-        confirmDeactivate: undefined
-      });
-    }
+  deleteComputeHost(id) {
+    this.setState({
+      confirmDelete: {
+        show: true,
+        loading: false,
+        id: id
+      }
+    });
+  }
+
+  performDeleteComputeHost() {
+    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+    let { id } = this.state.confirmDelete;
+    const theProps = {
+      oldServer: this.state.serverStatuses[id].internal
+    };
+    this.setState({
+      confirmDelete: undefined
+    });
+    this.props.startUpdateProcess('DeleteServer', DeleteServerProcessPages, theProps);
   }
 
   async activateComputeHost(id) {
-    let internalHostname = this.state.serverStatuses[id].hostname;
-    try {
-      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
-      await postJson(
-        '/api/v2/playbooks/ardana-start',
-        { limit: internalHostname }
-      );
-      this.setState({
-        serverStatuses: {
-          ...this.state.serverStatuses,
-          [id]: {
-            ...this.state[id],
-            status: true
-          }
-        }
-      });
-    } catch (error) {
-      let msg = translate('server.activate.error', error.toString());
-      this.setState({
-        errorMessages: [
-          ...this.state.errorMessages,
-          msg
-        ]
-      });
-    }
+    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+    const  props = {
+      target: this.state.serverStatuses[id].internal
+    };
+    this.props.startUpdateProcess('ActivateServer', ActivateServerProcessPages, props);
   }
 
   async deactivateComputeHost(id) {
-    let status = this.state.serverStatuses[id];
+    let server = this.state.serverStatuses[id];
     this.setState({
       confirmDeactivate: {
         show: true,
         loading: true,
-        id: status.id
+        id: server.id
       }
     });
     try {
-      let instances = await fetchJson(`/api/v2/compute/instances/${status.hostname}`);
-      this.setState({
+      let promises = [
+        fetchJson(`/api/v2/compute/instances/${server.hostname}`),
+        getReachability(server['ip-addr'])
+      ];
+      let [ instances, conectivityStatus ] = await Promise.all(promises);
+      this.setState(prev => ({
+        serverStatuses: {
+          ...prev.serverStatuses,
+          [id]: {
+            ...prev.serverStatuses[id],
+            internal: {
+              ...prev.serverStatuses[id].internal,
+              isReachable: conectivityStatus
+            }
+          }
+        },
         confirmDeactivate: {
-          ...this.state.confirmDeactivate,
+          ...prev.confirmDeactivate,
           loading: false,
           instances
         }
-      });
+      }));
     } catch (error) {
       let msg = translate('server.deactivate.error', error.toString());
       this.setState({
@@ -515,25 +523,106 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
+  async performDeactivateAndOrMigration() {
+    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+    let props = {
+      oldServer: this.state.serverStatuses[this.state.confirmDeactivate.id].internal
+    };
+
+    if (this.state.confirmDeactivate.migrate) {
+      props.server = this.state.confirmDeactivate.migrationTarget.internal;
+    }
+
+    this.setState({
+      confirmDeactivate: undefined
+    });
+
+    this.props.startUpdateProcess('DeactivateServer', DeactivateServerProcessPages, props);
+  }
+
+  selectMigrationTarget(event) {
+    const id = event.target.value,
+      migrationTarget = this.state.serverStatuses[id].internal;
+
+    this.setState((prev) => {
+      return {
+        confirmDeactivate: {
+          ...prev.confirmDeactivate,
+          migrationTarget,
+          migrationTargetId: id
+        }
+      };
+    });
+  }
+
   renderDeactivateConfirmModal() {
     if (!this.state.confirmDeactivate || !this.state.confirmDeactivate.show) return;
-    let { id, instances, loading } = this.state.confirmDeactivate;
+    const { id, instances, loading, migrationTargetId } = this.state.confirmDeactivate,
+      haveInstances = instances?.length > 0;
+
+    let choices = [], otherHosts = [];
+
+    if (haveInstances) {
+      otherHosts = Object.keys(this.state.serverStatuses)
+        .filter(id => id !== this.state.confirmDeactivate?.id);
+      choices =
+        otherHosts.map(id => {
+          const server = this.state.serverStatuses[id];
+          return <div key={server.id} className="form-check">
+            <input className="form-check-input" type="radio" name={server.id} id={server.id}
+              value={server.id} checked={migrationTargetId === server.id}
+              onChange={::this.selectMigrationTarget}/>
+            <label className="form-check-label" htmlFor={server.id}>
+              {server.id}
+            </label>
+          </div>;
+        });
+    }
+
     return (
       <YesNoModal
-        title={translate('server.deactivate.confirm.title', id)} yesAction={::this.performDeactivateComputeHost}
+        title={translate('server.deactivate.confirm.title', id)}
+        yesAction={::this.performDeactivateAndOrMigration}
         noAction={() => this.setState({confirmDeactivate: undefined})}
-        disableYes={loading}>
-        <h3>
+        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}>
+        <h2>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
-          <If condition={!loading && instances?.length > 0}>
+          <If condition={!loading && instances?.length > 0 && otherHosts.length > 0}>
             {translate('server.deactivate.confirm.message_instances', id, instances.length)}
+          </If>
+          <If condition={!loading && instances?.length > 0 && otherHosts.length === 0}>
+            {translate('server.deactivate.confirm.message_instances_cant_be_migrated', id, instances.length)}
           </If>
           <If condition={!loading && instances?.length === 0}>
             {translate('server.deactivate.confirm.message', id)}
           </If>
-        </h3>
+        </h2>
+        <If condition={haveInstances && otherHosts > 0}>
+          <h2>{translate('server.migrate.prompt', id)}</h2>
+          {choices}
+        </If>
+      </YesNoModal>
+    );
+  }
+
+  renderDeleteConfirmModal() {
+    if (!this.state.confirmDelete || !this.state.confirmDelete.show) return;
+    let { id, loading } = this.state.confirmDelete;
+    return (
+      <YesNoModal
+        title={translate('server.deploy.progress.delete_compute')} yesAction={::this.performDeleteComputeHost}
+        noAction={() => this.setState({confirmDelete: undefined})}
+        disableYes={loading}>
+        <h2>
+          <If condition={loading}>
+            {translate('loading.pleasewait')}
+          </If>
+          <If condition={!loading}>
+            {translate('server.delete.confirm.message', id)}
+          </If>
+        </h2>
       </YesNoModal>
     );
   }
@@ -574,7 +663,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     return (<div className='notification-message-container'>{msgList}</div>);
   }
 
-  checkPrereqs = (server) => {
+  checkReplacePrereqs = (server) => {
     // Verify the prerequisites before prompting for replacement information:
     // - the selected controller node is not shared with the deployer
     // - the selected node is no longer reachable (via ssh)
@@ -739,12 +828,12 @@ class UpdateServers extends BaseUpdateWizardPage {
       <CollapsibleTable
         addExpandedGroup={this.addExpandedGroup} removeExpandedGroup={this.removeExpandedGroup}
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
-        replaceServer={this.checkPrereqs} updateGlobalState={this.props.updateGlobalState}
+        replaceServer={this.checkReplacePrereqs} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
         processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
         activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}
-        serverMonascaStatuses={this.state.serverMonascaStatuses}
-        internalModel={this.state.internalModel} />
+        serverMonascaStatuses={this.state.serverMonascaStatuses} internalModel={this.state.internalModel}
+        deleteComputeHost={::this.deleteComputeHost}/>
     );
   }
 
@@ -785,6 +874,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.renderNoMigrationWarning()}
         {this.renderValidationErrorModal()}
         {this.renderDeactivateConfirmModal()}
+        {this.renderDeleteConfirmModal()}
       </div>
     );
   }

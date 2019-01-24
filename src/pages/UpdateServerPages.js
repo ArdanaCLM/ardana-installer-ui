@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2019 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -12,29 +12,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-@import "./../palette.less";
 
-.context-menu-container {
-  position: absolute;
-  z-index: 999;
-  width: 9em;
-  margin-left: -10px;
-  margin-top: 5px;
+import ReplaceServer from './ReplaceServer';
+import ManageComputeHost from './ManageComputeHost';
 
-  .menu-item-list {
-    padding: 0.5em 0;
-  }
+const UpdateServerPages = {
+  ...ManageComputeHost,
+  ...ReplaceServer
+};
 
-  .menu-item {
-    width: 100%;
-    cursor: pointer;
-    font-size: 1.1em;
-    padding: 0.2em 1.5em;
-    border-bottom: 1px solid @box-border-color;
-    &:hover {
-      background: @main-menu-active-bg-color;
-      width: 100%
-    }
-  }
-}
-
+export default UpdateServerPages;
