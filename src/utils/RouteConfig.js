@@ -16,7 +16,6 @@
 import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import ServiceInfo from '../pages/ServiceInfo';
-import OpenStackPackages from '../pages/OpenStackPackages';
 import ArdanaPackages from '../pages/ArdanaPackages';
 import ServiceConfiguration from '../pages/ServiceConfiguration';
 import ServicesPerRole from '../pages/ServicesPerRole';
@@ -58,8 +57,7 @@ export const routes = [
   { name: translate('services'), slug: '/services',
     items: [
       { name: translate('information'), slug: '/services/info', component: ServiceInfo },
-      { name: translate('packages.openstack'), slug: '/services/openstack-packages', component: OpenStackPackages },
-      { name: translate('packages.ardana'), slug: '/services/openstack-ardana', component: ArdanaPackages },
+      { name: translate('packages.ardana'), slug: '/services/packages', component: ArdanaPackages },
       { name: translate('configuration'), slug: '/services/configuration', component: ServiceConfiguration },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
