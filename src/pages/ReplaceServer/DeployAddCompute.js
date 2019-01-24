@@ -18,7 +18,7 @@ import { translate } from '../../localization/localize.js';
 
 
 // This is the deployment page for adding a compute server
-// for replace a compute server
+// for replace a compute server.
 class DeployAddCompute extends DeployAddServers {
   getDeployServerTitle = () => {
     return translate('server.addcompute.deploy');
@@ -54,6 +54,10 @@ class DeployAddCompute extends DeployAddServers {
     return newServers;
   }
 
+  renderFooterButtons (showCancel, showRetry) {
+    // TODO will handle retry
+    return this.renderNavButtons(showCancel, false);
+  }
 }
 
 export default DeployAddCompute;

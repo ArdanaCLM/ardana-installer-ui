@@ -56,6 +56,16 @@ export function CancelButton(props) {
   );
 }
 
+export function RetryButton(props) {
+  return (
+    <ActionButton type='default'
+      clickAction={props.clickAction}
+      displayLabel={props.displayLabel || translate('common.retry')}
+      isDisabled={props.isDisabled}
+    />
+  );
+}
+
 export class ActionButton extends Component {
   render() {
     let buttonClass = 'btn ' + (this.props.type ? 'btn-' + this.props.type + ' ' : 'btn-primary ') +
