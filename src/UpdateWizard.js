@@ -185,6 +185,7 @@ class UpdateWizard extends InstallWizard {
     props.startUpdateProcess = this.startUpdate;
     props.closeUpdateProcess = this.closeUpdate;
     props.cancelUpdateProcess = this.cancelUpdate;
+    props.retryUpdateProcess = this.retryUpdate;
 
     // if have on going process and the processMenuName matches the menuName passed in
     // load the on going step based on the dynamic pages
@@ -237,6 +238,24 @@ class UpdateWizard extends InstallWizard {
   cancelUpdate = () => {
     // TODO Is there a need additional cancel logic?
     this.closeUpdate();
+  }
+
+  retryUpdate = () => {
+    // Remove the playbook status 3 and playId
+    if (this.state.playbookStatus) {
+      let playStatus = this.state.playbookStatus.slice();
+      // Should have just one failure since deploy stops
+      // when error occurs
+      playStatus.forEach((play) => {
+        if (play.status === STATUS.FAILED) {
+          play.playId = '';
+          play.status = '';
+        }
+      });
+      this.updateGlobalState('playbookStatus', playStatus);
+      // Refresh the current page
+      window.location.reload();
+    }
   }
 
   renderProgressBar() {

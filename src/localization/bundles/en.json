@@ -8,6 +8,7 @@
     "back" : "Back",
     "cancel" : "Cancel",
     "close": "Close",
+    "common.retry": "Retry",
     "update": "Update",
     "common.nodata": "No Data",
     "done" : "Done",
@@ -698,6 +699,10 @@
     "server.deploy.progress.delete_network_agents.hasfailed": "Deleting network agents for compute host {0} has completed with partial failure. Followings are failed - \n\n{1}. \n\nDo you still want to proceed?",
     "server.deploy.progress.delete_network_agents.failure": "Error: Failed to delete network agents for compute host {0}. {1}",
     "server.deploy.installos.failure": "Failed to install SLES OS on compute host {0}.",
+    "server.deploy.retry.confirm": "Retry will rerun the failed playbook. Please examine the errors in the log and fix the issues before click Yes.  \n\n Do you want to continue?",
+    "server.deploy.failure.cancel.confirm": "Please examine the errors in the log and fix the issues encountered. \nPlease check the document's trouble shooting section on how to recover and try again. \n\n Do you want to continue?",
+    "server.addserver.failure.cancel.confirm": "Please examine the errors in the log and fix the issues encountered. Please do the following steps manually on the cloud deployer before click Yes to continue... \n1. Remove the new compute server(s) from ~/openstack/my_cloud/definition/data/servers.yml. \n2. git commit -a -m 'commite message'. \n3. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost config-processor-run.yml \n4. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost ready-deployment.yml  \n\nOnce it goes back the Add Server page, refresh page if it is necessary. Find servers at Manual Entry tab, update the servers and drag them to the right side table to retry deployment. \n\nPlease check the document's trouble shooting section for more details. \n\n Do you want to continue?",
+    "server.addserver.installos.cancel.confirm": "This will cancel the OS installation for the new compute server(s). \n\nDo you want to continue? ",
 
     "table.column.header.id" : "Server ID",
     "table.column.header.ip-addr" : "IP Address",

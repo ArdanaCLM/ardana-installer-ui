@@ -28,6 +28,11 @@ class PrepareAddCompute extends PrepareAddServers {
   getPrepareServerTitle = () => {
     return translate('server.addcompute.prepare');
   }
+
+  renderFooterButtons (showCancel, showRetry) {
+    // TODO handle retry
+    return this.renderNavButtons(showCancel, false);
+  }
 }
 
 export default PrepareAddCompute;

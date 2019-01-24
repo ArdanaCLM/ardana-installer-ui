@@ -241,9 +241,16 @@ class DeployAddServers extends BaseUpdateWizardPage {
     );
   }
 
+  renderFooterButtons (showCancel, showRetry) {
+    // Will have a specific cancel confirmation message when user clicks
+    // cancel button.
+    let cancelMsg = translate('server.addserver.failure.cancel.confirm');
+    return this.renderNavButtons(showCancel, showRetry, cancelMsg);
+  }
+
   render() {
-    //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    // If error happens, will show cancel and retry buttons.
+    let failed =  this.state.overallStatus === STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.toShowLoadingMask()}/>
@@ -252,10 +259,10 @@ class DeployAddServers extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content'>
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
-          {cancel && this.renderProcessError()}
+          {failed && this.renderProcessError()}
           {this.state.warningMessage && this.renderSkipWarning()}
         </div>
-        {this.renderNavButtons(cancel)}
+        {this.renderFooterButtons(failed, failed)}
       </div>
     );
   }

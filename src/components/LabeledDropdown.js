@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import { ListDropdown } from './ListDropdown.js';
 import { translate } from '../localization/localize.js';
-import {ActionButton} from "./Buttons";
+import { ActionButton } from './Buttons.js';
 
 export class LabeledDropdown extends Component {
   render() {
