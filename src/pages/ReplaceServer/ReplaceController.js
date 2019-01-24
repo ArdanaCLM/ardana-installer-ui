@@ -336,7 +336,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   renderError () {
     return (
-      <div className='banner-container'>
+      <div className='banner-container no-margin'>
         <ErrorBanner message={this.state.invalidMsg}
           show={this.state.overallStatus === STATUS.FAILED}/>
       </div>

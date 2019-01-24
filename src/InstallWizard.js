@@ -364,12 +364,13 @@ class InstallWizard extends Component {
   render() {
     // overwrite default tab title to use branding title
     document.title = translate('openstack.cloud.deployer.title');
+    const progressBar = this.renderProgressBar();
 
     return (
-      <div>
+      <div className={progressBar ? 'has-progress-bar' : ''}>
         <div className='wizard-header'>
           {this.renderTitle()}
-          {this.renderProgressBar()}
+          {progressBar}
         </div>
         <div className='wizard-content-container'>
           {this.renderLoadingMask()}

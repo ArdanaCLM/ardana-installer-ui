@@ -148,6 +148,16 @@
 }
 
 .wizard-content-container .wizard-content {
+  // 291px is calculated as:
+  //   20px for top margin for h1 header (controlled by bootstrap)
+  //   28px for h1 header
+  //   104px for wizard-progress-container
+  //   44px for content-header and top margin
+  //   20px for wizard-content top and bottom margins
+  //   55px for footer-container
+
+  @day0-reserved-height: 291px;
+
   margin: 20px;
   &.smaller-margin {
     margin: 3px;
@@ -157,14 +167,18 @@
     margin-bottom: 10px;
   }
 
-  // 291px is calculated as:
-  //   20px for top margin for h1 header (controlled by bootstrap)
-  //   28px for h1 header
-  //   104px for wizard-progress-container
-  //   44px for content-header and top margin
-  //   40px for wizard-content top and bottom margins
-  //   55px for footer-container
-  height: calc(~"100vh - 291px");
+  height: @content-height;
+
+  // When contained within a main-window (i.e. day 2), adjust
+  // the reserved height due to the thinner menu bar
+  .main-window .has-progress-bar & {
+      @reserved-height: @day2-with-progress-reserved-height;
+      height: @content-height;
+  }
+  .main-window & {
+    @reserved-height: @day2-reserved-height;
+    height: @content-height;
+  }
 
   &.unlimited-height {
     height: auto;

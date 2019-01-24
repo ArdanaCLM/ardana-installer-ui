@@ -1625,8 +1625,7 @@ class AssignServerRoles extends BaseWizardPage {
 
   render() {
     let serverId = this.state.activeRowData?.id || '';
-    const contentClass =
-      'wizard-content' + (this.props.isUpdateMode ? ' smaller-margin' : '');
+    const contentClass = this.props.isUpdateMode ? 'smaller-margin' : 'wizard-content';
     return (
       <div className='wizard-page'>
         {!this.props.isUpdateMode && this.renderCloudSettings()}

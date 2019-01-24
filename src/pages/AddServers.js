@@ -357,7 +357,7 @@ class AddServers extends BaseUpdateWizardPage {
             {this.renderHeading(translate('add.server.add'))}
           </div>
         </div>
-        <div className='wizard-content unlimited-height'>
+        <div className='wizard-content'>
           {this.isValidToRenderServerContent() && this.renderAddPage()}
         </div>
         {this.renderDeployConfirmModal()}
