@@ -252,7 +252,7 @@ class CollapsibleTable extends Component {
 
   renderMenuAction = (row) => {
     return (
-      <span className='menu-icon' onClick={(event) => this.prepareContextMenu(event, row)}>
+      <span className='menu-icon md-dark' onClick={(event) => this.prepareContextMenu(event, row)}>
         <i className='material-icons'>more_horiz</i>
       </span>
     );
