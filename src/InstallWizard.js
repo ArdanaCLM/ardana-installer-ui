@@ -362,8 +362,6 @@ class InstallWizard extends Component {
    * boilerplate ReactJS render function
    */
   render() {
-    // overwrite default tab title to use branding title
-    document.title = translate('openstack.cloud.deployer.title');
     const progressBar = this.renderProgressBar();
 
     return (

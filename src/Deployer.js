@@ -55,6 +55,7 @@ class Deployer extends Component {
       path = window.location.hash.replace('#', '');
 
     let defaultPath;
+    let isInstall = true;
 
     if(this.state.isSecuredError) {
       return <ErrorBanner message={this.state.isSecuredError.toString?.()} show={true}/>;
@@ -69,12 +70,14 @@ class Deployer extends Component {
       if (! getAuthToken()) {
         // If a login is required, Redirect to the login page
         defaultPath = <Redirect to='/login'/> ;
+        isInstall = false;
       } else {
 
         // Go to NavMenu unless the url specifically requests the installer
         if (search.get('start')?.startsWith('installer')) {
           defaultPath = <InstallWizard pages={pages}/>;
         } else {
+          isInstall = false;
           defaultPath = <>
             <NavMenu routes={routes}/>
             {/* redirect to the default page, when already logged in a blank page is shown otherwise */}
@@ -89,10 +92,19 @@ class Deployer extends Component {
       if (search.get('start')?.startsWith('menu')) {
         // If in secured (post-install) mode with a valid auth token, display menu
         defaultPath = <NavMenu routes={routes}/>;
+        isInstall = false;
       } else {
         // Initial, unsecured mode.  Display the InstallWizard
         defaultPath = <InstallWizard pages={pages}/>;
       }
+    }
+
+    // overwrite default tab title to use branding title
+    if(isInstall) {
+      document.title = translate('openstack.cloud.deployer.title');
+    } else {
+      // overwrite default tab title to use branding title
+      document.title = translate('day2.product.title');
     }
 
     return (
