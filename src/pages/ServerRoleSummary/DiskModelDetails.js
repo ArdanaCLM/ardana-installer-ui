@@ -802,38 +802,6 @@ class DiskModelDetails extends Component {
     }
     const buttonClass = (this.secondDetails === '') ? 'btn-container' : 'btn-container hide';
 
-    let confirmRemoveSection = '';
-    if (this.state.showRemoveVGConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveVGConfirmation} title={translate('warning')}
-          yesAction={() => this.removeVolumeGroup(this.state.selectedRow) }
-          noAction={() => this.setState({showRemoveVGConfirmation: false})}>
-          {translate('details.volume.group.confirm.remove',
-            this.state.volumeGroups[this.state.selectedRow].name)}
-        </YesNoModal>
-      );
-    }
-    if (this.state.showRemoveDGConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveDGConfirmation} title={translate('warning')}
-          yesAction={() => this.removeDeviceGroup(this.state.selectedRow) }
-          noAction={() => this.setState({showRemoveDGConfirmation: false})}>
-          {translate('details.device.group.confirm.remove',
-            this.state.deviceGroups[this.state.selectedRow].name)}
-        </YesNoModal>
-      );
-    }
-    if (this.state.showRemoveLVConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveLVConfirmation} title={translate('warning')}
-          yesAction={() => this.removeLogicalVolume(this.state.selectedRow) }
-          noAction={() => this.setState({showRemoveLVConfirmation: false})}>
-          {translate('details.logical.volume.confirm.remove',
-            this.state.logicalVolumes[this.state.selectedRow].name)}
-        </YesNoModal>
-      );
-    }
-
     return (
       <div className={widthClass}>
         <div className={detailsClass}>
@@ -862,7 +830,32 @@ class DiskModelDetails extends Component {
         </div>
         {this.renderSecondDetails()}
         {this.renderLogicalVolume()}
-        {confirmRemoveSection}
+        <Choose>
+          <When condition={this.state.showRemoveVGConfirmation}>
+            <YesNoModal title={translate('warning')}
+              yesAction={() => this.removeVolumeGroup(this.state.selectedRow) }
+              noAction={() => this.setState({showRemoveVGConfirmation: false})}>
+              {translate('details.volume.group.confirm.remove',
+                this.state.volumeGroups[this.state.selectedRow].name)}
+            </YesNoModal>
+          </When>
+          <When condition={this.state.showRemoveDGConfirmation}>
+            <YesNoModal title={translate('warning')}
+              yesAction={() => this.removeDeviceGroup(this.state.selectedRow) }
+              noAction={() => this.setState({showRemoveDGConfirmation: false})}>
+              {translate('details.device.group.confirm.remove',
+                this.state.deviceGroups[this.state.selectedRow].name)}
+            </YesNoModal>
+          </When>
+          <When condition={this.state.showRemoveLVConfirmation}>
+            <YesNoModal title={translate('warning')}
+              yesAction={() => this.removeLogicalVolume(this.state.selectedRow) }
+              noAction={() => this.setState({showRemoveLVConfirmation: false})}>
+              {translate('details.logical.volume.confirm.remove',
+                this.state.logicalVolumes[this.state.selectedRow].name)}
+            </YesNoModal>
+          </When>
+        </Choose>
       </div>
     );
   }

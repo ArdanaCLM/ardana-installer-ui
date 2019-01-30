@@ -33,7 +33,7 @@ class ServerTable extends Component {
           // editAction and deleteAction
           if(!this.props.deployedServers.some(server => {
             return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
-          })) {
+          }) || !this.props.isSafeMode) {
             extraProps.editAction = this.props.editAction;
             extraProps.deleteAction = this.props.deleteAction;
           }

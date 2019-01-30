@@ -14,22 +14,12 @@
 **/
 import { fetchJson } from '../../utils/RestUtils.js';
 
-// Intead of doing this base-class thing, just use something like ConfigHelper.js used
-// to do for the config promise, which is to always return a promise, which may or may
-// not have been resolved already
-//
-var modelPromise;
-
-function loadInternalModel() {
-  return fetchJson('/api/v1/clm/model/cp_internal/CloudModel.yaml');
-}
-
 // Prevent wrapping on hyphens by replacing normal hyphen characters with the non-wrapping-hyphen character
 export function noHyphenWrap(s) {
   return s.replace(/-/g, '\u2011');
 }
 
 export function getInternalModel() {
-  modelPromise = modelPromise || loadInternalModel();
-  return modelPromise;
+  // fetch using the no-cache option to ensure we have the latest version of the model
+  return fetchJson('/api/v2/model/cp_internal/CloudModel.yaml', undefined, true, true);
 }

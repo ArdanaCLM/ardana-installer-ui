@@ -217,7 +217,7 @@ p {
   height: 100vh;
   display: block;
   flex-direction: column;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   .top-bar-container {
     background-color: #00243E;
     .top-bar {
@@ -304,7 +304,7 @@ p {
 .menu-tab-content {
   margin: 2em;
   .header {
-    margin: 24px 0;
+    margin-bottom: 24px;
     color: #686565;
     font-size: 24px;
     font-weight: 400;
@@ -312,7 +312,7 @@ p {
   .header-row {
     display: flex;
     .search-group {
-      margin: 24px 0;
+      margin-bottom: 24px;
       min-width: 350px;
       .search-container {
         margin-bottom: 0;
@@ -372,3 +372,17 @@ a {
 .form-control{
   line-height: 20px;//in bootstrap 3 the default is 20px, in bootstrap 4 its 24px
 }
+
+/*
+The following variables are used to calculate how much space to reserve for headers and footers
+when displaying content page in several contexts:
+  day 0 : install wizard with progress bar
+  day 2 : with navigation menu
+  day 2 w/progress : navigation menu present AND a progress bar present.  This
+          is used in day 2 screens that have a multiple step workflow
+*/
+@day0-reserved-height: 0px; // unused and overriden whenever @content-height is referenced
+@day2-reserved-height: @day0-reserved-height - 106px;
+@day2-with-progress-reserved-height: @day2-reserved-height + 104px;
+@reserved-height: @day0-reserved-height;
+@content-height: calc(100vh - @reserved-height);

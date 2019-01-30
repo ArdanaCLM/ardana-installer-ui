@@ -13,12 +13,16 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../../localization/localize.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { YesNoModal } from '../../components/Modals.js';
 import ServerGroupDetails from './ServerGroupDetails.js';
 import { getModelIndexByName } from '../../components/ServerUtils.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { ErrorMessage } from '../../components/Messages.js';
+import { LoadingMask } from '../../components/LoadingMask.js';
+import { getInternalModel } from '../topology/TopologyUtils.js';
 
 class ServerGroupsTab extends Component {
 
@@ -28,9 +32,59 @@ class ServerGroupsTab extends Component {
       value: '',
       showServerGroupDetails: false,
       showRemoveConfirmation: false,
-      serverGroupToRemove: ''
+      serverGroupToRemove: '',
+      // check against server-groups in use when
+      // isUpdateMode
+      serverGroupsInUse: undefined,
+      loading: false,
+      errorMsg: undefined
     };
   }
+
+  componentDidMount() {
+    if(this.props.isUpdateMode) {
+      this.setState({loading: true});
+      getInternalModel()
+        .then((internalModel) => {
+          if (internalModel) {
+            let server_groups = this.getServerGroupsInUse(internalModel);
+            this.setState({serverGroupsInUse: server_groups, loading: false});
+          }
+        })
+        .catch(error => {
+          let msg =
+            translate(
+              'edit.server.groups.get.servergroups_inuse.error', error.toString());
+          this.setState({errorMsg: msg, loading: false});
+        });
+    }
+  }
+
+  getServerGroupsInUse = (internalModel) => {
+    let serverGroupList =
+      internalModel['internal']['servers']?.filter(server => !isEmpty(server['ardana_ansible_host']))
+        .map(server => server['server-group-list']);
+    // flat and remove the duplicates
+    // serverGroupList could be like
+    // [["rack1","AZ1","CLOUD"],["rack1","AZ1","CLOUD"],
+    // ["rack1","AZ1","CLOUD"],["rack1","AZ1","CLOUD"]],
+    serverGroupList =[...new Set([].concat(...serverGroupList))];
+
+    // get some more details from internalModel
+    let serverGroupsModel = internalModel['internal']['server-groups'];
+    let serverGroups;
+    if(serverGroupsModel) {
+      serverGroups = serverGroupList.map(sgName => {
+        return {
+          'name': serverGroupsModel[sgName]['name'],
+          'server-groups': serverGroupsModel[sgName]['server-groups'],
+          'networks': serverGroupsModel[sgName]['networks']
+        };
+      });
+    }
+
+    return serverGroups;
+  };
 
   resetData = () => {
     this.setState({
@@ -113,6 +167,10 @@ class ServerGroupsTab extends Component {
           removeClass = removeClass + ' disabled';
         }
 
+        // if serverGroupsInUse has this server group name,
+        // this server group is in use when isUpdateMode
+        let isInUse = this.props.isUpdateMode &&
+          this.state.serverGroupsInUse?.map((grp)=> grp['name']).includes(name);
         return (
           <tr key={idx}>
             <td>{name}</td>
@@ -123,9 +181,11 @@ class ServerGroupsTab extends Component {
                 <span onClick={() => this.editServerGroup(selected)}>
                   <i className={editClass}>edit</i>
                 </span>
-                <span onClick={() => this.confirmRemoveServerGroup(name)}>
-                  <i className={removeClass}>delete</i>
-                </span>
+                <If condition={!isInUse}>
+                  <span onClick={() => this.confirmRemoveServerGroup(name)}>
+                    <i className={removeClass}>delete</i>
+                  </span>
+                </If>
               </div>
             </td>
           </tr>);
@@ -143,24 +203,10 @@ class ServerGroupsTab extends Component {
       </tr>
     );
 
-    let detailsSection = '';
-    if (this.state.showServerGroupDetails) {
-      detailsSection = (<ServerGroupDetails model={this.props.model}
-        value={this.state.value} updateGlobalState={this.props.updateGlobalState}
-        setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}
-        tabIndex={this.props.tabIndex} ref={instance => {this.serverGroupDetails = instance;}}/>);
-    }
-
-    let confirmRemoveSection = '';
-    if (this.state.showRemoveConfirmation) {
-      confirmRemoveSection = (
-        <YesNoModal show={this.state.showRemoveConfirmation} title={translate('warning')}
-          yesAction={() => this.removeServerGroup(this.state.serverGroupToRemove) }
-          noAction={() => this.setState({showRemoveConfirmation: false})}>
-          {translate('details.server.group.confirm.remove', this.state.serverGroupToRemove)}
-        </YesNoModal>
-      );
-    }
+    // if serverGroupsInUse has this server group name,
+    // return the server group in serverGroupsInUse when isUpdateMode
+    let severGroupInUse = this.props.isUpdateMode &&
+      this.state.serverGroupsInUse?.filter(grp=>grp['name'] === this.state.value['name'])[0];
 
     return (
       <div className='extended-one'>
@@ -180,8 +226,30 @@ class ServerGroupsTab extends Component {
             </tbody>
           </table>
         </div>
-        {detailsSection}
-        {confirmRemoveSection}
+        <If condition={this.state.showServerGroupDetails}>
+          <ServerGroupDetails model={this.props.model}
+            value={this.state.value} updateGlobalState={this.props.updateGlobalState}
+            setDataChanged={this.props.setDataChanged} closeAction={this.hideServerGroupDetails}
+            tabIndex={this.props.tabIndex} ref={instance => {this.serverGroupDetails = instance;}}
+            serverGroupInUse={severGroupInUse}/>
+        </If>
+        <If condition={this.state.showRemoveConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={() => this.removeServerGroup(this.state.serverGroupToRemove) }
+            noAction={() => this.setState({showRemoveConfirmation: false})}>
+            {translate('details.server.group.confirm.remove', this.state.serverGroupToRemove)}
+          </YesNoModal>
+        </If>
+        <If condition={this.state.errorMsg}>
+          <div className='notification-message-container'>
+            <ErrorMessage
+              message={this.state.errorMsg}
+              closeAction={() => this.setState({errorMsg: undefined})}/>
+          </div>
+        </If>
+        <If condition={this.state.loading}>
+          <LoadingMask className='input-modal-mask' show={this.state.loading}></LoadingMask>
+        </If>
       </div>
     );
   }

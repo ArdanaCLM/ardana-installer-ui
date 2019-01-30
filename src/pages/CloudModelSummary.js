@@ -63,8 +63,7 @@ class CloudModelSummary extends BaseWizardPage {
 
   getChangeNodeWarning() {
     let warning = '';
-    if (this.state.activeItem && this.state.activeItem.indexOf('clusters') !== -1 &&
-      this.origActiveNodeCount === 3) {
+    if (this.state.activeItem?.indexOf('clusters') !== -1 && this.origActiveNodeCount === 3) {
       warning = (
         <div className='warning-banner'>
           <InfoBanner message={translate('model.summary.change.node.warning')}/>
@@ -114,7 +113,8 @@ class CloudModelSummary extends BaseWizardPage {
 
     // Update the control plane in the global model, save it, and move to the next page
     let model = this.props.model.updateIn(this.PATH_TO_CONTROL_PLANE, val => this.state.controlPlane);
-    this.props.updateGlobalState('model', model, this.props.next);
+    this.props.updateGlobalState('model', model)
+      .then(() => this.props.next());
   }
 
   renderItems = (section) => {
@@ -149,7 +149,7 @@ class CloudModelSummary extends BaseWizardPage {
     var additionalItems = this.state.controlPlane ? this.renderItems('resources') : [];
     var number = this.state.activeItem ? this.state.controlPlane.getIn(this.getKey()) : 0;
     let editNodesLabel = translate('model.summary.edit.nodes');
-    if (this.state.activeItem && this.state.activeItem.indexOf('min-count') !== -1) {
+    if (this.state.activeItem?.indexOf('min-count') !== -1) {
       editNodesLabel = translate('model.summary.edit.min.nodes');
     }
 

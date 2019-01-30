@@ -113,7 +113,7 @@ class InstallWizard extends Component {
 
     this.setState({wizardLoading: true});
     // Load the current state information from the backend
-    fetchJson('/api/v1/clm/model')
+    fetchJson('/api/v2/model')
       .then(responseData => {
         this.setState({'model': fromJS(responseData)});
       })
@@ -123,7 +123,7 @@ class InstallWizard extends Component {
         this.setState({wizardLoadingErrors: Map({modelError: ErrorMsg})});
         console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
       })
-      .then(() => fetchJson('/api/v1/progress')
+      .then(() => fetchJson('/api/v2/progress')
         .then((responseData) => {
           this.loadProgress(responseData, forcedReset);
           this.setState({wizardLoading: false});
@@ -137,7 +137,7 @@ class InstallWizard extends Component {
       )
       .then(() => {
         if (forcedReset) {
-          return deleteJson('/api/v1/server?source=sm,ov,manual');
+          return deleteJson('/api/v2/server?source=sm,ov,manual');
         }
       });
   }
@@ -211,7 +211,7 @@ class InstallWizard extends Component {
       toPersist[v] = this.state[v];
     }
 
-    return postJson('/api/v1/progress', toPersist);
+    return postJson('/api/v2/progress', toPersist);
   }
 
   /**
@@ -294,44 +294,37 @@ class InstallWizard extends Component {
     }
   }
 
-  // Setter functions for all state variables that need to be modified within pages.
-  // If this list gets long, consider replacing it with a more generic function
-  // that provides access to any
-  updateGlobalState = (key, value, callback) => {
+  // Return a promise that updates the global state and persist any other progress values
+  updateGlobalState = (key, value) => {
 
-    let modelChanged = false;
+    return new Promise((resolve, reject) => {
 
-    function mycallback() {
-      let p;
-      if (modelChanged) {
-        // save the model
-        p = this.saveModel();
-      } else if (this.persistedStateVars.includes(key)) {
-        // save the other state variables
-        p = this.persistState();
-      } else {
-        // don't save it anywhere
-        p = Promise.resolve(true);
-      }
+      let modelChanged = false;
 
-      p.then(() => {
-        if (callback)
-          callback();
+      this.setState(prevState => {
+        modelChanged = (key == 'model' && value !== prevState.model);
+        let updatedState = {};
+        updatedState[key] = value;
+        return updatedState;
+      }, () => {
+        if (modelChanged) {
+          // save the model
+          this.saveModel().then(resolve, reject);
+        } else if (this.persistedStateVars.includes(key)) {
+          // save the other state variables
+          this.persistState().then(resolve, reject);
+        } else {
+          // don't save it anywhere
+          resolve(true);
+        }
       });
-    }
-
-    this.setState(prevState => {
-      modelChanged = (key == 'model' && value !== prevState.model);
-      let updatedState = {};
-      updatedState[key] = value;
-      return updatedState;
-    }, mycallback);
+    });
   }
 
   // Pages within the installer may request that the model be forceably loaded
   // from disk, espcially when a change is made to directly to the model files
   // to the model.  Returns a promise
-  loadModel = () => fetchJson('/api/v1/clm/model')
+  loadModel = () => fetchJson('/api/v2/model')
     .then(responseData => {
       this.setState({'model': fromJS(responseData)});
     })
@@ -342,7 +335,7 @@ class InstallWizard extends Component {
   // Pages within the installer may request that the model be saved to disk,
   // which is especially important when some significant change has been made
   // to the model.  Returns a promise
-  saveModel = () => postJson('/api/v1/clm/model', this.state.model);
+  saveModel = () => postJson('/api/v2/model', this.state.model);
 
   renderTitle() {
     return (
@@ -369,14 +362,13 @@ class InstallWizard extends Component {
    * boilerplate ReactJS render function
    */
   render() {
-    // overwrite default tab title to use branding title
-    document.title = translate('openstack.cloud.deployer.title');
+    const progressBar = this.renderProgressBar();
 
     return (
-      <div>
+      <div className={progressBar ? 'has-progress-bar' : ''}>
         <div className='wizard-header'>
           {this.renderTitle()}
-          {this.renderProgressBar()}
+          {progressBar}
         </div>
         <div className='wizard-content-container'>
           {this.renderLoadingMask()}

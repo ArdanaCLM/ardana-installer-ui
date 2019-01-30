@@ -19,7 +19,7 @@ import { ValidatingInput } from '../components/ValidatingInput.js';
 class InlineAddRemoveDropdown extends Component {
   constructor(props) {
     super(props);
-    if (props.values && props.values.length > 0) {
+    if (props.values?.length > 0) {
       this.state = {
         items: props.values,
         selectedItem: props.values[props.values.length - 1]
@@ -123,15 +123,18 @@ class InlineAddRemoveDropdown extends Component {
       // show all items except the last one in text mode
       textFields.splice(textFields.length - 1, 1);
       textFields.map((item, index) => {
+        let isInUse = this.props.noDeleteOptions?.includes(item);
         lines.push(
           <div className='dropdown-plus-minus' key={this.props.name + item + index}>
             <ValidatingInput key={this.props.name + item + index} inputType='text' inputValue={item}
               disabled='true'/>
-            <div className='plus-minus-container'>
-              <span key={this.props.name + item + 'minus' + index} onClick={() => this.removeItem(index)}>
-                <i className={'material-icons left-sign'}>remove</i>
-              </span>
-            </div>
+            <If condition={!isInUse}>
+              <div className='plus-minus-container'>
+                <span key={this.props.name + item + 'minus' + index} onClick={() => this.removeItem(index)}>
+                  <i className={'material-icons left-sign'}>remove</i>
+                </span>
+              </div>
+            </If>
           </div>
         );
       });
@@ -159,17 +162,21 @@ class InlineAddRemoveDropdown extends Component {
     let lastItem = this.state.items[this.state.items.length - 1];
     const addClass = lastItem === '' || this.state.items.length === this.props.options.length ?
       'material-icons hide' : 'material-icons right-sign';
+    let isInUse = this.props.noDeleteOptions?.includes(lastItem);
     return (
       <div>
         {lines}
         <div className='dropdown-plus-minus'>
-          <ListDropdown key={this.props.name + 'start'} name={this.props.name} value={lastItem}
+          <ListDropdown key={this.props.name + 'start'} name={this.props.name}
+            value={lastItem} disabled={isInUse}
             optionList={options} defaultOption={this.props.defaultOption}
             selectAction={this.handleSelectedItem}/>
           <div className='plus-minus-container'>
-            <span key={this.props.name + 'minus'} onClick={() => this.removeItem(-1)}>
-              <i className='material-icons left-sign'>remove</i>
-            </span>
+            <If condition={!isInUse} >
+              <span key={this.props.name + 'minus'} onClick={() => this.removeItem(-1)}>
+                <i className='material-icons left-sign'>remove</i>
+              </span>
+            </If>
             <span key={this.props.name + 'plus'} onClick={this.addItem}>
               <i className={addClass}>add</i>
             </span>
@@ -183,7 +190,7 @@ class InlineAddRemoveDropdown extends Component {
 class InlineAddRemoveInput extends Component {
   constructor(props) {
     super(props);
-    if (props.values && props.values.length > 0) {
+    if (props.values?.length > 0) {
       this.state = {
         items: props.values,
         selectedItem: props.values[props.values.length - 1]

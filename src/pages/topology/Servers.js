@@ -63,7 +63,7 @@ class Servers extends Component {
     let toCount = [ group ];
     while (toCount.length > 0) {
       const g = toCount.shift();
-      if (g.groups && g.groups.length > 0) {
+      if (g.groups?.length > 0) {
         toCount = toCount.concat(g.groups);
       } else {
         sum += 1;

@@ -28,11 +28,11 @@ class EditTemplateFile extends Component {
 
   componentWillMount() {
     this.setState({ loading: true });
-    fetchJson('/api/v1/clm/service/files/' +  this.props.editFile)
+    fetchJson('/api/v2/service/files/' +  this.props.editFile)
       .then((response) => {
         this.setState({original: response, contents: response});
         if (this.props.revertable) {
-          fetchJson('/api/v1/clm/service/files/' +  this.props.editFile + '.bak')
+          fetchJson('/api/v2/service/files/' +  this.props.editFile + '.bak')
             .then((response) => {
               this.setState({original: response});
             })
@@ -52,20 +52,20 @@ class EditTemplateFile extends Component {
       const origFile = this.props.editFile + '.bak';
       if (this.state.original !== this.state.contents) {
         // preserve original content into a backup file (only once) for a reversion later on
-        fetchJson('/api/v1/clm/service/files/' +  origFile)
+        fetchJson('/api/v2/service/files/' +  origFile)
           .catch((error) => {
-            postJson('/api/v1/clm/service/files/' + origFile, JSON.stringify(this.state.original));
+            postJson('/api/v2/service/files/' + origFile, JSON.stringify(this.state.original));
           });
-        postJson('/api/v1/clm/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
+        postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
         this.props.changeAction(true);
       } else {
         // update the file and remove backup file if new content is the same as original content
-        postJson('/api/v1/clm/service/files/' +  this.props.editFile, JSON.stringify(this.state.original))
-          .then(() => {deleteJson('/api/v1/clm/service/files/' +  origFile);});
+        postJson('/api/v2/service/files/' +  this.props.editFile, JSON.stringify(this.state.original))
+          .then(() => {deleteJson('/api/v2/service/files/' +  origFile);});
         this.props.changeAction(false);
       }
     } else {
-      postJson('/api/v1/clm/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
+      postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
     }
     this.props.closeAction();
   }
@@ -132,7 +132,7 @@ class ServiceTemplatesTab extends Component {
 
   componentWillMount() {
     //retrieve a list of j2 files for services
-    fetchJson('/api/v1/clm/service/files')
+    fetchJson('/api/v2/service/files')
       .then((responseData) => {
         this.setState({serviceFiles: responseData});
       })
@@ -200,7 +200,7 @@ class ServiceTemplatesTab extends Component {
       if (val.changedFiles) {
         val.changedFiles.map((file) => {
           const filename = val.service + '/' + file + '.bak';
-          deleteJson('/api/v1/clm/service/files/' +  filename);
+          deleteJson('/api/v2/service/files/' +  filename);
         });
       }
     });
@@ -212,10 +212,10 @@ class ServiceTemplatesTab extends Component {
         val.changedFiles.map((file) => {
           const filename = val.service + '/' + file;
           // fetch original content, write it out to the current file, then remove the original copy
-          fetchJson('/api/v1/clm/service/files/' +  filename + '.bak')
+          fetchJson('/api/v2/service/files/' +  filename + '.bak')
             .then((response) => {
-              postJson('/api/v1/clm/service/files/' + filename, JSON.stringify(response))
-                .then(() => {deleteJson('/api/v1/clm/service/files/' +  filename + '.bak');});
+              postJson('/api/v2/service/files/' + filename, JSON.stringify(response))
+                .then(() => {deleteJson('/api/v2/service/files/' +  filename + '.bak');});
             });
         });
         delete val.changedFiles;
@@ -316,10 +316,10 @@ class ServiceTemplatesTab extends Component {
 
   renderServiceList() {
     let serviceList = [];
-    this.state.serviceFiles && this.state.serviceFiles
-      .sort((a,b) => alphabetically(a['service'], b['service']))
-      .forEach((item, index) => {
-        if(item.files && item.files.length > 0) {
+    this.state.serviceFiles
+      ?.sort((a,b) => alphabetically(a['service'], b['service']))
+      ?.forEach((item, index) => {
+        if(item.files?.length > 0) {
           if(item.expanded === undefined) {
             item.expanded = false;
           }

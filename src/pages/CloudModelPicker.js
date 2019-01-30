@@ -64,7 +64,7 @@ class CloudModelPicker extends BaseWizardPage {
     this.setState({loading: true});
 
     // Load overview for all templates
-    fetchJson('/api/v1/clm/templates')
+    fetchJson('/api/v2/templates')
       .then((templates) => {
         this.templates = templates;
 
@@ -124,8 +124,9 @@ class CloudModelPicker extends BaseWizardPage {
     if (this.saveRequired) {
       this.setState({loading: true});
       // Load the full template, update the global model, and save it
-      fetchJson('/api/v1/clm/templates/' + this.state.selectedModelName)
-        .then(model => this.props.updateGlobalState('model', fromJS(model), this.props.next))
+      fetchJson('/api/v2/templates/' + this.state.selectedModelName)
+        .then(model => this.props.updateGlobalState('model', fromJS(model)))
+        .then(() => this.props.next())
         .catch(error => {
           this.setState({
             errorContent: {
@@ -315,7 +316,7 @@ class CloudModelPicker extends BaseWizardPage {
 
     const hSource = this.state.currentFilter === 'hypervisor-type' ? this.filteredTemplates : templates;
     const hypervisors = hSource.map((template) => {
-      return (template.metadata && template.metadata.hypervisor) ? template.metadata.hypervisor : [];
+      return template.metadata?.hypervisor || [];
     });
     const uniqueHypervisors = this.getUniqueValues(hypervisors).sort();
     const hOptions = uniqueHypervisors.length > 0 ? ['none'].concat(uniqueHypervisors) : ['none'];
@@ -324,7 +325,7 @@ class CloudModelPicker extends BaseWizardPage {
 
     const nSource = this.state.currentFilter === 'network-type' ? this.filteredTemplates : templates;
     let networks = nSource.map((template) => {
-      return (template.metadata && template.metadata.network) ? template.metadata.network : undefined;
+      return template.metadata?.network || undefined;
     }).filter(network => network !== undefined);
     const uniqueNetworks = [...new Set(networks)].sort();
     const nOptions = uniqueNetworks.length ? ['none'].concat(uniqueNetworks) : ['none'];
@@ -436,12 +437,14 @@ class CloudModelPicker extends BaseWizardPage {
           {this.renderErrorMessage()}
         </div>
         {this.renderNavButtons()}
-        <YesNoModal show={this.state.showChangeModelConfirmation} title={translate('warning')}
-          yesAction={this.closeChangeModelConfirmation}
-          noAction={() => this.setState({showChangeModelConfirmation: false,
-            selectedModelName: this.props.model.get('name')})}>
-          {translate('model.picker.change.model.confirm')}
-        </YesNoModal>
+        <If condition={this.state.showChangeModelConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.closeChangeModelConfirmation}
+            noAction={() => this.setState({showChangeModelConfirmation: false,
+              selectedModelName: this.props.model.get('name')})}>
+            {translate('model.picker.change.model.confirm')}
+          </YesNoModal>
+        </If>
       </div>
     );
   }

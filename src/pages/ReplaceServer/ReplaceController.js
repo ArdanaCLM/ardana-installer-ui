@@ -62,10 +62,11 @@ class ReplaceController extends BaseUpdateWizardPage {
       });
   }
 
-  updatePageStatus = (status) => {
+  updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
     if (status === STATUS.FAILED) {
-      this.setState({invalidMsg: translate('server.replace.prepare.failure')});
+      const errorMsg = error?.message || '';
+      this.setState({invalidMsg: translate('server.replace.prepare.failure', errorMsg)});
     }
   }
 
@@ -103,13 +104,14 @@ class ReplaceController extends BaseUpdateWizardPage {
         label: translate('deploy.progress.commit'),
         action: ((logger) => {
           const commitMessage = {'message': 'Committed via Ardana Installer'};
-          return postJson('/api/v1/clm/model/commit', commitMessage)
+          return postJson('/api/v2/model/commit', commitMessage)
             .then((response) => {
-              logger('Model committed\n');
+              logger('Model committed');
             })
             .catch((error) => {
+              const logMsg = 'Failed to commit update changes. ' + error.toString();
+              logger(logMsg);
               const message = translate('update.commit.failure', error.toString());
-              logger(message+'\n');
               throw new Error(message);
             });
         }),
@@ -125,7 +127,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       {
         label: translate('server.deploy.progress.rm-cobbler'),
         action: ((logger) => {
-          return fetchJson('/api/v1/clm/cobbler/servers')
+          return fetchJson('/api/v2/cobbler/servers')
             .then((response) => {
               const cobbler_server = response.find((e) =>
                 e.ip === this.props.operationProps.server.ip ||
@@ -133,18 +135,19 @@ class ReplaceController extends BaseUpdateWizardPage {
               if (cobbler_server) {
                 const name = cobbler_server.name;
 
-                return deleteJson('/api/v1/clm/cobbler/servers/' + name)
+                return deleteJson('/api/v2/cobbler/servers/' + name)
                   .then((response) => {
-                    logger('Host removed from cobbler\n');
+                    logger('Host removed from cobbler');
                   })
                   .catch((error) => {
+                    const logMsg = 'Unable to remove system from cobbler.' + error.toString();
+                    logger(logMsg);
                     const message = translate('update.remove_cobbler.failure', error.toString());
-                    logger(message+'\n');
                     throw new Error(message);
                   });
 
               } else {
-                logger('Host not present in cobbler, continuing\n');
+                logger('Host not present in cobbler, continuing');
               }
             });
         }),
@@ -153,25 +156,28 @@ class ReplaceController extends BaseUpdateWizardPage {
         label: translate('server.deploy.progress.rm-known-host'),
         action: ((logger) => {
           if (isEmpty(server.hostname)) {
-            logger('No hostname found to remove from known_hosts, continuing\n');
+            logger('No hostname found to remove from known_hosts, continuing');
             return Promise.resolve();
           }
 
-          return deleteJson('/api/v1/clm/known_hosts/' + server.hostname)
+          return deleteJson('/api/v2/known_hosts/' + server.hostname)
             .then((response) => {
-              logger(server.hostname+' removed from known_hosts\n');
+              logger(server.hostname + ' removed from known_hosts');
             })
             .catch((error) => {
+              const logMsg =
+                'Unable to remove server from known_hosts file.' + error.toString();
+              logger(logMsg);
               const message = translate('update.known_hosts.failure', error.toString());
-              logger(message+'\n');
               throw new Error(message);
             }); }),
       },
     ];
 
-    if(this.props.operationProps.installOS) {
-      const installPass = this.props.operationProps.osInstallPassword || '';
-      const serverId = this.props.operationProps.server.id;
+    const serverId = this.props.operationProps.server.id;
+
+    if (this.props.operationProps.installOS) {
+      const installPass = this.props.operationProps.osPassword || '';
       // The following steps will all be performed via the INSTALL_PLAYBOOK
       playbook_steps.push(
         {
@@ -192,9 +198,31 @@ class ReplaceController extends BaseUpdateWizardPage {
             event: INSTALL_PLAYBOOK + '.yml'
           }],
           playbook: INSTALL_PLAYBOOK,
-          payload: {'extra-vars': {'nodelist': [serverId], 'ardanauser_password': installPass}}
+          payload: {'extra-vars': {'nodelist': serverId, 'ardanauser_password': installPass}}
         },
       );
+    } else {
+      playbook_steps.push(
+        {
+          label: translate('server.deploy.progress.powerup'),
+          playbook: 'bm-power-up.yml',
+          payload: {'extra-vars': {'nodelist': serverId}}
+        },
+        {
+          label: translate('server.deploy.progress.waitssh'),
+          playbook: 'bm-wait-for-ssh.yml',
+          payload: {'extra-vars': {'nodelist': serverId}}
+        }
+      );
+    }
+
+    if (this.props.operationProps.wipeDisk) {
+      playbook_steps.push(
+        {
+          label: translate('server.deploy.progress.wipe-disks'),
+          playbook: 'wipe_disks.yml',
+          payload: {limit: server.hostname}
+        });
     }
 
     playbook_steps.push(
@@ -308,7 +336,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   renderError () {
     return (
-      <div className='banner-container'>
+      <div className='banner-container no-margin'>
         <ErrorBanner message={this.state.invalidMsg}
           show={this.state.overallStatus === STATUS.FAILED}/>
       </div>
@@ -335,7 +363,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       );
 
       return (
-        <ConfirmModal show={true} title={translate('server.deploy.progress.swift-check')}
+        <ConfirmModal title={translate('server.deploy.progress.swift-check')}
           onHide={cancel} footer={footer}>
           {translate('server.deploy.progress.swift-manual')}
         </ConfirmModal>

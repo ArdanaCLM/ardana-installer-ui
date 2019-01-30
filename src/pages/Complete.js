@@ -28,7 +28,7 @@ class Complete extends BaseWizardPage {
       opsconsole: ''
     };
 
-    fetchJson('/api/v1/external_urls')
+    fetchJson('/api/v2/external_urls')
       .then(responseData => {
         if (responseData.horizon) {
           this.setState({horizon: responseData.horizon});

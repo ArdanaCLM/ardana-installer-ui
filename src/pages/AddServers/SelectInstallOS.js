@@ -65,7 +65,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
     this.setState({showInstallConfirmModal : false});
     if (this.props.operationProps.sshPassphraseRequired) {
       let password = {'password': this.props.operationProps.sshPassphrase};
-      postJson('/api/v1/clm/sshagent/key', JSON.stringify(password), undefined, false)
+      postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
         .then(() => {
           super.goForward(e);
         })
@@ -80,11 +80,13 @@ class SelectInstallOS extends BaseUpdateWizardPage {
 
   renderInstallConfirmModal() {
     return (
-      <YesNoModal show={this.state.showInstallConfirmModal} title={translate('warning')}
-        yesAction={this.startInstallProcess}
-        noAction={() => this.setState({showInstallConfirmModal: false})}>
-        {translate('provision.server.confirm.body', this.props.operationProps.selectedToInstallOS.length)}
-      </YesNoModal>
+      <If condition={this.state.showInstallConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={this.startInstallProcess}
+          noAction={() => this.setState({showInstallConfirmModal: false})}>
+          {translate('provision.server.confirm.body', this.props.operationProps.selectedToInstallOS.length)}
+        </YesNoModal>
+      </If>
     );
   }
 

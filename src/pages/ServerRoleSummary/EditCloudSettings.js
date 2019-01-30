@@ -87,7 +87,7 @@ class EditCloudSettings extends Component {
             <Tab eventKey={TAB.SERVER_GROUPS} title={translate('edit.server.groups')}>
               <ServerGroupsTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
                 setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.SERVER_GROUPS)}
-                ref={instance => {this.serverGroupsTab = instance;}}/>
+                ref={instance => {this.serverGroupsTab = instance;}} isUpdateMode={this.props.isUpdateMode}/>
             </Tab>
           </Tabs>
         );
@@ -98,7 +98,7 @@ class EditCloudSettings extends Component {
             <Tab eventKey={TAB.NIC_MAPPINGS} title={translate('edit.nic.mappings')}>
               <NicMappingTab model={this.props.model} updateGlobalState={this.props.updateGlobalState}
                 setDataChanged={this.setDataChanged} tabIndex={TABINDEX.indexOf(TAB.NIC_MAPPINGS)}
-                ref={instance => {this.nicMappingTab = instance;}}/>
+                ref={instance => {this.nicMappingTab = instance;}} isUpdateMode={this.props.isUpdateMode}/>
             </Tab>
           </Tabs>
         );
@@ -142,9 +142,8 @@ class EditCloudSettings extends Component {
     }
 
     return (
-      <div>
+      <>
         <ConfirmModal
-          show={this.props.show}
           title={translate('edit.cloud.settings')}
           className={'cloud-settings'}
           hideFooter='true'
@@ -154,11 +153,13 @@ class EditCloudSettings extends Component {
 
         </ConfirmModal>
 
-        <YesNoModal show={this.state.showCloseConfirmation} title={translate('warning')}
-          yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>
-          {translate('edit.cloud.settings.close.confirm')}
-        </YesNoModal>
-      </div>
+        <If condition={this.state.showCloseConfirmation}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.closeModals} noAction={() => this.setState({showCloseConfirmation: false})}>
+            {translate('edit.cloud.settings.close.confirm')}
+          </YesNoModal>
+        </If>
+      </>
     );
   }
 }

@@ -46,5 +46,5 @@ export function redirectToLogin(forced = true) {
 
 export function wasRedirectedToLogin() {
   const location = createHistory().location;
-  return location.state && location.state['forcedRedirect'] === true;
+  return location.state?.['forcedRedirect'] === true;
 }

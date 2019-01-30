@@ -3,7 +3,7 @@
     "openstack.cloud.deployer.title.version": "SUSE OpenStack Cloud 8",
     "day2.product.title": "CLM Admin Console",
     "day2.product.name": "CLM\nAdmin Console",
-    "packages.ardana": "SUSE OpenStack Cloud Packages",
+    "packages.ardana": "Packages",
     "services.header.packages.ardana" : "Installed SUSE Cloud Packages",
     "complete.message.refresh": "Please wait a few minutes for the cloud deployment to be complete before refreshing the browser in order to access the CLM Admin Console."
 

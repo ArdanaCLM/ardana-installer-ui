@@ -110,7 +110,7 @@ class StatusModal extends Component {
     const footer = <ActionButton id='closePlaybookStatus' clickAction={this.handleButton} displayLabel={label}/>;
 
     return (
-      <ConfirmModal show={this.props.showModal} onHide={this.props.onHide} className='status-modal'
+      <ConfirmModal onHide={this.props.onHide} className='status-modal'
         title={translate('services.status.result', this.props.serviceName)} hideCloseButton
         footer={footer}>
         <div className='log-viewer'>
@@ -168,8 +168,6 @@ class PlaybookProgress extends Component {
     //
     //   payload - body of REST call when invoking all playbooks.
     //
-    //   isUpdateMode - Mostly used for determining whether playbooks is an array of objects
-    //      or an array of strings.   Also used to hardcode certain password-related extra-vars
     //
     //   steps - array of objects, each of which contains:
     //     label     - string to display on the UI page
@@ -277,22 +275,26 @@ class PlaybookProgress extends Component {
   }
 
   monitorSocket = (playbookName, playId) => {
+
     // Note that this function is only called after a fetch has completed, and thus
     // the application config has already completed loading, so getAppConfig can
     // be safely used here
     this.socket = io(getAppConfig('shimurl'));
     this.socket.on('playbook-start', this.playbookStarted);
-    this.socket.on(
-      'playbook-stop',
-      (stepPlaybook) => { this.playbookStopped(stepPlaybook, playbookName, playId); });
-    this.socket.on(
-      'playbook-error',
-      (stepPlaybook) => { this.playbookError(stepPlaybook, playbookName, playId); });
+    this.socket.on('playbook-stop', (stepPlaybook) => {
+      this.playbookStopped(stepPlaybook, playbookName, playId);
+    });
+    this.socket.on('playbook-error', (stepPlaybook) => {
+      this.playbookError(stepPlaybook, playbookName, playId);
+    });
     this.socket.on('log', this.logMessage);
-    this.socket.on(
-      'end',
-      () => { this.processEndMonitorPlaybook(playbookName); });
-    this.socket.emit('join', playId);
+    this.socket.on('end', () => this.processEndMonitorPlaybook(playbookName));
+    this.socket.on('connect', () => { this.socket.emit('join', playId); });
+    this.socket.on('disconnect', (reason) => {
+      if (reason === 'transport close') {
+        console.log('Connection lost, trying to reconnect...'); // eslint-disable-line no-console
+      }
+    });
   }
 
   // "Playbooks" come in a couple varieties. Originally they were just names, but
@@ -405,7 +407,7 @@ class PlaybookProgress extends Component {
     }
 
     // go get logs
-    fetchJson('/api/v1/clm/plays/' + playbook.playId + '/log')
+    fetchJson('/api/v2/plays/' + playbook.playId + '/log')
       .then(response => {
         const message = response.trimRight('\n');
         this.logsReceived = List(message);
@@ -419,7 +421,7 @@ class PlaybookProgress extends Component {
       });
 
     // update the UI status
-    fetchJson('/api/v1/clm/plays/' + playbook.playId + '/events')
+    fetchJson('/api/v2/plays/' + playbook.playId + '/events')
       .then(response => {
         for (let evt of response) {
           if (evt.event === 'playbook-stop')
@@ -454,7 +456,7 @@ class PlaybookProgress extends Component {
       const progressPlay = inProgressPlaybooks[0];  // there will only be one playbook in progress
       // if have completes, process completed logs first
       //check the in progress one
-      fetchJson('/api/v1/clm/plays/' + progressPlay.playId, {
+      fetchJson('/api/v2/plays/' + progressPlay.playId, {
         // Note: Use no-cache in order to get an up-to-date response
         headers: {
           'pragma': 'no-cache',
@@ -563,12 +565,12 @@ class PlaybookProgress extends Component {
           }
         })
         .catch((error) => {
-          this.playbookError(playbook.name, playbook.name, 0);
+          this.playbookError(playbook.name, playbook.name, 0, error);
         });
 
     } else {
       const playbookName = this.getPlaybookName(playbook);
-      postJson('/api/v1/clm/playbooks/' + playbookName, payload)
+      postJson('/api/v2/playbooks/' + playbookName, payload)
         .then(response => {
           const playId = response['id'];
           this.monitorSocket(playbookName, playId);
@@ -593,10 +595,10 @@ class PlaybookProgress extends Component {
     this.setState({showConfirmationDlg: false});
     const running = this.getPlaybooksWithStatus(STATUS.IN_PROGRESS)[0];
     if (running) {
-      deleteJson('/api/v1/clm/plays/' + running.playId)
+      deleteJson('/api/v2/plays/' + running.playId)
         .then(response => {
           if (this.props.modalMode) {
-            this.logMessage(translate('deploy.cancel.message'));
+            this.logMessage('Playbook cancelled.');
           } else {
             // update local this.globalPlaybookStatus and also update global state playbookSatus
             this.updateGlobalPlaybookStatus(running.name, running.playId, STATUS.FAILED);
@@ -616,16 +618,6 @@ class PlaybookProgress extends Component {
     this.setState((prevState) => {
       return {errorMsg : prevState.errorMsg.concat(msg + '\n')};
     });
-  }
-
-  renderShowLogButton() {
-    const logButtonLabel = translate('progress.show.log');
-
-    return (
-      <ActionButton type='link'
-        displayLabel={logButtonLabel}
-        clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
-    );
   }
 
   renderCancelButton() {
@@ -660,7 +652,7 @@ class PlaybookProgress extends Component {
       this.setState({errorMsg: '', closeStatusPlaybookModal: true});
     }
     return (
-      <StatusModal showModal={this.props.showModal} serviceName={this.props.serviceName}
+      <StatusModal serviceName={this.props.serviceName}
         onHide={this.props.onHide} contents={this.state.displayedLogs}
         closeModal={this.state.closeStatusPlaybookModal} cancelPlaybook={this.cancelRunningPlaybook}
         playbooksComplete={this.state.playbooksComplete}/>
@@ -686,13 +678,19 @@ class PlaybookProgress extends Component {
                 <ul>{this.getProgress()}</ul>
                 <div>
                   {this.renderCancelButton()}
-                  {!this.state.errorMsg && !this.state.showLog && this.renderShowLogButton()}
-                  <YesNoModal show={this.state.showConfirmationDlg}
-                    title={translate('warning')}
-                    yesAction={this.cancelRunningPlaybook}
-                    noAction={() => this.setState({showConfirmationDlg: false})}>
-                    {translate('deploy.cancel.confirm')}
-                  </YesNoModal>
+                  <If condition={!this.state.errorMsg && !this.state.showLog}>
+                    <ActionButton type='link'
+                      displayLabel={translate('progress.show.log')}
+                      clickAction={() => this.setState((prev) => { return {'showLog': !prev.showLog}; }) } />
+                  </If>
+                  <If condition={this.state.showConfirmationDlg}>
+                    <YesNoModal
+                      title={translate('warning')}
+                      yesAction={this.cancelRunningPlaybook}
+                      noAction={() => this.setState({showConfirmationDlg: false})}>
+                      {translate('deploy.cancel.confirm')}
+                    </YesNoModal>
+                  </If>
                 </div>
               </div>
               <div className='col-8'>
@@ -772,7 +770,7 @@ class PlaybookProgress extends Component {
    * @param playbookName
    * @param playId
    */
-  playbookError = (stepPlaybook, playbookName, playId) => {
+  playbookError = (stepPlaybook, playbookName, playId, error) => {
     let failed = false;
 
     this.setState((prevState) => {
@@ -787,11 +785,19 @@ class PlaybookProgress extends Component {
         this.updateGlobalPlaybookStatus(playbookName, playId, STATUS.FAILED);
       }
       // if failed update caller page immediately
-      this.props.updatePageStatus(STATUS.FAILED);
+      this.props.updatePageStatus(STATUS.FAILED, error);
     }
   }
 
-  logMessage = (message) => {
+  logMessage = (message, addNewlineIfMissing=true) => {
+    // if the message does not contain a new line
+    // append a new line break
+    if (addNewlineIfMissing) {
+      var hasNewLine = /\r|\n/.exec(message);
+      if (!hasNewLine) {
+        message = message + '\n';
+      }
+    }
     this.logsReceived = this.logsReceived.push(message);
     this.updateState(this.logsReceived);
   }

@@ -110,10 +110,10 @@ class ServiceDetails extends Component {
     return version;
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.props.setLoadingMask(true);
     let serviceNameObj = this.getServiceName();
-    fetchJson('/api/v1/clm/packages')
+    fetchJson('/api/v2/packages')
       .then(responseData => {
         this.setState({version: this.getVersion(responseData, serviceNameObj), packageDataLoaded: true});
         this.checkLoadingMask();
@@ -125,17 +125,23 @@ class ServiceDetails extends Component {
 
     const lookupName =  MONASCA_SERVICES_MAP[this.props.service.name.toLowerCase()];
     if (lookupName) {
-      const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
-      fetchJson('/api/v1/clm/monasca/passthru/alarms/count?' + query)
-        .then(responseData => {
-          this.processAlarms(responseData.counts);
-          this.setState({alarmDataLoaded: true});
-          this.checkLoadingMask();
-        })
-        .catch((error) => {
-          this.setState({alarmDataLoaded: true});
-          this.checkLoadingMask();
-        });
+      const responseData = await fetchJson('/api/v2/monasca/is_installed');
+      //only query for Monasca alarm counts if monasca is installed
+      if(responseData.installed) {
+        const query = 'metric_dimensions=service:' + lookupName + '&group_by=state,severity';
+        fetchJson('/api/v2/monasca/passthru/alarms/count?' + query)
+          .then(responseData => {
+            this.processAlarms(responseData.counts);
+            this.setState({alarmDataLoaded: true});
+            this.checkLoadingMask();
+          }).catch((error) => {
+            this.setState({alarmDataLoaded: true});
+            this.checkLoadingMask();
+          });
+      } else {
+        this.setState({alarmDataLoaded: true});
+        this.checkLoadingMask();
+      }
     } else {
       this.setState({alarmDataLoaded: true});
       this.checkLoadingMask();
@@ -201,7 +207,7 @@ class ServiceDetails extends Component {
 
   render() {
     return (
-      <ConfirmModal show={this.props.show} className='service-info-details-modal'
+      <ConfirmModal className='service-info-details-modal'
         onHide={this.props.onHide} title={this.props.title}>
         <div className='details'>
           {this.renderDetailsLine('name', this.props.service.name)}
@@ -240,9 +246,9 @@ class ServiceInfo extends Component {
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v1/clm/endpoints')
+    fetchJson('/api/v2/endpoints')
       .then(responseData => {
         this.setState({services: responseData, endpointsLoaded: true});
         this.checkLoadingMask();
@@ -268,15 +274,19 @@ class ServiceInfo extends Component {
         this.checkLoadingMask();
       });
 
-    fetchJson('/api/v1/clm/monasca/service_status')
-      .then(responseData => {
-        this.setState({statusList: responseData});
-      })
-      .catch((error) => {
-        // no need to show error for this case
-      });
+    const responseData = await fetchJson('/api/v2/monasca/is_installed');
+    //only query for Monasca service_status if monasca is installed
+    if(responseData.installed) {
+      fetchJson('/api/v2/monasca/service_status')
+        .then(responseData => {
+          this.setState({statusList: responseData});
+        }).catch((error) => {
+          // no need to show error for this case
+        });
+    }
 
-    fetchJson('/api/v1/clm/sshagent/requires_password')
+
+    fetchJson('/api/v2/sshagent/requires_password')
       .then((responseData) => {
         this.setState({
           requiresPassphrase: responseData['requires_password']
@@ -436,35 +446,24 @@ class ServiceInfo extends Component {
         });
     }
 
-    const passPhraseModal = (
-      <GetSshPassphraseModal show={this.state.showGetPassphraseModal} doneAction={this.handlePassphrase}
-        cancelAction={() => this.setState({showGetPassphraseModal: false})}/>
-    );
-
-    let statusModal;
-    if (this.state.showRunStatusPlaybookModal) {
-      statusModal = (
-        <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
-          updatePageStatus={() => {}} modalMode showModal={this.state.showRunStatusPlaybookModal}
-          onHide={() => this.setState({showRunStatusPlaybookModal: false})}
-          serviceName={this.state.selectedService.name}/>
-      );
-    }
-
-    let detailsModal;
-    if (this.state.showDetailsModal) {
-      detailsModal = (
-        <ServiceDetails show={this.state.showDetailsModal} service={this.state.selectedService}
-          onHide={() => this.setState({showDetailsModal: false})} setLoadingMask={this.setLoadingMask}
-          title={translate('services.details', this.state.selectedService.name)}/>
-      );
-    }
-
     return (
-      <div>
-        {passPhraseModal}
-        {statusModal}
-        {detailsModal}
+      <>
+        <If condition={this.state.showGetPassphraseModal}>
+          <GetSshPassphraseModal
+            doneAction={this.handlePassphrase}
+            cancelAction={() => this.setState({showGetPassphraseModal: false})}/>
+        </If>
+        <If condition={this.state.showRunStatusPlaybookModal}>
+          <PlaybookProgress steps={this.state.steps} playbooks={this.state.playbooks}
+            updatePageStatus={() => {}} modalMode showModal={true}
+            onHide={() => this.setState({showRunStatusPlaybookModal: false})}
+            serviceName={this.state.selectedService.name}/>
+        </If>
+        <If condition={this.state.showDetailsModal}>
+          <ServiceDetails service={this.state.selectedService}
+            onHide={() => this.setState({showDetailsModal: false})} setLoadingMask={this.setLoadingMask}
+            title={translate('services.details', this.state.selectedService.name)}/>
+        </If>
         {this.renderErrorMessage()}
         <LoadingMask className='details-modal-mask' show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
@@ -486,7 +485,7 @@ class ServiceInfo extends Component {
           </table>
           {this.state.showActionMenu && this.renderMenuItems()}
         </div>
-      </div>
+      </>
     );
   }
 

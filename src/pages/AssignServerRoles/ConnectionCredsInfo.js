@@ -24,6 +24,8 @@ import { ErrorMessage, SuccessMessage } from '../../components/Messages.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { isEmpty } from 'lodash';
 import { INPUT_STATUS } from '../../utils/constants.js';
+import { fromJS } from 'immutable';
+import {ConfirmModal} from '../../components/Modals';
 
 const TEST_STATUS = INPUT_STATUS;
 
@@ -34,142 +36,104 @@ class ConnectionCredsInfo extends Component {
   constructor(props) {
     super(props);
 
-    //check all inputs are valid
-    this.allInputsStatus = {
-      'sm': {
-        'host': INPUT_STATUS.UNKNOWN,
-        'username': INPUT_STATUS.UNKNOWN,
-        'password': INPUT_STATUS.UNKNOWN,
-        'port': INPUT_STATUS.UNKNOWN
-      },
-      'ov': {
-        'host': INPUT_STATUS.UNKNOWN,
-        'username': INPUT_STATUS.UNKNOWN,
-        'password': INPUT_STATUS.UNKNOWN,
-        'port': INPUT_STATUS.UNKNOWN
-      }
-    };
-
     this.state = {
-      isOvChecked: !!(props.data.ov && props.data.ov.checked),
-      isSmChecked: !!(props.data.sm && props.data.sm.checked),
-      isOvSecured: !!(props.data.ov && props.data.ov.secured),
-      isSmSecured: !!(props.data.sm && props.data.sm.secured),
       smTestStatus: TEST_STATUS.UNKNOWN,
       ovTestStatus: TEST_STATUS.UNKNOWN,
       loading: false,
+
+      // Set the inputValue and isValid maps based on the incoming this.props.data, if any
+      inputValue: fromJS({
+        sm: {
+          checked: this.props.data?.sm?.checked || false,
+          secured: (this.props.data?.sm?.secured === true),
+          sessionKey: this.props.data?.sm?.sessionKey,
+          host: this.props.data?.sm?.creds?.host || '',
+          port: this.props.data?.sm?.creds?.port || 443,
+          username: this.props.data?.sm?.creds?.username || '',
+        },
+        ov: {
+          checked: this.props.data?.ov?.checked || false,
+          secured: (this.props.data?.ov?.secured === true),
+          sessionKey: this.props.data?.ov?.sessionKey,
+          host: this.props.data?.ov?.creds?.host || '',
+          username: this.props.data?.ov?.creds?.username || '',
+        },
+      }),
+
+      isValid: fromJS({
+        sm: {
+          host: this.props.data?.sm?.creds?.host !== undefined || undefined,
+          username: this.props.data?.sm?.creds?.username !== undefined || undefined,
+          password: undefined,
+          port: true,
+        },
+        ov: {
+          host: this.props.data?.ov?.creds?.host !== undefined || undefined,
+          username: this.props.data?.ov?.creds?.username !== undefined || undefined,
+          password: undefined,
+        },
+      }),
 
       messages: []
     };
   }
 
-  componentWillMount() {
-    this.data = this.makeDeepCopy(this.props.data);
-    this.initData();
-  }
-
-  initData() {
-    //init so we don't need to check too many levels of data defined or undefined
-    if(!this.data.sm.creds) {
-      this.data.sm.creds = {
-        'host': '',
-        'username': '',
-        'password': '',
-        'port': 443,
-        'secured': true
-      };
-    }
-    if(!this.data.ov.creds) {
-      this.data.ov.creds = {
-        'host': '',
-        'username': '',
-        'password': '',
-        'secured': true
-      };
-    }
-  }
-
-  makeDeepCopy(srcData) {
-    return JSON.parse(JSON.stringify(srcData));
-  }
-
   isFormValid () {
-    let isAllValid = true;
-    if(this.state.isSmChecked) {
-      let values = Object.values(this.allInputsStatus.sm);
-      isAllValid = (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;}));
+    // At least one of the two types must be selected
+    if (!this.state.inputValue.getIn(['ov','checked']) &&
+        !this.state.inputValue.getIn(['sm','checked'])) {
+      return false;
     }
 
-    //still valid check hpe oneview creds
-    if(isAllValid) {
-      if(this.state.isOvChecked) {
-        let values = Object.values(this.allInputsStatus.ov);
-        isAllValid = (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;}));
+    for (const category of ['sm','ov']) {
+      if(this.state.inputValue.getIn([category,'checked'])) {
+        // Require that all fields are valid
+        if (! this.state.isValid.get(category).every(val => val)) {
+          return false;
+        }
       }
     }
-    return isAllValid;
+
+    return true;
   }
 
-  updateFormValidity = (props, isValid, clearTest) => {
-    this.allInputsStatus[props.category][props.inputName] = isValid ? INPUT_STATUS.VALID : INPUT_STATUS.INVALID;
-    if (clearTest) {
-      if (props.category === 'sm') {
-        this.setState({smTestStatus: TEST_STATUS.UNKNOWN});
-      }
-      else {
-        this.setState({ovTestStatus: TEST_STATUS.UNKNOWN});
-      }
+  isDoneEnabled() {
+    return this.isFormValid() &&
+      (this.state.smTestStatus != TEST_STATUS.INVALID || ! this.state.inputValue.getIn(['sm','checked'])) &&
+      (this.state.ovTestStatus != TEST_STATUS.INVALID || ! this.state.inputValue.getIn(['ov','checked']));
+  }
+
+  testSm() {
+    this.setState(prev => ({inputValue: prev.inputValue.removeIn(['sm','sessionKey'])}));
+    const sm = this.state.inputValue.get('sm');
+
+    let hostport = sm.get('host');
+    if (sm.has('port')) {
+      hostport += ':' + sm.get('port');
     }
-  }
 
-  isDoneDisabled() {
     return (
-      !this.isFormValid() ||
-      (this.state.isSmChecked && this.state.smTestStatus === TEST_STATUS.INVALID) ||
-      (this.state.isOvChecked && this.state.ovTestStatus === TEST_STATUS.INVALID) ||
-      (!this.state.isSmChecked && !this.state.isOvChecked)
-    );
-  }
-
-  isTestDisabled() {
-    return (
-      !this.isFormValid() ||
-      (!this.state.isOvChecked && !this.state.isSmChecked)
-    );
-  }
-
-  testSm = () => {
-    this.data.sm.sessionKey = undefined;
-    return (
-      postJson('/api/v1/sm/connection_test', JSON.stringify(this.data.sm.creds), {
+      postJson('/api/v2/sm/connection_test', sm, {
         headers: {
-          'Secured': this.state.isSmSecured
+          'Secured': sm.get('secured')
         },
       }, false)
         .then((responseData) => {
-          this.data.sm.sessionKey = responseData;
-          let hostport = this.data.sm.creds.host +
-            (this.data.sm.creds.port > 0 ? ':' + this.data.sm.creds.port : '');
           let msg = translate('server.test.sm.success', hostport);
 
-          this.setState(prev => {
-            return {
-              messages: prev.messages.concat([{msg: msg, messageType: SUCCESS_MSG}]),
-              smTestStatus: TEST_STATUS.VALID
-            };
-          });
+          this.setState(prev => ({
+            inputValue: prev.inputValue.setIn(['sm','sessionKey'], responseData),
+            messages: prev.messages.concat([{msg: msg, messageType: SUCCESS_MSG}]),
+            smTestStatus: TEST_STATUS.VALID
+          }));
         })
         .catch((error) => {
-
-          let hostport = this.data.sm.creds.host +
-              (this.data.sm.creds.port > 0 ? ':'  + this.data.sm.creds.port : '');
-
           let msg = translate('server.test.sm.error', hostport);
           if(error.status === 404) {
             msg = translate('server.test.sm.error.hostport', hostport);
           }
           else if(error.status === 401) {
-            msg = translate('server.test.sm.error.userpass', hostport, this.data.sm.creds.username);
+            msg = translate('server.test.sm.error.userpass', hostport, sm.get('username'));
           }
           else if(error.status === 403) {
             msg = translate('server.test.sm.error.secured', hostport);
@@ -184,26 +148,25 @@ class ConnectionCredsInfo extends Component {
     );
   }
 
-  testOv = () => {
-    this.data.ov.sessionKey = undefined;
+  testOv() {
+    const host = this.state.inputValue.getIn(['ov', 'host']);
+    this.setState(prev => ({inputValue: prev.inputValue.removeIn(['ov','sessionKey'])}));
     return (
-      postJson('/api/v1/ov/connection_test', JSON.stringify(this.data.ov.creds), {
+      postJson('/api/v2/ov/connection_test', this.state.inputValue.get('ov'), {
         headers: {
-          'Secured': this.state.isOvSecured
+          'Secured': this.state.inputValue.getIn(['ov', 'secured'])
         }
       }, false)
         .then((responseData) => {
-          this.data.ov.sessionKey = responseData.sessionID;
-          let msg = translate('server.test.ov.success', this.data.ov.creds.host);
-          this.setState(prev => {
-            return {
-              messages: prev.messages.concat([{msg: msg, messageType: SUCCESS_MSG}]),
-              ovTestStatus: TEST_STATUS.VALID
-            };
-          });
+          let msg = translate('server.test.ov.success', host);
+          this.setState(prev => ({
+            inputValue: prev.inputValue.setIn(['ov','sessionKey'], responseData.sessionID),
+            messages: prev.messages.concat([{msg: msg, messageType: SUCCESS_MSG}]),
+            ovTestStatus: TEST_STATUS.VALID
+          }));
         })
         .catch((error) => {
-          let msg = translate('server.test.ov.error', this.data.ov.creds.host);
+          let msg = translate('server.test.ov.error', host);
           this.setState(prev => {
             return {
               messages: prev.messages.concat([{msg: [msg, error.value.error], messageType: ERROR_MSG}]),
@@ -214,76 +177,85 @@ class ConnectionCredsInfo extends Component {
     );
   }
 
-  handleTest = () => {
+  async handleTest(event) {
+    event?.preventDefault();
     this.setState({
       messages: [],
       loading: true
     });
 
     let tests = [];
-    if(this.state.isSmChecked) {
+
+    if(this.state.inputValue.getIn(['sm','checked'])) {
       tests.push(this.testSm());
     }
 
-    if(this.state.isOvChecked) {
+    if(this.state.inputValue.getIn(['ov','checked'])) {
       tests.push(this.testOv());
     }
 
     // Perform all tests
-    return Promise.all(tests);
+    await Promise.all(tests);
+    this.setState({ loading: false });
   }
 
-  handleInputChange = (e, isValid, props) => {
-    let value = e.target.value;
-    this.updateFormValidity(props, isValid, true);
-    if (isValid) {
-      this.data[props.category]['creds'][props.inputName] = value;
+  handleInputChange = (e, valid, name, category) => {
+    const target = e.target;
+    let value;
+    if (target.type == 'checkbox') {
+      value = target.checked;
+    } else {
+      value = target.value;
     }
+
+    this.setState((prevState) => ({
+      inputValue: prevState.inputValue.setIn([category, name], value),
+      isValid: prevState.isValid.setIn([category, name], valid),
+    }));
   }
 
-  handleCancel = () => {
+  handleCancel() {
     this.props.cancelAction();
   }
 
-  setDataForDone = () => {
-    let retData = this.data;
-    retData.sm.checked = this.state.isSmChecked;
-    retData.ov.checked = this.state.isOvChecked;
-    retData.sm.secured = this.state.isSmSecured;
-    retData.ov.secured = this.state.isOvSecured;
-    this.props.doneAction(retData);
-  }
+  handleDone() {
 
-  handleDone = () => {
-    if(this.state.isSmChecked && this.state.smTestStatus === TEST_STATUS.UNKNOWN ||
-      this.state.isOvChecked && this.state.ovTestStatus === TEST_STATUS.UNKNOWN) {
+    // Create the data structure needed for the callback
+    let callbackData = {};
+    for (const category of ['sm','ov']) {
+      callbackData[category] = {};
+
+      if (this.state.inputValue.getIn([category,'checked'])) {
+        // Move secured, checked, and sessionKey to he top level
+        callbackData[category].secured = this.state.inputValue.getIn([category,'secured']);
+        callbackData[category].checked = this.state.inputValue.getIn([category,'checked']);
+        callbackData[category].sessionKey = this.state.inputValue.getIn([category,'sessionKey']);
+
+        let creds = this.state.inputValue.get(category)
+          .remove('secured')
+          .remove('checked')
+          .remove('sessionKey');
+
+        callbackData[category].creds = creds.toJS();
+      }
+      else {
+        callbackData[category].checked = false;
+      }
+    }
+
+    if(this.state.inputValue.getIn(['sm','checked']) && this.state.smTestStatus === TEST_STATUS.UNKNOWN ||
+      this.state.inputValue.getIn(['ov','checked']) && this.state.ovTestStatus === TEST_STATUS.UNKNOWN) {
       this.handleTest().then(() => {
         this.setState({loading: false});
         if(this.state.smTestStatus !== TEST_STATUS.INVALID &&
           this.state.ovTestStatus !== TEST_STATUS.INVALID) {
-          this.setDataForDone();
+          this.props.doneAction(callbackData);
         }
       });
     }
     else {
-      this.setDataForDone();
+      this.props.doneAction(callbackData);
     }
-  }
-
-  handleSmCheckBoxChange = () => {
-    this.setState({isSmChecked: !this.state.isSmChecked});
-  }
-
-  handleOvCheckBoxChange = () => {
-    this.setState({isOvChecked: !this.state.isOvChecked});
-  }
-
-  handleSmSecuredChange = () => {
-    this.setState({isSmSecured: !this.state.isSmSecured});
-  }
-
-  handleOvSecuredChange = () => {
-    this.setState({isOvSecured: !this.state.isOvSecured});
   }
 
   handleCloseMessage = (ind) => {
@@ -295,12 +267,8 @@ class ConnectionCredsInfo extends Component {
   }
 
   handleShowSslHelp = (type) => {
-    if(type === 'sm') {
-      window.open('https://www.suse.com/documentation/cloud');
-    }
-    else {
-      window.open('https://www.suse.com/documentation/cloud');
-    }
+    // TODO: Open links that are specific to sm/ov, if any
+    window.open('https://www.suse.com/documentation/cloud');
   }
 
   renderMessage() {
@@ -327,73 +295,44 @@ class ConnectionCredsInfo extends Component {
     );
   }
 
-  renderInputLine = (title, name, type, category, validate) => {
-    let theprops = {};
-    let required = true;
-    if(name === 'port') {
-      theprops.min = 0;
-      theprops.max = 65535;
-      required = false;
-    }
-    return (
-      <InputLine label={title} isRequired={required} inputName={name} inputType={type}
-        inputValidate={validate} category={category} {...theprops}
-        inputValue={this.data[category]['creds'][name] || ''}
-        inputAction={this.handleInputChange} updateFormValidity={this.updateFormValidity}/>
-    );
-  }
-
-  renderCredsOvContent() {
-    return (
-      <div className='server-details-container'>
-        {this.renderInputLine('server.host1.prompt', 'host', 'text', 'ov',
-          IpV4AddressHostValidator)}
-        {this.renderInputLine('server.user.prompt', 'username', 'text', 'ov')}
-        {this.renderInputLine('server.pass.prompt', 'password', 'password', 'ov')}
-        <input className='secured' type='checkbox' value='ovsecured'
-          checked={this.state.isOvSecured} onChange={this.handleOvSecuredChange}/>
-        {translate('server.secure')}
-        <ItemHelpButton clickAction={(e) => this.handleShowSslHelp('ov')}/>
-        <div className='message-line'></div>
-      </div>
-    );
-  }
-
-  renderCredsSmContent() {
-    return (
-      <div className='server-details-container'>
-        {this.renderInputLine('server.host1.prompt', 'host', 'text', 'sm',
-          IpV4AddressHostValidator)}
-        {this.renderInputLine('server.port.prompt', 'port', 'number', 'sm', PortValidator)}
-        {this.renderInputLine('server.user.prompt', 'username', 'text', 'sm')}
-        {this.renderInputLine('server.pass.prompt', 'password', 'password', 'sm')}
-        <input className='secured' type='checkbox' value='smsecured'
-          checked={this.state.isSmSecured} onChange={this.handleSmSecuredChange}/>
-        {translate('server.secure')}
-        <ItemHelpButton clickAction={(e) => this.handleShowSslHelp('sm')}/>
-        <div className='message-line'></div>
-      </div>
-    );
-  }
-
-  renderSmCreds() {
+  renderCredentials(category) {
     return (
       <div>
-        <input className='creds-category' type='checkbox' value='sm'
-          checked={this.state.isSmChecked} onChange={this.handleSmCheckBoxChange}/>
-        {translate('server.sm')}
-        {this.state.isSmChecked && this.renderCredsSmContent()}
-      </div>
-    );
-  }
-
-  renderOvCreds() {
-    return (
-      <div>
-        <input className='creds-category' type='checkbox' value='ov'
-          checked={this.state.isOvChecked} onChange={this.handleOvCheckBoxChange}/>
-        {translate('server.ov')}
-        {this.state.isOvChecked && this.renderCredsOvContent()}
+        <input className='creds-category' type='checkbox' value={category}
+          checked={this.state.inputValue.getIn([category, 'checked'])}
+          onChange={(e) => this.handleInputChange(e,true,'checked',category)}/>
+        {translate('server.'+category)}
+        <If condition={this.state.inputValue.getIn([category, 'checked'])}>
+          <div className='server-details-container'>
+            <InputLine
+              isRequired={true} inputName='host' label='server.host1.prompt'
+              inputValidate={IpV4AddressHostValidator}
+              inputValue={this.state.inputValue.getIn([category, 'host'], '')}
+              inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
+            <If condition={category === 'sm'}>
+              <InputLine
+                isRequired={false} inputType='number' min='0' max='65535'
+                inputName='host' label='server.port.prompt'
+                inputValidate={PortValidator}
+                inputValue={this.state.inputValue.getIn([category, 'port'], '')}
+                inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
+            </If>
+            <InputLine
+              isRequired={true} inputName='username' label='server.user.prompt'
+              inputValue={this.state.inputValue.getIn([category, 'username'], '')}
+              inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
+            <InputLine
+              isRequired={true} inputType='password'inputName='password' label='server.pass.prompt'
+              inputValue={this.state.inputValue.getIn([category, 'password'], '')}
+              inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
+            <input className='secured' type='checkbox' value='secured'
+              checked={this.state.inputValue.getIn([category, 'secured'])}
+              onChange={(e) => this.handleInputChange(e,true,'secured',category)}/>
+            {translate('server.secure')}
+            <ItemHelpButton clickAction={(e) => this.handleShowSslHelp(category)}/>
+            <div className='message-line'></div>
+          </div>
+        </If>
       </div>
     );
   }
@@ -402,27 +341,31 @@ class ConnectionCredsInfo extends Component {
     return (
       <div className='btn-row input-button-container'>
         <ActionButton type='default'
-          clickAction={this.handleCancel} displayLabel={translate('cancel')}/>
+          clickAction={::this.handleCancel} displayLabel={translate('cancel')}/>
         <ActionButton type='default'
-          isDisabled={this.isTestDisabled()}
-          clickAction={()=> this.handleTest().then(() => this.setState({loading: false}))}
+          isDisabled={!this.isFormValid()}
+          clickAction={::this.handleTest}
           displayLabel={translate('test')}/>
         <ActionButton
-          isDisabled={this.isDoneDisabled()}
-          clickAction={this.handleDone} displayLabel={translate('common.save.continue')}/>
+          isDisabled={!this.isDoneEnabled()}
+          clickAction={::this.handleDone} displayLabel={translate('common.save.continue')}/>
       </div>
     );
   }
 
   render() {
     return (
-      <div className='connection-creds-info'>
-        {this.renderMessage()}
-        {this.renderSmCreds()}
-        {this.renderOvCreds()}
-        {this.renderFooter()}
-        {this.renderLoadingMask()}
-      </div>
+      <ConfirmModal className={this.props.className} title={this.props.title}
+        onHide={this.props.cancelAction} footer={this.renderFooter()}>
+        <div className='connection-creds-info'>
+          {this.renderMessage()}
+          <form onSubmit={::this.handleTest}>
+            {this.renderCredentials('sm')}
+            {this.renderCredentials('ov')}
+          </form>
+          {this.renderLoadingMask()}
+        </div>
+      </ConfirmModal>
     );
   }
 }

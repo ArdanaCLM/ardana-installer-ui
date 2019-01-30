@@ -74,7 +74,7 @@ class NetworksTab extends Component {
   renderRemoveConfirmation() {
     if (this.state.showRemoveConfirmation) {
       return (
-        <YesNoModal show={this.state.showRemoveConfirmation} title={translate('warning')}
+        <YesNoModal title={translate('warning')}
           yesAction={() => this.handleDeleteNetwork(this.state.networkName) }
           noAction={() => this.setState({showRemoveConfirmation: false})}>
           {translate('network.confirm.remove', this.state.networkName)}

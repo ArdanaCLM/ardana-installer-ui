@@ -47,7 +47,7 @@ class ServiceConfiguration extends Component {
     // remove original files and commit configuration changes
     this.serviceTemplatesTab.removeOrigFiles();
     const commitMessage = {'message': 'Committed via CLM Admin Console'};
-    postJson('/api/v1/clm/model/commit', commitMessage)
+    postJson('/api/v2/model/commit', commitMessage)
       .then(() => {
         this.setState({showUpdateProgress: true, updateCompleted: false});
       })
@@ -106,7 +106,7 @@ class ServiceConfiguration extends Component {
   getPlaybooks = () => {
     let playbooksToRun = {};
     const changedServices = this.serviceTemplatesTab.getChangedServices();
-    if (changedServices && changedServices.length > 0) {
+    if (changedServices?.length > 0) {
       playbooksToRun.steps = [{
         label: translate('deploy.progress.config-processor-run'),
         playbooks: ['config-processor-run.yml']
