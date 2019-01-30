@@ -142,12 +142,20 @@ class ServerGroupDetails extends Component {
       }
     }
 
+    let extraProps1 = {};
+    let extraProps2 = {};
+    if(this.props.serverGroupInUse?.name === this.state.name) {
+      extraProps1.noDeleteOptions =  this.props.serverGroupInUse['networks'] || undefined;
+      extraProps2.noDeleteOptions =  this.props.serverGroupInUse['server-groups'] || undefined;
+    }
+
     return (
       <div className='col-4'>
         <div className='details-section'>
           <div className='details-header'>{header}</div>
           <div className='details-body'>
             <ValidatingInput isRequired={true} placeholder={translate('server.group.name') + '*'}
+              disabled={this.props.serverGroupInUse?.name === this.state.name}
               inputValue={this.state.name} inputName='name' inputType='text'
               inputAction={this.handleInputLine}
               inputValidate={chainValidators(
@@ -156,11 +164,11 @@ class ServerGroupDetails extends Component {
               )}
               autoFocus={true}/>
             <div className='details-group-title'>{translate('edit.networks') + ':'}</div>
-            <InlineAddRemoveDropdown name='networks' options={networks}
+            <InlineAddRemoveDropdown name='networks' options={networks} {...extraProps1}
               values={this.state.networks} defaultOption={networkDefaultOption}
               sendSelectedList={this.getSelectedNetworks}/>
             <div className='details-group-title'>{translate('edit.server.groups') + ':'}</div>
-            <InlineAddRemoveDropdown name='serverGroups' options={serverGroups}
+            <InlineAddRemoveDropdown name='serverGroups' options={serverGroups} {...extraProps2}
               values={this.state.serverGroups} defaultOption={serverGroupDefaultOption}
               sendSelectedList={this.getSelectedServerGroups} exceptions={exceptions}/>
             <div className='btn-row details-btn'>

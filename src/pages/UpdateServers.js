@@ -32,6 +32,9 @@ import { fetchJson, postJson, putJson } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
 import { genUID } from '../utils/ModelUtils.js';
+import { getInternalModel } from './topology/TopologyUtils';
+import { fromJS } from 'immutable';
+import { isMonascaInstalled } from '../utils/MonascaUtils.js';
 
 class UpdateServers extends BaseUpdateWizardPage {
 
@@ -39,9 +42,8 @@ class UpdateServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
-      // this loading indicator, the possible value could
-      // be undefined, '', 'Validating Changes'
-      loading: undefined,
+      loading: false,
+      validating: undefined, // Will have a text when validating
       errorMessages: [],
 
       // Track which groups the user has expanded
@@ -57,13 +59,17 @@ class UpdateServers extends BaseUpdateWizardPage {
       serverToReplace: undefined,
 
       // error message show as a popup modal for validation errors
-      validationError: undefined
+      validationError: undefined,
+      // need the expanded model to match up server info for Nova and Monasca
+      internalModel: undefined,        // a copy of the full internal model for matching up hostnames
+      monasca: undefined,               // whether monasca is installed
+      serverMonascaStatuses: {}
     };
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.model !== prevProps.model)
-    {
+    //TODO this is ugly, we souldn't be waiting for things to load like this
+    if (this.props.model !== prevProps.model) {
       const allGroups =
         this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
       if (allGroups.includes('COMPUTE-ROLE')) {
@@ -71,28 +77,157 @@ class UpdateServers extends BaseUpdateWizardPage {
       } else if (allGroups.size > 0) {
         this.setState({expandedGroup: [allGroups.sort().first()]});
       }
+
+      if(this.state.loading === false) {
+        this.setState({loading: true});
+
+        getInternalModel()
+          .then(model => {
+            this.setState({ internalModel: fromJS(model) });
+          })
+          .then(::this.getServerStatuses)
+          .then(::this.checkMonasca)
+          .then(() => this.setState({ loading: false }))
+          .catch(error => {
+            this.setState({
+              errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
+              loading: false
+            });
+          });
+      }
     }
   }
 
   componentDidMount() {
     // empty string loading indicates loading mask without
     // text
-    this.setState({loading: ''});
-    fetchJson('/api/v1/server?source=sm,ov,manual')
+    this.setState({loading: true});
+    fetchJson('/api/v2/server?source=sm,ov,manual')
       .then(servers => {
         this.setState({
           servers: servers,
-          loading: undefined});
+          loading: false});
       })
       .catch(error => {
         let msg = translate('server.retrieve.discovered.servers.error', error.toString());
         this.setState(prev => {
           return {
             errorMessages: prev.errorMessages.concat([msg]),
-            loading: undefined
+            loading: false
           };
         });
       });
+  }
+
+  /**
+   * checks to see if Monasca is installed, and if it is, triggers a call to the status
+   * of each server in the model
+   */
+  async checkMonasca() {
+    if(this.state.monasca === undefined) {
+      //default state.monasca to false, primarily to short circuit additional checks
+      //this is because componentDidMount and componentDidUpdate both call into this
+      //depending on how the page was navigated to... removing either of those calls results
+      //in some cases where this function never gets called... keeping both results in it
+      //usually being called twice, setting the state to false (from its original value of
+      //undefined) prevents the 2nd call from duplicating the check and model load
+      this.setState({monasca: false});
+      let isInstalled = await isMonascaInstalled();
+      if(isInstalled) {
+        this.setState({monasca: true}, () => this.getServerMonascaStatuses());
+      }
+    } else if(this.state.monasca === true) {
+      //if monasca is installed, get the server statuses
+      this.getServerMonascaStatuses();
+    }
+  }
+
+  /**
+  * takes a List (immutable) of serverIds, serially requests server status on each
+  * the serial nature is to avoid flooding the monasca API with status requests
+  */
+  async throttledServerStatusRequest(serverIds) {
+    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
+    for (const server_id of serverIds.values()) {
+      let server = internalModelServers.find(s => s.id == server_id);
+      if (!server) continue;
+      try {
+        const responseData = await fetchJson('/api/v2/monasca/server_status/' + server.hostname);
+        this.setMonascaStatus(server_id, responseData.status);
+      } catch(error) {
+        this.setMonascaStatus(server_id);
+        console.log('error getting server status for:' + server.hostname + // eslint-disable-line no-console
+          ' -- error is:' + error);
+      }
+    }
+  }
+
+  /**
+   * Update the translated status of a server status
+   * @param {String} server_id The id of the server
+   * @param {String} status The current status of the server
+   */
+  setMonascaStatus(server_id, status) {
+    this.setState(prevState => {
+      let { serverMonascaStatuses } = prevState,
+        translationKey = `server.details.status.${status}`;
+      serverMonascaStatuses[server_id] = status ? translate(translationKey) : null;
+      if(serverMonascaStatuses[server_id] === null || serverMonascaStatuses[server_id] === translationKey) {
+        serverMonascaStatuses[server_id] = translate('server.details.status.unknown');
+      }
+      return { serverMonascaStatuses };
+    });
+  }
+
+  /**
+   * get the monasca status (up/down/unknown) for each server in the cloud
+   */
+  getServerMonascaStatuses() {
+    if(this.state.monasca && this.state.internalModel !== undefined
+        && this.props.model !== undefined) {
+      // get the list of all servers, then load their statuses
+      // possible future enhancement: batching this
+      const serverIds = this.props.model.getIn(['inputModel','servers'])
+        .map(server => server.get('id'));
+
+      this.throttledServerStatusRequest(serverIds);
+    }
+  }
+
+  async getServerStatuses() {
+    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
+    let servers = this.props.model.getIn(['inputModel','servers']).toJS()
+      .filter(s => s.role.includes('COMPUTE'))
+      .map(s => {
+        const internalServer = internalModelServers.filter(sev => sev.id === s.id)[0];
+        if(internalServer !== undefined) {
+          return {
+            ...s,
+            internal: internalServer,
+            hostname: internalServer.hostname
+          };
+        } else {
+          console.log('possible model inconsistency, internal model missing server id:' + s.id);
+        }
+      });
+
+    let serversStatus = servers.map(s => {
+      if(s) {
+        return fetchJson(`/api/v2/compute/services/${s.hostname}`);
+      }
+    });
+    const values = await Promise.all(serversStatus);
+    let serverStatuses = {};
+    for(const [index, status] of values.entries()) {
+      const server = servers[index];
+      if(server) {
+        serverStatuses[server.id] = {
+          ...server,
+          status: status['nova-compute']
+        };
+      }
+    }
+    this.setState({serverStatuses});
   }
 
   expandAll() {
@@ -128,7 +263,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     let old = this.state.servers.find(s => server.uid === s.uid);
     if (old) {
       const updated_server = getMergedServer(old, server, this.getReplaceProps());
-      putJson('/api/v1/server', updated_server)
+      putJson('/api/v2/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
@@ -138,7 +273,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     // to saved servers
     else if(isComputeNode(this.state.serverToReplace)) {
       server['source'] = 'manual';
-      postJson('/api/v1/server', [server])
+      postJson('/api/v2/server', [server])
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
@@ -152,6 +287,12 @@ class UpdateServers extends BaseUpdateWizardPage {
     let pages = [];
 
     if(isComputeNode(this.state.serverToReplace)) {
+      if(theProps.installOS) {
+        pages.push({
+          name: 'InstallOS',
+          component: UpdateServerPages.InstallOS
+        });
+      }
       pages.push({
         name: 'PrepareAddCompute',
         component: UpdateServerPages.PrepareAddCompute
@@ -161,8 +302,16 @@ class UpdateServers extends BaseUpdateWizardPage {
         component: UpdateServerPages.DeployAddCompute
       });
       pages.push({
-        name: 'CompleteAddCompute',
-        component: UpdateServerPages.CompleteAddCompute
+        name: 'DisableComputeServiceNetwork',
+        component: UpdateServerPages.DisableComputeServiceNetwork
+      });
+      pages.push({
+        name: 'DeleteCompute',
+        component: UpdateServerPages.DeleteCompute
+      });
+      pages.push({
+        name: 'CompleteReplaceCompute',
+        component: UpdateServerPages.CompleteReplaceCompute
       });
     } else {
       pages.push({
@@ -175,9 +324,9 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   // server includes server info and ipmi info
   // theProps includes zero or more of the items like
-  // wipeDisk, installOS, osInstallUsername, osInstallPassword,
+  // wipeDisk, installOS, osUsername, osPassword,
   // selectedServerId
-  replaceServer = (server, theProps) =>  {
+  replaceServer = async (server, theProps) =>  {
     let model;
 
     let repServer = Object.assign({}, server);
@@ -209,19 +358,23 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     this.updateServerForReplaceServer(repServer);
 
-    this.props.updateGlobalState('model', model);
+    // Update the global state. Since this saves the model and updates the state, wait for
+    // it to complete before moving on.
+    await this.props.updateGlobalState('model', model);
 
     // existing server id and ip-addr for non-compute node
     // new server id and ip-addr for a new compute node
     // for replacing a compute node, also recorded oldServer's id
     // and ip-addr
-    // id and ip-addr can be used to retriev hostname in CloudModel.yml
+    // id and ip-addr can be used to retrieve hostname in CloudModel.yml
     theProps.server = {id: repServer.id, 'ip': repServer['ip-addr']};
 
     // save the oldServer information for later process when replace compute
     if(isComputeNode(this.state.serverToReplace)) {
       theProps.oldServer = {
-        id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr']};
+        id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr'],
+        isReachable: this.state.isOldServerReachable
+      };
       // will always activate the newly added compute server
       theProps.activate = true;
     }
@@ -229,16 +382,16 @@ class UpdateServers extends BaseUpdateWizardPage {
     let pages = this.assembleProcessPages(theProps);
 
     if(isComputeNode(this.state.serverToReplace)) {
-      this.setState({loading: translate('server.validating')});
-      postJson('/api/v1/clm/config_processor')
+      this.setState({validating: translate('server.validating')});
+      postJson('/api/v2/config_processor')
         .then(() => {
-          this.setState({loading: undefined});
+          this.setState({validating: undefined});
           this.props.startUpdateProcess('ReplaceServer', pages, theProps);
         })
         .catch((error) => {
           // when validation failed, show error messages and
           // instruct users to update and do replace again.
-          this.setState({loading: undefined});
+          this.setState({validating: undefined});
           this.setState({validationError: error.value ? error.value.log : error.toString()});
           // remove the server from model
           // remove role of the server in the availabe server list
@@ -264,12 +417,125 @@ class UpdateServers extends BaseUpdateWizardPage {
       let servers = this.state.servers.filter(s => server.uid !== s.uid);
       servers.push(updated_server);
       this.setState({'servers': servers});
-      putJson('/api/v1/server', updated_server)
+      putJson('/api/v2/server', updated_server)
         .catch(error => {
           let msg = translate('server.save.error', error.toString());
           this.setState(prev => ({ errorMessages: prev.errorMessages.concat(msg)}));
         });
     }
+  }
+
+  async performDeactivateComputeHost() {
+    let id = this.state.confirmDeactivate?.id;
+    let status = this.state.serverStatuses[id];
+    if (!status) return;
+    try {
+      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+      await postJson(
+        '/api/v2/playbooks/nova-stop',
+        { limit: status.hostname }
+      );
+      this.setState({
+        serverStatuses: {
+          ...this.state.serverStatuses,
+          [id]: {
+            ...status,
+            status: false
+          }
+        },
+        confirmDeactivate: undefined
+      });
+    } catch (error) {
+      let msg = translate('server.deactivate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDeactivate: undefined
+      });
+    }
+  }
+
+  async activateComputeHost(id) {
+    let internalHostname = this.state.serverStatuses[id].hostname;
+    try {
+      // TODO (SCRD-5292) allow user to specify encryption key before this playbook
+      await postJson(
+        '/api/v2/playbooks/ardana-start',
+        { limit: internalHostname }
+      );
+      this.setState({
+        serverStatuses: {
+          ...this.state.serverStatuses,
+          [id]: {
+            ...this.state[id],
+            status: true
+          }
+        }
+      });
+    } catch (error) {
+      let msg = translate('server.activate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ]
+      });
+    }
+  }
+
+  async deactivateComputeHost(id) {
+    let status = this.state.serverStatuses[id];
+    this.setState({
+      confirmDeactivate: {
+        show: true,
+        loading: true,
+        id: status.id
+      }
+    });
+    try {
+      let instances = await fetchJson(`/api/v2/compute/instances/${status.hostname}`);
+      this.setState({
+        confirmDeactivate: {
+          ...this.state.confirmDeactivate,
+          loading: false,
+          instances
+        }
+      });
+    } catch (error) {
+      let msg = translate('server.deactivate.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDeactivate: undefined
+      });
+    }
+  }
+
+  renderDeactivateConfirmModal() {
+    if (!this.state.confirmDeactivate || !this.state.confirmDeactivate.show) return;
+    let { id, instances, loading } = this.state.confirmDeactivate;
+    return (
+      <YesNoModal
+        title={translate('server.deactivate.confirm.title', id)} yesAction={::this.performDeactivateComputeHost}
+        noAction={() => this.setState({confirmDeactivate: undefined})}
+        disableYes={loading}>
+        <h3>
+          <If condition={loading}>
+            {translate('loading.pleasewait')}
+          </If>
+          <If condition={!loading && instances?.length > 0}>
+            {translate('server.deactivate.confirm.message_instances', id, instances.length)}
+          </If>
+          <If condition={!loading && instances?.length === 0}>
+            {translate('server.deactivate.confirm.message', id)}
+          </If>
+        </h3>
+      </YesNoModal>
+    );
   }
 
   handleCloseMessage = (idx) => {
@@ -285,18 +551,17 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   renderValidationErrorModal() {
-    let msg = translate('server.addcompute.validate.error.msg');
-    return (
-      <BaseInputModal
-        show={this.state.validationError !== undefined}
-        className='addserver-log-dialog'
-        onHide={this.handleCloseValidationErrorModal}
-        title={translate('server.addcompute.validate.error.title')}>
-        <div className='addservers-page'>
-          <pre>{msg}</pre>
-          <pre className='log'>{this.state.validationError}</pre></div>
-      </BaseInputModal>
-    );
+    if (this.state.validationError) {
+      return (
+        <BaseInputModal
+          className='addserver-log-dialog'
+          onHide={this.handleCloseValidationErrorModal}
+          title={translate('server.addcompute.validate.error.title')}>
+          <div className='addservers-page'>
+            <pre className='log'>{this.state.validationError}</pre></div>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderMessages() {
@@ -317,36 +582,38 @@ class UpdateServers extends BaseUpdateWizardPage {
     // on the old compute node first, therefore it should be reachable.
     // If it is not reachable, show a warning indicating that instances can not
     // be migrated.
-    fetchJson('api/v1/ips')
+    fetchJson('/api/v2/ips')
       .then(ips => {
         if (ips.includes(server['ip-addr'])) {
           this.setState({showSharedWarning: true});
         }
         else {
           // Display the load mask without loading text
-          this.setState({loading: ''});
+          this.setState({loading: true});
 
-          postJson('api/v1/connection_test', {host: server['ip-addr']})
+          postJson('api/v2/connection_test', {host: server['ip-addr']})
             .then(result => {
               if(isComputeNode(server)) {
                 this.setState({
-                  loading: undefined,
+                  loading: false,
                   showReplaceModal: true,
-                  serverToReplace: server
+                  serverToReplace: server,
+                  isOldServerReachable: true
                 });
               }
               else {
                 // If the node is still reachable, then display a message to the user to have them
                 // power it down.
-                this.setState({loading: undefined, showPowerOffWarning: true});
+                this.setState({loading: false, showPowerOffWarning: true});
               }
             })
             .catch(error => {
               if (error.status == 404) {
                 if(isComputeNode(server)) {
                   this.setState({
-                    loading: undefined,
+                    loading: false,
                     serverToReplace: server,
+                    isOldServerReachable: false,
                     showNoMigrationWarning: true});
                 }
                 else {
@@ -356,7 +623,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                   // 404 means the server is not found, which is the state that we *want* to be in.
                   // Proceed with the modal for entering the replacement info.
                   this.setState({
-                    loading: undefined,
+                    loading: false,
                     showReplaceModal: true,
                     serverToReplace: server
                   });
@@ -365,7 +632,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                 let msg = translate('server.save.error', error.toString());
                 this.setState(prev => ({
                   errorMessages: prev.errorMessages.concat(msg),
-                  loading: undefined
+                  loading: false
                 }));
               }
             });
@@ -377,23 +644,25 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState({showReplaceModal: false, serverToReplace: undefined});
   }
 
-  handleDoneReplaceServer = (server, theProps) => {
-    this.replaceServer(server, theProps);
+  handleDoneReplaceServer = async (server, theProps) => {
+    await this.replaceServer(server, theProps);
     this.handleCancelReplaceServer();
+  }
+
+  proceedOldComputeNotReachable = () => {
+    this.setState({
+      showNoMigrationWarning: false, showReplaceModal: true});
   }
 
   renderSharedWarning() {
     if (this.state.showSharedWarning) {
       return (
         <ConfirmModal
-          show={true}
           title={translate('warning')}
           onHide={() => this.setState({showSharedWarning: false})}>
           <div>{translate('replace.server.shared.warning')}</div>
         </ConfirmModal>
       );
-    } else {
-      return null;
     }
   }
 
@@ -401,30 +670,24 @@ class UpdateServers extends BaseUpdateWizardPage {
     if (this.state.showPowerOffWarning) {
       return (
         <ConfirmModal
-          show={true}
           title={translate('warning')}
           onHide={() => this.setState({showPowerOffWarning: false})}>
           <div>{translate('replace.server.poweroff.warning')}</div>
         </ConfirmModal>
       );
-    } else {
-      return null;
     }
   }
 
   renderNoMigrationWarning() {
     if (this.state.showNoMigrationWarning) {
       return (
-        <YesNoModal
-          show={true} title={translate('warning')}
-          yesAction={() => this.setState({showNoMigrationWarning: false, showReplaceModal: true})}
+        <YesNoModal title={translate('warning')}
+          yesAction={this.proceedOldComputeNotReachable}
           noAction={() => this.setState({showNoMigrationWarning: false, serverToReplace: undefined})}>
           {translate('replace.server.nomigration.warning',
             this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'])}
         </YesNoModal>
       );
-    } else {
-      return null;
     }
   }
 
@@ -433,7 +696,6 @@ class UpdateServers extends BaseUpdateWizardPage {
       return;
     }
 
-    let title = translate('server.replace.heading', this.state.serverToReplace.id);
     let newProps = { ...this.props };
 
     const modelIds = this.props.model.getIn(['inputModel','servers'])
@@ -442,16 +704,13 @@ class UpdateServers extends BaseUpdateWizardPage {
     newProps.availableServers = this.state.servers.filter(server => ! modelIds.includes(server.uid));
 
     return (
-      <BaseInputModal
-        show={true} className='edit-details-dialog'
-        onHide={this.handleCancelReplaceServer} title={title}>
-        <ReplaceServerDetails
-          cancelAction={this.handleCancelReplaceServer}
-          doneAction={this.handleDoneReplaceServer}
-          data={this.state.serverToReplace}
-          { ...newProps }>
-        </ReplaceServerDetails>
-      </BaseInputModal>
+      <ReplaceServerDetails className='edit-details-dialog'
+        title={translate('server.replace.heading', this.state.serverToReplace.id)}
+        cancelAction={this.handleCancelReplaceServer}
+        doneAction={this.handleDoneReplaceServer}
+        data={this.state.serverToReplace}
+        {...newProps}>
+      </ReplaceServerDetails>
     );
   }
 
@@ -464,6 +723,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {name: 'server-group'},
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
+        {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses', hidden: !this.state.monasca},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
@@ -481,7 +741,10 @@ class UpdateServers extends BaseUpdateWizardPage {
         model={this.props.model} tableConfig={tableConfig} expandedGroup={this.state.expandedGroup}
         replaceServer={this.checkPrereqs} updateGlobalState={this.props.updateGlobalState}
         autoServers={autoServers} manualServers={manualServers}
-        processOperation={this.props.processOperation}/>
+        processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
+        activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}
+        serverMonascaStatuses={this.state.serverMonascaStatuses}
+        internalModel={this.state.internalModel} />
     );
   }
 
@@ -501,16 +764,16 @@ class UpdateServers extends BaseUpdateWizardPage {
   render() {
     return (
       <div className='wizard-page'>
-        <LoadingMask show={this.props.wizardLoading || this.state.loading !== undefined}
-          text={this.state.loading}/>
+        <LoadingMask show={this.props.wizardLoading || this.state.loading || this.state.validating}
+          text={this.state.validating}/>
         <div className='content-header'>
           <div className='titleBox'>
             {this.renderHeading(translate('common.servers'))}
           </div>
-          {this.props.model && this.props.model.size > 0 && this.renderGlobalButtons()}
+          {this.props.model?.size > 0 && this.renderGlobalButtons()}
         </div>
         <div className='wizard-content unlimited-height'>
-          {this.props.model && this.props.model.size > 0 && this.renderCollapsibleTable()}
+          {this.props.model?.size > 0 && this.renderCollapsibleTable()}
           {!this.props.wizardLoading && this.props.wizardLoadingErrors &&
            this.renderWizardLoadingErrors(
              this.props.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
@@ -521,6 +784,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.renderPowerOffWarning()}
         {this.renderNoMigrationWarning()}
         {this.renderValidationErrorModal()}
+        {this.renderDeactivateConfirmModal()}
       </div>
     );
   }

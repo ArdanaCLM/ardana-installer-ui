@@ -16,19 +16,19 @@
 describe('basic sanity tests', function() {
 
   beforeAll(function() {
-    browser.get('localhost:3000?installreset=true');
+    browser.get('http://localhost:3000?installreset=true');
     browser.sleep(1000);
   });
 
   it('loads the app', function() {
-    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Deployer');
+    expect(browser.getTitle()).toEqual('SUSE OpenStack Cloud Installer');
   });
 
   it('has the first step selected by default', function() {
     var stateLineWrapperContainer = element(by.css('.wizard-progress-container'));
     var firstIndicator = stateLineWrapperContainer.all(by.css('.progress')).first();
 
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
+    expect(firstIndicator.getCssValue('background-color')).toContain('0, 192, 129');//the rgba value of #00C081
   });
 
   it('advances to the next page and updates the indicator', function() {
@@ -37,13 +37,13 @@ describe('basic sanity tests', function() {
     var lastIndicator = stateLineWrapperContainer.all(by.css('.progress')).last();
 
     //the first indicator is the correct "in-progress" color
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
+    expect(firstIndicator.getCssValue('background-color')).toContain('0, 192, 129');//the rgba value of #00C081
 
     var nextButton = element(by.xpath('.//Button[.="Next"]'));
     nextButton.click();
     //the first indicator has updated to the "complete" color
-    expect(firstIndicator.getCssValue('background-color')).toEqual('rgba(0, 192, 129, 1)');//the rgba value of #00C081
+    expect(firstIndicator.getCssValue('background-color')).toContain('0, 192, 129');//the rgba value of #00C081
     //the last indicator has a "notdone" color
-    expect(lastIndicator.getCssValue('background-color')).toEqual('rgba(106, 114, 118, 1)');//the rgba value of #6a7276
+    expect(lastIndicator.getCssValue('background-color')).toContain('106, 114, 118');//the rgba value of #6a7276
   });
 });

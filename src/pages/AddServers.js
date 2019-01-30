@@ -77,7 +77,7 @@ class AddServers extends BaseUpdateWizardPage {
   getDeployedServers = () => {
     this.setState({loading: true});
     // fetchJson(url, init, forceLogin, noCache)
-    fetchJson('/api/v1/clm/model/deployed_servers', undefined, true, true)
+    fetchJson('/api/v2/model/deployed_servers', undefined, true, true)
       .then((servers) => {
         if (servers) {
           this.setState({deployedServers: servers, loading: false});
@@ -132,7 +132,7 @@ class AddServers extends BaseUpdateWizardPage {
     // validate and update CloudModel.yml so we
     // can have hostnames ready for newly added servers
     this.setState({validating: true, showDeployConfirmModal: false});
-    postJson('/api/v1/clm/config_processor')
+    postJson('/api/v2/config_processor')
       .then(() => {
         this.setState({validating: false});
         let pages = this.assembleDeployProcessPages();
@@ -212,14 +212,14 @@ class AddServers extends BaseUpdateWizardPage {
 
   //check if we can deploy the new servers
   isDeployable = () => {
-    if(this.props.model && this.props.model.size > 0) {
+    if(this.props.model?.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the deploy button when all servers are valid
       // and have new servers added and do not have existing processOperation
       // going on
       return (
         !this.props.wizardLoadingErrors &&
-        newIds && newIds.length > 0 && !this.props.processOperation &&
+        newIds?.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers() &&
         getServerRoles(this.props.model, ROLE_LIMIT).every(role => {
           return isRoleAssignmentValid(role, this.checkInputs);
@@ -232,14 +232,14 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   isInstallable = () => {
-    if(this.props.model && this.props.model.size > 0) {
+    if(this.props.model?.size > 0) {
       let newIds = this.getAddedServerIds();
       // turn on the install button when all servers are valid for installing os
       // and have new servers added and do not have existing processOperation
       // going on
       return (
         !this.props.wizardLoadingErrors &&
-        newIds && newIds.length > 0 && !this.props.processOperation &&
+        newIds?.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers(true)
       );
     }
@@ -252,7 +252,7 @@ class AddServers extends BaseUpdateWizardPage {
     return (
       // render the servers content when  model loaded, have no errors of deployed servers
       // and have no model loading errors and wizard loading is done
-      this.props.model && this.props.model.size > 0 && !this.state.errorBanner &&
+      this.props.model?.size > 0 && !this.state.errorBanner &&
       (!this.state.wizardLoadingErrors || !this.state.wizardLoadingErrors.get('modelError')) &&
       !this.props.wizardLoading
     );
@@ -323,24 +323,27 @@ class AddServers extends BaseUpdateWizardPage {
   }
 
   renderValidationErrorModal() {
-    return (
-      <BaseInputModal
-        show={this.state.validationError !== undefined}
-        className='addserver-log-dialog'
-        onHide={this.handleCloseValidationErrorModal}
-        title={translate('server.addserver.validate.error.title')}>
-        <div className='addservers-page'><pre className='log'>{this.state.validationError}</pre></div>
-      </BaseInputModal>
-    );
+    if(this.state.validationError) {
+      return (
+        <BaseInputModal
+          className='addserver-log-dialog'
+          onHide={this.handleCloseValidationErrorModal}
+          title={translate('server.addserver.validate.error.title')}>
+          <div className='addservers-page'><pre className='log'>{this.state.validationError}</pre></div>
+        </BaseInputModal>
+      );
+    }
   }
 
   renderDeployConfirmModal() {
     return (
-      <YesNoModal show={this.state.showDeployConfirmModal} title={translate('warning')}
-        yesAction={this.addServers}
-        noAction={() => this.setState({showDeployConfirmModal: false})}>
-        {translate('server.addserver.deploy.confirm')}
-      </YesNoModal>
+      <If condition={this.state.showDeployConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={this.addServers}
+          noAction={() => this.setState({showDeployConfirmModal: false})}>
+          {translate('server.addserver.deploy.confirm')}
+        </YesNoModal>
+      </If>
     );
   }
 
@@ -354,7 +357,7 @@ class AddServers extends BaseUpdateWizardPage {
             {this.renderHeading(translate('add.server.add'))}
           </div>
         </div>
-        <div className='wizard-content unlimited-height'>
+        <div className='wizard-content'>
           {this.isValidToRenderServerContent() && this.renderAddPage()}
         </div>
         {this.renderDeployConfirmModal()}

@@ -27,7 +27,7 @@ export class LabeledInput extends Component {
           <ValidatingInput isRequired={this.props.isRequired} inputName={this.props.inputName}
             inputType={this.props.inputType} inputValidate={this.props.inputValidate} {... this.props}
             inputAction={this.props.inputAction} inputValue={this.props.inputValue}
-            updateFormValidity={this.props.updateFormValidity} category={this.props.category}
+            category={this.props.category}
             moreClass={this.props.moreClass}/>
         </div>
       </div>

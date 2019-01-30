@@ -29,7 +29,8 @@ import {
   from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
-import {fetchJson} from '../utils/RestUtils.js';
+import { fetchJson } from '../utils/RestUtils.js';
+import { ConfirmModal } from './Modals.js';
 
 
 class ReplaceServerDetails extends Component {
@@ -37,27 +38,27 @@ class ReplaceServerDetails extends Component {
     super(props);
 
     this.state = {
-      isInstallOsSelected: false,
+      isInstallOsSelected: true,
       isWipeDiskSelected: false,
       isUseAvailServersSelected: false,
       inputValue: this.initInputs(props),
 
       selectedServerId: undefined,
-      osInstallUsername: undefined,
-      osInstallPassword: undefined,
+      osUsername: undefined,
+      osPassword: undefined,
 
       isValid: this.initInputsValid(props),
-      isOsInstallPasswordValid: undefined,
+      isOsPasswordValid: undefined,
       nicMappings: getNicMappings(props.model),
       serverGroups: getServerGroups(props.model)
     };
   }
 
   componentDidMount() {
-    fetchJson('/api/v1/clm/user')
+    fetchJson('/api/v2/user')
       .then(responseData => {
         this.setState({
-          osInstallUsername: responseData['username']
+          osUsername: responseData['username']
         });
       });
   }
@@ -115,10 +116,10 @@ class ReplaceServerDetails extends Component {
 
   isFormInputValid = () => {
 
-    // The form is valid if all of the fields are valid.  The OS install password only has
-    // to be valid when the OS Install checkbox is selected
+    // The form is valid if all of the fields are valid.  The OS password only has
+    // to be valid when the OS Install checkbox is selected or it is a compute server
     return this.isServerInputsValid() &&
-      (this.state.isOsInstallPasswordValid || !this.state.isInstallOsSelected);
+      (this.state.isOsPasswordValid || (!this.state.isInstallOsSelected && !isComputeNode(this.props.data)));
   }
 
   handleDone = () => {
@@ -141,9 +142,9 @@ class ReplaceServerDetails extends Component {
       wipeDisk : this.state.isWipeDiskSelected,
       installOS : this.state.isInstallOsSelected
     };
-    if(this.state.isInstallOsSelected) {
-      theProps.osInstallUsername = this.state.osInstallUsername;
-      theProps.osInstallPassword = this.state.osInstallPassword; //TODO where to store
+    if(this.state.isInstallOsSelected || isComputeNode(this.props.data)) {
+      theProps.osUsername = this.state.osUsername;
+      theProps.osPassword = this.state.osPassword;
     }
 
     // picked from available server, this is used to
@@ -169,14 +170,30 @@ class ReplaceServerDetails extends Component {
   handleOsPasswordChange = (e, valid, props) => {
     const value = e.target.value;
     this.setState({
-      isOsInstallPasswordValid: valid,
-      osInstallPassword: value,
+      isOsPasswordValid: valid,
+      osPassword: value,
     });
   }
 
   handleInstallOsCheck = (e) => {
     const selected = e.target.checked;
     this.setState({isInstallOsSelected: selected});
+
+    // reset the isValid regarding IMPI information when select
+    // or deslect installOS for compute server
+    if (isComputeNode(this.props.data)) {
+      this.setState((prev) => {
+        let resetValid = prev.isValid.toJS();
+        REPLACE_SERVER_MAC_IPMI_PROPS.forEach((key) => {
+          // if select installOS, empty value is invalid
+          // if deselect installOS empty value is ignored
+          if(isEmpty(prev.inputValue.get(key))) {
+            resetValid[key] = selected ? false : undefined;
+          }
+        });
+        return {isValid : Map(resetValid)};
+      });
+    }
   }
 
   handleWipeDiskCheck = (e) => {
@@ -325,17 +342,17 @@ class ReplaceServerDetails extends Component {
   }
 
   renderOSUserPass() {
-    if (this.state.isInstallOsSelected) {
+    if (this.state.isInstallOsSelected || isComputeNode(this.props.data)) {
       return (
         <>
           <div className='detail-line'>
             <div className='detail-heading'>{translate('server.user.prompt')}</div>
-            <div className='info-body'>{this.state.osInstallUsername}</div>
+            <div className='info-body'>{this.state.osUsername}</div>
           </div>
           <InputLine
-            isRequired={this.state.isInstallOsSelected} inputName={'osInstallPassword'}
+            isRequired={this.state.isInstallOsSelected || isComputeNode(this.props.data)} inputName={'osPassword'}
             inputType={'password'} label={'server.pass.prompt'}
-            inputValue={this.state.osInstallPassword || ''}
+            inputValue={this.state.osPassword || ''}
             inputAction={this.handleOsPasswordChange}/>
         </>);
     }
@@ -428,7 +445,8 @@ class ReplaceServerDetails extends Component {
   }
 
   renderServerContent() {
-    const modelServers = this.props.model.getIn(['inputModel','servers']);
+    const modelServers = this.props.model.getIn(['inputModel','servers'])
+      .filter(s => s.get('id') != this.props.data.id);
 
     const existingMacAddreses = modelServers.map(server => server.get('mac-addr'));
 
@@ -450,7 +468,7 @@ class ReplaceServerDetails extends Component {
           {this.renderOSUserPass()}
         </div>
         <div className='server-details-container'>
-          <input className='replace-options more-bottom-margin' type='checkbox' value='wipedisk'
+          <input className='replace-options' type='checkbox' value='wipedisk'
             checked={this.state.isWipeDiskSelected} onChange={this.handleWipeDiskCheck}/>
           {translate('common.wipedisk')}
         </div>
@@ -465,17 +483,21 @@ class ReplaceServerDetails extends Component {
           clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
           isDisabled={!this.isFormInputValid()}
-          clickAction={this.handleDone} displayLabel={translate('common.replace')}/>
+          clickAction={::this.handleDone} displayLabel={translate('common.replace')}/>
       </div>
     );
   }
 
   render() {
     return (
-      <div className='replace-server-details'>
-        {this.renderServerContent()}
-        {this.renderFooter()}
-      </div>
+      <ConfirmModal className={this.props.className} title={this.props.title}
+        onHide={this.props.cancelAction} footer={this.renderFooter()}>
+        <div className='replace-server-details'>
+          <form onSubmit={::this.handleDone}>
+            {this.renderServerContent()}
+          </form>
+        </div>
+      </ConfirmModal>
     );
   }
 }

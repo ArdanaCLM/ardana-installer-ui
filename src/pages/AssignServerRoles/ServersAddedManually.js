@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { Map } from 'immutable';
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
-import { LabeledDropdown } from '../../components/LabeledDropdown.js';
+import { LabeledDropdown, LabeledDropdownWithButton } from '../../components/LabeledDropdown.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import { InputLine } from '../../components/InputLine.js';
 import { postJson, putJson } from '../../utils/RestUtils.js';
@@ -26,6 +26,7 @@ import { IpV4AddressValidator, MacAddressValidator, createExcludesValidator } fr
 import {
   genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, matchRolesLimit
 } from '../../utils/ModelUtils.js';
+import { EditCloudSettings } from '../ServerRoleSummary/EditCloudSettings.js';
 
 
 class ServersAddedManually extends Component {
@@ -55,7 +56,9 @@ class ServersAddedManually extends Component {
           'ilo-password': !isEmpty(props.server['ilo-password']) ? true : undefined,
           'ilo-ip': !isEmpty(props.server['ilo-ip']) ? true : undefined,
           'mac-addr': !isEmpty(props.server['mac-addr']) ? true : undefined,
-        })
+        }),
+        showAddServerGroup: false,
+        showAddNicMapping: false
       };
     } else {
       this.state = this.getNewServer(props.model);
@@ -63,7 +66,7 @@ class ServersAddedManually extends Component {
   }
 
   // Return new server state variables with appropriate defaults
-  getNewServer = (model) => {
+  getNewServer(model) {
     const serverGroups = getServerGroups(model);
     const nicMappings = getNicMappings(model);
 
@@ -88,16 +91,18 @@ class ServersAddedManually extends Component {
         'ilo-password': undefined,
         'ilo-ip': undefined,
         'mac-addr': undefined,
-      })
+      }),
+      showAddServerGroup: false,
+      showAddNicMapping: false
     };
   }
 
-  isFormInputValid = () => {
+  isFormInputValid() {
     return this.state.isValid.every((value, key) => value === true || (value === undefined &&
       key !== 'id' && key !== 'ip-addr'));
   }
 
-  saveServer = () => {
+  saveServer() {
     // if role is provided, add server to the model
     let model = this.props.model;
 
@@ -111,39 +116,68 @@ class ServersAddedManually extends Component {
 
     // Call the callback props and update the server list in the shim
     if (this.props.addAction) {
-      postJson('/api/v1/server', [server])
+      postJson('/api/v2/server', [server])
         .then(() =>
           this.props.addAction(server.toJS())
         );
     } else {
-      putJson('/api/v1/server', server)
+      putJson('/api/v2/server', server)
         .then(() =>
           this.props.updateAction(server.toJS())
         );
     }
   }
 
-  saveAndClose = () => {
+  saveAndClose(event) {
+    event?.preventDefault();
     this.saveServer();
     this.props.closeAction();
   }
 
-  saveAndClear = () => {
+  saveAndClear() {
     this.saveServer();
     this.setState(this.getNewServer(this.props.model));
   }
 
-  handleInputChange = (value, valid, name) => {
+  handleInputChange(value, valid, name) {
     this.setState((prev) => ({
       isValid: prev.isValid.set(name, valid),
       inputValue: prev.inputValue.set(name, value)
     }));
   }
 
+  handleShowAddServerGroup = (event) => {
+    event?.preventDefault();
+    this.setState({showAddServerGroup: true});
+  }
+
+  handleShowAddNicMapping = (event) => {
+    event?.preventDefault();
+    this.setState({showAddNicMapping: true});
+  }
+
+  renderAddServerGroup() {
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='server-group' onHide={() => this.setState({showAddServerGroup: false})}
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={this.props.isUpdateMode}/>
+    );
+  }
+
+  renderAddNicMapping() {
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='nic-mapping' onHide={() => this.setState({showAddNicMapping: false})}
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={this.props.isUpdateMode}/>
+    );
+  }
+
   renderInputLine = (required, title, name, type, validator) => {
     return (
       <InputLine isRequired={required} label={title} inputName={name}
-        inputType={type} inputValidate={validator}
+        inputType={type} inputValidate={validator} moreClass={'has-button'}
         inputAction={(e, valid) => this.handleInputChange(e.target.value, valid, name)}
         inputValue={this.state.inputValue.get(name)}/>
     );
@@ -153,7 +187,16 @@ class ServersAddedManually extends Component {
     return (
       <LabeledDropdown label={title} name={name} value={this.state.inputValue.get(name)} optionList={list}
         isRequired={required} selectAction={(value) => this.handleInputChange(value, true, name)}
-        defaultOption={defaultOption}/>
+        defaultOption={defaultOption}  moreClass={'has-button'}/>
+    );
+  }
+
+  renderDropdownLineWithButton(required, title, name, list, buttonLabel, buttonAction) {
+    return (
+      <LabeledDropdownWithButton
+        label={title} name={name} value={this.state.inputValue.get(name)} optionList={list}
+        isRequired={required} selectAction={(value) => this.handleInputChange(value, true, name)}
+        buttonAction={buttonAction} buttonLabel={buttonLabel}/>
     );
   }
 
@@ -175,7 +218,7 @@ class ServersAddedManually extends Component {
 
     let addOnlyButton;
     if (this.props.addAction) {
-      addOnlyButton = (<ActionButton type={'default'} clickAction={this.saveAndClear}
+      addOnlyButton = (<ActionButton type={'default'} clickAction={::this.saveAndClear}
         displayLabel={translate('add.more')} isDisabled={!isValid}/>);
     }
 
@@ -183,7 +226,7 @@ class ServersAddedManually extends Component {
       <div className='btn-row'>
         <ActionButton type={'default'} clickAction={this.props.closeAction} displayLabel={translate('cancel')}/>
         {addOnlyButton}
-        <ActionButton clickAction={this.saveAndClose} displayLabel={translate('save')} isDisabled={!isValid}/>
+        <ActionButton clickAction={::this.saveAndClose} displayLabel={translate('save')} isDisabled={!isValid}/>
       </div>
     );
 
@@ -194,25 +237,34 @@ class ServersAddedManually extends Component {
     );
 
     return (
-      <ConfirmModal show={this.props.show} className={'manual-discover-modal'}
+      <ConfirmModal className={'manual-discover-modal'}
         title={this.props.addAction ? translate('add.server.add') : translate('edit.server')}
         onHide={this.props.closeAction} footer={footer}>
 
-        <div className='server-details-container'>
-          {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
-          {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
-          {this.renderDropdownLine(true, 'server.group.prompt', 'server-group', serverGroups)}
-          {this.renderDropdownLine(true, 'server.nicmapping.prompt', 'nic-mapping', nicMappings)}
-          {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
-        </div>
-        <div className='message-line'>{translate('server.ipmi.message')}</div>
-        <div className='server-details-container'>
-          {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
-          {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
-          {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
-        </div>
-
+        <form onSubmit={::this.saveAndClose}>
+          <div className='server-details-container'>
+            {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
+            {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
+            {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
+            {this.renderDropdownLineWithButton(
+              true, 'server.group.prompt', 'server-group', serverGroups,
+              'server.group.prompt', ::this.handleShowAddServerGroup)}
+            {this.renderDropdownLineWithButton(
+              true, 'server.nicmapping.prompt', 'nic-mapping', nicMappings,
+              'server.nicmapping.prompt', ::this.handleShowAddNicMapping)}
+          </div>
+          <div className='message-line'>{translate('server.ipmi.message')}</div>
+          <div className='server-details-container'>
+            {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
+            {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
+            {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
+            {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
+          </div>
+        </form>
+        <If condition={this.state.showAddServerGroup}>
+          {this.renderAddServerGroup()}</If>
+        <If condition={this.state.showAddNicMapping}>
+          {this.renderAddNicMapping()}</If>
       </ConfirmModal>
     );
   }

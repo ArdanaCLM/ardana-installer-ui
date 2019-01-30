@@ -20,7 +20,7 @@ import { translate } from '../localization/localize.js';
 import { fetchJson, postJson, putJson, deleteJson } from '../utils/RestUtils.js';
 import { ActionButton, LoadFileButton } from '../components/Buttons.js';
 import { SearchBar, ServerRolesAccordion } from '../components/ServerUtils.js';
-import { BaseInputModal, ConfirmModal } from '../components/Modals.js';
+import { ConfirmModal } from '../components/Modals.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import ConnectionCredsInfo from './AssignServerRoles/ConnectionCredsInfo.js';
 import ServersAddedManually from './AssignServerRoles/ServersAddedManually.js';
@@ -111,15 +111,19 @@ class AssignServerRoles extends BaseWizardPage {
       importedResults: {},
 
       // add server, wipedisk for all newly added servers
-      isWipeDiskChecked: props.operationProps && props.operationProps.wipeDisk || false,
+      isWipeDiskChecked: props.operationProps?.wipeDisk || false,
 
       // add server, activate for all newly added servers
-      isActivateChecked: props.operationProps && props.operationProps.activate || false,
+      isActivateChecked: props.operationProps?.activate || false,
+
+      // add server, safeMode
+      isSafeModeChecked: props.safeMode !== undefined ? props.safeMode : true,
+      showUnSafeWarning: false
     };
   }
 
   getSmServersData(tokenKey, smUrl, secured) {
-    return fetchJson('/api/v1/sm/servers', {
+    return fetchJson('/api/v2/sm/servers', {
       headers: {
         'Auth-Token': tokenKey,
         'Suse-Manager-Url': smUrl,
@@ -129,7 +133,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getOvServersData(tokenKey, ovUrl, secured) {
-    return fetchJson('/api/v1/ov/servers', {
+    return fetchJson('/api/v2/ov/servers', {
       headers: {
         'Auth-Token': tokenKey,
         'Ov-Url': ovUrl,
@@ -142,7 +146,7 @@ class AssignServerRoles extends BaseWizardPage {
     let promise = new Promise((resolve, reject) => {
       this.getSmServersData(tokenKey, smUrl, secured)
         .then((rawServerData) => {
-          if (rawServerData && rawServerData.length > 0) {
+          if (rawServerData?.length > 0) {
             let ids = rawServerData.map((srv) => {
               return srv.id;
             });
@@ -173,7 +177,7 @@ class AssignServerRoles extends BaseWizardPage {
     let promise = new Promise((resolve, reject) => {
       this.getOvServersData(tokenKey, ovUrl, secured)
         .then((rawServerData) => {
-          if (rawServerData && rawServerData.members && rawServerData.members.length > 0) {
+          if (rawServerData?.members?.length > 0) {
             let servers = this.updateOvServerData(rawServerData.members);
             resolve(servers);
           }
@@ -216,7 +220,7 @@ class AssignServerRoles extends BaseWizardPage {
   saveAllDiscoveredServers(servers) {
     this.deleteDiscoveredServers()
       .then((response) => {
-        postJson('/api/v1/server', JSON.stringify(servers))
+        postJson('/api/v2/server', JSON.stringify(servers))
           .then((response) => {})
           .catch((error) => {
             let msg = translate('server.discover.save.error');
@@ -276,10 +280,10 @@ class AssignServerRoles extends BaseWizardPage {
   renderAddServerManuallyModal = () => {
     if (this.state.showAddServerManuallyModal) {
       return (
-        <ServersAddedManually show={this.state.showAddServerManuallyModal} model={this.props.model}
+        <ServersAddedManually model={this.props.model}
           closeAction={this.closeAddServerManuallyModal} updateGlobalState={this.props.updateGlobalState}
           addAction={this.addServersAddedManually} serversAddedManually={this.state.serversAddedManually}
-          rolesLimit={this.props.rolesLimit}
+          rolesLimit={this.props.rolesLimit} isUpdateMode={this.props.isUpdateMode}
           rawDiscoveredServers={this.state.rawDiscoveredServers}/>
       );
     }
@@ -299,17 +303,13 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderEditServerAddedManuallyModal = () => {
-    let extraProps = {};
-    if(this.props.isUpdateMode) {
-      extraProps.rolesLimit = this.props.rolesLimit;
-    }
     if (this.state.showEditServerAddedManuallyModal) {
       return (
-        <ServersAddedManually show={this.state.showEditServerAddedManuallyModal} model={this.props.model}
+        <ServersAddedManually model={this.props.model}
           closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
           updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
           rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
-          {...extraProps}
+          rolesLimit={this.props.rolesLimit} isUpdateMode={this.props.isUpdateMode}
         />
       );
     }
@@ -381,7 +381,7 @@ class AssignServerRoles extends BaseWizardPage {
       // update manually added servers list
       // find previously imported server with same id and overwrite it
       let sIndex = manualServers.findIndex(svr => {
-        return  svr['uid'] && svr['uid'].startsWith('import') && svr['id'] === server.id;
+        return svr['uid']?.startsWith('import') && svr['id'] === server.id;
       });
       if(sIndex < 0) {
         newServers.push(server);
@@ -390,7 +390,7 @@ class AssignServerRoles extends BaseWizardPage {
         // use the existing imported server's uid
         server.uid = manualServers[sIndex].uid;
         manualServers[sIndex] = server;
-        putJson('/api/v1/server', JSON.stringify(server))
+        putJson('/api/v2/server', JSON.stringify(server))
           .catch((error) => {
             let msg = translate('server.import.update.error', server.id);
             this.setState(prev => {
@@ -399,7 +399,7 @@ class AssignServerRoles extends BaseWizardPage {
       }
       // look for previously imported server in the model
       const mIndex = model.getIn(['inputModel', 'servers']).findIndex(svr => {
-        return svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id;
+        return svr.get('uid')?.startsWith('import') && svr.get('id') === server.id;
       });
       // it is not in the model
       if (mIndex < 0) {
@@ -415,7 +415,7 @@ class AssignServerRoles extends BaseWizardPage {
         if(server.role) {
           // Overwrite the existing imported server in input model
           model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
-            if (svr.get('uid') && svr.get('uid').startsWith('import') && svr.get('id') === server.id) {
+            if (svr.get('uid')?.startsWith('import') && svr.get('id') === server.id) {
               return fromJS(server); //overwrite the exiting with imported one
             }
             else
@@ -438,7 +438,7 @@ class AssignServerRoles extends BaseWizardPage {
     // have some imported server, need to add to backend
     if(newServers.length > 0) {
       manualServers = manualServers.concat(newServers);
-      postJson('/api/v1/server', JSON.stringify(newServers))
+      postJson('/api/v2/server', JSON.stringify(newServers))
         .catch((error) => {
           let msg = translate('server.import.add.error');
           this.setState(prev => { return {
@@ -553,7 +553,7 @@ class AssignServerRoles extends BaseWizardPage {
     let saveConnect =
       this.props.connectionInfo ? JSON.parse(JSON.stringify(this.props.connectionInfo)) : {
         sm: {checked: false, secured: true}, ov: {checked: false, secured: true}};
-    if (credsData.sm && credsData.sm.checked) {
+    if (credsData.sm?.checked) {
       let smConn = this.setSmCredentials(credsData);
       saveConnect.sm = smConn;
     }
@@ -562,7 +562,7 @@ class AssignServerRoles extends BaseWizardPage {
       this.connections.sm.checked = false;
     }
 
-    if (credsData.ov && credsData.ov.checked) {
+    if (credsData.ov?.checked) {
       let ovConn = this.setOvCredentials(credsData);
       saveConnect.ov = ovConn;
     }
@@ -626,7 +626,7 @@ class AssignServerRoles extends BaseWizardPage {
       //pass
     }
 
-    fetchJson('/api/v1/server?source=sm,ov')
+    fetchJson('/api/v2/server?source=sm,ov')
       .then((rawServerData) => {
         if(rawServerData) {
           this.setState({rawDiscoveredServers : rawServerData});
@@ -643,7 +643,7 @@ class AssignServerRoles extends BaseWizardPage {
       });
 
     // get manually added servers
-    fetchJson('/api/v1/server?source=manual')
+    fetchJson('/api/v2/server?source=manual')
       .then((responseData) => {
         if (responseData.length > 0) {
           this.setState({serversAddedManually: responseData});
@@ -652,7 +652,7 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   deleteDiscoveredServers() {
-    return deleteJson('/api/v1/server?source=sm,ov');
+    return deleteJson('/api/v2/server?source=sm,ov');
   }
 
   checkUpdateServerDataToMatchModel = (serverData, modelServers) => {
@@ -676,9 +676,9 @@ class AssignServerRoles extends BaseWizardPage {
     details.forEach((srvDetail) => {
       // promise could return empty detail
       // only pick up non empty detail.
-      if(srvDetail && srvDetail.id) {
+      if(srvDetail?.id) {
         let nkdevice = srvDetail.network_devices.find((device) => {
-          return device.interface && device.interface.startsWith('eth') && device.ip !== '';
+          return device.interface?.startsWith('eth') && device.ip !== '';
         });
         // still can not find ip address, try one more time
         if (!nkdevice) {
@@ -807,7 +807,7 @@ class AssignServerRoles extends BaseWizardPage {
   getSmAllServerDetailsData = (serverIds, smTokenKey, smUrl, secured) => {
     let tasks = [];
     serverIds.forEach((id) => {
-      let shimUrlPath = '/api/v1/sm/servers/' + id;
+      let shimUrlPath = '/api/v2/sm/servers/' + id;
       tasks.push(this.getSmOneServerDetailData(shimUrlPath, smTokenKey, smUrl, secured));
     });
 
@@ -841,7 +841,7 @@ class AssignServerRoles extends BaseWizardPage {
       model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
         // use uid if sever has uid, if it doesn't have uid like the example one, will use
         // id.
-        if ((svr.get('uid') && svr.get('uid') === server.uid) || svr.get('id' === server.id))
+        if (svr.get('uid') === server.uid || svr.get('id') === server.id)
           return svr.set('role', role);
         else
           return svr;
@@ -928,7 +928,7 @@ class AssignServerRoles extends BaseWizardPage {
           return {serversAddedManually: prevState.serversAddedManually.concat([server])};
         });
         // save to the backend
-        postJson('/api/v1/server', JSON.stringify([server]))
+        postJson('/api/v2/server', JSON.stringify([server]))
           .catch((error) => {
             let msg = translate('server.save.error', server.id);
             this.setState(prev => { return {
@@ -962,17 +962,17 @@ class AssignServerRoles extends BaseWizardPage {
    */
   highlightDrop = (event) => {
     let { target } = event;
-    if (target && !target.classList.contains('server-dropzone')) {
+    if (!target)
+      return;
+    if (!target.classList.contains('server-dropzone')) {
       target = target.closest('.server-dropzone');
     }
-    if (target) {
-      if (!target.style.outline.includes('dashed'))
-        target.setAttribute('data-prevoutline', target.style.outline);
-      target.style.outline = '2px #00C081 dashed';
-      if (!target.style.margin.includes('2px'))
-        target.setAttribute('data-prevmargin', target.style.margin);
-      target.style.margin = '2px';
-    }
+    if (!target.style.outline.includes('dashed'))
+      target.setAttribute('data-prevoutline', target.style.outline);
+    target.style.outline = '2px #00C081 dashed';
+    if (!target.style.margin.includes('2px'))
+      target.setAttribute('data-prevmargin', target.style.margin);
+    target.style.margin = '2px';
   }
 
   /**
@@ -985,15 +985,17 @@ class AssignServerRoles extends BaseWizardPage {
    */
   unHighlightDrop = (event, forceclear) => {
     let { target } = event;
-    if(target && !target.classList.contains('server-dropzone')) {
+    if(!target)
+      return;
+    if(!target.classList.contains('server-dropzone')) {
       target = target.closest('.server-dropzone');
     }
     const offset = target?.getBoundingClientRect();
-    if(target && (forceclear ||
+    if(forceclear ||
        offset.left > event.pageX ||
        offset.left + offset.width < event.pageX ||
        offset.top >= event.pageY ||
-       offset.top + offset.height <= event.pageY)) {
+       offset.top + offset.height <= event.pageY) {
       target.style.outline = target.getAttribute('data-prevoutline') || '';
       target.style.margin = target.getAttribute('data-prevmargin') || '';
     }
@@ -1017,7 +1019,7 @@ class AssignServerRoles extends BaseWizardPage {
           tempList.splice(idx, 1, updated_server);
           return {[list]: tempList};
         }, () => {
-          putJson('/api/v1/server', JSON.stringify(updated_server))
+          putJson('/api/v2/server', JSON.stringify(updated_server))
             .catch((error) => {
               let msg = translate('server.discover.update.error', updated_server.id);
               this.setState(prev => { return {
@@ -1046,7 +1048,7 @@ class AssignServerRoles extends BaseWizardPage {
           return {[list]: prev[list]};
         }, () => {
           deleteJson(
-            '/api/v1/server?source=' + deleted_server.source +'&uid=' + deleted_server.uid)
+            '/api/v2/server?source=' + deleted_server.source +'&uid=' + deleted_server.uid)
             .catch((error) => {
               let msg = translate('server.discover.delete.server.error', deleted_server.id);
               this.setState(prev => { return {
@@ -1059,7 +1061,7 @@ class AssignServerRoles extends BaseWizardPage {
       }
     }
     // remove server from right table
-    if (deleted_server.role !== '') {
+    if (!isEmpty(deleted_server.role)) {
       let index = this.props.model.getIn(['inputModel', 'servers']).findIndex(
         server => server.get('id') === deleted_server.id);
       let newModel = this.props.model.removeIn(['inputModel', 'servers', index]);
@@ -1107,6 +1109,27 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   setNextButtonDisabled = () => !this.isValid();
+
+  proceedUnsafeMode = () => {
+    this.setState(prev => {
+      this.props.updateGlobalState('safeMode', false);
+      return {isSafeModeChecked: false, showUnSafeWarning: false};
+    });
+  }
+
+  handleSafeModeCheck = () => {
+    this.setState(prev => {
+      let isChecked = !prev.isSafeModeChecked;
+      if (!isChecked) {
+        return {showUnSafeWarning: true};
+      }
+      else {
+        // save to the global
+        this.props.updateGlobalState('safeMode', isChecked);
+        return {isSafeModeChecked: isChecked};
+      }
+    });
+  }
 
   handleWipeDiskCheck = () => {
     this.setState(prev => {
@@ -1190,8 +1213,8 @@ class AssignServerRoles extends BaseWizardPage {
       servers.filter((server) => {
         // search text applied to name , ip-addr and mac-addr
         if(!(server.id.indexOf(this.state.searchFilterText) !== -1 ||
-          (server['ip-addr'] && server['ip-addr'].indexOf(this.state.searchFilterText) !== -1) ||
-          (server['mac-addr'] && server['mac-addr'].indexOf(this.state.searchFilterText) !== -1))) {
+          (server['ip-addr']?.indexOf(this.state.searchFilterText) !== -1) ||
+          (server['mac-addr']?.indexOf(this.state.searchFilterText) !== -1))) {
           return false;
         }
 
@@ -1269,11 +1292,13 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderBaremetalSettings = () => {
-    return (
-      <BaremetalSettings show={this.state.showBaremetalSettings}
-        model={this.props.model} cancelAction={this.closeBaremetalSettings}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showBaremetalSettings) {
+      return (
+        <BaremetalSettings
+          model={this.props.model} cancelAction={this.closeBaremetalSettings}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderAvailableServersTabs() {
@@ -1375,6 +1400,8 @@ class AssignServerRoles extends BaseWizardPage {
       extraProps.checkNewDupAddresses = {
         modelServerAddresses: modelServerAddresses
       };
+
+      extraProps.isSafeMode = this.state.isSafeModeChecked;
     }
     return (
       <ServerRolesAccordion
@@ -1392,12 +1419,38 @@ class AssignServerRoles extends BaseWizardPage {
     );
   }
 
+  renderUnSafeWarning() {
+    if (this.state.showUnSafeWarning) {
+      return (
+        <YesNoModal key='unsafe' title={translate('warning')}
+          yesAction={this.proceedUnsafeMode}
+          noAction={() => this.setState({showUnSafeWarning: false})}>
+          {translate('server.replace.unsafe.warning')}
+        </YesNoModal>
+      );
+    }
+  }
+
+  renderSafeMode() {
+    let className =
+      'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
+    return (
+      <div  key='safemode' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
+          type='checkbox' value='safemode'
+          checked={this.state.isSafeModeChecked} onChange={this.handleSafeModeCheck}/>
+        {translate('common.safemode')}
+        <HelpText tooltipText={translate('server.addserver.safemode.message')}/>
+      </div>
+    );
+  }
+
   renderWipeDisk() {
     let className =
       'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
-      <div className={className}>
-        <input disabled={this.toDisableCheckboxes()} className='wipe-disk-option'
+      <div  key='wipedisk' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
           type='checkbox' value='wipedisk'
           checked={this.state.isWipeDiskChecked} onChange={this.handleWipeDiskCheck}/>
         {translate('common.wipedisk')}
@@ -1410,9 +1463,9 @@ class AssignServerRoles extends BaseWizardPage {
     let className =
       'addserver-options' + (!this.toDisableCheckboxes() ? '' : ' disabled');
     return (
-      <div className={className}>
-        <input disabled={this.toDisableCheckboxes()}
-          className='wipe-disk-option' type='checkbox' value='activate'
+      <div key='activate' className={className}>
+        <input disabled={this.toDisableCheckboxes()} className='bottom-option'
+          type='checkbox' value='activate'
           checked={this.state.isActivateChecked} onChange={this.handleActivateCheck}/>
         {translate('common.activate')}
         <HelpText tooltipText={translate('server.addserver.activate.message')}/>
@@ -1431,7 +1484,7 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderServerRoleContent() {
     let serverRoles = getServerRoles(this.props.model, this.props.rolesLimit);
-    let isValidToRenderAccordion = serverRoles && serverRoles.length > 0;
+    let isValidToRenderAccordion = serverRoles?.length > 0;
     return (
       <div className='assign-server-role body-container'>
         <div className='server-container'>
@@ -1449,8 +1502,12 @@ class AssignServerRoles extends BaseWizardPage {
             {isValidToRenderAccordion && this.renderServerRolesAccordion(serverRoles)}
             {this.props.isUpdateMode && !isValidToRenderAccordion && this.renderEmptyRolesInfo()}
           </div>
-          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderWipeDisk()}
-          {this.props.isUpdateMode && isValidToRenderAccordion && this.renderActivate()}
+          <If condition={this.props.isUpdateMode && isValidToRenderAccordion}>
+            {this.renderActivate()}
+            {this.renderWipeDisk()}
+            {this.renderSafeMode()}
+            {this.renderUnSafeWarning()}
+          </If>
         </div>
 
       </div>
@@ -1458,46 +1515,46 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   renderCredsInputModal() {
-    return (
-      <BaseInputModal
-        show={this.state.showCredsModal}
-        className='creds-dialog'
-        onHide={this.handleCancelCredsInput}
-        title={translate('add.server.connection.creds')}>
-
-        <ConnectionCredsInfo
+    if (this.state.showCredsModal) {
+      return (
+        <ConnectionCredsInfo className='creds-dialog'
+          title={translate('add.server.connection.creds')}
           cancelAction={this.handleCancelCredsInput}
           doneAction={credsData => this.handleDoneCredsInput(credsData)}
-          data={this.connections}>
-        </ConnectionCredsInfo>
-      </BaseInputModal>
-    );
+          data={this.connections}/>
+      );
+    }
   }
 
   renderServerDetailsModal() {
-    //if the activeRowData is from the right side table...it doesn't have the
-    //source ...need to find source data which has the details
-    let sourceData =
-      this.getSourceData(this.state.activeRowData, this.activeTableId);
+    if(this.state.showServerDetailsModal) {
+      //if the activeRowData is from the right side table...it doesn't have the
+      //source ...need to find source data which has the details
+      let sourceData =
+        this.getSourceData(this.state.activeRowData, this.activeTableId);
 
-    let extraProps = {};
-    let dialogClass = 'view-details-dialog ';
-    if(sourceData && (sourceData.source === 'sm' || sourceData.source === 'ov')) {
-      extraProps.tableId = this.activeTableId;
-      extraProps.source = sourceData.source;
-      extraProps.details = sourceData.details;
-      dialogClass = dialogClass + 'more-width';
+      let extraProps = {};
+      let dialogClass = 'view-details-dialog ';
+      if(sourceData?.source === 'sm' || sourceData?.source === 'ov') {
+        extraProps.tableId = this.activeTableId;
+        extraProps.source = sourceData.source;
+        extraProps.details = sourceData.details;
+        dialogClass = dialogClass + 'more-width';
+      }
+
+      return (
+        <ConfirmModal className={dialogClass} hideFooter
+          onHide={this.handleCloseServerDetails} title={translate('view.server.details.heading')}>
+          <ViewServerDetails data={this.state.activeRowData} {...extraProps}/>
+        </ConfirmModal>
+      );
     }
-
-    return (
-      <ConfirmModal show={this.state.showServerDetailsModal} className={dialogClass} hideFooter
-        onHide={this.handleCloseServerDetails} title={translate('view.server.details.heading')}>
-        <ViewServerDetails data={this.state.activeRowData} {...extraProps}/>
-      </ConfirmModal>
-    );
   }
 
   renderEditServerDetailsModal() {
+    if (!this.state.showEditServerModal) {
+      return;
+    }
     let extraProps = {};
     if(this.state.activeRowData) {
       // check against all the server ids to make sure
@@ -1528,32 +1585,24 @@ class AssignServerRoles extends BaseWizardPage {
     }
 
     return (
-      <BaseInputModal
-        show={this.state.showEditServerModal}
-        className='edit-details-dialog'
-        onHide={this.handleCancelEditServer}
-        title={translate('edit.server.details.heading')}>
-
-        <EditServerDetails
-          cancelAction={this.handleCancelEditServer}
-          doneAction={this.handleDoneEditServer}
-          model={this.props.model}
-          updateGlobalState={this.props.updateGlobalState}
-          data={this.state.activeRowData}
-          {...extraProps}>
-        </EditServerDetails>
-      </BaseInputModal>
+      <EditServerDetails className='edit-details-dialog'
+        title={translate('edit.server.details.heading')}
+        cancelAction={this.handleCancelEditServer} doneAction={this.handleDoneEditServer}
+        model={this.props.model} updateGlobalState={this.props.updateGlobalState}
+        data={this.state.activeRowData} {...extraProps}>
+      </EditServerDetails>
     );
   }
 
   renderCloudSettings() {
-    return (
-      <EditCloudSettings
-        show={this.state.showCloudSettings}
-        onHide={() => this.setState({showCloudSettings: false})}
-        model={this.props.model}
-        updateGlobalState={this.props.updateGlobalState}/>
-    );
+    if (this.state.showCloudSettings) {
+      return (
+        <EditCloudSettings
+          onHide={() => this.setState({showCloudSettings: false})}
+          model={this.props.model}
+          updateGlobalState={this.props.updateGlobalState}/>
+      );
+    }
   }
 
   renderInstallContentHeading() {
@@ -1575,25 +1624,28 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   render() {
-    let serverId = (this.state.activeRowData && this.state.activeRowData.id) ? this.state.activeRowData.id : '';
-    const contentClass =
-      'wizard-content' + (this.props.isUpdateMode ? ' smaller-margin' : '');
+    let serverId = this.state.activeRowData?.id || '';
+    const contentClass = this.props.isUpdateMode ? 'smaller-margin' : 'wizard-content';
     return (
       <div className='wizard-page'>
         {!this.props.isUpdateMode && this.renderCloudSettings()}
         {!this.props.isUpdateMode && this.renderInstallContentHeading()}
-        <YesNoModal show={this.state.showDeleteServerConfirmModal} title={translate('warning')}
-          yesAction={this.deleteServer}
-          noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
-          {translate('server.delete.server.confirm', serverId)}
-        </YesNoModal>
-        <YesNoModal show={this.state.showImportServerConfirmModal} title={translate('warning')}
-          yesAction={this.saveImportedServers}
-          noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
-          {this.props.isUpdateMode ?
-            translate('server.import.server.confirm.limit.conflict') :
-            translate('server.import.server.confirm')}
-        </YesNoModal>
+        <If condition={this.state.showDeleteServerConfirmModal}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.deleteServer}
+            noAction={() => this.setState({showDeleteServerConfirmModal: false})}>
+            {translate('server.delete.server.confirm', serverId)}
+          </YesNoModal>
+        </If>
+        <If condition={this.state.showImportServerConfirmModal}>
+          <YesNoModal title={translate('warning')}
+            yesAction={this.saveImportedServers}
+            noAction={() => this.setState({showImportServerConfirmModal: false, importedResults: {}})}>
+            {this.props.isUpdateMode ?
+              translate('server.import.server.confirm.limit.conflict') :
+              translate('server.import.server.confirm')}
+          </YesNoModal>
+        </If>
         <div id='AssignServerRoleId' className={contentClass}>
           {this.renderServerRoleContent()}
           {this.renderCredsInputModal()}

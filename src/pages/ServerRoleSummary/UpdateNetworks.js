@@ -13,7 +13,8 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
-import { fromJS } from 'immutable';
+import { Map, List } from 'immutable';
+import { isEmpty } from 'lodash';
 import { translate } from '../../localization/localize.js';
 import { LabeledDropdown } from '../../components/LabeledDropdown.js';
 import { InputLine } from '../../components/InputLine.js';
@@ -21,172 +22,91 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator, NoWhiteSpaceValidator,
-  chainValidators
+  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator,
+  NoWhiteSpaceValidator, chainValidators
 } from '../../utils/InputValidators.js';
-import { MODE, INPUT_STATUS } from '../../utils/constants.js';
+import { MODE } from '../../utils/constants.js';
 import HelpText from '../../components/HelpText.js';
+
+const MIN_VLANID = 1;
+const MAX_VLANID = 4094;
 
 class UpdateNetworks extends Component {
   constructor(props) {
     super(props);
-    this.networkGroups = this.getNetworkGroups(props);
-    this.allInputsStatus = {
-      'name': INPUT_STATUS.UNKNOWN,
-      'vlanid': INPUT_STATUS.UNKNOWN,
-      'cidr': INPUT_STATUS.UNKNOWN,
-      'gateway-ip': INPUT_STATUS.UNKNOWN
-    };
 
-    this.allAddressesStatus = [];
+    let network = this.getNetwork(props);
+    let initInputs = this.initInputValues(network);
+    let initAddresses = network.get('addresses') || List();
+    // get a copy of original data
+    this.originInputs = Map(initInputs);
+    this.originAddresses = List(initAddresses);
 
-    let networks = props.mode === MODE.EDIT ? this.getNetworkData(props) : {};
-    networks.addresses = this.initAddresses(networks);
     this.state = {
-      isFormValid: false,
-      data: networks,
+      inputValues: initInputs,
+      isInputValid: this.initInputValid(initInputs),
+      addresses: initAddresses,
+      isAddressValid: this.initAddressValid(initAddresses)
     };
-
-    this.origData = networks;
+    this.networkGroups = this.getNetworkGroups(props);
   }
 
-  resetData = () => {
-    this.setState({
-      isFormValid: false,
-      data: {addresses: []},
-    });
+  getNetwork(props) {
+    return (
+      props.mode === MODE.EDIT ? this.getNetworkData(props) : this.getNewNetworkData()
+    );
   }
 
-  initAddresses(networks) {
-    // for UI state addresses
-    let retAddresses = networks['addresses'] ? networks['addresses'] : [];
-
-    // init validation status
-    this.allAddressesStatus = retAddresses.map((addr) => {
-      return INPUT_STATUS.VALID;
+  getNewNetworkData() {
+    return Map({
+      'name': '', //required
+      'vlanid': 1, //required
+      'cidr': '',
+      'gateway-ip':'',
+      'network-group': '', //required
+      'tagged-vlan': false
     });
-    return retAddresses;
   }
 
   getNetworkData(props) {
-    const name = props.networkName;
     let network =
-      props.model.getIn(['inputModel','networks']).find(net => net.get('name') === name);
-    return JSON.parse(JSON.stringify(network));
+      props.model.getIn(['inputModel','networks']).find(
+        net => net.get('name') === props.networkName);
+    return network;
   }
 
-  isFormTextInputValid() {
-    let isAllValid = true;
-    let values = Object.values(this.allInputsStatus);
-    isAllValid =
-      (values.every((val) => {return val === INPUT_STATUS.VALID || val === INPUT_STATUS.UNKNOWN;})) &&
-      this.allInputsStatus['name'] !== INPUT_STATUS.UNKNOWN &&
-      this.allInputsStatus['vlanid'] !== INPUT_STATUS.UNKNOWN && (
-        this.allAddressesStatus.length === 0 || this.allAddressesStatus.every((val) => {
-          return val === INPUT_STATUS.VALID;
-        })
-      );
-
-    return isAllValid;
-  }
-
-  isFormDropdownValid() {
-    let isValid = true;
-    if(this.state.data['network-group'] === '' || this.state.data['network-group'] === undefined) {
-      isValid = false;
-    }
-    return isValid;
-  }
-
-  updateFormValidity = (props, isValid) => {
-    this.allInputsStatus[props.inputName] = isValid ? INPUT_STATUS.VALID : INPUT_STATUS.INVALID;
-    this.setState({isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()});
-  }
-
-  handleSelectNetworkGroup = (groupName) => {
-    this.setState(prevState => {
-      const newData = JSON.parse(JSON.stringify(prevState.data));
-      newData['network-group'] = groupName;
-      return {
-        data: newData,
-        isFormValid: this.isFormTextInputValid() && this.isFormDropdownValid()
-      };
+  initInputValues(network) {
+    return Map({
+      'name': network.get('name'),
+      'vlanid': network.get('vlanid'),
+      'cidr': network.get('cidr') || '',
+      'gateway-ip': network.get('gateway-ip') || '',
+      'network-group': network.get('network-group'),
+      'tagged-vlan': network.get('tagged-vlan') || false
     });
   }
 
-  handleInputChange = (e, isValid, props) => {
-    let value = e.target.value;
-    this.updateFormValidity(props, isValid);
-    if (isValid) {
-      if(props.inputName === 'vlanid') {
-        value = parseInt(value);
-      }
-
-      this.setState(prevState => {
-        const newData = JSON.parse(JSON.stringify(prevState.data));
-        newData[props.inputName] = value;
-        return {data: newData};
-      });
-    }
-  }
-
-  handleAddressChange = (e, isValid, props, idx) => {
-    let value = e.target.value;
-    if (isValid) {
-      this.allAddressesStatus[idx] = INPUT_STATUS.VALID;
-
-      this.setState(prevState => {
-        const newData = JSON.parse(JSON.stringify(prevState.data));
-        newData.addresses[idx] = value;
-        return {data: newData};
-      });
-    }
-    else {
-      this.allAddressesStatus[idx] = INPUT_STATUS.INVALID;
-    }
-
-    this.updateFormValidity(props, isValid);
-  }
-
-  handleUpdateNetwork = () => {
-    let model = this.props.model;
-    for (let key in this.state.data) {
-      if(this.state.data[key] === undefined || this.state.data[key] === '') {
-        delete this.state.data[key];
-      }
-
-      if (key === 'addresses') {
-        let cleanAddrs = this.state.data.addresses.filter(addr => addr !== '');
-        if (cleanAddrs.length === 0) {
-          delete this.state.data[key];
-        }
-        else {
-          this.state.data[key] = cleanAddrs;
-        }
-      }
-    }
-
-    if(this.props.mode === MODE.ADD) {
-      model = model.updateIn(
-        ['inputModel', 'networks'], net => net.push(fromJS(this.state.data)));
-      this.props.updateGlobalState('model', model);
-    }
-    else {
-      let idx = model.getIn(['inputModel','networks']).findIndex(
-        net => net.get('name') === this.props.networkName);
-      model = model.updateIn(['inputModel', 'networks'],
-        net => net.splice(idx, 1, fromJS(this.state.data)));
-      this.props.updateGlobalState('model', model);
-    }
-    this.closeAction();
-  }
-
-  handleTaggedVLANChange = () => {
-    this.setState(prevState => {
-      const newData = JSON.parse(JSON.stringify(prevState.data));
-      newData['tagged-vlan'] = !prevState.data['tagged-vlan'];
-      return {data: newData};
+  initInputValid(initData) {
+    return Map({
+      'name': !isEmpty(initData.get('name')),
+      'vlanid': initData.get('vlanid') >= MIN_VLANID && initData.get('vlanid') <= MAX_VLANID,
+      'cidr': !isEmpty(initData.get('cidr')) ? true : undefined,
+      'gateway-ip': !isEmpty(initData.get('gateway-ip')) ? true : undefined,
+      'network-group': !isEmpty(initData.get('network-group')),
+      'tagged-vlan': true //always valid
     });
+  }
+
+  initAddressValid(addresses) {
+    if(addresses.size === 0) {
+      return List();
+    }
+
+    let retList = List();
+    for (let i = 0; i < addresses.size; i++) {
+      retList = retList.push(true);
+    }
+    return retList;
   }
 
   getNetworkGroups = (props) => {
@@ -195,22 +115,111 @@ class UpdateNetworks extends Component {
       .sort(alphabetically);
   }
 
+  handleUpdateNetwork = () => {
+    let model = this.props.model;
+    let updateData = Map(this.state.inputValues);
+    // remove any key with empty value
+    for (let key in updateData.toJS()) {
+      if(!updateData.get(key)) {
+        updateData = updateData.delete(key);
+      }
+    }
+
+    // add addresses to save
+    if (this.state.addresses.size > 0) {
+      let cleanAddrs = this.state.addresses.filter(addr => !isEmpty(addr));
+      if (cleanAddrs.size > 0) {
+        updateData = updateData.set('addresses', cleanAddrs);
+      }
+    }
+
+    if(this.props.mode === MODE.ADD) {
+      model = model.updateIn(
+        ['inputModel', 'networks'], net => net.push(updateData));
+      this.props.updateGlobalState('model', model);
+    }
+    else {
+      model = model.updateIn(['inputModel', 'networks'],
+        list => list.map(net => {
+          if (net.get('name') === this.props.networkName) {
+            return updateData;
+          }
+          else {
+            return net;
+          }
+        })
+      );
+      this.props.updateGlobalState('model', model);
+    }
+    this.closeAction();
+  }
+
+  handleInputChange = (value, isValid, name) => {
+    this.setState((prev) => {
+      if(name === 'vlanid') {
+        value = parseInt(value);
+      }
+      return {
+        isInputValid: prev.isInputValid.set(name, isValid),
+        inputValues: prev.inputValues.set(name, value)
+      };
+    });
+  }
+
+  handleAddressChange = (value, isValid, idx) => {
+    this.setState((prev) => {
+      return {
+        isAddressValid: prev.isAddressValid.set(idx, isValid),
+        addresses: prev.addresses.set(idx, value)
+      };
+    });
+  }
+
   removeAddress = (idx) => {
     this.setState(prevState => {
-      const newData = JSON.parse(JSON.stringify(prevState.data));
-      newData.addresses.splice(idx, 1);
-      return {data: newData};
+      return {
+        addresses: prevState.addresses.delete(idx),
+        isAddressValid: prevState.isAddressValid.delete(idx)
+      };
     });
-    // remove status
-    this.allAddressesStatus.splice(idx, 1);
   }
 
   addAddress = () => {
     this.setState(prevState => {
-      const newData = JSON.parse(JSON.stringify(prevState.data));
-      newData.addresses.push('');
-      return {data: newData};
+      return {
+        addresses: prevState.addresses.push(''),
+        isAddressValid: prevState.isAddressValid.push(undefined)
+      };
     });
+  }
+
+  isFormValid = () => {
+    let isInputValid =
+      this.state.isInputValid.every((value, key) =>  value === true ||
+        value === undefined && key !== 'name' && key !== 'server-group');
+    let isAddressValid = true;
+    if(this.state.isAddressValid.size > 0) {
+      isAddressValid =
+        this.state.isAddressValid.every((value) => value === true || value === undefined);
+    }
+    return isInputValid && isAddressValid;
+  }
+
+  resetData = () => {
+    this.setState({
+      inputValues: Map(),
+      isInputValid: Map(),
+      addresses: List(),
+      isAddressValid: List()
+    });
+  }
+
+  checkDataToSave = () => {
+    const dataChanged =
+      (JSON.stringify(this.originInputs) !== JSON.stringify(this.state.inputValues) ||
+      JSON.stringify(this.originAddresses) !== JSON.stringify(this.state.addresses));
+    this.props.setDataChanged(this.props.tabIndex, dataChanged);
+    return this.isFormValid() && dataChanged;
   }
 
   renderNewAddressInput () {
@@ -218,7 +227,7 @@ class UpdateNetworks extends Component {
       <div key={0} className='dropdown-plus-minus network-plus-minus'>
         <div className="field-container">
           <ValidatingInput
-            inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, 0)}
+            inputAction={(e, valid) => this.handleAddressChange(e.target.value, valid, 0)}
             inputType='text' inputValue={''} inputValidate={AddressesValidator}
             isRequired='false' placeholder={translate('network.addresses')}/>
         </div>
@@ -227,26 +236,26 @@ class UpdateNetworks extends Component {
   }
 
   renderNetworkAddresses () {
-    if(this.state.data.addresses.length === 0) {
+    if(this.state.addresses.size === 0) {
       return this.renderNewAddressInput();
     }
-    let addressRows = this.state.data.addresses.map((addr, idx) => {
-      const lastRow = (idx === this.state.data.addresses.length -1);
+    let addressRows = this.state.addresses.map((addr, idx) => {
+      const lastRow = (idx === this.state.addresses.size -1);
       return (
         <div key={idx} className='dropdown-plus-minus network-plus-minus'>
           <div className="field-container">
             <ValidatingInput
-              inputAction={(e, valid, props) => this.handleAddressChange(e, valid, props, idx)}
+              inputAction={(e, valid) => this.handleAddressChange(e.target.value, valid, idx)}
               inputType='text' inputValue={addr} inputValidate={AddressesValidator}
               isRequired='false' placeholder={translate('network.addresses')}/>
           </div>
           <div className='plus-minus-container'>
-            <If condition={idx > 0 || (addr !== '')}>
+            <If condition={idx > 0 || !isEmpty(addr)}>
               <span key={'address_minus'} onClick={() => this.removeAddress(idx)}>
                 <i className='material-icons left-sign'>remove</i>
               </span>
             </If>
-            <If condition={lastRow && this.allAddressesStatus[idx] !== INPUT_STATUS.INVALID && addr !== ''}>
+            <If condition={lastRow && this.state.isAddressValid.get(idx) && !isEmpty(addr)}>
               <span key={'address_plus'} onClick={this.addAddress}>
                 <i className='material-icons right-sign'>add</i>
               </span>
@@ -267,50 +276,40 @@ class UpdateNetworks extends Component {
       extraProps.max = 4094;
     }
 
-    if(this.props.mode === MODE.EDIT) {
-      extraProps.updateFormValidity = this.updateFormValidity;
-    }
-
     return (
       <InputLine
         isRequired={isRequired} inputName={name} inputType={type}
         placeholder={placeholderText} inputValidate={validate}
-        inputValue={this.props.mode === MODE.EDIT ? this.state.data[name] : ''} {...extraProps}
-        inputAction={this.handleInputChange}/>
+        inputValue={this.state.inputValues.get(name)} {...extraProps}
+        inputAction={(e, valid) => this.handleInputChange(e.target.value, valid, name)}/>
     );
   }
 
   renderNetworkGroup() {
     let emptyOptProps = '';
-    if(this.state.data['network-group'] === '' || this.state.data['network-group'] === undefined) {
+    if(isEmpty(this.state.inputValues.get('network-group'))) {
       emptyOptProps = {
         label: translate('network.group.please.select'),
         value: 'noopt'
       };
     }
     return (
-      <LabeledDropdown value={this.state.data['network-group']}
+      <LabeledDropdown value={this.state.inputValues.get('network-group')}
         optionList={this.networkGroups} isRequired={true}
-        emptyOption={emptyOptProps} selectAction={this.handleSelectNetworkGroup}/>
+        emptyOption={emptyOptProps}
+        selectAction={(value)=>this.handleInputChange(value, true, 'network-group')}/>
     );
   }
 
   renderTaggedVLAN() {
-    const checked = this.state.data['tagged-vlan'] !== '' && this.state.data['tagged-vlan'] !== undefined ?
-      this.state.data['tagged-vlan'] : false;
+    const checked = this.state.inputValues.get('tagged-vlan') || false;
     return (
       <div className='tagged-vlan'>
         <input className='tagged' type='checkbox' value='taggedvlan'
-          checked={checked} onChange={this.handleTaggedVLANChange}/>
+          checked={checked} onChange={()=>this.handleInputChange(!checked, true, 'tagged-vlan')}/>
         {translate('tagged-vlan')}
       </div>
     );
-  }
-
-  checkDataToSave = () => {
-    const dataChanged = JSON.stringify(this.origData) !== JSON.stringify(this.state.data);
-    this.props.setDataChanged(this.props.tabIndex, dataChanged);
-    return this.state.isFormValid && dataChanged;
   }
 
   closeAction = () => {
@@ -326,9 +325,7 @@ class UpdateNetworks extends Component {
       .map(e => e.get('name')).toJS();
     if(this.props.mode === MODE.EDIT) {
       //remove current name so won't check against it
-      let idx = this.props.model.getIn(['inputModel','networks']).findIndex(
-        net => net.get('name') === this.props.networkName);
-      names.splice(idx, 1);
+      names = names.filter(name => name !== this.props.networkName);
     }
     return (
       <div className='details-section network-section'>
