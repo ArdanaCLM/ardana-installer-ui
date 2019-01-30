@@ -102,7 +102,6 @@ export class GetSshPassphraseModal extends Component {
     postJson('/api/v2/sshagent/key', JSON.stringify(password), undefined, false)
       .then(this.props.doneAction)
       .catch((error) => {
-        this.props.cancelAction();
         if (error.status === 401) {
           this.setState({error: translate('get.passphrase.invalid'), passphrase: ''});
         } else {
@@ -138,7 +137,6 @@ export class GetSshPassphraseModal extends Component {
   render() {
     const footer = (
       <div className="btn-row">
-        <ActionButton type='default' clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton clickAction={::this.setPassphrase} displayLabel={translate('ok')}
           isDisabled={!this.isValidPassphrase()}/>
       </div>
@@ -148,7 +146,8 @@ export class GetSshPassphraseModal extends Component {
       <div>
         {this.renderErrorMessage()}
         <ConfirmModal title={translate('get.passphrase')}
-          onHide={this.props.cancelAction} footer={footer}>
+          onHide={this.props.cancelAction} footer={footer}
+          hideCloseButton={true}>
           <form onSubmit={::this.setPassphrase}>
             <div>{translate('get.passphrase.description')}</div>
             <div className='passphrase-line'>

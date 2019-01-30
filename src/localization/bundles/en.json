@@ -64,7 +64,7 @@
     "legend.unknown": "Unknown",
     "legend.ok": "ok",
     "get.passphrase": "Provide SSH Passphrase",
-    "get.passphrase.description": "The operation you are about to perform requires the SSH passphrase. Please provide the SSH passphrase or select the Cancel button to abort the operation.",
+    "get.passphrase.description": "Many operations require SSH access, and the private key is supplied by an SSH agent.  The SSH agent cannot load the private key because it is protected by a passphrase. Please provide this SSH passphrase in order to load the private key into the SSH agent.\nIn the event that the ardana service and the SSH agent are restarted while logged into the CLM Admin Console, operations that require the SSH key will fail until you logout and log back in and enter the SSH passphrase here.",
     "get.passphrase.invalid": "SSH passphrase provided is incorrect. Please provide the correct SSH passphrase.",
     "get.passphrase.error": "Unable to use the provided SSH passphrase: {0}.\nPlease correct the problem and try again.",
     "id.with_colon": "ID:",
