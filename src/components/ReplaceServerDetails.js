@@ -50,7 +50,8 @@ class ReplaceServerDetails extends Component {
       isValid: this.initInputsValid(props),
       isOsPasswordValid: undefined,
       nicMappings: getNicMappings(props.model),
-      serverGroups: getServerGroups(props.model)
+      serverGroups: getServerGroups(props.model),
+      encryptKey: props.encryptKey || ''
     };
   }
 
@@ -117,9 +118,11 @@ class ReplaceServerDetails extends Component {
   isFormInputValid = () => {
 
     // The form is valid if all of the fields are valid.  The OS password only has
-    // to be valid when the OS Install checkbox is selected or it is a compute server
+    // to be valid when the OS Install checkbox is selected or it is a compute server.
+    // If isEncrypted, encryptKey can not be empty.
     return this.isServerInputsValid() &&
-      (this.state.isOsPasswordValid || (!this.state.isInstallOsSelected && !isComputeNode(this.props.data)));
+      (this.state.isOsPasswordValid || (!this.state.isInstallOsSelected && !isComputeNode(this.props.data))) &&
+      (!this.props.isEncrypted || (this.props.isEncrypted && !isEmpty(this.state.encryptKey)));
   }
 
   handleDone = () => {
@@ -140,7 +143,8 @@ class ReplaceServerDetails extends Component {
 
     let theProps = {
       wipeDisk : this.state.isWipeDiskSelected,
-      installOS : this.state.isInstallOsSelected
+      installOS : this.state.isInstallOsSelected,
+      encryptKey: this.state.encryptKey
     };
     if(this.state.isInstallOsSelected || isComputeNode(this.props.data)) {
       theProps.osUsername = this.state.osUsername;
@@ -173,6 +177,11 @@ class ReplaceServerDetails extends Component {
       isOsPasswordValid: valid,
       osPassword: value,
     });
+  }
+
+  handleEncryptKeyChange = (e) => {
+    const value = e.target.value;
+    this.setState({encryptKey: value});
   }
 
   handleInstallOsCheck = (e) => {
@@ -341,6 +350,22 @@ class ReplaceServerDetails extends Component {
     }
   }
 
+  renderEncryptKey() {
+    return (
+      <If condition={this.props.isEncrypted}>
+        <div className='message-line'>
+          {translate('common.encryptkey.message')}</div>
+        <div className='server-details-container'>
+          <InputLine
+            isRequired={this.props.isEncrypted} inputName={'encryptKey'}
+            inputType={'password'} label={'validate.deployment.encryptKey'}
+            inputValue={this.state.encryptKey}
+            inputAction={this.handleEncryptKeyChange}/>
+        </div>
+      </If>
+    );
+  }
+
   renderOSUserPass() {
     if (this.state.isInstallOsSelected || isComputeNode(this.props.data)) {
       return (
@@ -472,6 +497,7 @@ class ReplaceServerDetails extends Component {
             checked={this.state.isWipeDiskSelected} onChange={this.handleWipeDiskCheck}/>
           {translate('common.wipedisk')}
         </div>
+        {this.renderEncryptKey()}
       </div>
     );
   }

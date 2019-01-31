@@ -13,6 +13,7 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { Modal } from 'react-bootstrap';
 import { ActionButton } from '../components/Buttons.js';
 import { translate } from '../localization/localize.js';
@@ -158,6 +159,54 @@ export class GetSshPassphraseModal extends Component {
               <div className='passphrase-input'>
                 <ValidatingInput isRequired='true' inputName='sshPassphrase'
                   inputType='password' inputValue={this.state.passphrase}
+                  inputAction={::this.handleValueChange}/>
+              </div>
+            </div>
+          </form>
+        </ConfirmModal>
+      </div>
+    );
+  }
+}
+
+export class SetEncryptKeyModal extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {encryptKey: ''};
+  }
+
+  handleSaveEncryptKey = (event) => {
+    event?.preventDefault();
+    this.props.doneAction(this.state.encryptKey);
+  }
+
+  handleValueChange(event) {
+    this.setState({encryptKey: event.target.value});
+  }
+
+  render() {
+    const footer = (
+      <div className="btn-row">
+        <ActionButton clickAction={::this.handleSaveEncryptKey} displayLabel={translate('ok')}
+          isDisabled={isEmpty(this.state.encryptKey)}/>
+      </div>
+    );
+
+    return (
+      <div>
+        <ConfirmModal title={translate('common.encryptkey.title')}
+          onHide={this.props.cancelAction} hideCloseButton={true} footer={footer}>
+          <form onSubmit={::this.handleSaveEncryptKey}>
+            <div>{translate('common.encryptkey.description')}</div>
+            <div className='passphrase-line'>
+              <div className='passphrase-heading'>
+                {translate('validate.deployment.encryptKey') + '*'}
+                <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
+              </div>
+              <div className='passphrase-input'>
+                <ValidatingInput isRequired='true' inputName='encryptKey'
+                  inputType='password' inputValue={this.state.encryptKey}
                   inputAction={::this.handleValueChange}/>
               </div>
             </div>

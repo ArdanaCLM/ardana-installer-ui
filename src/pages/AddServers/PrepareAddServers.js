@@ -22,21 +22,6 @@ import { translate } from '../../localization/localize.js';
 import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
 
-
-const PLAYBOOK_STEPS = [{
-  label: translate('deploy.progress.commit'),
-  playbooks: ['commit']
-}, {
-  label: translate('deploy.progress.config-processor-run'),
-  playbooks: ['config-processor-run.yml']
-}, {
-  label: translate('deploy.progress.ready-deployment'),
-  playbooks: ['ready-deployment.yml']
-}, {
-  label: translate('deploy.progress.predeployment'),
-  playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml', ]
-}];
-
 // This is the prepare page for adding compute servers
 // process. It will first commit the model changes and start
 // the playbook to do pre-deployment.
@@ -49,6 +34,10 @@ class PrepareAddServers extends BaseUpdateWizardPage {
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       processErrorBanner: '',
     };
+  }
+
+  componentDidMount() {
+    this.checkEncryptKeyAndProceed();
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
@@ -69,6 +58,20 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   }
 
   renderPlaybookProgress () {
+    const PLAYBOOK_STEPS = [{
+      label: translate('deploy.progress.commit'),
+      playbooks: ['commit']
+    }, {
+      label: translate('deploy.progress.config-processor-run'),
+      playbooks: ['config-processor-run.yml']
+    }, {
+      label: translate('deploy.progress.ready-deployment'),
+      playbooks: ['ready-deployment.yml']
+    }, {
+      label: translate('deploy.progress.predeployment'),
+      playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+    }];
+
     let playbooks = [{
       name: 'commit',
       action: ((logger) => {
@@ -85,7 +88,8 @@ class PrepareAddServers extends BaseUpdateWizardPage {
           });
       }),
     }, {
-      name: PRE_DEPLOYMENT_PLAYBOOK
+      name: PRE_DEPLOYMENT_PLAYBOOK,
+      payload:  {'extra-vars': {encrypt: this.props.encryptKey || ''}}
     }];
     return (
       <PlaybookProgress
@@ -120,8 +124,11 @@ class PrepareAddServers extends BaseUpdateWizardPage {
           {this.renderHeading(this.getPrepareServerTitle())}
         </div>
         <div className='wizard-content'>
-          {!this.props.wizardLoading && this.renderPlaybookProgress()}
-          {failed && this.renderProcessError()}
+          <If condition={!this.props.wizardLoading && this.state.showPlaybookProcess}>
+            {this.renderPlaybookProgress()}
+          </If>
+          <If condition={failed}>{this.renderProcessError()}</If>
+          {this.renderEncryptKeyModal()}
         </div>
         {this.renderFooterButtons(failed, failed)}
       </div>

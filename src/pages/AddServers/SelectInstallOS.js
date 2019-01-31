@@ -41,13 +41,17 @@ class SelectInstallOS extends BaseUpdateWizardPage {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if(this.props.operationProps !== prevProps.operationProps) {
+    if(this.props.operationProps !== prevProps.operationProps ||
+      this.props.isEncrypted !== prevProps.isEncrypted ||
+      this.props.encryptKey !== prevProps.encryptKey) {
       let isValid =
       !isEmpty(this.props.operationProps.selectedToInstallOS) &&
       !isEmpty(this.props.operationProps.osInstallPassword) &&
       (!this.props.operationProps.sshPassphraseRequired ||
         (this.props.operationProps.sshPassphraseRequired &&
-        !isEmpty(this.props.operationProps.sshPassphrase)));
+        !isEmpty(this.props.operationProps.sshPassphrase))) &&
+      (!this.props.isEncrypted ||
+        (this.props.isEncrypted && !isEmpty(this.props.encryptKey)));
       this.setState({isValid: isValid});
     }
   }

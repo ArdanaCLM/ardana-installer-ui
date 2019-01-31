@@ -63,7 +63,8 @@ class SelectServersToProvision extends BaseWizardPage {
       requiresPassword: false,
       sshPassphrase: '',
       hasError: false,
-      errorMsg: ''
+      errorMsg: '',
+      encryptKey: props.encryptKey || ''
     };
 
     this.ips = [];
@@ -167,6 +168,12 @@ class SelectServersToProvision extends BaseWizardPage {
     }
   }
 
+  handleSaveEncryptKey = async (e) => {
+    const encryptKey = e.target.value;
+    this.setState({encryptKey: encryptKey});
+    await this.props.updateGlobalState('encryptKey', encryptKey);
+  }
+
   handleOsInstallPassword = (e) => {
     const password = e.target.value;
     this.setState({osInstallPassword: password});
@@ -211,6 +218,24 @@ class SelectServersToProvision extends BaseWizardPage {
         </div>
       );
     }
+  }
+
+  renderEncryptKey() {
+    return (
+      <If condition={this.props.isEncrypted && this.props.isUpdateMode}>
+        <div className='detail-line'>
+          <div className='detail-heading'>
+            {translate('validate.deployment.encryptKey') + '*'}
+            <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
+          </div>
+          <div className='input-body'>
+            <ValidatingInput isRequired='true' inputName='encryptKey'
+              inputType='password' inputValue={this.state.encryptKey}
+              inputAction={this.handleSaveEncryptKey}/>
+          </div>
+        </div>
+      </If>
+    );
   }
 
   startInstalling = () => {
@@ -310,6 +335,7 @@ class SelectServersToProvision extends BaseWizardPage {
                 inputValue={this.state.osInstallPassword}
                 inputAction={this.handleOsInstallPassword}/>
               {this.renderSshPassphraseInputLine()}
+              {this.renderEncryptKey()}
             </div>
 
             <TransferTable

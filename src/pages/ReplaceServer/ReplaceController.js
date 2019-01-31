@@ -32,11 +32,12 @@ class ReplaceController extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
       invalidMsg: '',
       showLoadingMask: false,
 
-      ringBuilderConfirmation: undefined,
+      ringBuilderConfirmation: undefined
     };
   }
 
@@ -48,6 +49,10 @@ class ReplaceController extends BaseUpdateWizardPage {
       .then((yml) => {
         // Force a re-render if the page is still shown (user may navigate away while waiting)
         if (this.refs.ReplaceController) {
+          // deal with refresh case
+          if(this.props.isEncrypted && isEmpty(this.props.encryptKey)) {
+            this.setState({showEncryptKeyModal: true});
+          }
           this.setState({internalModel: yml, showLoadingMask: false});
         }
       })
@@ -60,6 +65,12 @@ class ReplaceController extends BaseUpdateWizardPage {
           showLoadingMask: false
         });
       });
+  }
+
+  // overwrite function in parent
+  handleSaveEncryptKey = async (encryptKey) => {
+    this.setState({showEncryptKeyModal: false});
+    await this.props.updateGlobalState('encryptKey', encryptKey);
   }
 
   updatePageStatus = (status, error) => {
@@ -92,7 +103,8 @@ class ReplaceController extends BaseUpdateWizardPage {
     //      payload: used when playbook is sent
 
     // Return without rendering if the internalModel is still loading
-    if (!this.state.internalModel) {
+    // or if need input encryption key
+    if (!this.state.internalModel || this.state.showEncryptKeyModal) {
       return;
     }
 
@@ -307,9 +319,12 @@ class ReplaceController extends BaseUpdateWizardPage {
         playbooks.push({name: playbook_name, payload: pb_step.payload});
       }
     }
-
+    // common_payload will be merged with individual playbook payload when luanch
+    // playbook in PlaybookProgress
+    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (
       <PlaybookProgress
+        payload={common_payload}
         updatePageStatus={this.updatePageStatus}
         updateGlobalState={this.props.updateGlobalState}
         playbookStatus={this.props.playbookStatus}
@@ -368,6 +383,7 @@ class ReplaceController extends BaseUpdateWizardPage {
           {this.renderPlaybookProgress()}
           {cancel && this.renderError()}
           {this.renderRingBuilderConfirmation()}
+          {this.renderEncryptKeyModal()}
         </div>
         {this.renderNavButtons(cancel)}
       </div>

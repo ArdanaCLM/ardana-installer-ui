@@ -18,6 +18,7 @@ import { STATUS } from './utils/constants.js';
 import WizardProgress from './components/WizardProgress';
 import { Map } from 'immutable';
 import InstallWizard from  './InstallWizard.js';
+import { isCloudConfigEncrypted } from './utils/RestUtils.js';
 
 /**
  * The UpdateWizard component is a container for loading update pages which will launch
@@ -62,6 +63,9 @@ class UpdateWizard extends InstallWizard {
       // operationProps record all the bits that need to run to update
       // TODO how to deal with install password
       operationProps: undefined,
+
+      encryptKey: '',
+      isEncrypted: false
     };
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
@@ -69,7 +73,8 @@ class UpdateWizard extends InstallWizard {
     // ['playbookStatus', 'model', 'connectionInfo', 'deployConfig', 'wizardLoading', 'wizardLoadingErrors'];
     this.globalStateVars =
       this.globalStateVars.concat([
-        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode'
+        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode',
+        'encryptKey', 'isEncrypted'
       ]);
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
@@ -79,6 +84,11 @@ class UpdateWizard extends InstallWizard {
       this.persistedStateVars.concat([
         'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode'
       ]);
+  }
+
+  getIsEncrypted = async () => {
+    let isEncrypted = await isCloudConfigEncrypted();
+    this.setState({isEncrypted : isEncrypted});
   }
 
   // deal with day2 update when refresh

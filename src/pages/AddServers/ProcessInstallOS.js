@@ -82,7 +82,8 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
       payload: {
         'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
-          'ardanauser_password': this.props.operationProps.osInstallPassword
+          'ardanauser_password': this.props.operationProps.osInstallPassword,
+          'encrypt': this.props.encryptKey || ''
         }
       }
     }];

@@ -43,8 +43,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
     this.state = {
+      ...this.state,
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
-      showPlabybookProcess: false,
       processErrorBanner: '',
       loading: false,
       // confirmation dialog when results contain failed
@@ -76,7 +76,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             opProps.server['hostname'] = newHost['hostname'];
             opProps.server['ansible_hostname'] = newHost['ansible_hostname'];
             this.props.updateGlobalState('operationProps', opProps);
-            this.setState({showPlabybookProcess: true});
+            this.checkEncryptKeyAndProceed();
           }
           else { // no old or new hostname, should not happen, just in case
             this.setState({
@@ -94,7 +94,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         });
     }
     else { //have the hostname already
-      this.setState({showPlabybookProcess: true});
+      this.checkEncryptKeyAndProceed();
     }
   }
 
@@ -114,7 +114,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
 
   isValidToRenderPlaybookProgress = () => {
     return (
-      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading &&
+      this.state.showPlaybookProcess && !this.props.wizardLoading && !this.state.loading &&
       this.props.operationProps.oldServer.hostname
     );
   }
@@ -491,9 +491,12 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   renderPlaybookProgress() {
     let steps = this.getSteps();
     let playbooks = this.getPlaybooks();
-
+    // common_payload will be merged with individual playbook payload when luanch
+    // playbook in PlaybookProgress
+    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (
       <PlaybookProgress
+        payload={common_payload}
         updatePageStatus={this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
         playbookStatus={this.props.playbookStatus} steps={steps} playbooks={playbooks}/>
     );
@@ -524,6 +527,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         {this.renderNavButtons(cancel)}
         {this.renderPartialFailedConfirmation()}
         {this.renderMigrationMonitorModal()}
+        {this.renderEncryptKeyModal()}
       </div>
     );
   }
