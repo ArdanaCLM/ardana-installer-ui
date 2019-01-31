@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -199,5 +199,20 @@ class RestError extends Error {
     super(message);
     this.status = status;
     this.value = value;
+  }
+}
+
+
+/**
+ * Convinience method to test the reachability of a host
+ * @param {string} ip ip of the host to test
+ */
+export async function getReachability(ip) {
+  try {
+    await postJson('api/v2/connection_test', {host: ip});
+    return true;
+  } catch(e) {
+    if (e.status === 404) return false;
+    throw e;
   }
 }

@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -195,10 +195,6 @@ class CollapsibleTable extends Component {
     }];
 
     if (row.role.includes('COMPUTE')) {
-      // TODO: Add these as they are implemented
-      /*
-          key: 'common.delete', action: ...
-      */
       // show replace button when there is no process operation going on
       if (!this.props.processOperation) {
         items.push({
@@ -221,6 +217,11 @@ class CollapsibleTable extends Component {
             items.push({
               key: 'common.activate',
               action: this.props.activateComputeHost,
+              active: true,
+              callbackData: row.id
+            }, {
+              key: 'common.delete',
+              action: this.props.deleteComputeHost,
               active: true,
               callbackData: row.id
             });

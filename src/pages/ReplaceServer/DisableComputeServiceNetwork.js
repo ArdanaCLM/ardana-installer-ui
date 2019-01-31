@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       partialFailedConfirmMsg: undefined,
       // monitor instances migration polling
       migrationMonitorModal: undefined,
-      migrationData: undefined
+      migrationData: undefined,
+      heading: translate('server.deploy.progress.disable_compute_service_network')
     };
   }
 
@@ -229,6 +230,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   }
 
   migrateInstances = (logger) => {
+    if(!this.props.operationProps.server) return;
     const apiUrl =
       '/api/v2/compute/instances/' + this.props.operationProps.oldServer.hostname +
       '/' + this.props.operationProps.server.hostname + '/migrate';
@@ -328,7 +330,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       });
   }
 
-  getSteps = () => {
+  getSteps() {
     let steps = [{
       label: translate('server.deploy.progress.disable_compute_service'),
       playbooks: [DISABLE_COMPUTE_SERVICE]
@@ -337,7 +339,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       playbooks: [REMOVE_FROM_AGGREGATES]
     }];
 
-    if (this.props.operationProps.oldServer.isReachable) {
+    if (this.props.operationProps.oldServer.isReachable && this.props.operationProps.server) {
       steps.push({
         label: translate('server.deploy.progress.migrate_instances'),
         playbooks: [MIGRATE_INSTANCES]
@@ -359,7 +361,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     return steps;
   }
 
-  getPlaybooks = () => {
+  getPlaybooks() {
     let playbooks = [{
       name: DISABLE_COMPUTE_SERVICE,
       action: ((logger) => {
@@ -373,7 +375,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }];
 
     // migrate instances when old compute host is reachable
-    if(this.props.operationProps.oldServer.isReachable) {
+    if(this.props.operationProps.oldServer.isReachable && this.props.operationProps.server) {
       playbooks.push({
         name: MIGRATE_INSTANCES,
         action: ((logger) => {
@@ -513,7 +515,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>
         <div className='content-header'>
-          {this.renderHeading(translate('server.deploy.progress.disable_compute_service_network'))}
+          {this.renderHeading(this.state.heading)}
         </div>
         <div className='wizard-content'>
           <If condition={this.isValidToRenderPlaybookProgress()}>{this.renderPlaybookProgress()}</If>
