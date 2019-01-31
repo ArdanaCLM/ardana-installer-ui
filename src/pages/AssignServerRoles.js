@@ -841,7 +841,7 @@ class AssignServerRoles extends BaseWizardPage {
       model = model.updateIn(['inputModel', 'servers'], list => list.map(svr => {
         // use uid if sever has uid, if it doesn't have uid like the example one, will use
         // id.
-        if (svr.get('uid') === server.uid || svr.get('id') === server.id)
+        if ((svr.get('uid') && svr.get('uid') === server.uid) || (svr.get('id') && svr.get('id') === server.id))
           return svr.set('role', role);
         else
           return svr;
