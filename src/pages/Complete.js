@@ -65,7 +65,13 @@ class Complete extends BaseWizardPage {
     });
 
     return (
-      <Modal className='complete-step' show={true} backdrop={false}>
+      <Modal
+        className='complete-step'
+        show={true}
+        backdrop={false}
+        centered
+        size="lg"
+      >
         <Modal.Header>
           <div className='icon-container'><i className='material-icons complete-icon'>done</i></div>
           <div>{this.renderHeading(translate('complete.heading'))}</div>
@@ -84,7 +90,7 @@ class Complete extends BaseWizardPage {
             <h4>{translate('loading.pleasewait')}</h4>
           </If>
           <If condition={!this.state.linksLoaing}>
-            <ul>
+            <ul className="body-list">
               {links}
             </ul>
           </If>

@@ -30,7 +30,7 @@
 
 .btn-primary {
   background-color: @preferredcolor;
-  color: white;
+  color: @sb-white;
   display:inline-block;
 }
 
@@ -41,11 +41,7 @@
   border: 1px solid @active-button-color;
   outline: 0;
 }
-.btn.btn-primary:disabled,
-.btn.btn-primary[disabled] {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
+
 .btn.btn-primary:disabled:hover,
 .btn.btn-primary[disabled]:hover,
 .btn.btn-primary:disabled,
@@ -60,9 +56,9 @@
 .btn.btn-default:hover,
 .btn.btn-default:focus,
 .btn.btn-default {
-  color: @defaultcolor;
-  background-color: @page-background-color;
-  border-color: @defaultcolor;
+  color: @default-button-color;
+  background-color: @background-color;
+  border-color: @default-button-color;
   display:inline-block;
   outline: 0;
 }
@@ -71,8 +67,8 @@
 .btn.btn-default[disabled]:hover,
 .btn.btn-default:disabled,
 .btn.btn-default[disabled] {
-  background-color:  @page-background-color;
-  border: 1px solid @defaultcolor;
+  background-color:  @background-color;
+  border: 1px solid @default-button-color;
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -99,6 +95,13 @@
   display:inline-block;
   outline: 0;
   box-shadow: none;
+}
+
+.btn-primary:not(:disabled):not(.disabled).active,
+.btn-primary:not(:disabled):not(.disabled):active,
+.show>.btn-primary.dropdown-toggle {
+  border: 1px solid @sb-green-900;
+  background-color: @sb-green-900;
 }
 
 // Buttons in a .btn-row are automatically separated with a gap
@@ -145,7 +148,7 @@
 
 .model-element-selected div {
   background-color: @preferredcolor;
-  color: white;
+  color: @sb-white;
 }
 
 .picker-card {
@@ -153,7 +156,7 @@
   height: 150px;
   width: 150px;
   color: @preferredcolor;
-  font-size: 1.3em;
+  font-size: 1.2em;
   padding: 10px;
   float: left;
   margin: 10px;
@@ -162,7 +165,7 @@
   position: relative;
   &.selected {
     background-color: @preferredcolor;
-    color: white;
+    color: @sb-white;
   }
   .model-name {
     margin-top: 3px;
@@ -170,19 +173,9 @@
   }
 }
 
-.model-check-icon {
-  font-size: 28px;
-  background-color: @preferredcolor;
-  color: white;
-}
-
 .assignment-button {
   font-size: 24px;
   cursor: pointer;
-  &.disabled {
-    color: @inactivecolor;
-    cursor: default;
-  }
 }
 
 .edit, .detail-info, .delete {
@@ -191,7 +184,6 @@
   font-size: small;
   float: right;
   padding-right: 3px;
-  color: @info-link-color;
   &.collapsible {
     padding-right: 12px;
   }

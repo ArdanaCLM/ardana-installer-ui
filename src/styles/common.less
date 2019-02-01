@@ -15,9 +15,9 @@
 @import "palette";//palette.less
 
 body {
-  background-color: @page-background-color;
+  background-color: @background-color;
   font-family: 'Lato', sans-serif;
-  color: @page-font-color;
+  color: @font-color;
   font-size: 14px;
 }
 
@@ -52,8 +52,12 @@ p {
   margin-bottom: 1em;
 }
 
+code {
+  color: @sb-orange-500;
+}
+
 .verticalLine {
-  border-right: thin solid lightgray;
+  border-right: thin solid @sb-gray-200;
 }
 
 .margin-top-10 {
@@ -167,6 +171,7 @@ p {
     border: 1px solid transparent;
     border-bottom: 3px solid @preferredcolor;
     background-color: transparent;
+    color: @font-color;
   }
   a {
     color: @subheadingcolor;
@@ -183,6 +188,9 @@ p {
   color: rgba(0, 0, 0, 0.54);
   &.disabled {
     color: rgba(0, 0, 0, 0.26);
+    cursor: not-allowed;
+  }
+  &.md-inactive {
     cursor: not-allowed;
   }
 }
@@ -268,11 +276,9 @@ p {
 
 a {
   color: @sb-cerulean-900;//bootstrap 4 changed its defaul to 007bff, change it back here
-}
-
-.alert.show:not(.alert-danger):not(.alert-success){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
-  background-color: rgba(179, 232, 246, 0.3);
-  border-color: @sb-cerulean-100;
+  &:hover {
+    color: @sb-blue-400;
+  }
 }
 
 .hide {

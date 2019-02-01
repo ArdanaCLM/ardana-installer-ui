@@ -81,8 +81,11 @@ function WarningMessage(props) {
 
 function InfoBanner(props) {
   return (
-    <Alert><span className='info-banner'>
-      <i className='material-icons info-icon md-dark'>info</i>{props.message}</span></Alert>
+    <Alert variant="info">
+      <span className='info-banner'>
+        <i className='material-icons info-icon md-dark'>info</i>{props.message}
+      </span>
+    </Alert>
   );
 }
 

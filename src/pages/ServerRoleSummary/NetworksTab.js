@@ -84,7 +84,7 @@ class NetworksTab extends Component {
   }
 
   renderActionRow() {
-    let addClass = 'material-icons add-button';
+    let addClass = 'material-icons md-dark add-button';
     addClass = this.state.mode !== MODE.NONE ? addClass + ' disabled' : addClass;
     let addTextClass = 'add-text';
     addTextClass = this.state.mode !== MODE.NONE ? addTextClass + ' disabled' : addTextClass;
@@ -116,9 +116,9 @@ class NetworksTab extends Component {
   }
 
   renderNetworkTable() {
-    const checkMark = <i className='material-icons data-icon'>check</i>;
-    let editClass = 'material-icons edit-button';
-    let removeClass = 'material-icons remove-button';
+    const checkMark = <i className='material-icons md-dark data-icon'>check</i>;
+    let editClass = 'material-icons md-dark edit-button';
+    let removeClass = 'material-icons md-dark remove-button';
     if (this.state.mode !== MODE.NONE) {
       editClass = editClass + ' disabled';
       removeClass = removeClass + ' disabled';

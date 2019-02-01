@@ -84,10 +84,10 @@ export class ValidatingInput extends Component {
     let togglePassword = '';
     if (inputType === 'password') {
       if (this.state.showMask) {
-        togglePassword = <i className='material-icons password-icon'
+        togglePassword = <i className='material-icons md-dark password-icon'
           onClick={(e) => this.toggleShowHidePassword(e)}>visibility</i>;
       } else {
-        togglePassword = <i className='material-icons password-icon'
+        togglePassword = <i className='material-icons md-dark password-icon'
           onClick={(e) => this.toggleShowHidePassword(e)}>visibility_off</i>;
       }
     }

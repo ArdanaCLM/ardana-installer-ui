@@ -137,7 +137,7 @@ class DiskModelsTab extends Component {
           </tr>);
       });
 
-    let addClass = 'material-icons add-button';
+    let addClass = 'material-icons md-dark add-button';
     addClass = this.state.showDiskModelDetails ? addClass + ' disabled' : addClass;
     let addTextClass = 'add-text';
     addTextClass = this.state.showDiskModelDetails ? addTextClass + ' disabled' : addTextClass;
