@@ -368,20 +368,20 @@ a {
 
 .alert-danger {
   color: @sb-gray-900;
-  background-color: @sb-red-100;
-  border-color: @sb-red-200;
+  background-color: @alert-red-background;
+  border-color: @sb-red-100;
 }
 
 .alert-success {
   color: @sb-gray-900;
-  background-color: @sb-green-100;
+  background-color: @alert-green-background;
   border-color: @sb-green-200;
 }
 
 .alert.show:not(.alert-danger):not(.alert-success){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
   color: @sb-gray-900;
-  background-color: @sb-cerulean-100;
-  border-color: @sb-cerulean-200;
+  background-color: @alert-cerulean-background;
+  border-color: @sb-cerulean-100;
 }
 
 .hide {
