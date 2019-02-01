@@ -169,7 +169,7 @@ export class PickerButton extends Component {
       (this.props.isSelected ? ' selected' : '');
     let check = '';
     if(this.props.isSelected) {
-      check = (<i className="material-icons model-check-icon">check_circle</i>);
+      check = (<i className="material-icons md-light model-check-icon">check_circle</i>);
     }
     return (
       <div className={classN} name={this.props.keyName}
@@ -225,7 +225,7 @@ export class ItemHelpButton extends Component {
 }
 
 export function AssignmentButton(props) {
-  let cName = 'material-icons assignment-button';
+  let cName = 'material-icons md-dark assignment-button';
   let iconName = '';
   if (props.type === 'right') {
     iconName = 'chevron_right';
@@ -237,7 +237,7 @@ export function AssignmentButton(props) {
   } else if (props.type === 'double-left') {
     iconName = 'first_page';
   }
-  cName = (props.isDisabled === true) ? cName + ' disabled' : cName;
+  cName = (props.isDisabled === true) ? cName + ' md-inactive' : cName;
   return (
     <span onClick={props.clickAction}>
       <i className={cName}>{iconName}</i>
@@ -265,7 +265,7 @@ export class EditPencilForTableRow extends Component {
       <td className='actions'>
         <p onClick={this.props.clickAction}>
           <span className='edit'>
-            <i className="material-icons">edit</i>
+            <i className="material-icons md-dark">edit</i>
           </span>
         </p>
       </td>
@@ -279,7 +279,7 @@ export class InfoForTableRow extends Component {
       <td className='actions'>
         <p onClick={this.props.clickAction}>
           <span className='detail-info'>
-            <i className='material-icons'>info</i>
+            <i className='material-icons md-dark'>info</i>
           </span>
         </p>
       </td>
@@ -293,7 +293,7 @@ export class DeleteForTableRow extends Component {
       <td className='actions'>
         <p onClick={this.props.clickAction}>
           <span className='delete'>
-            <i className='material-icons'>delete</i>
+            <i className='material-icons md-dark'>delete</i>
           </span>
         </p>
       </td>

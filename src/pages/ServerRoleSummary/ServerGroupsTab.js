@@ -160,8 +160,8 @@ class ServerGroupsTab extends Component {
           serverGroups: m.has('server-groups') ? m.get('server-groups').toJS() : [],
         };
 
-        let editClass = 'material-icons edit-button';
-        let removeClass = 'material-icons remove-button';
+        let editClass = 'material-icons md-dark edit-button';
+        let removeClass = 'material-icons md-dark remove-button';
         if (this.state.showServerGroupDetails) {
           editClass = editClass + ' disabled';
           removeClass = removeClass + ' disabled';
@@ -191,7 +191,7 @@ class ServerGroupsTab extends Component {
           </tr>);
       });
 
-    let addClass = 'material-icons add-button';
+    let addClass = 'material-icons md-dark add-button';
     addClass = this.state.showServerGroupDetails ? addClass + ' disabled' : addClass;
     let addTextClass = 'add-text';
     addTextClass = this.state.showServerGroupDetails ? addTextClass + ' disabled' : addTextClass;

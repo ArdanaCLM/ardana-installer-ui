@@ -15,10 +15,10 @@
 @import "palette";//palette.less
 
 body {
-  background-color: @page-background-color;
+  background-color: @background-color;
   font-family: 'Lato', sans-serif;
-  color: @page-font-color;
-  font-size: 13px;
+  color: @font-color;
+  font-size: 14px;
 }
 
 h1,
@@ -52,8 +52,12 @@ p {
   margin-bottom: 1em;
 }
 
+code {
+  color: @sb-orange-500;
+}
+
 .verticalLine {
-  border-right: thin solid lightgray;
+  border-right: thin solid @sb-gray-200;
 }
 
 .margin-top-10 {
@@ -167,6 +171,7 @@ p {
     border: 1px solid transparent;
     border-bottom: 3px solid @preferredcolor;
     background-color: transparent;
+    color: @font-color;
   }
   a {
     color: @subheadingcolor;
@@ -180,9 +185,11 @@ p {
 
 .material-icons {
   cursor: pointer;
-  color: @info-link-color;
   &.disabled {
     color: @inactivecolor;
+    cursor: not-allowed;
+  }
+  &.md-inactive {
     cursor: not-allowed;
   }
 }
@@ -356,13 +363,25 @@ p {
 }
 
 a {
-  color: #337ab7;//bootstrap 4 changed its defaul to 007bff, change it back here
+  color: @sb-cerulean-900;//bootstrap 4 changed its defaul to 007bff, change it back here
+}
+
+.alert-danger {
+  color: @sb-gray-900;
+  background-color: @sb-red-100;
+  border-color: @sb-red-200;
+}
+
+.alert-success {
+  color: @sb-gray-900;
+  background-color: @sb-green-100;
+  border-color: @sb-green-200;
 }
 
 .alert.show:not(.alert-danger):not(.alert-success){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
-  color: #31708f;
-  background-color: #d9edf7;
-  border-color: #bce8f1;
+  color: @sb-gray-900;
+  background-color: @sb-cerulean-100;
+  border-color: @sb-cerulean-200;
 }
 
 .hide {

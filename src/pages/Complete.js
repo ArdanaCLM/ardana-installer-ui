@@ -74,7 +74,13 @@ class Complete extends BaseWizardPage {
     }
 
     return (
-      <Modal className='complete-step' show={true} backdrop={false}>
+      <Modal
+        className='complete-step'
+        show={true}
+        backdrop={false}
+        centered
+        size="lg"
+      >
         <Modal.Header>
           <div className='icon-container'><i className='material-icons complete-icon'>done</i></div>
           <div>{this.renderHeading(translate('complete.heading'))}</div>
