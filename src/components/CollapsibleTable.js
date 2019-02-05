@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ class CollapsibleTable extends Component {
     return (
       <span className='edit collapsible'
         onClick={() => this.setState({showEditServerModal: true, contextMenuRow: server})}>
-        <i className="material-icons collapsible">edit</i>
+        <i className="material-icons md-dark collapsible">edit</i>
       </span>
     );
   }
@@ -136,7 +136,7 @@ class CollapsibleTable extends Component {
     return (
       <span className="detail-info collapsible"
         onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
-        <i className="material-icons collapsible">info</i>
+        <i className="material-icons md-dark collapsible">info</i>
       </span>
     );
   }
@@ -195,10 +195,6 @@ class CollapsibleTable extends Component {
     }];
 
     if (row.role.includes('COMPUTE')) {
-      // TODO: Add these as they are implemented
-      /*
-          key: 'common.delete', action: ...
-      */
       // show replace button when there is no process operation going on
       if (!this.props.processOperation) {
         items.push({
@@ -221,6 +217,11 @@ class CollapsibleTable extends Component {
             items.push({
               key: 'common.activate',
               action: this.props.activateComputeHost,
+              active: true,
+              callbackData: row.id
+            }, {
+              key: 'common.delete',
+              action: this.props.deleteComputeHost,
               active: true,
               callbackData: row.id
             });
@@ -251,7 +252,7 @@ class CollapsibleTable extends Component {
 
   renderMenuAction = (row) => {
     return (
-      <span className='menu-icon' onClick={(event) => this.prepareContextMenu(event, row)}>
+      <span className='menu-icon md-dark' onClick={(event) => this.prepareContextMenu(event, row)}>
         <i className='material-icons'>more_horiz</i>
       </span>
     );
@@ -311,7 +312,7 @@ class CollapsibleTable extends Component {
       {fillerTds}
       <td></td>
       <td className='group-count-col'>{group.members.length}
-        <span className='expand-collapse-icon'><i className='material-icons'>{icon}</i></span></td></tr>];
+        <span className='expand-collapse-icon'><i className='material-icons md-dark'>{icon}</i></span></td></tr>];
 
     groupRows.push(this.renderHeaders(group.isExpanded, group.groupName));
     group.members.forEach((member) => {

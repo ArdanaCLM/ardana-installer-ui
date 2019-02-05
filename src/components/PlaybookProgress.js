@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -525,6 +525,17 @@ class PlaybookProgress extends Component {
     }
   }
 
+  moveOnToNextPlaybook = (playbook) => {
+    this.playbookStopped(playbook.name, playbook.name, 0);
+    const nextPlaybook = this.findNextPlaybook(playbook.name);
+    if (nextPlaybook) {
+      this.launchPlaybook(nextPlaybook);
+    }
+    else {
+      this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
+    }
+  }
+
   launchPlaybook = (playbook) => {
 
     // Seed the payload with defaults.  Many playbooks, including the config processor run, wipe disks,
@@ -552,17 +563,16 @@ class PlaybookProgress extends Component {
       this.updateGlobalPlaybookStatus(playbook.name, 0, STATUS.IN_PROGRESS);
       this.props.updatePageStatus(STATUS.IN_PROGRESS);
 
-      playbook.action(this.logMessage)
+      let promise = playbook.action(this.logMessage);
+      if(!(promise instanceof Promise)) {
+        // this step gave us back something that was not a Promise.
+        // we will assume that is step is finished and move on to the next one.
+        this.moveOnToNextPlaybook(playbook);
+        return;
+      }
+      promise
         .then(response => {
-          this.playbookStopped(playbook.name, playbook.name, 0);
-
-          const nextPlaybook = this.findNextPlaybook(playbook.name);
-          if (nextPlaybook) {
-            this.launchPlaybook(nextPlaybook);
-          }
-          else {
-            this.props.updatePageStatus(STATUS.COMPLETE); //set the caller page status
-          }
+          this.moveOnToNextPlaybook(playbook);
         })
         .catch((error) => {
           this.playbookError(playbook.name, playbook.name, 0, error);

@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,27 +13,12 @@
 * limitations under the License.
 **/
 
-.addservers-page {
-  .complete-servernames-list {
-    margin-top: 1em;
-    font-size: 1.4em;
-    max-height: 40em;
-    overflow: auto;
-  }
+import ReplaceServer from './ReplaceServer';
+import ManageComputeHost from './ManageComputeHost';
 
-  .complete-serverdetails {
-    list-style-type: none;
-    font-size: 1em;
-    margin-bottom: 0.5em;
-  }
+const UpdateServerPages = {
+  ...ManageComputeHost,
+  ...ReplaceServer
+};
 
-  .log {
-    min-height: 55em;
-    max-height: 55em;
-    overflow: auto;
-  }
-}
-
-.addserver-log-dialog {
-  min-width: 60em;
-}
+export default UpdateServerPages;

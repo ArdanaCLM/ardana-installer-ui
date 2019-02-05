@@ -108,6 +108,10 @@ class SelectInstallOS extends BaseUpdateWizardPage {
   }
 
   render() {
+    // For select installos page, show cancel button but no retry button.
+    // Will have a specific cancel confirmation message when user clicks
+    // cancel button.
+    let cancelMsg = translate('server.addserver.installos.cancel.confirm');
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
@@ -119,7 +123,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
         </div>
         {this.state.isValid && this.renderInstallConfirmModal()}
         {this.state.passphraseError && this.renderPassphraseErrorMsg()}
-        {this.renderNavButtons(true)}
+        {this.renderNavButtons(true, false, cancelMsg)}
       </div>
     );
   }

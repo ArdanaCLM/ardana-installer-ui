@@ -237,10 +237,12 @@ class ServersAddedManually extends Component {
     );
 
     return (
-      <ConfirmModal className={'manual-discover-modal'}
+      <ConfirmModal
         title={this.props.addAction ? translate('add.server.add') : translate('edit.server')}
-        onHide={this.props.closeAction} footer={footer}>
-
+        onHide={this.props.closeAction}
+        footer={footer}
+        size="lg"
+      >
         <form onSubmit={::this.saveAndClose}>
           <div className='server-details-container'>
             {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}

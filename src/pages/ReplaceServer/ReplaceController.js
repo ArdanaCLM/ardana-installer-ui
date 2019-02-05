@@ -154,23 +154,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
       {
         label: translate('server.deploy.progress.rm-known-host'),
-        action: ((logger) => {
-          if (isEmpty(server.hostname)) {
-            logger('No hostname found to remove from known_hosts, continuing');
-            return Promise.resolve();
-          }
-
-          return deleteJson('/api/v2/known_hosts/' + server.hostname)
-            .then((response) => {
-              logger(server.hostname + ' removed from known_hosts');
-            })
-            .catch((error) => {
-              const logMsg =
-                'Unable to remove server from known_hosts file.' + error.toString();
-              logger(logMsg);
-              const message = translate('update.known_hosts.failure', error.toString());
-              throw new Error(message);
-            }); }),
+        playbook: 'ardana-ssh-keyscan.yml',
       },
     ];
 

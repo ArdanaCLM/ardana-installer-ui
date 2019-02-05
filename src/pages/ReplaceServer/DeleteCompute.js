@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -58,22 +58,29 @@ class DeleteCompute extends BaseUpdateWizardPage {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.setState({loading: true});
-    fetchJson('/api/v2/server?source=sm,ov,manual')
-      .then(servers => {
-        this.setState({
-          showPlabybookProcess: true,
-          servers: servers,
-          loading: false});
-      })
-      .catch(error => {
-        let msg = translate('server.deploy.progress.get_servers.error', error.toString());
-        this.setState({
-          errorMessages: msg,
-          loading: false
-        });
+    try {
+      const promises = [
+        fetchJson('/api/v2/server?source=sm,ov,manual'),
+        fetchJson('/api/v2/cobbler')
+      ];
+      const [ servers, cobblerStatus ] = await Promise.all(promises);
+      this.setState({
+        showPlabybookProcess: true,
+        servers,
+        cobblerPresent: cobblerStatus.cobbler,
+        loading: false
       });
+    } catch(error) {
+      let msg = `Failed to get list of servers or cobbler presence flag: ${error.toString()}`;
+      console.log(msg, error); // eslint-disable-line no-console
+      this.setState({
+        cobblerPresent: true,
+        showPlabybookProcess: true,
+        loading: false
+      });
+    }
   }
 
   updatePageStatus = (status, error) => {
@@ -363,16 +370,18 @@ class DeleteCompute extends BaseUpdateWizardPage {
       playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     });
 
-    // remove from cobbler
-    steps.push({
-      label: translate('server.deploy.progress.remove_from_cobbler'),
-      playbooks: [REMOVE_FROM_COBBLER]
-    });
+    if(this.state.cobblerPresent) {
+      // remove from cobbler
+      steps.push({
+        label: translate('server.deploy.progress.remove_from_cobbler'),
+        playbooks: [REMOVE_FROM_COBBLER]
+      });
 
-    steps.push({
-      label: translate('server.deploy.progress.cobbler_deploy'),
-      playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
-    });
+      steps.push({
+        label: translate('server.deploy.progress.cobbler_deploy'),
+        playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
+      });
+    }
 
     // remove from monasca ping if there is monasca
     steps.push({
@@ -452,17 +461,19 @@ class DeleteCompute extends BaseUpdateWizardPage {
       payload: {'extra-vars': {'remove_deleted_servers': 'y', 'free_unused_addresses': 'y'}}
     });
 
-    playbooks.push({
-      name: REMOVE_FROM_COBBLER,
-      action: ((logger) => {
-        return this.removeFromCobbler(logger);
-      })
-    });
+    if(this.state.cobblerPresent) {
+      playbooks.push({
+        name: REMOVE_FROM_COBBLER,
+        action: ((logger) => {
+          return this.removeFromCobbler(logger);
+        })
+      });
 
-    playbooks.push({
-      name: COBBLER_DEPLOY_PLAYBOOK,
-      payload: {'extra-vars': {'ardanauser_password': this.props.operationProps.osPassword}}
-    });
+      playbooks.push({
+        name: COBBLER_DEPLOY_PLAYBOOK,
+        payload: {'extra-vars': {'ardanauser_password': this.props.operationProps.osPassword}}
+      });
+    }
 
     playbooks.push({
       name: MONASCA_DEPLOY_PLAYBOOK,

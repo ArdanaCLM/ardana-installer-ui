@@ -13,8 +13,8 @@
 * limitations under the License.
 **/
 import React from 'react';
-import { ThreeBounce } from 'better-react-spinkit';
 import '../styles/deployer.less';
+import 'eos-icons/dist/css/eos-icons.css';
 
 export const LoadingMask = (props) => (
   <If condition={props.show}>
@@ -22,10 +22,7 @@ export const LoadingMask = (props) => (
       <If condition={props.text}>
         <div className='spinners-text'>{props.text}</div>
       </If>
-      <ThreeBounce
-        className='spinners'
-        size={props.size || 25}
-        color='#00C081'/>
+      <i className="eos-icons eos-icon-loading spinners"></i>
     </div>
   </If>
 );

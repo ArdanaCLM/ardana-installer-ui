@@ -15,10 +15,10 @@
 @import "palette";//palette.less
 
 body {
-  background-color: @page-background-color;
+  background-color: @background-color;
   font-family: 'Lato', sans-serif;
-  color: @page-font-color;
-  font-size: 13px;
+  color: @font-color;
+  font-size: 14px;
 }
 
 h1,
@@ -30,17 +30,17 @@ h5 {
   margin-top: 20px;//bootstrap 3 style replacement for 0px bootstrap 4 default
 }
 h1, .h1 {
-  font-size: 2em;//bootstrap 3 style replacement for larger bootstrap 4 default
+  font-size: 1.86em;//bootstrap 3 style replacement for larger bootstrap 4 default
 }
 h2, .h2 {
-  font-size: 1.6em;//bootstrap 3 style replacement for larger bootstrap 4 default
+  font-size: 1.48em;//bootstrap 3 style replacement for larger bootstrap 4 default
 }
 h3, .h3 {
-  font-size: 1.4em;//bootstrap 3 style replacement for larger bootstrap 4 default
+  font-size: 1.3em;//bootstrap 3 style replacement for larger bootstrap 4 default
   font-weight: 700;
 }
 h4, .h4 {
-  font-size: 1.2em;//bootstrap 3 style replacement for larger bootstrap 4 default
+  font-size: 1.1em;//bootstrap 3 style replacement for larger bootstrap 4 default
   margin-top: 10px;//bootstrap 3 style replacement for 0px bootstrap 4 default
 }
 h5, .h5 {
@@ -52,8 +52,12 @@ p {
   margin-bottom: 1em;
 }
 
+code {
+  color: @sb-orange-500;
+}
+
 .verticalLine {
-  border-right: thin solid lightgray;
+  border-right: thin solid @sb-gray-200;
 }
 
 .margin-top-10 {
@@ -167,6 +171,7 @@ p {
     border: 1px solid transparent;
     border-bottom: 3px solid @preferredcolor;
     background-color: transparent;
+    color: @font-color;
   }
   a {
     color: @subheadingcolor;
@@ -180,9 +185,12 @@ p {
 
 .material-icons {
   cursor: pointer;
-  color: @info-link-color;
+  color: rgba(0, 0, 0, 0.54);
   &.disabled {
-    color: @inactivecolor;
+    color: rgba(0, 0, 0, 0.26);
+    cursor: not-allowed;
+  }
+  &.md-inactive {
     cursor: not-allowed;
   }
 }
@@ -209,95 +217,6 @@ p {
   .material-icons {
     font-size: 18px;
     vertical-align: text-bottom;
-  }
-}
-
-.login-page {
-  background-color: #003258;
-  height: 100vh;
-  display: block;
-  flex-direction: column;
-  font-family: Arial, sans-serif;
-  .top-bar-container {
-    background-color: #00243E;
-    .top-bar {
-      height: 60px;
-      max-width: 1170px;
-      padding: 0 15px 0 0;
-      margin: 0 auto 0 auto;
-      .top-bar-header {
-        margin-left: 12px;
-        display: block;
-        font-size: 22px;
-        color: #CCCCCC;
-        padding-top: 15px;
-      }
-    }
-  }
-  .login-body {
-    padding: 112px 15px 0 15px;
-    .content-container {
-      max-width: 1170px;
-      margin: 0 auto 0 auto;
-      .content-container-left {
-        font-family: 'Raleway', sans-serif;
-        .upper-left {
-          line-height: 1.1;
-          color: #00C081;
-          font-size: 52px;
-          margin-bottom: 1em;
-          font-weight: 300;
-        }
-        .lower-left {
-          font-size: 16px;
-          color: #CCCCCC;
-        }
-      }
-      .content-right {
-        padding-left: 10px;
-        padding-right: 30px;
-        .header {
-          color: #CCCCCC;
-          font-size: 32px;
-          margin-top: 1em;
-          margin-bottom: 1em;
-          line-height: 1.1;
-        }
-        .password-icon {
-          color: #A7A9Ac;
-          top: -40px;
-          left: -7px;
-          float: right;
-          margin-bottom: -15px;
-        }
-        .password-container {
-          display: block;
-          width: 100%;
-        }
-        input {
-          width: 100%;
-          background-color: #002644;
-          border-color: #004981;
-          margin-bottom: 15px;
-          padding: 6px 12px;
-          color: #A7A9Ac;
-        }
-        ::placeholder {
-          color: #A7A9Ac;
-        }
-        button {
-          height: 34px;
-          width: 100%;
-          background-color: #00C081;
-          border-color: #00C081;
-          color: white;
-          &:hover {
-            background-color: #008d5f;
-            border-color: #008358;
-          }
-        }
-      }
-    }
   }
 }
 
@@ -356,13 +275,10 @@ p {
 }
 
 a {
-  color: #337ab7;//bootstrap 4 changed its defaul to 007bff, change it back here
-}
-
-.alert.show:not(.alert-danger):not(.alert-success){ //in bootstrap3, this is handled via alert-info, but the alert dialog is not the same with bootstrap4
-  color: #31708f;
-  background-color: #d9edf7;
-  border-color: #bce8f1;
+  color: @sb-cerulean-900;//bootstrap 4 changed its defaul to 007bff, change it back here
+  &:hover {
+    color: @sb-blue-400;
+  }
 }
 
 .hide {

@@ -15,14 +15,23 @@
 
 import React from 'react';
 import BaseWizardPage from './BaseWizardPage.js';
-import { CloseButton, CancelButton } from '../components/Buttons.js';
+import { CloseButton, CancelButton, RetryButton } from '../components/Buttons.js';
 import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
+import { YesNoModal } from '../components/Modals.js';
 
 /**
  * This base class handles the functions common to update process
  */
 class BaseUpdateWizardPage extends BaseWizardPage {
+  constructor(props) {
+    super();
+    this.state = {
+      showRetryConfirmModal: false,
+      showCancelConfirmModal: false
+    };
+  }
+
   goForward(e) {
     e.preventDefault();
     this.props.updateGlobalState('playbookStatus', undefined); //clean up playbook status
@@ -39,8 +48,47 @@ class BaseUpdateWizardPage extends BaseWizardPage {
     this.props.cancelUpdateProcess();
   }
 
+  retryUpdateProcess = (e) => {
+    e.preventDefault();
+    this.props.retryUpdateProcess();
+  }
+
   handleCloseLoadingErrorMessage = () => {
     this.setState({wizardLoadingErrors: undefined});
+  }
+
+  handleCancel = (e) => {
+    e.preventDefault();
+    this.setState({showCancelConfirmModal: true});
+  }
+
+  handleRetry = (e) => {
+    e.preventDefault();
+    this.setState({showRetryConfirmModal: true});
+  }
+
+  renderCancelConfirmModal(cancelMsg) {
+    return (
+      <If condition={this.state.showCancelConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={(e) => this.cancelUpdateProcess(e)}
+          noAction={() => this.setState({showCancelConfirmModal: false})}>
+          {cancelMsg || translate('server.deploy.failure.cancel.confirm')}
+        </YesNoModal>
+      </If>
+    );
+  }
+
+  renderRetryConfirmModal() {
+    return (
+      <If condition={this.state.showRetryConfirmModal}>
+        <YesNoModal title={translate('warning')}
+          yesAction={(e) => this.retryUpdateProcess(e)}
+          noAction={() => this.setState({showRetryConfirmModal: false})}>
+          {translate('server.deploy.retry.confirm')}
+        </YesNoModal>
+      </If>
+    );
   }
 
   renderCloseButton() {
@@ -54,17 +102,29 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   renderCancelButton(show) {
     if(show) {
       return (
-        <CancelButton clickAction={this.cancelUpdateProcess}/>
+        <CancelButton clickAction={(e) => this.handleCancel(e)}/>
       );
     }
   }
 
-  renderNavButtons(showCancel) {
+  // playbookStatus includes playId and name
+  renderRetryButton(show) {
+    if(show) {
+      return (
+        <RetryButton clickAction={(e) => this.handleRetry(e)}/>
+      );
+    }
+  }
+
+  renderNavButtons(showCancel, showRetry, cancelMsg) {
     return (
       <div className='btn-row footer-container'>
+        {this.renderRetryButton(showRetry)}
         {this.renderCancelButton(showCancel)}
         {this.renderForwardButton()}
         {this.renderCloseButton()}
+        {this.renderRetryConfirmModal()}
+        {this.renderCancelConfirmModal(cancelMsg)}
       </div>
     );
   }

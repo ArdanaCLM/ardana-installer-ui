@@ -19,6 +19,9 @@ import { setAuthToken, clearAuthToken } from '../utils/Auth.js';
 import { navigateTo, navigateBack, wasRedirectedToLogin } from '../utils/RouteUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
+import { GetSshPassphraseModal } from '../components/Modals.js';
+
+import '../styles/pages/login.less';
 
 class LoginPage extends Component {
 
@@ -30,7 +33,8 @@ class LoginPage extends Component {
       password: '',
       errorMsg: '',
       showPasswordMask: true,
-      showLoadMask: false
+      showLoadMask: false,
+      showSshPassphraseModal: false
     };
   }
 
@@ -42,6 +46,24 @@ class LoginPage extends Component {
   handlePasswordChange = (e, valid, props) => {
     let value = e.target.value;
     this.setState({password: value});
+  }
+
+  navigate = () => {
+    if (wasRedirectedToLogin()) {
+      navigateBack();
+    } else {
+      const search = new URLSearchParams(window.location.search);
+      if (search.get('start')?.startsWith('installer')) {
+        navigateTo('/', undefined, search.toString());
+      } else {
+        navigateTo('/services/info');
+      }
+    }
+  }
+
+  handlePassphrase = () => {
+    this.setState({showSshPassphraseModal: false});
+    this.navigate();
   }
 
   handleLogin = (e, valid, props) => {
@@ -63,21 +85,15 @@ class LoginPage extends Component {
         const expires = new Date(response.expires);
         setAuthToken(response.token, expires);
 
-        // Attempt a typical operation to validate the token against the policy
-        return fetchJson('/api/v2/user', undefined, false);
+        // Determine whether a password is requires to run playbooks
+        return fetchJson('/api/v2/sshagent/requires_password');
       })
       .then(response => {
         this.setState({show: false, errorMsg: '', showLoadMask: false});
-
-        if (wasRedirectedToLogin()) {
-          navigateBack();
+        if (response.requires_password) {
+          this.setState({showSshPassphraseModal: true});
         } else {
-          const search = new URLSearchParams(window.location.search);
-          if (search.get('start')?.startsWith('installer')) {
-            navigateTo('/', undefined, search.toString());
-          } else {
-            navigateTo('/services/info');
-          }
+          this.navigate();
         }
       })
       .catch((error) => {
@@ -140,14 +156,14 @@ class LoginPage extends Component {
                     autoComplete='username' value={this.state.username}
                     placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
                   <div className='password-container'>
-                    <input type='password' className='rounded-corner' required
+                    <input type='password' className='rounded-corner password' required
                       autoComplete='current-password' value={this.state.password}
                       placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
                     <i className='material-icons password-icon' onClick={this.toggleShowHidePassword}>
                       {this.state.showPasswordMask ? 'visibility': 'visibility_off'}
                     </i>
                   </div>
-                  <button className="rounded-corner" type="submit" onClick={this.handleLogin}>
+                  <button className="btn rounded-corner" type="submit" onClick={this.handleLogin}>
                     {translate('login')}
                   </button>
                 </form>
@@ -155,10 +171,12 @@ class LoginPage extends Component {
             </div>
           </div>
         </div>
+        <If condition={this.state.showSshPassphraseModal}>
+          <GetSshPassphraseModal doneAction={this.handlePassphrase} />
+        </If>
       </div>
     );
   }
-
 }
 
 export default LoginPage;
