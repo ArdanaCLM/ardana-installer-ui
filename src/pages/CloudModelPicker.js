@@ -367,7 +367,7 @@ class CloudModelPicker extends BaseWizardPage {
         <Tooltip id='clear-filters' className='tooltip top'>{translate('model.picker.filter.clear')}</Tooltip>);
       const clearFilterButton = (
         <OverlayTrigger placement='top' overlay={tooltip}>
-          <i className='material-icons clear-filters' onClick={this.clearFilters}>clear</i>
+          <i className='material-icons md-dark clear-filters' onClick={this.clearFilters}>clear</i>
         </OverlayTrigger>
       );
 

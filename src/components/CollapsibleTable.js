@@ -122,7 +122,7 @@ class CollapsibleTable extends Component {
     return (
       <span className='edit collapsible'
         onClick={() => this.setState({showEditServerModal: true, contextMenuRow: server})}>
-        <i className="material-icons collapsible">edit</i>
+        <i className="material-icons md-dark collapsible">edit</i>
       </span>
     );
   }
@@ -136,7 +136,7 @@ class CollapsibleTable extends Component {
     return (
       <span className="detail-info collapsible"
         onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
-        <i className="material-icons collapsible">info</i>
+        <i className="material-icons md-dark collapsible">info</i>
       </span>
     );
   }
@@ -252,7 +252,7 @@ class CollapsibleTable extends Component {
 
   renderMenuAction = (row) => {
     return (
-      <span className='menu-icon' onClick={(event) => this.prepareContextMenu(event, row)}>
+      <span className='menu-icon md-dark' onClick={(event) => this.prepareContextMenu(event, row)}>
         <i className='material-icons'>more_horiz</i>
       </span>
     );
@@ -312,7 +312,7 @@ class CollapsibleTable extends Component {
       {fillerTds}
       <td></td>
       <td className='group-count-col'>{group.members.length}
-        <span className='expand-collapse-icon'><i className='material-icons'>{icon}</i></span></td></tr>];
+        <span className='expand-collapse-icon'><i className='material-icons md-dark'>{icon}</i></span></td></tr>];
 
     groupRows.push(this.renderHeaders(group.isExpanded, group.groupName));
     group.members.forEach((member) => {

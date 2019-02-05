@@ -154,7 +154,7 @@ class InterfaceModelsTab extends Component {
 
   // Render the entire contents of the tab
   render() {
-    let addClass = 'material-icons add-button';
+    let addClass = 'material-icons md-dark add-button';
     let addTextClass = 'add-text';
     let editClass = 'material-icons edit-button';
     let removeClass = 'material-icons remove-button';
@@ -453,7 +453,7 @@ class InterfaceModelsTab extends Component {
         );
       });
 
-      let addClass = 'material-icons add-button';
+      let addClass = 'material-icons md-dark add-button';
       let widthClass = '';
       let buttonClass = 'btn-container';
       if (this.state.detailMode !== MODE.NONE) {
