@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,27 +19,31 @@ import BaseWizardPage from './BaseWizardPage';
 import { fetchJson } from '../utils/RestUtils.js';
 import { Modal } from 'react-bootstrap';
 
+const linkTranslations = {
+  horizon: translate('complete.message.link1'),
+  opsconsole: translate('complete.message.link2'),
+  'ardana-service': translate('day2.product.title')
+};
+
 class Complete extends BaseWizardPage {
 
   constructor() {
     super();
     this.state = {
-      horizon: '',
-      opsconsole: ''
+      links: {},
+      linksLoaing: true
     };
+  }
 
-    fetchJson('/api/v2/external_urls')
-      .then(responseData => {
-        if (responseData.horizon) {
-          this.setState({horizon: responseData.horizon});
-        }
-        if (responseData.opsconsole) {
-          this.setState({opsconsole: responseData.opsconsole});
-        }
-      })
-      .catch((error) => {
-        console.log('Unable to retrieve external URLs');// eslint-disable-line no-console
+  async componentDidMount() {
+    try {
+      this.setState({
+        links: await fetchJson('/api/v2/external_urls'),
+        linksLoaing: false
       });
+    } catch(error) {
+      console.log('Unable to retrieve external URLs'); // eslint-disable-line no-console
+    }
   }
 
   render() {
@@ -52,26 +56,13 @@ class Complete extends BaseWizardPage {
         {translate('complete.message.body3', modelName)}</div>);
     }
 
-    let linkSection = '';
-    if (this.state.horizon !== '' || this.state.opsconsole !== '') {
-      let links = [];
-      if (this.state.horizon !== '') {
-        links.push(<li className='body-link' key='horizon'>
-          <a href={this.state.horizon}>{translate('complete.message.link1')}</a></li>);
-      }
-      if (this.state.opsconsole !== '') {
-        links.push(<li className='body-link' key='ops'>
-          <a href={this.state.opsconsole}>{translate('complete.message.link2')}</a></li>);
-      }
-      linkSection = (
-        <div>
-          <div className='body-header'>{translate('complete.message.link.heading')}</div>
-          <ul>
-            {links}
-          </ul>
-        </div>
-      );
-    }
+    let links = Object.keys(this.state.links).filter(linkName => {
+      return this.state.links[linkName].length > 0;
+    }).map(linkName => {
+      return <li className='body-link' key={linkName}>
+        <a href={this.state.links[linkName]}>{linkTranslations[linkName]}</a>
+      </li>;
+    });
 
     return (
       <Modal className='complete-step' show={true} backdrop={false}>
@@ -82,8 +73,21 @@ class Complete extends BaseWizardPage {
         </Modal.Header>
         <Modal.Body>
           {modelLines}
-          <div className='body-header'>{translate('complete.message.refresh')}</div>
-          {linkSection}
+          <div className='body-header'>
+            {translate(
+              'complete.message.body4',
+              <a href={this.state.links['ardana-service']}>{translate('day2.product.title')}</a>
+            )}
+          </div>
+          <div className='body-header'>{translate('complete.message.link.heading')}</div>
+          <If condition={this.state.linksLoaing}>
+            <h4>{translate('loading.pleasewait')}</h4>
+          </If>
+          <If condition={!this.state.linksLoaing}>
+            <ul>
+              {links}
+            </ul>
+          </If>
         </Modal.Body>
       </Modal>
     );

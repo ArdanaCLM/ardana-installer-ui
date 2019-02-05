@@ -439,6 +439,7 @@
     "complete.message.body1": "Congratulations! You've successfully deployed your cloud.",
     "complete.message.body2": "This is the information about your cloud:",
     "complete.message.body3": "Cloud model: {0}",
+    "complete.message.body4": "Please wait a few minutes for the cloud deployment to be complete before accessing the {0}.",
     "complete.message.link.heading": "Useful links:",
     "complete.message.link1": "Openstack Horizon UI",
     "complete.message.link2": "Ops Console UI",
