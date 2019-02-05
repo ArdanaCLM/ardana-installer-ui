@@ -57,7 +57,7 @@ class Complete extends BaseWizardPage {
     }
 
     let links = Object.keys(this.state.links).filter(linkName => {
-      return this.state.links[linkName].length > 0;
+      return this.state.links[linkName]?.length > 0;
     }).map(linkName => {
       return <li className='body-link' key={linkName}>
         <a href={this.state.links[linkName]}>{linkTranslations[linkName]}</a>
