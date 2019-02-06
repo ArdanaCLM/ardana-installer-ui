@@ -344,7 +344,7 @@ class ServiceTemplatesTab extends Component {
       return (
         <li key={index}>
           <span className='service-heading' onClick={() => this.handleToggleService(item)}>
-            <i className='material-icons'>keyboard_arrow_right</i>{item.service}</span>
+            <i className='material-icons md-dark'>keyboard_arrow_right</i>{item.service}</span>
         </li>
       );
     }

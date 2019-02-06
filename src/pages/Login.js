@@ -21,6 +21,8 @@ import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { GetSshPassphraseModal } from '../components/Modals.js';
 
+import '../styles/pages/login.less';
+
 class LoginPage extends Component {
 
   constructor(props) {
@@ -154,14 +156,14 @@ class LoginPage extends Component {
                     autoComplete='username' value={this.state.username}
                     placeholder={translate('login.placeholder.username')} onChange={this.handleUsernameChange}/>
                   <div className='password-container'>
-                    <input type='password' className='rounded-corner' required
+                    <input type='password' className='rounded-corner password' required
                       autoComplete='current-password' value={this.state.password}
                       placeholder={translate('login.placeholder.password')} onChange={this.handlePasswordChange}/>
                     <i className='material-icons password-icon' onClick={this.toggleShowHidePassword}>
                       {this.state.showPasswordMask ? 'visibility': 'visibility_off'}
                     </i>
                   </div>
-                  <button className="rounded-corner" type="submit" onClick={this.handleLogin}>
+                  <button className="btn rounded-corner" type="submit" onClick={this.handleLogin}>
                     {translate('login')}
                   </button>
                 </form>

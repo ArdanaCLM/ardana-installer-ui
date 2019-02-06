@@ -73,7 +73,7 @@ class UpdateWizard extends InstallWizard {
     // ['playbookStatus', 'model', 'connectionInfo', 'deployConfig', 'wizardLoading', 'wizardLoadingErrors'];
     this.globalStateVars =
       this.globalStateVars.concat([
-        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode',
+        'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode', 'expandedGroup',
         'encryptKey', 'isEncrypted'
       ]);
 

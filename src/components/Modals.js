@@ -28,6 +28,7 @@ export function ConfirmModal(props) {
     <Modal
       className='modals'
       show={true}
+      size={props.size}
       onHide={props.onHide}
       backdrop={'static'}
       dialogClassName={props.className}>

@@ -110,7 +110,7 @@ class Networks extends Component {
     return (
       <Fragment key={cp_name}>
         <div className='header'>{translate('control_plane', cp_name)}</div>
-        <table className='table'>
+        <table className='table table-sm'>
           <thead>
             <tr>
               <th>{translate('group')}</th>

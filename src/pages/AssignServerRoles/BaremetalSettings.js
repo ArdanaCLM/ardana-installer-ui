@@ -74,8 +74,12 @@ class BaremetalSettings extends Component {
       </div>
     );
     return (
-      <ConfirmModal className={'manual-discover-modal'}
-        title={translate('add.server.set.network')} onHide={this.props.cancelAction} footer={footer}>
+      <ConfirmModal
+        title={translate('add.server.set.network')}
+        onHide={this.props.cancelAction}
+        footer={footer}
+        size="lg"
+      >
         <div className='description-line'>{translate('add.server.set.network.description')}</div>
         <div className='server-details-container'>
           <InputLine isRequired={true} label={'add.server.set.network.subnet'}

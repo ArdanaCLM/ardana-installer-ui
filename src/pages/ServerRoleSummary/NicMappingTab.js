@@ -369,7 +369,7 @@ class NicMappingTab extends Component {
 
   render() {
 
-    let addClass = 'material-icons add-button';
+    let addClass = 'material-icons md-dark add-button';
     let addTextClass = 'add-text';
     let editClass = 'material-icons edit-button';
     let removeClass = 'material-icons remove-button';
