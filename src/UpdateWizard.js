@@ -64,9 +64,10 @@ class UpdateWizard extends InstallWizard {
       // TODO how to deal with install password
       operationProps: undefined,
 
-      // Indicate if the cloud configuration isEncrypted,
+      // Indicate if the cloud configuration isEncrypted. If it is true,
+      // it will force user to input encryptKey.
       isEncrypted: false,
-      // encryptKey from user input if isEncrypted is true otherwise it is empty
+      // encryptKey from user input if isEncrypted is true otherwise it is empty.
       encryptKey: ''
     };
 
