@@ -66,7 +66,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       errorMessages: [],
 
       // Track which groups the user has expanded
-      expandedGroup: [],
+      expandedGroup: props.expandedGroup || [],
 
       // servers that were discovered or manually entered
       servers: [],
@@ -87,55 +87,58 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    //TODO this is ugly, we souldn't be waiting for things to load like this
-    if (this.props.model !== prevProps.model) {
+    if (this.state.expandedGroup?.length === 0) {
       const allGroups =
-        this.props.model.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
-      if (allGroups.includes('COMPUTE-ROLE')) {
+        this.props.model?.getIn(['inputModel', 'server-roles']).map(e => e.get('name'));
+      if (allGroups?.includes('COMPUTE-ROLE')) {
         this.setState({expandedGroup: ['COMPUTE-ROLE']});
-      } else if (allGroups.size > 0) {
+      } else if (allGroups?.size > 0) {
         this.setState({expandedGroup: [allGroups.sort().first()]});
-      }
-
-      if(this.state.loading === false) {
-        this.setState({loading: true});
-
-        getInternalModel()
-          .then(model => {
-            this.setState({ internalModel: fromJS(model) });
-          })
-          .then(::this.getServerStatuses)
-          .then(::this.checkMonasca)
-          .then(() => this.setState({ loading: false }))
-          .catch(error => {
-            this.setState({
-              errorMessage: translate('server.retreive.serverstatus.error', error.toString()),
-              loading: false
-            });
-          });
       }
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     // empty string loading indicates loading mask without
     // text
     this.setState({loading: true});
-    fetchJson('/api/v2/server?source=sm,ov,manual')
-      .then(servers => {
-        this.setState({
-          servers: servers,
-          loading: false});
-      })
-      .catch(error => {
+    try {
+      try {
+        const servers = await fetchJson('/api/v2/server?source=sm,ov,manual');
+        this.setState({ servers });
+      } catch(error) {
         let msg = translate('server.retrieve.discovered.servers.error', error.toString());
         this.setState(prev => {
           return {
-            errorMessages: prev.errorMessages.concat([msg]),
-            loading: false
+            errorMessages: [
+              ...prev.errorMessages,
+              msg
+            ]
           };
         });
+      }
+      if(!this.state.internalModel) {
+        const model = await getInternalModel();
+        this.setState({ internalModel: fromJS(model) });
+      }
+      let promises = [
+        this.getServerStatuses(),
+        this.checkMonasca()
+      ];
+      await Promise.all(promises);
+      this.setState({ loading: false });
+    } catch(error) {
+      this.setState(prev => {
+        const msg = translate('server.retreive.serverstatus.error', error.toString());
+        return {
+          errorMessages: [
+            ...prev.errorMessages,
+            msg
+          ],
+          loading: false
+        };
       });
+    }
   }
 
   /**
@@ -166,9 +169,9 @@ class UpdateServers extends BaseUpdateWizardPage {
   * the serial nature is to avoid flooding the monasca API with status requests
   */
   async throttledServerStatusRequest(serverIds) {
-    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
+    let internalModelServers = this.state.internalModel?.getIn(['internal', 'servers']).toJS();
     for (const server_id of serverIds.values()) {
-      let server = internalModelServers.find(s => s.id == server_id);
+      let server = internalModelServers?.find(s => s.id == server_id);
       if (!server) continue;
       try {
         const responseData = await fetchJson('/api/v2/monasca/server_status/' + server.hostname);
@@ -206,7 +209,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         && this.props.model !== undefined) {
       // get the list of all servers, then load their statuses
       // possible future enhancement: batching this
-      const serverIds = this.props.model.getIn(['inputModel','servers'])
+      const serverIds = this.props.model?.getIn(['inputModel','servers'])
         .map(server => server.get('id'));
 
       this.throttledServerStatusRequest(serverIds);
@@ -214,8 +217,8 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   async getServerStatuses() {
-    let internalModelServers = this.state.internalModel.getIn(['internal', 'servers']).toJS();
-    let servers = this.props.model.getIn(['inputModel','servers']).toJS()
+    let internalModelServers = this.state.internalModel?.getIn(['internal', 'servers']).toJS();
+    let servers = this.props.model?.getIn(['inputModel','servers']).toJS()
       .filter(s => s.role.includes('COMPUTE'))
       .map(s => {
         const internalServer = internalModelServers.filter(sev => sev.id === s.id)[0];
@@ -254,24 +257,28 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.setState({serverStatuses});
   }
 
+  setExpandedGroup(expandedGroup) {
+    this.setState({ expandedGroup });
+    this.props.updateGlobalState('expandedGroup', expandedGroup);
+  }
+
   expandAll() {
     const allGroups =
       this.props.model.getIn(['inputModel','server-roles']).map(e => e.get('name'));
-    this.setState({expandedGroup: allGroups});
+    this.setExpandedGroup(allGroups);
   }
 
   collapseAll() {
-    this.setState({expandedGroup: []});
+    this.setExpandedGroup();
   }
 
   removeExpandedGroup = (groupName) => {
-    this.setState(prevState => {
-      return {'expandedGroup': prevState.expandedGroup.filter(e => e != groupName)};
-    });
+    let groups = (this.state.expandedGroup || []).filter(e => e != groupName);
+    this.setExpandedGroup(groups.length > 0 ? groups : undefined);
   }
 
   addExpandedGroup = (groupName) => {
-    this.setState(prevState => ({'expandedGroup': prevState.expandedGroup.concat(groupName)}));
+    this.setExpandedGroup((this.state.expandedGroup || []).concat(groupName));
   }
 
   getReplaceProps = () => {
@@ -787,7 +794,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     let newProps = { ...this.props };
 
-    const modelIds = this.props.model.getIn(['inputModel','servers'])
+    const modelIds = this.props.model?.getIn(['inputModel','servers'])
       .map(server => server.get('uid') || server.get('id'));
 
     newProps.availableServers = this.state.servers.filter(server => ! modelIds.includes(server.uid));
