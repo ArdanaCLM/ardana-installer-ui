@@ -60,6 +60,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       loading: false,
       validating: undefined, // Will have a text when validating
       errorMessages: [],

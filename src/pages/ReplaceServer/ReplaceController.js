@@ -37,7 +37,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       invalidMsg: '',
       showLoadingMask: false,
 
-      ringBuilderConfirmation: undefined
+      ringBuilderConfirmation: undefined,
     };
   }
 
