@@ -32,9 +32,14 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
     this.state = {
+      ...this.state,
       loading: false,
       overallStatus: STATUS.NOT_STARTED
     };
+  }
+
+  componentDidMount() {
+    this.checkEncryptKeyAndProceed();
   }
 
   getSteps() {
@@ -103,7 +108,10 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
   render() {
     const failed = this.state.overallStatus === STATUS.FAILED,
       steps = this.getSteps(),
-      playbooks = this.getPlaybooks();
+      playbooks = this.getPlaybooks(),
+      // common_payload will be merged with individual playbook payload when luanch
+      // playbook in PlaybookProgress
+      common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>
@@ -111,15 +119,19 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
           {this.renderHeading(translate('server.activate.text', this.props.operationProps.target.id))}
         </div>
         <div className='wizard-content'>
-          <PlaybookProgress
-            updatePageStatus={::this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
-            playbookStatus={this.props.playbookStatus} steps={steps} playbooks={playbooks}/>
+          <If condition={this.state.showPlaybookProcess}>
+            <PlaybookProgress
+              payload={common_payload}
+              updatePageStatus={::this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
+              playbookStatus={this.props.playbookStatus} steps={steps} playbooks={playbooks}/>
+          </If>
           <If condition={failed}>
             <div className='banner-container'>
               <ErrorBanner message={this.state.processErrorBanner}
                 show={true}/>
             </div>
           </If>
+          {this.renderEncryptKeyModal()}
         </div>
         {this.renderNavButtons(failed)}
       </div>

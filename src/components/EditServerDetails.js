@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ class EditServerDetails extends Component {
       showAddServerGroup: false,
       showAddNicMapping: false,
       nicMappings: getNicMappings(props.model),
-      serverGroups: getServerGroups(props.model)
+      serverGroups: getServerGroups(props.model),
+      encryptKey: props.encryptKey || ''
     };
   }
 
@@ -70,11 +71,13 @@ class EditServerDetails extends Component {
 
   isFormInputValid() {
     return this.state.isValid.every((value, key) => value === true || (value === undefined &&
-      key !== 'id' && key !== 'ip-addr' && key !== 'nic-mapping' && key !== 'server-group'));
+      key !== 'id' && key !== 'ip-addr' && key !== 'nic-mapping' && key !== 'server-group')) &&
+      (!this.props.isEncrypted || (this.props.isEncrypted && !isEmpty(this.state.encryptKey)));
   }
 
   handleDone() {
-    this.props.doneAction(this.state.inputValues.toJS(), this.props.data.id);
+    this.props.doneAction(
+      this.state.inputValues.toJS(), this.props.data.id, this.state.encryptKey);
   }
 
   handleInputChange(value, isValid, name) {
@@ -109,6 +112,26 @@ class EditServerDetails extends Component {
 
   closeAddNicMapping() {
     this.setState({showAddNicMapping: false, nicMappings: getNicMappings(this.props.model)});
+  }
+
+  handleEncryptKeyChange = (e) => {
+    const value = e.target.value;
+    this.setState({encryptKey: value});
+  }
+
+  renderEncryptKey() {
+    return (
+      <If condition={this.props.isEncrypted}>
+        <div key='msg2' className='message-line'>{translate('common.encryptkey.message')}</div>
+        <div key='misc' className='server-details-container'>
+          <InputLine
+            isRequired={this.props.isEncrypted} inputName={'encryptKey'}
+            inputType={'password'} label={'validate.deployment.encryptKey'}
+            inputValue={this.state.encryptKey} moreClass={'has-button'}
+            inputAction={this.handleEncryptKeyChange}/>
+        </div>
+      </If>
+    );
   }
 
   renderAddServerGroup() {
@@ -190,8 +213,8 @@ class EditServerDetails extends Component {
             true, 'server.nicmapping.prompt', 'nic-mapping', this.state.nicMappings,
             'server.nicmapping.prompt', ::this.addNicMapping)}
         </div>
-        <div className='message-line'>{translate('server.ipmi.message')}</div>
-        <div className='server-details-container'>
+        <div key='msg1' className='message-line'>{translate('server.ipmi.message')}</div>
+        <div key='server' className='server-details-container'>
           {this.renderInput(
             'mac-addr', 'text', false, 'server.mac.prompt',
             chainValidators(
@@ -214,6 +237,7 @@ class EditServerDetails extends Component {
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}
         </div>
+        {this.renderEncryptKey()}
       </div>
     );
   }

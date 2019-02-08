@@ -14,7 +14,6 @@
 **/
 
 import React from 'react';
-
 import { translate } from '../../localization/localize.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { STATUS } from '../../utils/constants.js';
@@ -44,8 +43,8 @@ class DeleteCompute extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
     this.state = {
+      ...this.state,
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
-      showPlabybookProcess: false,
       processErrorBanner: '',
       loading: false,
       // confirmation dialog when results contain failed
@@ -67,19 +66,19 @@ class DeleteCompute extends BaseUpdateWizardPage {
       ];
       const [ servers, cobblerStatus ] = await Promise.all(promises);
       this.setState({
-        showPlabybookProcess: true,
         servers,
         cobblerPresent: cobblerStatus.cobbler,
         loading: false
       });
+      this.checkEncryptKeyAndProceed();
     } catch(error) {
       let msg = `Failed to get list of servers or cobbler presence flag: ${error.toString()}`;
       console.log(msg, error); // eslint-disable-line no-console
       this.setState({
         cobblerPresent: true,
-        showPlabybookProcess: true,
         loading: false
       });
+      this.checkEncryptKeyAndProceed();
     }
   }
 
@@ -99,7 +98,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
   isValidToRenderPlaybookProgress = () => {
     return (
       !this.props.wizardLoading && !this.state.loading &&
-      this.props.operationProps.oldServer.hostname && this.state.showPlabybookProcess
+      this.props.operationProps.oldServer.hostname && this.state.showPlaybookProcess
     );
   }
 
@@ -543,9 +542,12 @@ class DeleteCompute extends BaseUpdateWizardPage {
   renderPlaybookProgress() {
     let steps = this.getSteps();
     let playbooks = this.getPlaybooks();
-
+    // common_payload will be merged with individual playbook payload when luanch
+    // playbook in PlaybookProgress
+    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (
       <PlaybookProgress
+        payload={common_payload}
         updatePageStatus={this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
         playbookStatus={this.props.playbookStatus} steps={steps} playbooks={playbooks}/>
     );
@@ -576,6 +578,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
         {this.renderNavButtons(cancel)}
         {this.renderPartialFailedConfirmation()}
         {this.renderManualShutdownConfirmation()}
+        {this.renderEncryptKeyModal()}
       </div>
     );
   }

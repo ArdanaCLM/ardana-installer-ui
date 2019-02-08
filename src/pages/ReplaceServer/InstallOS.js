@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -30,10 +30,16 @@ class InstallOS extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
-      processErrorBanner: '',
+      processErrorBanner: ''
     };
   }
+
+  componentDidMount() {
+    this.checkEncryptKeyAndProceed();
+  }
+
   setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
 
   updatePageStatus = (status) => {
@@ -75,7 +81,8 @@ class InstallOS extends BaseUpdateWizardPage {
       payload: {
         'extra-vars': {
           'nodelist': this.props.operationProps.server.id,
-          'ardanauser_password': installPass
+          'ardanauser_password': installPass,
+          'encrypt': this.props.encryptKey || ''
         }
       }
     }];
@@ -99,7 +106,10 @@ class InstallOS extends BaseUpdateWizardPage {
           {this.renderHeading(translate('install.progress.heading'))}
         </div>
         <div className='wizard-content'>
-          <If condition={!this.props.wizardLoading}>{this.renderPlaybookProgress()}</If>
+          <If condition={!this.props.wizardLoading && this.state.showPlaybookProcess}>
+            {this.renderPlaybookProgress()}
+          </If>
+          {this.renderEncryptKeyModal()}
           <If condition={cancel}>{this.renderProcessError()}</If>
         </div>
         {this.renderNavButtons(cancel)}

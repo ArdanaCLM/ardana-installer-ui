@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -25,31 +25,6 @@ import {
 } from '../../utils/constants.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
 
-const PLAYBOOK_POSSIBLE_STEPS = [{
-  name: WIPE_DISKS_PLAYBOOK,
-  label: translate('server.deploy.progress.wipe-disks'),
-  playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
-  payload: {limit: {}}
-}, {
-  name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
-  label: translate('server.deploy.progress.gen-hosts-file'),
-  playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
-}, {
-  name: SITE_PLAYBOOK,
-  label: translate('server.deploy.progress.addserver.deploy'),
-  playbooks: [SITE_PLAYBOOK + '.yml'],
-  payload: {limit: {}}
-}, {
-  name: MONASCA_DEPLOY_PLAYBOOK,
-  label: translate('server.deploy.progress.update-monasca'),
-  playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
-  payload: {tags: 'active_ping_checks'}
-}, {
-  name: ARDANA_START_PLAYBOOK,
-  label: translate('server.deploy.progress.activate'),
-  playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
-  payload: {limit: {}}
-}];
 
 // This is the deployment page for adding compute servers
 // process. If newHosts are not recorded in progress.json,
@@ -69,8 +44,8 @@ class DeployAddServers extends BaseUpdateWizardPage {
     this.steps = [];
 
     this.state = {
+      ...this.state,
       overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
-      showPlabybookProcess: false,
       processErrorBanner: '',
       // this loading indicator
       loading: false,
@@ -107,9 +82,9 @@ class DeployAddServers extends BaseUpdateWizardPage {
             let opProps = Object.assign({}, this.props.operationProps);
             opProps.newHosts = cleanedHosts; // need for complete message
             this.props.updateGlobalState('operationProps', opProps);
-            this.setState({showPlabybookProcess: true});
+            this.checkEncryptKeyAndProceed();
           }
-          else { //no new hostnames, show not happen just in case
+          else { //no new hostnames, should not happen just in case
             this.setState({
               processErrorBanner: translate('server.addserver.emptyhostnames'),
               overallStatus: STATUS.FAILED
@@ -123,7 +98,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
         });
     }
     else {
-      this.setState({showPlabybookProcess: true});
+      this.checkEncryptKeyAndProceed();
     }
   }
 
@@ -172,6 +147,33 @@ class DeployAddServers extends BaseUpdateWizardPage {
   }
 
   getPlaybooksAndSteps = () => {
+
+    const PLAYBOOK_POSSIBLE_STEPS = [{
+      name: WIPE_DISKS_PLAYBOOK,
+      label: translate('server.deploy.progress.wipe-disks'),
+      playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
+      payload: {limit: {}}
+    }, {
+      name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
+      label: translate('server.deploy.progress.gen-hosts-file'),
+      playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
+    }, {
+      name: SITE_PLAYBOOK,
+      label: translate('server.deploy.progress.addserver.deploy'),
+      playbooks: [SITE_PLAYBOOK + '.yml'],
+      payload: {limit: {}}
+    }, {
+      name: MONASCA_DEPLOY_PLAYBOOK,
+      label: translate('server.deploy.progress.update-monasca'),
+      playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
+      payload: {tags: 'active_ping_checks'}
+    }, {
+      name: ARDANA_START_PLAYBOOK,
+      label: translate('server.deploy.progress.activate'),
+      playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
+      payload: {limit: {}}
+    }];
+
     this.steps = PLAYBOOK_POSSIBLE_STEPS.filter((step) => {
       if(!this.props.operationProps.wipeDisk &&
         !this.props.operationProps.activate) {
@@ -207,15 +209,19 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
   isValidToRenderPlaybookProgress = () => {
     return (
-      this.state.showPlabybookProcess && !this.props.wizardLoading && !this.state.loading &&
+      this.state.showPlaybookProcess && !this.props.wizardLoading && !this.state.loading &&
       this.props.operationProps.newHosts && this.props.operationProps.newHosts.length > 0
     );
   }
 
   renderPlaybookProgress () {
     this.getPlaybooksAndSteps();
+    // common_payload will be merged with individual playbook payload when luanch
+    // playbook in PlaybookProgress
+    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (
       <PlaybookProgress
+        payload={common_payload}
         updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
         playbookStatus = {this.props.playbookStatus} steps = {this.steps}
         playbooks = {this.playbooks} isUpdateMode = {true}/>
@@ -261,6 +267,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {failed && this.renderProcessError()}
           {this.state.warningMessage && this.renderSkipWarning()}
+          {this.renderEncryptKeyModal()}
         </div>
         {this.renderFooterButtons(failed, failed)}
       </div>

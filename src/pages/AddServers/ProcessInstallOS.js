@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -82,7 +82,8 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
       payload: {
         'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
-          'ardanauser_password': this.props.operationProps.osInstallPassword
+          'ardanauser_password': this.props.operationProps.osInstallPassword,
+          'encrypt': this.props.encryptKey || ''
         }
       }
     }];

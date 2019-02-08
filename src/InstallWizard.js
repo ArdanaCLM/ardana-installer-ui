@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -123,6 +123,7 @@ class InstallWizard extends Component {
         this.setState({wizardLoadingErrors: Map({modelError: ErrorMsg})});
         console.log('Unable to retrieve saved model . ' + ErrorMsg);// eslint-disable-line no-console
       })
+      .then(::this.getIsEncrypted)
       .then(() => fetchJson('/api/v2/progress')
         .then((responseData) => {
           this.loadProgress(responseData, forcedReset);
@@ -140,6 +141,10 @@ class InstallWizard extends Component {
           return deleteJson('/api/v2/server?source=sm,ov,manual');
         }
       });
+  }
+
+  getIsEncrypted = async () => {
+    return; // do nothing in day0
   }
 
   /**

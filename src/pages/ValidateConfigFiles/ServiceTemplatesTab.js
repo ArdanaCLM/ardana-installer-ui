@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
 * limitations under the License.
 **/
 import React, { Component } from 'react';
+
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { ErrorMessage, InfoBanner } from '../../components/Messages.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
+import HelpText from '../../components/HelpText.js';
 
 class EditTemplateFile extends Component {
   constructor(props) {
@@ -126,7 +128,10 @@ class ServiceTemplatesTab extends Component {
       expandedServices: [],
 
       // for error message
-      errorContent: undefined
+      errorContent: undefined,
+
+      //deal with encryptKey
+      encryptKey: props.encryptKey || ''
     };
   }
 
@@ -249,6 +254,12 @@ class ServiceTemplatesTab extends Component {
     }
   }
 
+  handleEncryptKeyChange = (e) => {
+    e.preventDefault();
+    this.setState({encryptKey: e.target.value});
+    this.props.handleEncryptKey(e.target.value);
+  }
+
   renderErrorMessage() {
     if (this.state.errorContent) {
       return (
@@ -260,6 +271,26 @@ class ServiceTemplatesTab extends Component {
         </div>
       );
     }
+  }
+
+  renderEncryptKey() {
+    return (
+      <If condition={this.props.handleEncryptKey !== undefined}>
+        <div className='encryptkey-container'>
+          <div className='detail-line'>
+            <div className='detail-heading'>
+              {translate('validate.deployment.encryptKey') + '*'}
+              <HelpText tooltipText={translate('validate.deployment.encryptKey.tooltip')}/>
+            </div>
+            <div className='input-body'>
+              <ValidatingInput isRequired='true' inputName='encryptKey'
+                inputType='password' inputValue={this.state.encryptKey}
+                inputAction={this.handleEncryptKeyChange}/>
+            </div>
+          </div>
+        </div>
+      </If>
+    );
   }
 
   renderFileSection() {
@@ -275,7 +306,12 @@ class ServiceTemplatesTab extends Component {
     }
     else {
       let desc = translate('validate.config.service.info');
-      return (<div className='col-6'><InfoBanner message={desc}/></div>);
+      return (
+        <div className='col-6'>
+          <InfoBanner message={desc}/>
+          <p />
+          {this.renderEncryptKey()}
+        </div>);
     }
   }
 

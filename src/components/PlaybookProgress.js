@@ -542,7 +542,7 @@ class PlaybookProgress extends Component {
     // various service updates, plus *any* playbooks that call those, will stop and prompt for values, effectively
     // causing the UI to hang.  Send extra-vars which avoid this to *all* playbooks.  Note that sending
     // extra vars to playbooks that do not use them has no ill effects.
-    let payload = { 'extra-vars': {automate: 'true', encrypt: '', rekey: ''}};
+    let payload = {'extra-vars': {automate: 'true', rekey: ''}};
 
     for (const override of [this.props.payload, playbook.payload]) {
       if (override) {

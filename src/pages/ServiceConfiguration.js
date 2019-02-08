@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
 **/
 
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
-import { postJson } from '../utils/RestUtils.js';
+import { postJson, isCloudConfigEncrypted } from '../utils/RestUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../utils/constants.js';
@@ -38,9 +39,17 @@ class ServiceConfiguration extends Component {
       showUpdateProgress: false,
       isChanged: false,
       updateCompleted: false,
-      error: undefined
+      error: undefined,
+      // deal with encryptKey
+      isEncrypted: false,
+      encryptKey: ''
     };
     this.playbooksToRun = undefined;
+  }
+
+  async componentDidMount() {
+    let isEncrypted = await isCloudConfigEncrypted();
+    this.setState({isEncrypted : isEncrypted});
   }
 
   startConfigUpdate = () => {
@@ -81,6 +90,11 @@ class ServiceConfiguration extends Component {
 
   handleChange = (change) => {
     this.setState({isChanged: change});
+  }
+
+  handleEncryptKey = (key) => {
+    // will not save in global cache
+    this.setState({encryptKey: key});
   }
 
   updateProgressStatus = (msg, playbooks) => {
@@ -135,12 +149,17 @@ class ServiceConfiguration extends Component {
     return playbooksToRun;
   }
 
+  toDisableUpdate = () => {
+    return !this.state.isChanged || (this.state.isEncrypted && !isEmpty(this.state.encryptKey));
+  }
+
   renderContent = () => {
     if (this.state.showUpdateProgress) {
       if (!this.playbooksToRun) {
         this.playbooksToRun = this.getPlaybooks();
       }
-      const payload = {'extra-vars': {automate: 'true', encrypt: '', rekey: ''}};
+      const payload = {'extra-vars': {encrypt: this.state.encryptKey || ''}};
+
       return (
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update.progress')}</div>
@@ -150,11 +169,17 @@ class ServiceConfiguration extends Component {
         </div>
       );
     } else {
+      let handleEncryption = {};
+      if(this.state.isEncrypted) {
+        handleEncryption.handleEncryptKey = this.handleEncryptKey;
+        handleEncryption.encryptKey = this.state.encryptKey;
+      }
       return (
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update')}</div>
           <ServiceTemplatesTab revertable disableTab={() => {}}
             showNavButtons={this.showActionButtons} hasChange={this.handleChange}
+            {...handleEncryption}
             ref={instance => {this.serviceTemplatesTab = instance;}}/>
           {this.state.showActionButtons ? this.renderActionButtons() : ''}
         </div>
@@ -173,7 +198,7 @@ class ServiceConfiguration extends Component {
     } else {
       return (
         <div className='btn-row right-btn-group'>
-          <ActionButton type='default' displayLabel={translate('cancel')} isDisabled={!this.state.isChanged}
+          <ActionButton type='default' displayLabel={translate('cancel')} isDisabled={this.toDisableUpdate()}
             clickAction={() => this.serviceTemplatesTab.revertChanges()}/>
           <ActionButton displayLabel={translate('update')} isDisabled={!this.state.isChanged}
             clickAction={() => this.startConfigUpdate()}/>
@@ -187,6 +212,7 @@ class ServiceConfiguration extends Component {
       <div>
         <div className='menu-tab-content'>
           {this.renderContent()}
+          {this.renderErrorMessage()}
         </div>
       </div>
     );

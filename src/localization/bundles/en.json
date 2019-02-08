@@ -68,6 +68,9 @@
     "get.passphrase.invalid": "SSH passphrase provided is incorrect. Please provide the correct SSH passphrase.",
     "get.passphrase.error": "Unable to use the provided SSH passphrase: {0}.\nPlease correct the problem and try again.",
     "id.with_colon": "ID:",
+    "common.encryptkey.message": "Please provide encryption key for running playbooks",
+    "common.encryptkey.title": "Provide encryption key",
+    "common.encryptkey.description": "The operation you are about to perform requires the encryption key. Please provide the encryption key.",
 
     "day2.product.description": "Manage and configure your OpenStack cloud via one interface, anytime, anywhere.",
     "login": "Log in",

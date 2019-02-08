@@ -26,12 +26,11 @@ import {
   from '../utils/constants.js';
 import {
   updateServersInModel, getMergedServer, addServerInModel, isComputeNode,
-  removeServerFromModel }
+  removeServerFromModel, genUID }
   from '../utils/ModelUtils.js';
 import { fetchJson, postJson, putJson, getReachability } from '../utils/RestUtils.js';
 import ReplaceServerDetails from '../components/ReplaceServerDetails.js';
 import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.js';
-import { genUID } from '../utils/ModelUtils.js';
 import { getInternalModel } from './topology/TopologyUtils';
 import { fromJS } from 'immutable';
 import { isMonascaInstalled } from '../utils/MonascaUtils.js';
@@ -61,6 +60,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       loading: false,
       validating: undefined, // Will have a text when validating
       errorMessages: [],
@@ -392,6 +392,11 @@ class UpdateServers extends BaseUpdateWizardPage {
     // Update the global state. Since this saves the model and updates the state, wait for
     // it to complete before moving on.
     await this.props.updateGlobalState('model', model);
+
+    // save the encryptKey in global cache so it could be retrieved later
+    if(this.props.isEncrypted) {
+      await this.props.updateGlobalState('encryptKey', theProps.encryptKey);
+    }
 
     // existing server id and ip-addr for non-compute node
     // new server id and ip-addr for a new compute node

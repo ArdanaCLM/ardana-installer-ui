@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
 **/
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import BaseWizardPage from './BaseWizardPage.js';
 import { CloseButton, CancelButton, RetryButton } from '../components/Buttons.js';
 import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
 import { YesNoModal } from '../components/Modals.js';
+import { SetEncryptKeyModal } from '../components/Modals.js';
 
 /**
  * This base class handles the functions common to update process
@@ -27,8 +29,11 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   constructor(props) {
     super();
     this.state = {
+      showPlaybookProcess: false,
       showRetryConfirmModal: false,
-      showCancelConfirmModal: false
+      showCancelConfirmModal: false,
+      // show encryptKey modal when isEncrypted but key is missing
+      showEncryptKeyModal: false
     };
   }
 
@@ -65,6 +70,22 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   handleRetry = (e) => {
     e.preventDefault();
     this.setState({showRetryConfirmModal: true});
+  }
+
+  handleSaveEncryptKey = async (encryptKey) => {
+    this.setState({showEncryptKeyModal: false});
+    await this.props.updateGlobalState('encryptKey', encryptKey);
+    this.setState({showPlaybookProcess: true});
+  }
+
+  checkEncryptKeyAndProceed = () => {
+    if((this.props.isEncrypted && !isEmpty(this.props.encryptKey)) ||
+      !this.props.isEncrypted) {
+      this.setState({ showPlaybookProcess: true});
+    }
+    else { // encrypted but don't have encryptKey
+      this.setState({showEncryptKeyModal: true});
+    }
   }
 
   renderCancelConfirmModal(cancelMsg) {
@@ -114,6 +135,15 @@ class BaseUpdateWizardPage extends BaseWizardPage {
         <RetryButton clickAction={(e) => this.handleRetry(e)}/>
       );
     }
+  }
+
+  renderEncryptKeyModal() {
+    return (
+      <If condition={this.state.showEncryptKeyModal}>
+        <SetEncryptKeyModal title={translate('warning')} doneAction={this.handleSaveEncryptKey}>
+        </SetEncryptKeyModal>
+      </If>
+    );
   }
 
   renderNavButtons(showCancel, showRetry, cancelMsg) {

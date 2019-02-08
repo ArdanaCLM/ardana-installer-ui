@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -591,7 +591,7 @@ class AssignServerRoles extends BaseWizardPage {
     this.activeTableId = undefined;
   }
 
-  handleDoneEditServer = (server, originId) => {
+  handleDoneEditServer = async (server, originId, encryptKey) => {
     //update model and save on the spot
     this.updateModelObjectForEditServer(server, originId);
 
@@ -599,6 +599,11 @@ class AssignServerRoles extends BaseWizardPage {
     this.updateServerForEditServer(server);
 
     this.setState({showEditServerModal: false, activeRowData: undefined});
+
+    if(this.props.isEncrypted && !isEmpty(encryptKey)) {
+      // update global vars so encryptKey can be available later
+      await this.props.updateGlobalState('encryptKey', encryptKey);
+    }
   }
 
   handleCancelEditServer = () => {
@@ -1576,6 +1581,8 @@ class AssignServerRoles extends BaseWizardPage {
 
       if(this.props.isUpdateMode) {
         extraProps.isUpdateMode = this.props.isUpdateMode;
+        extraProps.isEncrypted = this.props.isEncrypted;
+        extraProps.encryptKey = this.props.encryptKey;
       }
     } else {
       extraProps.ids = [];

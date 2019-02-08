@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ class AddServers extends BaseUpdateWizardPage {
     super(props);
     this.checkInputs = ['nic-mapping', 'server-group'];
     this.state = {
+      ...this.state,
       deployedServers: undefined,
       validating: false,
       // loading errors from wizard model or progress loading
@@ -135,9 +136,12 @@ class AddServers extends BaseUpdateWizardPage {
     postJson('/api/v2/config_processor')
       .then(() => {
         this.setState({validating: false});
-        let pages = this.assembleDeployProcessPages();
-        let opProps = {'deployedServers': this.state.deployedServers};
-        this.props.startUpdateProcess('AddServer', pages, opProps);
+        if((this.props.isEncrypted && !isEmpty(this.props.encryptKey)) || !this.props.isEncrypted) {
+          this.startAddServers();
+        }
+        else { // encrypted but don't have encryptKey
+          this.setState({showEncryptKeyModal: true});
+        }
       })
       .catch((error) => {
         this.setState({validating: false});
@@ -145,6 +149,11 @@ class AddServers extends BaseUpdateWizardPage {
       });
   }
 
+  startAddServers = () => {
+    let pages = this.assembleDeployProcessPages();
+    let opProps = {'deployedServers': this.state.deployedServers};
+    this.props.startUpdateProcess('AddServer', pages, opProps);
+  }
 
   hasDuplicates = (arrayList) => {
     // filter out empty items
@@ -272,6 +281,13 @@ class AddServers extends BaseUpdateWizardPage {
     this.setState({showDeployConfirmModal: true});
   }
 
+  // overwrite function in parent
+  handleSaveEncryptKey = async (encryptKey) => {
+    this.setState({showEncryptKeyModal: false});
+    await this.props.updateGlobalState('encryptKey', encryptKey);
+    this.startAddServers();
+  }
+
   // reuse assignServerRole page for update
   // this.props contains all the global props from UpdateWizard
   renderAddPage() {
@@ -367,6 +383,7 @@ class AddServers extends BaseUpdateWizardPage {
         {!this.props.wizardLoading && this.state.wizardLoadingErrors &&
           this.renderWizardLoadingErrors(
             this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
+        {this.renderEncryptKeyModal()}
       </div>
     );
   }

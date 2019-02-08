@@ -216,3 +216,22 @@ export async function getReachability(ip) {
     throw e;
   }
 }
+
+/**
+ * Helper function to heck if the cloud configuration is encrypted
+ *
+ * @returns {Promise<boolean>} true if it is encrypted
+ */
+export async function isCloudConfigEncrypted() {
+  try {
+    let response = await fetchJson('/api/v2/model/is_encrypted');
+    if (response?.isEncrypted) {
+      return true;
+    }
+  } catch (error) {
+    console.log(
+      'Failed to check if cloud configuration encrypted:' +
+      error.toString()); // eslint-disable-line no-console
+  }
+  return false;
+}
