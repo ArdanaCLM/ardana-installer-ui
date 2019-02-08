@@ -146,10 +146,10 @@ export class GetSshPassphraseModal extends Component {
 
     return (
       <div>
-        {this.renderErrorMessage()}
         <ConfirmModal title={translate('get.passphrase')}
           onHide={this.props.cancelAction} footer={footer}
           hideCloseButton={true}>
+          {this.renderErrorMessage()}
           <form onSubmit={::this.setPassphrase}>
             <div>{translate('get.passphrase.description')}</div>
             <div className='passphrase-line'>
