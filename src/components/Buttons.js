@@ -15,6 +15,7 @@
 import React, { Component } from 'react';
 import '../styles/deployer.less';
 import { translate } from '../localization/localize.js';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 export function BackButton(props) {
   return (
@@ -262,13 +263,23 @@ export class ItemMenuButton extends Component {
 export class EditPencilForTableRow extends Component {
   render() {
     return (
-      <td className='actions'>
-        <p onClick={this.props.clickAction}>
-          <span className='edit'>
-            <i className="material-icons md-dark">edit</i>
-          </span>
-        </p>
-      </td>
+      <OverlayTrigger
+        key='bottom'
+        placement='bottom'
+        overlay={
+          <Tooltip id='edit-row'>
+            {translate('common.edit')}
+          </Tooltip>
+        }
+      >
+        <td className='actions'>
+          <p onClick={this.props.clickAction}>
+            <span className='edit'>
+              <i className="material-icons md-dark">edit</i>
+            </span>
+          </p>
+        </td>
+      </OverlayTrigger>
     );
   }
 }
@@ -276,13 +287,23 @@ export class EditPencilForTableRow extends Component {
 export class InfoForTableRow extends Component {
   render() {
     return (
-      <td className='actions'>
-        <p onClick={this.props.clickAction}>
-          <span className='detail-info'>
-            <i className='material-icons md-dark'>info</i>
-          </span>
-        </p>
-      </td>
+      <OverlayTrigger
+        key='bottom'
+        placement='bottom'
+        overlay={
+          <Tooltip id='row-details'>
+            {translate('common.details')}
+          </Tooltip>
+        }
+      >
+        <td className='actions'>
+          <p onClick={this.props.clickAction}>
+            <span className='detail-info'>
+              <i className='material-icons md-dark'>info</i>
+            </span>
+          </p>
+        </td>
+      </OverlayTrigger>
     );
   }
 }
@@ -290,13 +311,23 @@ export class InfoForTableRow extends Component {
 export class DeleteForTableRow extends Component {
   render() {
     return (
-      <td className='actions'>
-        <p onClick={this.props.clickAction}>
-          <span className='delete'>
-            <i className='material-icons md-dark'>delete</i>
-          </span>
-        </p>
-      </td>
+      <OverlayTrigger
+        key='bottom'
+        placement='bottom'
+        overlay={
+          <Tooltip id='delete-row'>
+            {translate('common.delete')}
+          </Tooltip>
+        }
+      >
+        <td className='actions'>
+          <p onClick={this.props.clickAction}>
+            <span className='delete'>
+              <i className='material-icons md-dark'>delete</i>
+            </span>
+          </p>
+        </td>
+      </OverlayTrigger>
     );
   }
 }

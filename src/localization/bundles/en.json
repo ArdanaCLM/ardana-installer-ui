@@ -40,6 +40,7 @@
     "endpoint.status": "Endpoint status",
     "unavailable": "Unavailable",
     "search": "Search...",
+    "common.edit": "Edit",
     "common.details": "Details",
     "common.delete": "Delete",
     "common.activate": "Activate",

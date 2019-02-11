@@ -24,6 +24,7 @@ import {
   getAllOtherServerIds, getModelIPAddresses, getModelIPMIAddresses, getModelMacAddresses
 } from '../utils/ModelUtils.js';
 import { loadServerDiskUtilization } from '../utils/MonascaUtils.js';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -120,10 +121,20 @@ class CollapsibleTable extends Component {
 
   renderEditAction = (server) => {
     return (
-      <span className='edit collapsible'
-        onClick={() => this.setState({showEditServerModal: true, contextMenuRow: server})}>
-        <i className="material-icons md-dark collapsible">edit</i>
-      </span>
+      <OverlayTrigger
+        key={`${server.id}-edit-tooltip`}
+        placement='bottom'
+        overlay={
+          <Tooltip id='edit-row'>
+            {translate('common.edit')}
+          </Tooltip>
+        }
+      >
+        <span className='edit collapsible'
+          onClick={() => this.setState({showEditServerModal: true, contextMenuRow: server})}>
+          <i className="material-icons md-dark collapsible">edit</i>
+        </span>
+      </OverlayTrigger>
     );
   }
 
@@ -134,10 +145,20 @@ class CollapsibleTable extends Component {
    */
   renderViewAction = (server) => {
     return (
-      <span className="detail-info collapsible"
-        onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
-        <i className="material-icons md-dark collapsible">info</i>
-      </span>
+      <OverlayTrigger
+        key={`${server.id}-details-tooltip`}
+        placement='bottom'
+        overlay={
+          <Tooltip id='row-details'>
+            {translate('common.details')}
+          </Tooltip>
+        }
+      >
+        <span className="detail-info collapsible"
+          onClick={() => this.setState({showServerDetailsModal: true, contextMenuRow: server})}>
+          <i className="material-icons md-dark collapsible">info</i>
+        </span>
+      </OverlayTrigger>
     );
   }
 
