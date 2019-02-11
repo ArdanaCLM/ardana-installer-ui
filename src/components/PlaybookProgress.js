@@ -631,7 +631,7 @@ class PlaybookProgress extends Component {
   }
 
   renderCancelButton() {
-    if (!this.state.errorMsg &&
+    if (!this.state.errorMsg && !this.props.hideCancel &&
       this.getPlaybooksWithStatus(STATUS.IN_PROGRESS).length > 0 &&
       this.getPlaybooksWithStatus(STATUS.FAILED).length == 0) {
 
