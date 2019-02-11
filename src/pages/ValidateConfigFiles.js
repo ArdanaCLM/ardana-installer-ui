@@ -19,7 +19,7 @@ import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { YamlValidator } from '../utils/InputValidators.js';
 import { ActionButton } from '../components/Buttons.js';
 import BaseWizardPage from './BaseWizardPage.js';
-import { Tabs, Tab } from 'react-bootstrap';
+import { Alert, Tabs, Tab } from 'react-bootstrap';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import Dropdown from '../components/Dropdown.js';
 import HelpText from '../components/HelpText.js';
@@ -140,14 +140,29 @@ class DisplayFileList extends Component {
         </div>);
     } else if (this.props.valid === VALIDATING) {
       return (
-        <div> <i className='material-icons refresh-icon'>refresh</i>
-          {translate('validate.config.files.msg.validating')}</div>
+        <div>
+          <i className="eos-icons eos-icon-loading mr-3"></i>
+          {translate('validate.config.files.msg.validating')}
+        </div>
       );
     } else if (this.props.valid === VALID) {
-      return (<div>{translate('validate.config.files.msg.valid')}</div>);
+      return (
+        <Alert key='validate-success' variant='success'>
+          {translate('validate.config.files.msg.valid')}
+        </Alert>
+      );
     } else {
-      return (<div>{translate('validate.config.files.msg.invalid')}<br/>
-        <pre className='log'>{this.props.invalidMsg}</pre></div>);
+      return (
+        <Alert key='validate-invalid' variant='danger'>
+          <div>
+            {translate('validate.config.files.msg.invalid')}
+            <br/>
+            <pre className='log'>
+              {this.props.invalidMsg}
+            </pre>
+          </div>
+        </Alert>
+      );
     }
   }
 
