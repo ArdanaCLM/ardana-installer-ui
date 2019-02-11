@@ -312,7 +312,7 @@ class ConnectionCredsInfo extends Component {
             <If condition={category === 'sm'}>
               <InputLine
                 isRequired={false} inputType='number' min='0' max='65535'
-                inputName='host' label='server.port.prompt'
+                inputName='port' label='server.port.prompt'
                 inputValidate={PortValidator}
                 inputValue={this.state.inputValue.getIn([category, 'port'], '')}
                 inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
