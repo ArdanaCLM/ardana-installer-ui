@@ -16,7 +16,7 @@
 import React from 'react';
 import { translate } from '../../localization/localize.js';
 import {
-  INSTALL_PLAYBOOK, STATUS, BM_POWER_STATUS_PLAYBOOK, BM_REIMAGE,
+  INSTALL_PLAYBOOK, STATUS, BM_POWER_STATUS_PLAYBOOK, BM_REIMAGE_PLAYBOOK,
   COBBLER_DEPLOY_PLAYBOOK
 } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
@@ -69,7 +69,7 @@ class InstallOS extends BaseUpdateWizardPage {
       playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
     }, {
       label: translate('install.progress.step3'),
-      playbooks: [BM_REIMAGE + '.yml']
+      playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
     }, {
       label: translate('install.progress.step4'),
       playbooks: [INSTALL_PLAYBOOK + '.yml']

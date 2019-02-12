@@ -54,14 +54,40 @@ export const INSTALL_PLAYBOOK = 'installui-os-provision';
 export const PRE_DEPLOYMENT_PLAYBOOK = 'installui-pre-deployment';
 export const DAYZERO_SITE_PLAYBOOK = 'installui-wipe-and-site';
 export const SITE_PLAYBOOK = 'site';
-export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
-export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
-export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';
-export const ARDANA_START_PLAYBOOK = 'ardana-start';
-export const NOVA_STOP_PLAYBOOK = 'nova-stop';
-export const NEUTRON_STOP_PLAYBOOK = 'neutron-stop';
-export const BM_POWER_DOWN_PLAYBOOK = 'bm-power-down';
+
 export const COBBLER_DEPLOY_PLAYBOOK = 'cobbler-deploy';
-export const BM_REIMAGE = 'bm-reimage';
+export const CONFIG_PROCESSOR_RUN_PLAYBOOK = 'config-processor-run';
+export const OSCONFIG_RUN_PLAYBOOK = 'osconfig-run';
+export const READY_DEPLOYMENT_PLAYBOOK = 'ready-deployment';
+export const WIPE_DISKS_PLAYBOOK = 'wipe_disks';
+
+export const ARDANA_DEPLOY_PLAYBOOK = 'ardana-deploy';
+export const ARDANA_GEN_HOSTS_FILE_PLAYBOOK = 'ardana-gen-hosts-file';
+export const ARDANA_RECONFIGURE_PLAYBOOK = 'ardana-reconfigure';
+export const ARDANA_SSH_KEYSCAN_PLAYBOOK = 'ardana-ssh-keyscan';
+export const ARDANA_START_PLAYBOOK = 'ardana-start';
+export const ARDANA_STATUS_PLAYBOOK = 'ardana-status';
+
+export const BM_POWER_DOWN_PLAYBOOK = 'bm-power-down';
+export const BM_POWER_UP_PLAYBOOK = 'bm-power-up';
+export const BM_REIMAGE_PLAYBOOK = 'bm-reimage';
 export const BM_POWER_STATUS_PLAYBOOK = 'bm-power-status';
+export const BM_WAIT_FOR_SSH_PLAYBOOK = 'bm-wait-for-ssh';
+
+export const CEILOMETER_RECONFIGURE_PLAYBOOK = 'ceilometer-reconfigure';
+export const CEPH_DEPLOY_PLAYBOOK = 'ceph-deploy';
+export const CINDER_DEPLOY_PLAYBOOK = 'cinder-deploy';
+export const IRONIC_DEPLOY_PLAYBOOK = 'ironic-deploy';
+export const MAGNUM_DEPLOY_PLAYBOOK = 'magnum-deploy';
+export const NEUTRON_STOP_PLAYBOOK = 'neutron-stop';
+export const NETWORK_INTERFACE_DEPLOY_PLAYBOOK = 'network_interface-deploy';
+export const NOVA_DEPLOY_PLAYBOOK = 'nova-deploy';
+export const NOVA_STOP_PLAYBOOK = 'nova-stop';
+export const SWIFT_DEPLOY_PLAYBOOK = 'swift-deploy';
+
+export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';
+export const MONASCA_AGENT_DEPLOY_PLAYBOOK = 'monasca-agent-deploy';
+export const MONASCA_REBUILD_PRETASKS_PLAYBOOK = 'monasca-rebuild-pretasks';
+export const MONASCA_TRANSFORM_DEPLOY_PLAYBOOK = 'monasca-transform-deploy';
+
 

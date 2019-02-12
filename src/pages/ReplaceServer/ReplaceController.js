@@ -15,7 +15,14 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import { INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
+import {
+  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
+  ARDANA_SSH_KEYSCAN_PLAYBOOK, BM_POWER_STATUS_PLAYBOOK,
+  BM_REIMAGE_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK,
+  BM_POWER_UP_PLAYBOOK, BM_WAIT_FOR_SSH_PLAYBOOK, WIPE_DISKS_PLAYBOOK,
+  ARDANA_DEPLOY_PLAYBOOK, MONASCA_REBUILD_PRETASKS_PLAYBOOK,
+  OSCONFIG_RUN_PLAYBOOK, CEILOMETER_RECONFIGURE_PLAYBOOK,
+  INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
@@ -130,11 +137,11 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
       {
         label: translate('deploy.progress.config-processor-run'),
-        playbook: 'config-processor-run.yml'
+        playbook: CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml'
       },
       {
         label: translate('deploy.progress.ready-deployment'),
-        playbook: 'ready-deployment.yml'
+        playbook: READY_DEPLOYMENT_PLAYBOOK + '.yml'
       },
       {
         label: translate('server.deploy.progress.rm-cobbler'),
@@ -166,7 +173,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
       {
         label: translate('server.deploy.progress.rm-known-host'),
-        playbook: 'ardana-ssh-keyscan.yml',
+        playbook: ARDANA_SSH_KEYSCAN_PLAYBOOK + '.yml',
       },
     ];
 
@@ -179,15 +186,15 @@ class ReplaceController extends BaseUpdateWizardPage {
         {
           steps: [{
             label: translate('install.progress.step1'),
-            event: 'bm-power-status.yml'
+            event: BM_POWER_STATUS_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step2'),
-            event: 'cobbler-deploy.yml'
+            event: COBBLER_DEPLOY_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step3'),
-            event: 'bm-reimage.yml'
+            event: BM_REIMAGE_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step4'),
@@ -201,12 +208,12 @@ class ReplaceController extends BaseUpdateWizardPage {
       playbook_steps.push(
         {
           label: translate('server.deploy.progress.powerup'),
-          playbook: 'bm-power-up.yml',
+          playbook: BM_POWER_UP_PLAYBOOK + '.yml',
           payload: {'extra-vars': {'nodelist': serverId}}
         },
         {
           label: translate('server.deploy.progress.waitssh'),
-          playbook: 'bm-wait-for-ssh.yml',
+          playbook: BM_WAIT_FOR_SSH_PLAYBOOK + '.yml',
           payload: {'extra-vars': {'nodelist': serverId}}
         }
       );
@@ -216,7 +223,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       playbook_steps.push(
         {
           label: translate('server.deploy.progress.wipe-disks'),
-          playbook: 'wipe_disks.yml',
+          playbook: WIPE_DISKS_PLAYBOOK + '.yml',
           payload: {limit: server.hostname}
         });
     }
@@ -224,11 +231,11 @@ class ReplaceController extends BaseUpdateWizardPage {
     playbook_steps.push(
       {
         label: translate('server.deploy.progress.monasca-rebuild'),
-        playbook: 'monasca-rebuild-pretasks.yml'
+        playbook: MONASCA_REBUILD_PRETASKS_PLAYBOOK + '.yml'
       },
       {
         label: translate('server.deploy.progress.os-config'),
-        playbook: 'osconfig-run.yml',
+        playbook: OSCONFIG_RUN_PLAYBOOK + '.yml',
         payload: {'extra-vars': {'rebuild': 'True'}, limit: server.hostname}
       },
     );
@@ -277,11 +284,11 @@ class ReplaceController extends BaseUpdateWizardPage {
 
     playbook_steps.push({
       label: translate('server.deploy.progress.ardana-deploy'),
-      playbook: 'ardana-deploy.yml',
+      playbook: ARDANA_DEPLOY_PLAYBOOK + '.yml',
       payload: {'extra-vars': {'rebuild': 'True'}, limit: deploy_limit}
     },{
       label: translate('server.deploy.progress.ceilometer'),
-      playbook: 'ceilometer-reconfigure.yml',
+      playbook: CEILOMETER_RECONFIGURE_PLAYBOOK + '.yml',
     });
 
     let playbooks = [];

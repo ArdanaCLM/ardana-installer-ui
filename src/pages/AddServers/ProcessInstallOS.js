@@ -19,20 +19,22 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
-import { STATUS, INSTALL_PLAYBOOK } from '../../utils/constants.js';
+import {
+  BM_POWER_STATUS_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK, BM_REIMAGE_PLAYBOOK,
+  STATUS, INSTALL_PLAYBOOK } from '../../utils/constants.js';
 
 let PLAYBOOK_STEPS = [
   {
     label: translate('install.progress.step1'),
-    playbooks: ['bm-power-status.yml']
+    playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step2'),
-    playbooks: ['cobbler-deploy.yml']
+    playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step3'),
-    playbooks: ['bm-reimage.yml']
+    playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step4'),

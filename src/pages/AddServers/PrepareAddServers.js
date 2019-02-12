@@ -19,7 +19,9 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
-import { STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
+import {
+  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
+  STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
 
 // This is the prepare page for adding compute servers
@@ -63,10 +65,10 @@ class PrepareAddServers extends BaseUpdateWizardPage {
       playbooks: ['commit']
     }, {
       label: translate('deploy.progress.config-processor-run'),
-      playbooks: ['config-processor-run.yml']
+      playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
     }, {
       label: translate('deploy.progress.ready-deployment'),
-      playbooks: ['ready-deployment.yml']
+      playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
     }, {
       label: translate('deploy.progress.predeployment'),
       playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']

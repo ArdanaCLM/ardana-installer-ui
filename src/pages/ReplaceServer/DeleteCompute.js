@@ -27,8 +27,8 @@ import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js'
 import {
   NOVA_STOP_PLAYBOOK, NEUTRON_STOP_PLAYBOOK, BM_POWER_DOWN_PLAYBOOK,
   COBBLER_DEPLOY_PLAYBOOK, PRE_DEPLOYMENT_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK,
-  MODEL_SERVER_PROPS_ALL
-} from '../../utils/constants.js';
+  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
+  MODEL_SERVER_PROPS_ALL} from '../../utils/constants.js';
 import { removeServerFromModel, getMergedServer, genUID } from '../../utils/ModelUtils.js';
 
 const MANUAL_SHUTDOWN = 'manual_shutdown';
@@ -358,11 +358,11 @@ class DeleteCompute extends BaseUpdateWizardPage {
     });
     steps.push({
       label: translate('deploy.progress.config-processor-run'),
-      playbooks: ['config-processor-run.yml']
+      playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
     });
     steps.push({
       label: translate('deploy.progress.ready-deployment'),
-      playbooks: ['ready-deployment.yml']
+      playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
     });
     steps.push({
       label: translate('deploy.progress.predeployment'),
