@@ -15,8 +15,14 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import { PRE_DEPLOYMENT_PLAYBOOK, DAYZERO_SITE_PLAYBOOK,
-  SITE_PLAYBOOK, STATUS } from '../utils/constants.js';
+import {
+  PRE_DEPLOYMENT_PLAYBOOK, DAYZERO_SITE_PLAYBOOK,
+  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
+  NETWORK_INTERFACE_DEPLOY_PLAYBOOK, NOVA_DEPLOY_PLAYBOOK,
+  IRONIC_DEPLOY_PLAYBOOK, MAGNUM_DEPLOY_PLAYBOOK, ARDANA_STATUS_PLAYBOOK,
+  MONASCA_AGENT_DEPLOY_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK,
+  SWIFT_DEPLOY_PLAYBOOK, MONASCA_TRANSFORM_DEPLOY_PLAYBOOK, CEPH_DEPLOY_PLAYBOOK,
+  CINDER_DEPLOY_PLAYBOOK, SITE_PLAYBOOK, STATUS } from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -34,11 +40,11 @@ import { ErrorBanner } from '../components/Messages.js';
 const PLAYBOOK_STEPS = [
   {
     label: translate('deploy.progress.config-processor-run'),
-    playbooks: ['config-processor-run.yml']
+    playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.ready-deployment'),
-    playbooks: ['ready-deployment.yml']
+    playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.predeployment'),
@@ -46,27 +52,33 @@ const PLAYBOOK_STEPS = [
   },
   {
     label: translate('deploy.progress.step1'),
-    playbooks: ['network_interface-deploy.yml']
+    playbooks: [NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step2'),
-    playbooks: ['nova-deploy.yml', 'ironic-deploy.yml', 'magnum-deploy.yml']
+    playbooks: [
+      NOVA_DEPLOY_PLAYBOOK + '.yml', IRONIC_DEPLOY_PLAYBOOK + '.yml',
+      MAGNUM_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step3'),
-    playbooks: ['monasca-agent-deploy.yml', 'monasca-deploy.yml', 'monasca-transform-deploy.yml']
+    playbooks: [
+      MONASCA_AGENT_DEPLOY_PLAYBOOK + '.yml', MONASCA_DEPLOY_PLAYBOOK + '.yml',
+      MONASCA_TRANSFORM_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step4'),
-    playbooks: ['ceph-deploy.yml', 'cinder-deploy.yml', 'swift-deploy.yml']
+    playbooks: [
+      CEPH_DEPLOY_PLAYBOOK + '.yml', CINDER_DEPLOY_PLAYBOOK + '.yml', SWIFT_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step5'),
-    playbooks: ['ardana-status.yml']
+    playbooks: [ARDANA_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step6'),
-    playbooks: ['site.yml', DAYZERO_SITE_PLAYBOOK + '.yml'], //either site.yml or installui-wipe-and-site.yml
+    playbooks: [
+      SITE_PLAYBOOK + '.yml', DAYZERO_SITE_PLAYBOOK + '.yml'], //either site.yml or installui-wipe-and-site.yml
     orCondition: true
   }
 ];

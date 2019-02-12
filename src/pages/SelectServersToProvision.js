@@ -15,7 +15,9 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import { INSTALL_PLAYBOOK, STATUS } from '../utils/constants.js';
+import {
+  BM_POWER_STATUS_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK,
+  BM_REIMAGE_PLAYBOOK, INSTALL_PLAYBOOK, STATUS } from '../utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import { YesNoModal } from '../components/Modals.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -30,15 +32,15 @@ import { fetchJson, postJson } from '../utils/RestUtils.js';
 const OS_INSTALL_STEPS = [
   {
     label: translate('install.progress.step1'),
-    playbooks: ['bm-power-status.yml']
+    playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step2'),
-    playbooks: ['cobbler-deploy.yml']
+    playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step3'),
-    playbooks: ['bm-reimage.yml']
+    playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step4'),
