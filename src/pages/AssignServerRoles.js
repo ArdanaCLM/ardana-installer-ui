@@ -654,6 +654,12 @@ class AssignServerRoles extends BaseWizardPage {
           this.setState({serversAddedManually: responseData});
         }
       });
+
+    // react-bootstrap does not provide a good way to set tabs to not be draggable
+    // this is a bit of a hack but is better than the user dragging the tabs over to the
+    // server assignment roles dropzone
+    document.getElementById('AvailableServerTabsId-tab-1').setAttribute('draggable', false);
+    document.getElementById('AvailableServerTabsId-tab-2').setAttribute('draggable', false);
   }
 
   deleteDiscoveredServers() {
@@ -865,10 +871,13 @@ class AssignServerRoles extends BaseWizardPage {
    */
   assignServerToRoleDnD = (event, role) => {
     let format = IS_MS_EDGE || IS_MS_IE ? 'text' : 'data';
-    let serverData = JSON.parse(event.dataTransfer.getData(format));
+    let eventData = event.dataTransfer.getData(format);
+    if(eventData !== undefined && eventData !== '') {
+      let serverData = JSON.parse(eventData);
 
-    this.assignServerToRole(serverData, role);
-    this.unHighlightDrop(event, true);
+      this.assignServerToRole(serverData, role);
+      this.unHighlightDrop(event, true);
+    }
   }
 
   /**
