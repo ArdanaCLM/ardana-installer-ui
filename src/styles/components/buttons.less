@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,60 +17,152 @@
 .btn {
   display: inline-block;
   font-size: 14px;//in bootstrap 3 this is the default, in bootstrap 4 its 1rem which makes the buttons bigger
-  font-weight: normal;
+  font-weight: bold;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   border: 1px solid transparent;
   white-space: nowrap;
-  padding: 6px 12px;
-  border-radius: 4px;
-  line-height: 20px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
+  padding: 8px 16px;
+  border-radius: 2px;
+  line-height: 18px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
 }
 
 .btn-primary {
-  background-color: @preferredcolor;
+  background-color: @sb-green-500;
+  border-color: @sb-green-500;
   color: @sb-white;
-  display:inline-block;
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem fade(@sb-green-500, 50);
+  }
+
+  &:hover,
+  &:active:hover {
+    background-color: @sb-green-900;
+    border-color: @sb-green-900;
+    color: @sb-white;
+  }
+
+  &:active,
+  &:focus {
+    background-color: @sb-green-700;
+    border-color: @sb-green-700;
+    color: @sb-white;
+  }
+
+  &:disabled:focus,
+  &[disabled]:focus,
+  &:disabled:hover,
+  &[disabled]:hover,
+  &:disabled,
+  &[disabled] {
+    background-color: @sb-green-500;
+    border-color: @sb-green-500;
+    color: @sb-white;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:not(:disabled):not(.disabled).active,
+  &:not(:disabled):not(.disabled):active,
+  .show > &.dropdown-toggle {
+    background-color: @sb-green-700;
+    border: 1px solid @sb-green-700;
+    color: @sb-white;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus,
+  .show > &.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem fade(@sb-green-500, 50);
+  }
 }
 
-.btn.btn-primary:active,
-.btn.btn-primary:hover,
-.btn.btn-primary:focus{
-  background-color: @active-button-color;
-  border: 1px solid @active-button-color;
-  outline: 0;
+.btn-default {
+  background-color: transparent;
+  border-color: @sb-gray-900;
+  color: @sb-gray-900;
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem fade(@sb-gray-900, 50);
+  }
+
+  &:hover,
+  &:active:hover {
+    border-color: @sb-gray-600;
+    color: @sb-gray-600;
+  }
+
+  &:active,
+  &:focus {
+    border-color: @sb-gray-500;
+    color: @sb-gray-500;
+  }
+
+  &:disabled:focus,
+  &[disabled]:focus,
+  &:disabled:hover,
+  &[disabled]:hover,
+  &:disabled,
+  &[disabled] {
+    background-color: transparent;
+    border-color: @sb-gray-900;
+    color: @sb-gray-900;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 }
 
-.btn.btn-primary:disabled:hover,
-.btn.btn-primary[disabled]:hover,
-.btn.btn-primary:disabled,
-.btn.btn-primary[disabled] {
-  background-color: @preferredcolor;
-  border: 1px solid @preferredcolor;
-  cursor: not-allowed;
-  opacity: 0.4;
-}
+.btn-danger {
+  background-color: @sb-red-500;
+  border-color: @sb-red-500;
+  color: @sb-white;
 
-.btn.btn-default:active,
-.btn.btn-default:hover,
-.btn.btn-default:focus,
-.btn.btn-default {
-  color: @default-button-color;
-  background-color: @background-color;
-  border-color: @default-button-color;
-  display:inline-block;
-  outline: 0;
-}
+  &:focus {
+    box-shadow: 0 0 0 0.2rem fade(@sb-red-500, 50);
+  }
 
-.btn.btn-default:disabled:hover,
-.btn.btn-default[disabled]:hover,
-.btn.btn-default:disabled,
-.btn.btn-default[disabled] {
-  background-color:  @background-color;
-  border: 1px solid @default-button-color;
-  cursor: not-allowed;
-  opacity: 0.4;
+  &:hover,
+  &:active:hover {
+    background-color: @sb-red-900;
+    border-color: @sb-red-900;
+    color: @sb-white;
+  }
+
+  &:active,
+  &:focus {
+    background-color: @sb-red-700;
+    border-color: @sb-red-700;
+    color: @sb-white;
+  }
+
+  &:disabled:focus,
+  &[disabled]:focus,
+  &:disabled:hover,
+  &[disabled]:hover,
+  &:disabled,
+  &[disabled] {
+    background-color: @sb-red-500;
+    border-color: @sb-red-500;
+    color: @sb-white;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:not(:disabled):not(.disabled).active,
+  &:not(:disabled):not(.disabled):active,
+  .show > &.dropdown-toggle {
+    background-color: @sb-red-700;
+    border: 1px solid @sb-red-700;
+    color: @sb-white;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus,
+  .show > &.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem fade(@sb-red-500, 50);
+  }
 }
 
 .btn.btn-link:active,
@@ -95,13 +187,6 @@
   display:inline-block;
   outline: 0;
   box-shadow: none;
-}
-
-.btn-primary:not(:disabled):not(.disabled).active,
-.btn-primary:not(:disabled):not(.disabled):active,
-.show>.btn-primary.dropdown-toggle {
-  border: 1px solid @sb-green-900;
-  background-color: @sb-green-900;
 }
 
 // Buttons in a .btn-row are automatically separated with a gap
