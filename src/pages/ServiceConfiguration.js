@@ -20,9 +20,7 @@ import { ActionButton } from '../components/Buttons.js';
 import { postJson, isCloudConfigEncrypted } from '../utils/RestUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
-import {
-  STATUS, PRE_DEPLOYMENT_PLAYBOOK, CONFIG_PROCESSOR_RUN_PLAYBOOK,
-  READY_DEPLOYMENT_PLAYBOOK, ARDANA_RECONFIGURE_PLAYBOOK} from '../utils/constants.js';
+import * as constants from '..//utils/constants.js';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 
 // services that have corresponding -reconfigure.yml and -status.yml files
@@ -103,11 +101,11 @@ class ServiceConfiguration extends Component {
     let done = true;
     for (const playbook of playbooks) {
       if (playbook.status) {
-        if (playbook.status === STATUS.FAILED) {
+        if (playbook.status === constants.STATUS.FAILED) {
           done = true;
           break;
         } else {
-          done = done && (playbook.status === STATUS.COMPLETE);
+          done = done && (playbook.status === constants.STATUS.COMPLETE);
         }
       } else {
         done = false;
@@ -125,14 +123,15 @@ class ServiceConfiguration extends Component {
     if (changedServices?.length > 0) {
       playbooksToRun.steps = [{
         label: translate('deploy.progress.config-processor-run'),
-        playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
+        playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
       }, {
         label: translate('deploy.progress.ready-deployment'),
-        playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
+        playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
       }];
       const serviceName = changedServices[0];
       if (changedServices.length === 1 && UPDATEABLE_SERVICES.includes(serviceName)) {
-        playbooksToRun.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, serviceName + '-reconfigure', serviceName + '-status'];
+        playbooksToRun.playbooks = [
+          constants.PRE_DEPLOYMENT_PLAYBOOK, serviceName + '-reconfigure', serviceName + '-status'];
         playbooksToRun.steps.push({
           label: translate('deploy.progress.update'),
           playbooks: [serviceName + '-reconfigure.yml']
@@ -141,10 +140,11 @@ class ServiceConfiguration extends Component {
           playbooks: [serviceName + '-status.yml']
         });
       } else {
-        playbooksToRun.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, ARDANA_RECONFIGURE_PLAYBOOK];
+        playbooksToRun.playbooks = [
+          constants.PRE_DEPLOYMENT_PLAYBOOK, constants.ARDANA_RECONFIGURE_PLAYBOOK];
         playbooksToRun.steps.push({
           label: translate('deploy.progress.update'),
-          playbooks: [ARDANA_RECONFIGURE_PLAYBOOK + '.yml']
+          playbooks: [constants.ARDANA_RECONFIGURE_PLAYBOOK + '.yml']
         });
       }
     }

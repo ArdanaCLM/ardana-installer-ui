@@ -19,10 +19,7 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner, WarningMessage } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
-import {
-  STATUS, WIPE_DISKS_PLAYBOOK, ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
-  SITE_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK, ARDANA_START_PLAYBOOK
-} from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
 
 
@@ -45,7 +42,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
     this.state = {
       ...this.state,
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: '',
       // this loading indicator
       loading: false,
@@ -87,13 +84,13 @@ class DeployAddServers extends BaseUpdateWizardPage {
           else { //no new hostnames, should not happen just in case
             this.setState({
               processErrorBanner: translate('server.addserver.emptyhostnames'),
-              overallStatus: STATUS.FAILED
+              overallStatus: constants.STATUS.FAILED
             });
           }
         })
         .catch((error) => {
           this.setState({
-            processErrorBanner: error.toString(), overallStatus: STATUS.FAILED, loading: false
+            processErrorBanner: error.toString(), overallStatus: constants.STATUS.FAILED, loading: false
           });
         });
     }
@@ -136,11 +133,11 @@ class DeployAddServers extends BaseUpdateWizardPage {
     return newServers;
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       this.setState({
         processErrorBanner: this.getDeployFailureMsg()});
     }
@@ -149,41 +146,41 @@ class DeployAddServers extends BaseUpdateWizardPage {
   getPlaybooksAndSteps = () => {
 
     const PLAYBOOK_POSSIBLE_STEPS = [{
-      name: WIPE_DISKS_PLAYBOOK,
+      name: constants.WIPE_DISKS_PLAYBOOK,
       label: translate('server.deploy.progress.wipe-disks'),
-      playbooks: [WIPE_DISKS_PLAYBOOK + '.yml'],
+      playbooks: [constants.WIPE_DISKS_PLAYBOOK + '.yml'],
       payload: {limit: {}}
     }, {
-      name: ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
+      name: constants.ARDANA_GEN_HOSTS_FILE_PLAYBOOK,
       label: translate('server.deploy.progress.gen-hosts-file'),
-      playbooks: [ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
+      playbooks: [constants.ARDANA_GEN_HOSTS_FILE_PLAYBOOK + '.yml']
     }, {
-      name: SITE_PLAYBOOK,
+      name: constants.SITE_PLAYBOOK,
       label: translate('server.deploy.progress.addserver.deploy'),
-      playbooks: [SITE_PLAYBOOK + '.yml'],
+      playbooks: [constants.SITE_PLAYBOOK + '.yml'],
       payload: {limit: {}}
     }, {
-      name: MONASCA_DEPLOY_PLAYBOOK,
+      name: constants.MONASCA_DEPLOY_PLAYBOOK,
       label: translate('server.deploy.progress.update-monasca'),
-      playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml'],
+      playbooks: [constants.MONASCA_DEPLOY_PLAYBOOK + '.yml'],
       payload: {tags: 'active_ping_checks'}
     }, {
-      name: ARDANA_START_PLAYBOOK,
+      name: constants.ARDANA_START_PLAYBOOK,
       label: translate('server.deploy.progress.activate'),
-      playbooks: [ARDANA_START_PLAYBOOK + '.yml'],
+      playbooks: [constants.ARDANA_START_PLAYBOOK + '.yml'],
       payload: {limit: {}}
     }];
 
     this.steps = PLAYBOOK_POSSIBLE_STEPS.filter((step) => {
       if(!this.props.operationProps.wipeDisk &&
         !this.props.operationProps.activate) {
-        return step.name !== WIPE_DISKS_PLAYBOOK && step.name !== ARDANA_START_PLAYBOOK;
+        return step.name !== constants.WIPE_DISKS_PLAYBOOK && step.name !== constants.ARDANA_START_PLAYBOOK;
       }
       else if(!this.props.operationProps.wipeDisk) {
-        return step.name !== WIPE_DISKS_PLAYBOOK;
+        return step.name !== constants.WIPE_DISKS_PLAYBOOK;
       }
       else if(!this.props.operationProps.activate) {
-        return step.name !== ARDANA_START_PLAYBOOK;
+        return step.name !== constants.ARDANA_START_PLAYBOOK;
       }
       else {
         return true;
@@ -232,7 +229,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
@@ -256,7 +253,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
   render() {
     // If error happens, will show cancel and retry buttons.
-    let failed =  this.state.overallStatus === STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.toShowLoadingMask()}/>

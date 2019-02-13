@@ -90,4 +90,6 @@ export const MONASCA_AGENT_DEPLOY_PLAYBOOK = 'monasca-agent-deploy';
 export const MONASCA_REBUILD_PRETASKS_PLAYBOOK = 'monasca-rebuild-pretasks';
 export const MONASCA_TRANSFORM_DEPLOY_PLAYBOOK = 'monasca-transform-deploy';
 
+export const COMMIT_MODEL_CHANGE_ACTION = 'commit_model_change';
+
 

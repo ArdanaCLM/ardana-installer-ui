@@ -19,9 +19,7 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
-import {
-  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
-  STATUS, PRE_DEPLOYMENT_PLAYBOOK } from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
 
 // This is the prepare page for adding compute servers
@@ -33,7 +31,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook and commit
       processErrorBanner: '',
     };
   }
@@ -42,7 +40,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     this.checkEncryptKeyAndProceed();
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   getPrepareServerFailureMsg = () => {
     return translate('server.addserver.prepare.failure');
@@ -54,7 +52,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       this.setState({processErrorBanner: this.getPrepareServerFailureMsg()});
     }
   }
@@ -62,20 +60,20 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   renderPlaybookProgress () {
     const PLAYBOOK_STEPS = [{
       label: translate('deploy.progress.commit'),
-      playbooks: ['commit']
+      playbooks: [constants.COMMIT_MODEL_CHANGE_ACTION]
     }, {
       label: translate('deploy.progress.config-processor-run'),
-      playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
+      playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
     }, {
       label: translate('deploy.progress.ready-deployment'),
-      playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
+      playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
     }, {
       label: translate('deploy.progress.predeployment'),
-      playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+      playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     }];
 
     let playbooks = [{
-      name: 'commit',
+      name: constants.COMMIT_MODEL_CHANGE_ACTION,
       action: ((logger) => {
         const commitMessage = {'message': 'Committed via Ardana Installer'};
         return postJson('/api/v2/model/commit', commitMessage)
@@ -90,7 +88,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
           });
       }),
     }, {
-      name: PRE_DEPLOYMENT_PLAYBOOK,
+      name: constants.PRE_DEPLOYMENT_PLAYBOOK,
       payload:  {'extra-vars': {encrypt: this.props.encryptKey || ''}}
     }];
     return (
@@ -104,7 +102,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
@@ -118,7 +116,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
 
   render() {
     // If error happens, will show cancel and retry buttons.
-    let failed =  this.state.overallStatus === STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
