@@ -15,9 +15,7 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import {
-  BM_POWER_STATUS_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK,
-  BM_REIMAGE_PLAYBOOK, INSTALL_PLAYBOOK, STATUS } from '../utils/constants.js';
+import * as constants from '..//utils/constants.js';
 import { ActionButton } from '../components/Buttons.js';
 import { YesNoModal } from '../components/Modals.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -32,19 +30,19 @@ import { fetchJson, postJson } from '../utils/RestUtils.js';
 const OS_INSTALL_STEPS = [
   {
     label: translate('install.progress.step1'),
-    playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
+    playbooks: [constants.BM_POWER_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step2'),
-    playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
+    playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step3'),
-    playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
+    playbooks: [constants.BM_REIMAGE_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step4'),
-    playbooks: [INSTALL_PLAYBOOK + '.yml']
+    playbooks: [constants.INSTALL_PLAYBOOK + '.yml']
   }
 ];
 
@@ -61,7 +59,7 @@ class SelectServersToProvision extends BaseWizardPage {
       osInstallPassword: '',
       installing: false,
       showModal: false,
-      overallStatus: STATUS.UNKNOWN, // overall status of install playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of install playbook
       requiresPassword: false,
       sshPassphrase: '',
       hasError: false,
@@ -78,7 +76,7 @@ class SelectServersToProvision extends BaseWizardPage {
     if (this.props.playbookStatus) {
       let playStatus = this.props.playbookStatus.slice();
       playStatus.forEach((play) => {
-        if (play.name === INSTALL_PLAYBOOK) {
+        if (play.name === constants.INSTALL_PLAYBOOK) {
           play.playId = '';
           play.status = '';
         }
@@ -151,20 +149,20 @@ class SelectServersToProvision extends BaseWizardPage {
   getPlaybookProgress = () => {
     let playbook =
       this.props.playbookStatus ? this.props.playbookStatus.find((play) => {
-        return (play.name === INSTALL_PLAYBOOK && play.playId !== undefined && play.playId !== '');
+        return (play.name === constants.INSTALL_PLAYBOOK && play.playId !== undefined && play.playId !== '');
       }) : undefined;
     return playbook;
   }
 
   setBackButtonDisabled = () => {
     return this.getPlaybookProgress() && !(
-      this.state.overallStatus == STATUS.COMPLETE ||
-      this.state.overallStatus == STATUS.FAILED);
+      this.state.overallStatus == constants.STATUS.COMPLETE ||
+      this.state.overallStatus == constants.STATUS.FAILED);
   }
 
   setNextButtonDisabled = () => {
     if (this.getPlaybookProgress()) {
-      return this.state.overallStatus != STATUS.COMPLETE;
+      return this.state.overallStatus != constants.STATUS.COMPLETE;
     } else {
       return this.state.rightList.length > 0;
     }
@@ -382,10 +380,10 @@ class SelectServersToProvision extends BaseWizardPage {
             <PlaybookProgress
               updatePageStatus={this.updatePageStatus} updateGlobalState={this.props.updateGlobalState}
               playbookStatus={this.props.playbookStatus} steps={OS_INSTALL_STEPS}
-              playbooks={[INSTALL_PLAYBOOK]} payload={payload} isUpdateMode = {this.props.isUpdateMode} />
+              playbooks={[constants.INSTALL_PLAYBOOK]} payload={payload} isUpdateMode = {this.props.isUpdateMode} />
             <div className='banner-container'>
               <ErrorBanner message={translate('provision.server.failure')}
-                show={this.state.overallStatus === STATUS.FAILED}/>
+                show={this.state.overallStatus === constants.STATUS.FAILED}/>
             </div>
           </div>
         </div>);

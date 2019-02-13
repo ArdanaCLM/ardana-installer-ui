@@ -16,7 +16,6 @@
 import React from 'react';
 import { translate } from '../../localization/localize.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
-import { STATUS } from '../../utils/constants.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
@@ -24,18 +23,13 @@ import { putJson, deleteJson, fetchJson, postJson } from '../../utils/RestUtils.
 import { ActionButton } from '../../components/Buttons.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
-import {
-  NOVA_STOP_PLAYBOOK, NEUTRON_STOP_PLAYBOOK, BM_POWER_DOWN_PLAYBOOK,
-  COBBLER_DEPLOY_PLAYBOOK, PRE_DEPLOYMENT_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK,
-  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
-  MODEL_SERVER_PROPS_ALL} from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import { removeServerFromModel, getMergedServer, genUID } from '../../utils/ModelUtils.js';
 
 const MANUAL_SHUTDOWN = 'manual_shutdown';
 const DELETE_COMPUTE_SERVICE = 'delete_compute_service';
 const DELETE_NETWORK_AGENTS = 'delete_network_agents';
 const REMOVE_COMPUTE_FROM_MODEL = 'remove_compute_from_model';
-const COMMIT_MODEL_CHANGE = 'commit_model_change';
 const REMOVE_FROM_COBBLER = 'remove_from_cobbler';
 
 class DeleteCompute extends BaseUpdateWizardPage {
@@ -44,7 +38,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     super(props);
     this.state = {
       ...this.state,
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: '',
       loading: false,
       // confirmation dialog when results contain failed
@@ -84,7 +78,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
 
   updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       const errorMsg = error?.message || '';
       this.setState({
         processErrorBanner:
@@ -93,7 +87,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     }
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   isValidToRenderPlaybookProgress = () => {
     return (
@@ -226,7 +220,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
         server['role'] = '';
         let old = this.state.servers.find(s => server.uid === s.uid || server.id === s.id);
         if (old) {
-          const updated_server = getMergedServer(old, server, MODEL_SERVER_PROPS_ALL);
+          const updated_server = getMergedServer(old, server, constants.MODEL_SERVER_PROPS_ALL);
           putJson('/api/v2/server', updated_server)
             .then(() => resolve())
             .catch(error => {
@@ -318,15 +312,15 @@ class DeleteCompute extends BaseUpdateWizardPage {
     if (this.props.operationProps.oldServer.isReachable) {
       steps.push({
         label: translate('server.deploy.progress.nova_stop'),
-        playbooks: [NOVA_STOP_PLAYBOOK + '.yml']
+        playbooks: [constants.NOVA_STOP_PLAYBOOK + '.yml']
       });
       steps.push({
         label: translate('server.deploy.progress.neutron_stop'),
-        playbooks: [NEUTRON_STOP_PLAYBOOK + '.yml']
+        playbooks: [constants.NEUTRON_STOP_PLAYBOOK + '.yml']
       });
       steps.push({
         label: translate('server.deploy.progress.bm_powerdown'),
-        playbooks: [BM_POWER_DOWN_PLAYBOOK + '.yml']
+        playbooks: [constants.BM_POWER_DOWN_PLAYBOOK + '.yml']
       });
     }
     //prompt user to shutdown manually
@@ -354,19 +348,19 @@ class DeleteCompute extends BaseUpdateWizardPage {
     });
     steps.push({
       label: translate('deploy.progress.commit'),
-      playbooks: [COMMIT_MODEL_CHANGE]
+      playbooks: [constants.COMMIT_MODEL_CHANGE_ACTION]
     });
     steps.push({
       label: translate('deploy.progress.config-processor-run'),
-      playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
+      playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
     });
     steps.push({
       label: translate('deploy.progress.ready-deployment'),
-      playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
+      playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
     });
     steps.push({
       label: translate('deploy.progress.predeployment'),
-      playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+      playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     });
 
     if(this.state.cobblerPresent) {
@@ -378,14 +372,14 @@ class DeleteCompute extends BaseUpdateWizardPage {
 
       steps.push({
         label: translate('server.deploy.progress.cobbler_deploy'),
-        playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
+        playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
       });
     }
 
     // remove from monasca ping if there is monasca
     steps.push({
       label: translate('server.deploy.progress.update-monasca'),
-      playbooks: [MONASCA_DEPLOY_PLAYBOOK + '.yml']
+      playbooks: [constants.MONASCA_DEPLOY_PLAYBOOK + '.yml']
     });
 
     return steps;
@@ -396,15 +390,15 @@ class DeleteCompute extends BaseUpdateWizardPage {
 
     if (this.props.operationProps.oldServer.isReachable) {
       playbooks.push({
-        name: NOVA_STOP_PLAYBOOK,
+        name: constants.NOVA_STOP_PLAYBOOK,
         payload: {limit: this.props.operationProps.oldServer.ansible_hostname}
       });
       playbooks.push({
-        name: NEUTRON_STOP_PLAYBOOK,
+        name: constants.NEUTRON_STOP_PLAYBOOK,
         payload: {limit: this.props.operationProps.oldServer.ansible_hostname}
       });
       playbooks.push({
-        name: BM_POWER_DOWN_PLAYBOOK,
+        name: constants.BM_POWER_DOWN_PLAYBOOK,
         payload: {'extra-vars': {'nodelist': this.props.operationProps.oldServer.id}}
       });
     }
@@ -449,14 +443,14 @@ class DeleteCompute extends BaseUpdateWizardPage {
     });
 
     playbooks.push({
-      name: COMMIT_MODEL_CHANGE,
+      name: constants.COMMIT_MODEL_CHANGE_ACTION,
       action: ((logger) => {
         return this.commitModel(logger);
       })
     });
 
     playbooks.push({
-      name: PRE_DEPLOYMENT_PLAYBOOK,
+      name: constants.PRE_DEPLOYMENT_PLAYBOOK,
       payload: {'extra-vars': {'remove_deleted_servers': 'y', 'free_unused_addresses': 'y'}}
     });
 
@@ -469,13 +463,13 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
 
       playbooks.push({
-        name: COBBLER_DEPLOY_PLAYBOOK,
+        name: constants.COBBLER_DEPLOY_PLAYBOOK,
         payload: {'extra-vars': {'ardanauser_password': this.props.operationProps.osPassword}}
       });
     }
 
     playbooks.push({
-      name: MONASCA_DEPLOY_PLAYBOOK,
+      name: constants.MONASCA_DEPLOY_PLAYBOOK,
       payload: {'tags': 'active_ping_checks'}
     });
 
@@ -557,14 +551,14 @@ class DeleteCompute extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
 
   render() {
     //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>

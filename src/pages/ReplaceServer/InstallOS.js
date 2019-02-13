@@ -15,10 +15,7 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import {
-  INSTALL_PLAYBOOK, STATUS, BM_POWER_STATUS_PLAYBOOK, BM_REIMAGE_PLAYBOOK,
-  COBBLER_DEPLOY_PLAYBOOK
-} from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
@@ -31,7 +28,7 @@ class InstallOS extends BaseUpdateWizardPage {
 
     this.state = {
       ...this.state,
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: ''
     };
   }
@@ -40,11 +37,11 @@ class InstallOS extends BaseUpdateWizardPage {
     this.checkEncryptKeyAndProceed();
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       this.setState({
         processErrorBanner:
           translate('server.deploy.installos.failure', this.props.operationProps.server.id)});
@@ -55,7 +52,7 @@ class InstallOS extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
@@ -63,21 +60,21 @@ class InstallOS extends BaseUpdateWizardPage {
   renderPlaybookProgress(serverId) {
     const steps  = [{
       label: translate('install.progress.step1'),
-      playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
+      playbooks: [constants.BM_POWER_STATUS_PLAYBOOK + '.yml']
     }, {
       label: translate('install.progress.step2'),
-      playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
+      playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
     }, {
       label: translate('install.progress.step3'),
-      playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
+      playbooks: [constants.BM_REIMAGE_PLAYBOOK + '.yml']
     }, {
       label: translate('install.progress.step4'),
-      playbooks: [INSTALL_PLAYBOOK + '.yml']
+      playbooks: [constants.INSTALL_PLAYBOOK + '.yml']
     }];
 
     let installPass = this.props.operationProps.osPassword || '';
     let playbooks = [{
-      name: INSTALL_PLAYBOOK,
+      name: constants.INSTALL_PLAYBOOK,
       payload: {
         'extra-vars': {
           'nodelist': this.props.operationProps.server.id,
@@ -98,7 +95,7 @@ class InstallOS extends BaseUpdateWizardPage {
   render() {
 
     //assume for replace , we do one server at a time
-    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading} />

@@ -19,26 +19,24 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
-import {
-  BM_POWER_STATUS_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK, BM_REIMAGE_PLAYBOOK,
-  STATUS, INSTALL_PLAYBOOK } from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 
 let PLAYBOOK_STEPS = [
   {
     label: translate('install.progress.step1'),
-    playbooks: [BM_POWER_STATUS_PLAYBOOK + '.yml']
+    playbooks: [constants.BM_POWER_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step2'),
-    playbooks: [COBBLER_DEPLOY_PLAYBOOK + '.yml']
+    playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step3'),
-    playbooks: [BM_REIMAGE_PLAYBOOK + '.yml']
+    playbooks: [constants.BM_REIMAGE_PLAYBOOK + '.yml']
   },
   {
     label: translate('install.progress.step4'),
-    playbooks: [INSTALL_PLAYBOOK + '.yml']
+    playbooks: [constants.INSTALL_PLAYBOOK + '.yml']
   }
 ];
 
@@ -53,16 +51,16 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: ''
     };
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       this.setState({
         processErrorBanner: translate('server.addserver.deploy.failure')});
     }
@@ -80,7 +78,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
 
   renderPlaybookProgress () {
     let playbooks = [{
-      name: INSTALL_PLAYBOOK,
+      name: constants.INSTALL_PLAYBOOK,
       payload: {
         'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
@@ -101,7 +99,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
@@ -110,7 +108,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     // If error happens, will show cancel and retry buttons.
     // Will have a specific cancel confirmation message when user clicks
     // cancel button.
-    let failed =  this.state.overallStatus === STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
     let cancelMsg = translate('server.deploy.failure.cancel.confirm');
     return (
       <div className='wizard-page'>
