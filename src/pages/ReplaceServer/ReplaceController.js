@@ -15,14 +15,7 @@
 
 import React from 'react';
 import { translate } from '../../localization/localize.js';
-import {
-  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
-  ARDANA_SSH_KEYSCAN_PLAYBOOK, BM_POWER_STATUS_PLAYBOOK,
-  BM_REIMAGE_PLAYBOOK, COBBLER_DEPLOY_PLAYBOOK,
-  BM_POWER_UP_PLAYBOOK, BM_WAIT_FOR_SSH_PLAYBOOK, WIPE_DISKS_PLAYBOOK,
-  ARDANA_DEPLOY_PLAYBOOK, MONASCA_REBUILD_PRETASKS_PLAYBOOK,
-  OSCONFIG_RUN_PLAYBOOK, CEILOMETER_RECONFIGURE_PLAYBOOK,
-  INSTALL_PLAYBOOK, STATUS } from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
@@ -40,7 +33,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
     this.state = {
       ...this.state,
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook and commit
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook and commit
       invalidMsg: '',
       showLoadingMask: false,
 
@@ -48,7 +41,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     };
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   componentWillMount() {
     this.setState({showLoadingMask: true});
@@ -82,7 +75,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       const errorMsg = error?.message || '';
       this.setState({invalidMsg: translate('server.replace.prepare.failure', errorMsg)});
     }
@@ -137,11 +130,11 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
       {
         label: translate('deploy.progress.config-processor-run'),
-        playbook: CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml'
+        playbook: constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml'
       },
       {
         label: translate('deploy.progress.ready-deployment'),
-        playbook: READY_DEPLOYMENT_PLAYBOOK + '.yml'
+        playbook: constants.READY_DEPLOYMENT_PLAYBOOK + '.yml'
       },
       {
         label: translate('server.deploy.progress.rm-cobbler'),
@@ -173,7 +166,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       },
       {
         label: translate('server.deploy.progress.rm-known-host'),
-        playbook: ARDANA_SSH_KEYSCAN_PLAYBOOK + '.yml',
+        playbook: constants.ARDANA_SSH_KEYSCAN_PLAYBOOK + '.yml',
       },
     ];
 
@@ -186,21 +179,21 @@ class ReplaceController extends BaseUpdateWizardPage {
         {
           steps: [{
             label: translate('install.progress.step1'),
-            event: BM_POWER_STATUS_PLAYBOOK + '.yml'
+            event: constants.BM_POWER_STATUS_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step2'),
-            event: COBBLER_DEPLOY_PLAYBOOK + '.yml'
+            event: constants.COBBLER_DEPLOY_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step3'),
-            event: BM_REIMAGE_PLAYBOOK + '.yml'
+            event: constants.BM_REIMAGE_PLAYBOOK + '.yml'
           },
           {
             label: translate('install.progress.step4'),
-            event: INSTALL_PLAYBOOK + '.yml'
+            event: constants.INSTALL_PLAYBOOK + '.yml'
           }],
-          playbook: INSTALL_PLAYBOOK,
+          playbook: constants.INSTALL_PLAYBOOK,
           payload: {'extra-vars': {'nodelist': serverId, 'ardanauser_password': installPass}}
         },
       );
@@ -208,12 +201,12 @@ class ReplaceController extends BaseUpdateWizardPage {
       playbook_steps.push(
         {
           label: translate('server.deploy.progress.powerup'),
-          playbook: BM_POWER_UP_PLAYBOOK + '.yml',
+          playbook: constants.BM_POWER_UP_PLAYBOOK + '.yml',
           payload: {'extra-vars': {'nodelist': serverId}}
         },
         {
           label: translate('server.deploy.progress.waitssh'),
-          playbook: BM_WAIT_FOR_SSH_PLAYBOOK + '.yml',
+          playbook: constants.BM_WAIT_FOR_SSH_PLAYBOOK + '.yml',
           payload: {'extra-vars': {'nodelist': serverId}}
         }
       );
@@ -223,7 +216,7 @@ class ReplaceController extends BaseUpdateWizardPage {
       playbook_steps.push(
         {
           label: translate('server.deploy.progress.wipe-disks'),
-          playbook: WIPE_DISKS_PLAYBOOK + '.yml',
+          playbook: constants.WIPE_DISKS_PLAYBOOK + '.yml',
           payload: {limit: server.hostname}
         });
     }
@@ -231,11 +224,11 @@ class ReplaceController extends BaseUpdateWizardPage {
     playbook_steps.push(
       {
         label: translate('server.deploy.progress.monasca-rebuild'),
-        playbook: MONASCA_REBUILD_PRETASKS_PLAYBOOK + '.yml'
+        playbook: constants.MONASCA_REBUILD_PRETASKS_PLAYBOOK + '.yml'
       },
       {
         label: translate('server.deploy.progress.os-config'),
-        playbook: OSCONFIG_RUN_PLAYBOOK + '.yml',
+        playbook: constants.OSCONFIG_RUN_PLAYBOOK + '.yml',
         payload: {'extra-vars': {'rebuild': 'True'}, limit: server.hostname}
       },
     );
@@ -284,11 +277,11 @@ class ReplaceController extends BaseUpdateWizardPage {
 
     playbook_steps.push({
       label: translate('server.deploy.progress.ardana-deploy'),
-      playbook: ARDANA_DEPLOY_PLAYBOOK + '.yml',
+      playbook: constants.ARDANA_DEPLOY_PLAYBOOK + '.yml',
       payload: {'extra-vars': {'rebuild': 'True'}, limit: deploy_limit}
     },{
       label: translate('server.deploy.progress.ceilometer'),
-      playbook: CEILOMETER_RECONFIGURE_PLAYBOOK + '.yml',
+      playbook: constants.CEILOMETER_RECONFIGURE_PLAYBOOK + '.yml',
     });
 
     let playbooks = [];
@@ -344,7 +337,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     return (
       <div className='banner-container no-margin'>
         <ErrorBanner message={this.state.invalidMsg}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
@@ -379,7 +372,7 @@ class ReplaceController extends BaseUpdateWizardPage {
 
   render() {
     //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div ref="ReplaceController" className='wizard-page'>
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
