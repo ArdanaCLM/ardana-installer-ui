@@ -30,6 +30,16 @@ class EditTemplateFile extends Component {
 
   componentWillMount() {
     this.setState({ loading: true });
+    this.loadFileContent();
+  }
+
+  componentWillReceiveProps(props) {
+    if(this.props.fileLoadTime !== props.fileLoadTime) {
+      this.loadFileContent();
+    }
+  }
+
+  loadFileContent = () => {
     fetchJson('/api/v2/service/files/' +  this.props.editFile)
       .then((response) => {
         this.setState({original: response, contents: response});
@@ -37,8 +47,7 @@ class EditTemplateFile extends Component {
           fetchJson('/api/v2/service/files/' +  this.props.editFile + '.bak')
             .then((response) => {
               this.setState({original: response});
-            })
-            .catch((error) => {
+            }).catch((error) => {
               // it's ok to not have the original file
             }).finally(() => {
               this.setState({ loading: false });
@@ -118,6 +127,10 @@ class ServiceTemplatesTab extends Component {
       // [{service: 'cinder', files: ['api-cinder.conf.j2', 'api.conf.j2']}]
       serviceFiles: undefined,
 
+      //used to determine if the edit dialog needs to be reloaded because the files have been
+      //refreshed, after a revert for example
+      fileLoadTime: undefined,
+
       // which file is in edit
       editFile: undefined,
 
@@ -139,7 +152,7 @@ class ServiceTemplatesTab extends Component {
     //retrieve a list of j2 files for services
     fetchJson('/api/v2/service/files')
       .then((responseData) => {
-        this.setState({serviceFiles: responseData});
+        this.setState({serviceFiles: responseData, fileLoadTime: Date.now()});
       })
       .catch((error) => {
         this.setState({
@@ -227,7 +240,7 @@ class ServiceTemplatesTab extends Component {
       }
       return val;
     });
-    this.setState({serviceFiles: revertedList});
+    this.setState({serviceFiles: revertedList, fileLoadTime: Date.now()});
     this.props.hasChange(false);
   }
 
@@ -300,6 +313,7 @@ class ServiceTemplatesTab extends Component {
           <h3>{this.state.editServiceName + ' - ' + this.state.editFile}</h3>
           <EditTemplateFile closeAction={this.handleCloseEdit} changeAction={this.recordChangedFile}
             editFile={this.state.editServiceName + '/' + this.state.editFile}
+            fileLoadTime={this.state.fileLoadTime}
             revertable={this.props.revertable}/>
         </div>
       );

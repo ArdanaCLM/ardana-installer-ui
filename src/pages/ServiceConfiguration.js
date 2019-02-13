@@ -164,6 +164,7 @@ class ServiceConfiguration extends Component {
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update.progress')}</div>
           <PlaybookProgress steps={this.playbooksToRun.steps} playbooks={this.playbooksToRun.playbooks}
+            hideCancel={true}
             payload={payload} updatePageStatus={() => {}} updateGlobalState={this.updateProgressStatus}/>
           {this.state.showActionButtons ? this.renderActionButtons() : ''}
         </div>
