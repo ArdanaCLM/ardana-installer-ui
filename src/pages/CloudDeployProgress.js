@@ -15,14 +15,7 @@
 import React from 'react';
 
 import { translate } from '../localization/localize.js';
-import {
-  PRE_DEPLOYMENT_PLAYBOOK, DAYZERO_SITE_PLAYBOOK,
-  CONFIG_PROCESSOR_RUN_PLAYBOOK, READY_DEPLOYMENT_PLAYBOOK,
-  NETWORK_INTERFACE_DEPLOY_PLAYBOOK, NOVA_DEPLOY_PLAYBOOK,
-  IRONIC_DEPLOY_PLAYBOOK, MAGNUM_DEPLOY_PLAYBOOK, ARDANA_STATUS_PLAYBOOK,
-  MONASCA_AGENT_DEPLOY_PLAYBOOK, MONASCA_DEPLOY_PLAYBOOK,
-  SWIFT_DEPLOY_PLAYBOOK, MONASCA_TRANSFORM_DEPLOY_PLAYBOOK, CEPH_DEPLOY_PLAYBOOK,
-  CINDER_DEPLOY_PLAYBOOK, SITE_PLAYBOOK, STATUS } from '../utils/constants.js';
+import * as constants from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
@@ -40,45 +33,47 @@ import { ErrorBanner } from '../components/Messages.js';
 const PLAYBOOK_STEPS = [
   {
     label: translate('deploy.progress.config-processor-run'),
-    playbooks: [CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
+    playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.ready-deployment'),
-    playbooks: [READY_DEPLOYMENT_PLAYBOOK + '.yml']
+    playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.predeployment'),
-    playbooks: [PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+    playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step1'),
-    playbooks: [NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
+    playbooks: [constants.NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step2'),
     playbooks: [
-      NOVA_DEPLOY_PLAYBOOK + '.yml', IRONIC_DEPLOY_PLAYBOOK + '.yml',
-      MAGNUM_DEPLOY_PLAYBOOK + '.yml']
+      constants.NOVA_DEPLOY_PLAYBOOK + '.yml', constants.IRONIC_DEPLOY_PLAYBOOK + '.yml',
+      constants.MAGNUM_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step3'),
     playbooks: [
-      MONASCA_AGENT_DEPLOY_PLAYBOOK + '.yml', MONASCA_DEPLOY_PLAYBOOK + '.yml',
-      MONASCA_TRANSFORM_DEPLOY_PLAYBOOK + '.yml']
+      constants.MONASCA_AGENT_DEPLOY_PLAYBOOK + '.yml', constants.MONASCA_DEPLOY_PLAYBOOK + '.yml',
+      constants.MONASCA_TRANSFORM_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step4'),
     playbooks: [
-      CEPH_DEPLOY_PLAYBOOK + '.yml', CINDER_DEPLOY_PLAYBOOK + '.yml', SWIFT_DEPLOY_PLAYBOOK + '.yml']
+      constants.CEPH_DEPLOY_PLAYBOOK + '.yml', constants.CINDER_DEPLOY_PLAYBOOK + '.yml',
+      constants.SWIFT_DEPLOY_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step5'),
-    playbooks: [ARDANA_STATUS_PLAYBOOK + '.yml']
+    playbooks: [constants.ARDANA_STATUS_PLAYBOOK + '.yml']
   },
   {
     label: translate('deploy.progress.step6'),
     playbooks: [
-      SITE_PLAYBOOK + '.yml', DAYZERO_SITE_PLAYBOOK + '.yml'], //either site.yml or installui-wipe-and-site.yml
+      //either site.yml or installui-wipe-and-site.yml
+      constants.SITE_PLAYBOOK + '.yml', constants.DAYZERO_SITE_PLAYBOOK + '.yml'],
     orCondition: true
   }
 ];
@@ -91,11 +86,11 @@ class CloudDeployProgress extends BaseWizardPage {
     this.playbooks = [];
 
     this.state = {
-      overallStatus: STATUS.UNKNOWN // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN // overall status of entire playbook
     };
   }
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
-  setBackButtonDisabled = () => this.state.overallStatus != STATUS.FAILED;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
+  setBackButtonDisabled = () => this.state.overallStatus != constants.STATUS.FAILED;
 
   updatePageStatus = (status) => {
     this.setState({overallStatus: status});
@@ -136,13 +131,13 @@ class CloudDeployProgress extends BaseWizardPage {
 
   render() {
     // choose between site or site with wipedisks (installui-wipe-and-site)
-    let sitePlaybook = SITE_PLAYBOOK;
+    let sitePlaybook = constants.SITE_PLAYBOOK;
 
     // Build the payload from the deployment configuration page options
     let payload = {};
     if (this.props.deployConfig) {
       if (this.props.deployConfig['wipeDisks']) {
-        sitePlaybook = DAYZERO_SITE_PLAYBOOK;
+        sitePlaybook = constants.DAYZERO_SITE_PLAYBOOK;
       }
       payload['verbose'] = this.props.deployConfig['verbosity'];
       payload['extra-vars'] = {};
@@ -161,7 +156,7 @@ class CloudDeployProgress extends BaseWizardPage {
       }
     }
 
-    this.playbooks = [PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook];
+    this.playbooks = [constants.PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook];
 
     return (
       <div className='wizard-page'>
@@ -176,7 +171,7 @@ class CloudDeployProgress extends BaseWizardPage {
             playbooks = {this.playbooks} payload = {payload}/>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}
-              show={this.state.overallStatus === STATUS.FAILED}/>
+              show={this.state.overallStatus === constants.STATUS.FAILED}/>
           </div>
         </div>
         {this.renderNavButtons()}
