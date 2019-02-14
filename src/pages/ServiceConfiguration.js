@@ -150,7 +150,7 @@ class ServiceConfiguration extends Component {
   }
 
   toDisableUpdate = () => {
-    return !this.state.isChanged || (this.state.isEncrypted && !isEmpty(this.state.encryptKey));
+    return !this.state.isChanged || (this.state.isEncrypted && isEmpty(this.state.encryptKey));
   }
 
   renderContent = () => {
@@ -199,9 +199,9 @@ class ServiceConfiguration extends Component {
     } else {
       return (
         <div className='btn-row right-btn-group'>
-          <ActionButton type='default' displayLabel={translate('cancel')} isDisabled={this.toDisableUpdate()}
+          <ActionButton type='default' displayLabel={translate('cancel')} isDisabled={!this.state.isChanged}
             clickAction={() => this.serviceTemplatesTab.revertChanges()}/>
-          <ActionButton displayLabel={translate('update')} isDisabled={!this.state.isChanged}
+          <ActionButton displayLabel={translate('update')} isDisabled={this.toDisableUpdate()}
             clickAction={() => this.startConfigUpdate()}/>
         </div>
       );
