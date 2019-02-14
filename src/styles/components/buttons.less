@@ -1,4 +1,4 @@
-// (c) Copyright 2017-2018 SUSE LLC
+// (c) Copyright 2017-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -17,60 +17,143 @@
 .btn {
   display: inline-block;
   font-size: 14px;//in bootstrap 3 this is the default, in bootstrap 4 its 1rem which makes the buttons bigger
-  font-weight: normal;
+  font-weight: bold;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   border: 1px solid transparent;
   white-space: nowrap;
-  padding: 6px 12px;
-  border-radius: 4px;
-  line-height: 20px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
+  padding: 8px 16px;
+  border-radius: 2px;
+  line-height: 18px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
+}
+
+.button(@color, @hover-color, @active-color) {
+  background-color: @color;
+  border-color: @color;
+  color: @sb-white;
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
+  }
+
+  &:hover,
+  &:active:hover {
+    background-color: @hover-color;
+    border-color: @hover-color;
+    color: @sb-white;
+  }
+
+  &:active,
+  &:focus {
+    background-color: @active-color;
+    border-color: @active-color;
+    color: @sb-white;
+  }
+
+  &:disabled:focus,
+  &[disabled]:focus,
+  &:disabled:hover,
+  &[disabled]:hover,
+  &:disabled,
+  &[disabled] {
+    background-color: @color;
+    border-color: @color;
+    color: @sb-white;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:not(:disabled):not(.disabled).active.hover,
+  &:not(:disabled):not(.disabled):active:hover {
+    background-color: @hover-color;
+    border: 1px solid @hover-color;
+    color: @sb-white;
+  }
+
+  &:not(:disabled):not(.disabled):not(:hover).active,
+  &:not(:disabled):not(.disabled):not(:hover):active,
+  .show > &.dropdown-toggle {
+    background-color: @active-color;
+    border: 1px solid @active-color;
+    color: @sb-white;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus,
+  .show > &.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
+  }
+}
+
+.button-outline(@color, @hover-color, @active-color) {
+  background-color: transparent;
+  border-color: @color;
+  color: @color;
+
+  &:focus {
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
+  }
+
+  &:hover,
+  &:active:hover {
+    background-color: transparent;
+    border-color: @hover-color;
+    color: @hover-color;
+  }
+
+  &:active,
+  &:focus {
+    background-color: transparent;
+    border-color: @active-color;
+    color: @active-color;
+  }
+
+  &:disabled:focus,
+  &[disabled]:focus,
+  &:disabled:hover,
+  &[disabled]:hover,
+  &:disabled,
+  &[disabled] {
+    background-color: transparent;
+    border-color: @color;
+    color: @color;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:not(:disabled):not(.disabled).active.hover,
+  &:not(:disabled):not(.disabled):active:hover {
+    background-color: transparent;
+    border: 1px solid @hover-color;
+    color: @hover-color;
+  }
+
+  &:not(:disabled):not(.disabled):not(:hover).active,
+  &:not(:disabled):not(.disabled):not(:hover):active,
+  .show > &.dropdown-toggle {
+    background-color: transparent;
+    border: 1px solid @active-color;
+    color: @active-color;
+  }
+
+  &:not(:disabled):not(.disabled).active:focus,
+  &:not(:disabled):not(.disabled):active:focus,
+  .show > &.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
+  }
 }
 
 .btn-primary {
-  background-color: @preferredcolor;
-  color: @sb-white;
-  display:inline-block;
+  .button(@sb-green-500, @sb-green-900, @sb-green-700);
 }
 
-.btn.btn-primary:active,
-.btn.btn-primary:hover,
-.btn.btn-primary:focus{
-  background-color: @active-button-color;
-  border: 1px solid @active-button-color;
-  outline: 0;
+.btn-danger {
+  .button(@sb-red-500, @sb-red-900, @sb-red-700);
 }
 
-.btn.btn-primary:disabled:hover,
-.btn.btn-primary[disabled]:hover,
-.btn.btn-primary:disabled,
-.btn.btn-primary[disabled] {
-  background-color: @preferredcolor;
-  border: 1px solid @preferredcolor;
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.btn.btn-default:active,
-.btn.btn-default:hover,
-.btn.btn-default:focus,
-.btn.btn-default {
-  color: @default-button-color;
-  background-color: @background-color;
-  border-color: @default-button-color;
-  display:inline-block;
-  outline: 0;
-}
-
-.btn.btn-default:disabled:hover,
-.btn.btn-default[disabled]:hover,
-.btn.btn-default:disabled,
-.btn.btn-default[disabled] {
-  background-color:  @background-color;
-  border: 1px solid @default-button-color;
-  cursor: not-allowed;
-  opacity: 0.4;
+.btn-default {
+  .button-outline(@sb-gray-900, @sb-gray-600, @sb-gray-500);
 }
 
 .btn.btn-link:active,
@@ -95,13 +178,6 @@
   display:inline-block;
   outline: 0;
   box-shadow: none;
-}
-
-.btn-primary:not(:disabled):not(.disabled).active,
-.btn-primary:not(:disabled):not(.disabled):active,
-.show>.btn-primary.dropdown-toggle {
-  border: 1px solid @sb-green-900;
-  background-color: @sb-green-900;
 }
 
 // Buttons in a .btn-row are automatically separated with a gap
