@@ -163,7 +163,7 @@ class LoginPage extends Component {
                       {this.state.showPasswordMask ? 'visibility': 'visibility_off'}
                     </i>
                   </div>
-                  <button className="btn rounded-corner" type="submit" onClick={this.handleLogin}>
+                  <button className="btn btn-primary" type="submit" onClick={this.handleLogin}>
                     {translate('login')}
                   </button>
                 </form>
