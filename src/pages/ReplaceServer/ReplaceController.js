@@ -371,8 +371,7 @@ class ReplaceController extends BaseUpdateWizardPage {
   }
 
   render() {
-    //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
+    let failed = (this.state.overallStatus === STATUS.FAILED);
     return (
       <div ref="ReplaceController" className='wizard-page'>
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
@@ -381,11 +380,13 @@ class ReplaceController extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content'>
           {this.renderPlaybookProgress()}
-          {cancel && this.renderError()}
+          <If condition={failed}>
+            {this.renderError()}
+          </If>
           {this.renderRingBuilderConfirmation()}
           {this.renderEncryptKeyModal()}
         </div>
-        {this.renderNavButtons(cancel)}
+        {this.renderNavButtons(false, failed)}
       </div>
     );
   }

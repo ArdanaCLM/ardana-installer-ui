@@ -712,7 +712,7 @@
     "server.deploy.progress.delete_network_agents.failure": "Error: Failed to delete network agents for compute host {0}. {1}",
     "server.deploy.installos.failure": "Failed to install SLES OS on compute host {0}.",
     "server.deploy.retry.confirm": "Retry will rerun the failed playbook. Check the log for errors and if there were any issues, resolve them before proceeding. \n\n Do you want to continue?",
-    "server.deploy.failure.cancel.confirm": "Check the log for errors and if there were any issues, resolve them before proceeding. \n\n Do you want to continue?",
+    "server.deploy.failure.cancel.confirm": "Cancelling will close the window, and any error messages will no longer be available to view.\n\nDo you want to cancel?",
     "server.addserver.failure.cancel.confirm": "Check the log for errors and if there were any issues, resolve them before proceeding. The following steps need to be performed manually on the cloud deployer before clicking Yes to continue... \n1. Remove the new compute server(s) from ~/openstack/my_cloud/definition/data/servers.yml. \n2. git commit -a -m 'commite message'. \n3. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost config-processor-run.yml \n4. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost ready-deployment.yml  \n\n If the Add Server page continues to display the removed servers, refresh the page using the web browser. To retry deployment, re-add the servers to the appropriate role, and click the \"Deploy\" button. \n\n Do you want to continue?",
     "server.addserver.installos.cancel.confirm": "This will cancel the OS installation for the new compute server(s). \n\nDo you want to continue? ",
 
