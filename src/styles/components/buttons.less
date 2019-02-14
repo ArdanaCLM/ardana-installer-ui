@@ -28,26 +28,26 @@
   line-height: 18px;//in bootstrap 3 this is the default, in bootstrap 4 its 24px which makes the buttons bigger
 }
 
-.btn-primary {
-  background-color: @sb-green-500;
-  border-color: @sb-green-500;
+.button(@color, @hover-color, @active-color) {
+  background-color: @color;
+  border-color: @color;
   color: @sb-white;
 
   &:focus {
-    box-shadow: 0 0 0 0.2rem fade(@sb-green-500, 50);
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
   }
 
   &:hover,
   &:active:hover {
-    background-color: @sb-green-900;
-    border-color: @sb-green-900;
+    background-color: @hover-color;
+    border-color: @hover-color;
     color: @sb-white;
   }
 
   &:active,
   &:focus {
-    background-color: @sb-green-700;
-    border-color: @sb-green-700;
+    background-color: @active-color;
+    border-color: @active-color;
     color: @sb-white;
   }
 
@@ -57,47 +57,56 @@
   &[disabled]:hover,
   &:disabled,
   &[disabled] {
-    background-color: @sb-green-500;
-    border-color: @sb-green-500;
+    background-color: @color;
+    border-color: @color;
     color: @sb-white;
     cursor: not-allowed;
     opacity: 0.6;
   }
 
-  &:not(:disabled):not(.disabled).active,
-  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active.hover,
+  &:not(:disabled):not(.disabled):active:hover {
+    background-color: @hover-color;
+    border: 1px solid @hover-color;
+    color: @sb-white;
+  }
+
+  &:not(:disabled):not(.disabled):not(:hover).active,
+  &:not(:disabled):not(.disabled):not(:hover):active,
   .show > &.dropdown-toggle {
-    background-color: @sb-green-700;
-    border: 1px solid @sb-green-700;
+    background-color: @active-color;
+    border: 1px solid @active-color;
     color: @sb-white;
   }
 
   &:not(:disabled):not(.disabled).active:focus,
   &:not(:disabled):not(.disabled):active:focus,
   .show > &.dropdown-toggle:focus {
-    box-shadow: 0 0 0 0.2rem fade(@sb-green-500, 50);
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
   }
 }
 
-.btn-default {
+.button-outline(@color, @hover-color, @active-color) {
   background-color: transparent;
-  border-color: @sb-gray-900;
-  color: @sb-gray-900;
+  border-color: @color;
+  color: @color;
 
   &:focus {
-    box-shadow: 0 0 0 0.2rem fade(@sb-gray-900, 50);
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
   }
 
   &:hover,
   &:active:hover {
-    border-color: @sb-gray-600;
-    color: @sb-gray-600;
+    background-color: transparent;
+    border-color: @hover-color;
+    color: @hover-color;
   }
 
   &:active,
   &:focus {
-    border-color: @sb-gray-500;
-    color: @sb-gray-500;
+    background-color: transparent;
+    border-color: @active-color;
+    color: @active-color;
   }
 
   &:disabled:focus,
@@ -107,62 +116,44 @@
   &:disabled,
   &[disabled] {
     background-color: transparent;
-    border-color: @sb-gray-900;
-    color: @sb-gray-900;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.btn-danger {
-  background-color: @sb-red-500;
-  border-color: @sb-red-500;
-  color: @sb-white;
-
-  &:focus {
-    box-shadow: 0 0 0 0.2rem fade(@sb-red-500, 50);
-  }
-
-  &:hover,
-  &:active:hover {
-    background-color: @sb-red-900;
-    border-color: @sb-red-900;
-    color: @sb-white;
-  }
-
-  &:active,
-  &:focus {
-    background-color: @sb-red-700;
-    border-color: @sb-red-700;
-    color: @sb-white;
-  }
-
-  &:disabled:focus,
-  &[disabled]:focus,
-  &:disabled:hover,
-  &[disabled]:hover,
-  &:disabled,
-  &[disabled] {
-    background-color: @sb-red-500;
-    border-color: @sb-red-500;
-    color: @sb-white;
+    border-color: @color;
+    color: @color;
     cursor: not-allowed;
     opacity: 0.6;
   }
 
-  &:not(:disabled):not(.disabled).active,
-  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active.hover,
+  &:not(:disabled):not(.disabled):active:hover {
+    background-color: transparent;
+    border: 1px solid @hover-color;
+    color: @hover-color;
+  }
+
+  &:not(:disabled):not(.disabled):not(:hover).active,
+  &:not(:disabled):not(.disabled):not(:hover):active,
   .show > &.dropdown-toggle {
-    background-color: @sb-red-700;
-    border: 1px solid @sb-red-700;
-    color: @sb-white;
+    background-color: transparent;
+    border: 1px solid @active-color;
+    color: @active-color;
   }
 
   &:not(:disabled):not(.disabled).active:focus,
   &:not(:disabled):not(.disabled):active:focus,
   .show > &.dropdown-toggle:focus {
-    box-shadow: 0 0 0 0.2rem fade(@sb-red-500, 50);
+    box-shadow: 0 0 0 0.2rem fade(@color, 50);
   }
+}
+
+.btn-primary {
+  .button(@sb-green-500, @sb-green-900, @sb-green-700);
+}
+
+.btn-danger {
+  .button(@sb-red-500, @sb-red-900, @sb-red-700);
+}
+
+.btn-default {
+  .button-outline(@sb-gray-900, @sb-gray-600, @sb-gray-500);
 }
 
 .btn.btn-link:active,
