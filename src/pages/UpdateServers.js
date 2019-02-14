@@ -611,7 +611,7 @@ class UpdateServers extends BaseUpdateWizardPage {
             {translate('server.deactivate.confirm.message', id)}
           </If>
         </h2>
-        <If condition={haveInstances && otherHosts > 0}>
+        <If condition={haveInstances && otherHosts.length > 0}>
           <h2>{translate('server.migrate.prompt', id)}</h2>
           {choices}
         </If>
