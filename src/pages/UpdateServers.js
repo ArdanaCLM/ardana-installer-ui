@@ -596,8 +596,9 @@ class UpdateServers extends BaseUpdateWizardPage {
         title={translate('server.deactivate.confirm.title', id)}
         yesAction={::this.performDeactivateAndOrMigration}
         noAction={() => this.setState({confirmDeactivate: undefined})}
-        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}>
-        <h2>
+        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}
+      >
+        <p>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
@@ -610,9 +611,9 @@ class UpdateServers extends BaseUpdateWizardPage {
           <If condition={!loading && instances?.length === 0}>
             {translate('server.deactivate.confirm.message', id)}
           </If>
-        </h2>
+        </p>
         <If condition={haveInstances && otherHosts.length > 0}>
-          <h2>{translate('server.migrate.prompt', id)}</h2>
+          <p>{translate('server.migrate.prompt', id)}</p>
           {choices}
         </If>
       </YesNoModal>
@@ -626,15 +627,16 @@ class UpdateServers extends BaseUpdateWizardPage {
       <YesNoModal
         title={translate('server.deploy.progress.delete_compute')} yesAction={::this.performDeleteComputeHost}
         noAction={() => this.setState({confirmDelete: undefined})}
-        disableYes={loading}>
-        <h2>
+        disableYes={loading}
+      >
+        <p>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
           <If condition={!loading}>
             {translate('server.delete.confirm.message', id)}
           </If>
-        </h2>
+        </p>
       </YesNoModal>
     );
   }
