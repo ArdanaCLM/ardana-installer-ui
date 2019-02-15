@@ -371,7 +371,7 @@ class ReplaceController extends BaseUpdateWizardPage {
   }
 
   render() {
-    let failed = (this.state.overallStatus === STATUS.FAILED);
+    let failed = (this.state.overallStatus === constants.STATUS.FAILED);
     return (
       <div ref="ReplaceController" className='wizard-page'>
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
