@@ -97,6 +97,7 @@
     margin-bottom: 15px;
     padding-left: 25px;
     li {
+      margin-top: 5px;
       height: 1.5em;
     }
   }
@@ -111,6 +112,16 @@
     display: inline-flex;
     line-height: 1.4em;
     cursor: pointer;
+  }
+
+  .file-list a {
+    color: @sb-cerulean-900;
+    line-height: 1.5em;
+    &:hover {
+      color: @sb-blue-400;
+      text-decoration: underline;
+      cursor: pointer;
+    }
   }
 }
 

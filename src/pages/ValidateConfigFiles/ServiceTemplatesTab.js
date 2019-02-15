@@ -341,8 +341,7 @@ class ServiceTemplatesTab extends Component {
           }
           fileList.push(
             <li key={idx}>
-              <ActionButton type='clickable' clickAction={() => this.handleEditFile(item.service, file)}
-                displayLabel={file + (isChanged ? ' *' : '')}/>
+              <a onClick={() => this.handleEditFile(item.service, file)}>{file + (isChanged ? ' *' : '')}</a>
             </li>
           );
         });
