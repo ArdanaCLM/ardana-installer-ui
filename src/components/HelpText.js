@@ -21,7 +21,7 @@ export default function HelpText(props) {
   );
 
   return (
-    <OverlayTrigger placement="top" overlay={tooltip}>
+    <OverlayTrigger placement="auto" overlay={tooltip}>
       <span className='tooltip-icon'>
         <i className='material-icons md-dark'>info</i>
       </span>
