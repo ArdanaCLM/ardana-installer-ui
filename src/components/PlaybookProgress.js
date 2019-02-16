@@ -266,6 +266,12 @@ class PlaybookProgress extends Component {
       if (status === STATUS.COMPLETE) {
         return (<li key={index} className={statusClass}>{step.label}
           <i className='material-icons succeed-icon'>check_circle</i></li>);
+      } else if (status === STATUS.IN_PROGRESS) {
+        return (
+          <li key={index} className={statusClass}>
+            {step.label} <i class="eos-icons eos-icon-loading"></i>
+          </li>
+        );
       } else {
         return (<li key={index} className={statusClass}>{step.label}</li>);
       }
