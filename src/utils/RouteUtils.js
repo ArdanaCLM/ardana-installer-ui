@@ -35,11 +35,6 @@ export function navigateTo(url, state, search) {
   history.go(0);
 }
 
-export function navigateBack(fallback='/', state) {
-  const history = createHistory();
-  history.goBack();
-}
-
 export function redirectToLogin(forced = true) {
   navigateTo('/login', { forcedRedirect: forced });
 }
