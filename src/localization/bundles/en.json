@@ -71,7 +71,7 @@
     "id.with_colon": "ID:",
     "common.encryptkey.message": "Please provide encryption key for running playbooks",
     "common.encryptkey.title": "Provide encryption key",
-    "common.encryptkey.description": "The operation you are about to perform requires the encryption key. Please provide the encryption key.",
+    "common.encryptkey.description": "The operation you are about to perform requires the encryption key. Please provide the encryption key. If provide wrong encryption key, operation will fail. Refresh the page to invoke this dialog again in case wrong key was provided. ",
 
     "day2.product.description": "Manage and configure your OpenStack cloud via one interface, anytime, anywhere.",
     "login": "Log in",
