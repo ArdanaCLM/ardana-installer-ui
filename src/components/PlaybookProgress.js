@@ -269,7 +269,7 @@ class PlaybookProgress extends Component {
       } else if (status === STATUS.IN_PROGRESS) {
         return (
           <li key={index} className={statusClass}>
-            {step.label} <i class="eos-icons eos-icon-loading"></i>
+            {step.label} <i className="eos-icons eos-icon-loading"></i>
           </li>
         );
       } else {
