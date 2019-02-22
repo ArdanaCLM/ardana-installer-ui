@@ -711,7 +711,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                 this.setState({loading: false, showPowerOffWarning: true});
               }
             })
-            .catch((error) => {
+            .catch(error => {
               if (error.status == 404) {
                 if(isComputeNode(server)) {
                   this.setState({
