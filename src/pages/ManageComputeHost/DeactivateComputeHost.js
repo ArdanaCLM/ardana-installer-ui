@@ -16,6 +16,8 @@
 import DisableComputeServiceNetwork from '../ReplaceServer/DisableComputeServiceNetwork';
 import { translate } from '../../localization/localize';
 import { NOVA_STOP_PLAYBOOK } from '../../utils/constants';
+import { getHostFromCloudModel } from '../../utils/ModelUtils';
+import * as constants from '../../utils/constants';
 
 const MIGRATE_INSTANCES = 'migrate_instances',
   DISABLE_COMPUTE_SERVICE = 'nova_deactivate';
@@ -72,6 +74,31 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
       }
     });
     return playbooks;
+  }
+
+  needGetHostName() {
+    return !this.props.operationProps.oldServer.hostname;
+  }
+
+  getHostName(cloudModel) {
+    let oldHost =
+      getHostFromCloudModel(cloudModel, this.props.operationProps.oldServer.id);
+    if (oldHost) {
+      let opProps = Object.assign({}, this.props.operationProps);
+      // save the host names for old compute node
+      opProps.oldServer['hostname'] = oldHost['hostname'];
+      opProps.oldServer['ansible_hostname'] = oldHost['ansible_hostname'];
+      this.props.updateGlobalState('operationProps', opProps);
+      this.checkEncryptKeyAndProceed();
+    }
+    else { // no old or new hostname, should not happen, just in case
+      this.setState({
+        processErrorBanner: translate(
+          'server.deactivate.progress.compute.emptyhost', this.props.operationProps.oldServer.id,
+          oldHost),
+        overallStatus: constants.STATUS.FAILED
+      });
+    }
   }
 }
 

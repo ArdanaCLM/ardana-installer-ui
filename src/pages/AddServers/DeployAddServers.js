@@ -78,7 +78,10 @@ class DeployAddServers extends BaseUpdateWizardPage {
             // at this point we should have some operationProps
             let opProps = Object.assign({}, this.props.operationProps);
             opProps.newHosts = cleanedHosts; // need for complete message
+
+            opProps = this.getOldServerHost(cloudModel, opProps);
             this.props.updateGlobalState('operationProps', opProps);
+
             this.checkEncryptKeyAndProceed();
           }
           else { //no new hostnames, should not happen just in case
@@ -97,6 +100,10 @@ class DeployAddServers extends BaseUpdateWizardPage {
     else {
       this.checkEncryptKeyAndProceed();
     }
+  }
+
+  getOldServerHost =  (cloudModel, opProps) => {
+    return opProps; // do nothing for just add compute
   }
 
   getDeployServerTitle = () => {
@@ -118,15 +125,15 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
     let  newServers = hosts.map(host => {
       return {
+        // generated display hostname , for example, ardana-cp1-comp0004-mgmt
+        // this will be used for complete message
+        hostname: host['hostname'],
+        id: host['id'],
+        ip: host['addr'],
         // generated hostname by ardana, this will be used
         // to set --limit during deployment
         // for example, ardana-cp1-comp0004
-        hostname: host['ardana_ansible_host'],
-        id: host['id'],
-        ip: host['addr'],
-        // generated display hostname , for example, ardana-cp1-comp0004-mgmt
-        // this will be used for complete message
-        display_hostname: host['hostname']
+        ansible_hostname: host['ardana_ansible_host']
       };
     });
 
@@ -187,7 +194,8 @@ class DeployAddServers extends BaseUpdateWizardPage {
       }
     });
 
-    let newHostNames = this.props.operationProps.newHosts.map(host => host['hostname']);
+    let newHostNames =
+      this.props.operationProps.newHosts.map(host => host['ansible_hostname']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
       if (step.payload) {
@@ -196,8 +204,19 @@ class DeployAddServers extends BaseUpdateWizardPage {
         }
         retBook.payload = step.payload;
       }
+      // When this component is used in replace compute flow.
+      // Have a old server and old server is not reachable
+      // special case for ARDANA_GEN_HOSTS_FILE_PLAYBOOK to exclude
+      // the old server
+      else if(step.name === constants.ARDANA_GEN_HOSTS_FILE_PLAYBOOK) {
+        retBook = this.excludeOldServerForGenHostFile(retBook);
+      }
       return retBook;
     });
+  }
+
+  excludeOldServerForGenHostFile = (book) => {
+    return book; //do nothing for add compute
   }
 
   toShowLoadingMask = () => {

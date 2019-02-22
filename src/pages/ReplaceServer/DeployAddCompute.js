@@ -15,6 +15,7 @@
 
 import DeployAddServers from '../AddServers/DeployAddServers.js';
 import { translate } from '../../localization/localize.js';
+import { getHostFromCloudModel } from '../../utils/ModelUtils.js';
 
 
 // This is the deployment page for adding a compute server
@@ -29,29 +30,37 @@ class DeployAddCompute extends DeployAddServers {
   }
 
   getAddedComputeHosts = (cloudModel) => {
-    // get new hostname for new compute host
-    let hosts = cloudModel['internal']['servers'];
-    let host = hosts.find(host => {
-      return host.id === this.props.operationProps.server.id;
-    });
-
-    let newServers = [];
+    let host =
+      getHostFromCloudModel(cloudModel, this.props.operationProps.server.id);
     if(host) {
-      // should just have one new compute server
-      newServers = [{
-        // generated hostname by ardana, this will be used
-        // to set --limit during deployment
-        // for example, ardana-cp1-comp0004
-        hostname: host['ardana_ansible_host'],
-        id: host['id'],
-        ip: host['addr'],
-        // generated display hostname , for example, ardana-cp1-comp0004-mgmt
-        // this will be used for complete message
-        display_hostname: host['hostname']
-      }];
+      return [host];
     }
 
-    return newServers;
+    return [];
+  }
+
+  getOldServerHost = (cloudModel, opProps) => {
+    // When this component is used in replace compute flow.
+    // Have a old server and old server is not reachable
+    // need find out the old host name
+    let retProps = Object.assign({}, opProps);
+    if (!this.props.operationProps.oldServer.isReachable) {
+      let oldHost =
+        getHostFromCloudModel(cloudModel, this.props.operationProps.oldServer.id);
+      // save the host names for old compute node
+      retProps.oldServer['hostname'] = oldHost['hostname'];
+      retProps.oldServer['ansible_hostname'] = oldHost['ansible_hostname'];
+    }
+    return retProps;
+  }
+
+  excludeOldServerForGenHostFile = (book) => {
+    let retBook = Object.assign({}, book);
+    if(!this.props.operationProps.oldServer.isReachable) {
+      retBook.payload =
+        {limit: 'all:!' + this.props.operationProps.oldServer.ansible_hostname};
+    }
+    return retBook;
   }
 
   renderFooterButtons (showCancel, showRetry) {
