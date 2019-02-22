@@ -280,6 +280,7 @@ export class EditPencilForTableRow extends Component {
                 {translate('common.edit')}
               </Tooltip>
             }
+            popperConfig={preventOverflowPopperConfig}
           >
             <span className='edit'>
               <i className="material-icons md-dark">edit</i>
