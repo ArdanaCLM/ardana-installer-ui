@@ -90,7 +90,7 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
       this.props.updateGlobalState('operationProps', opProps);
       this.checkEncryptKeyAndProceed();
     }
-    else { // no old or new hostname, should not happen, just in case
+    else { // no old hostname should not happen, just in case
       this.setState({
         processErrorBanner: translate(
           'server.deactivate.progress.compute.emptyhost', this.props.operationProps.oldServer.id,
