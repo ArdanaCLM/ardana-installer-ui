@@ -260,26 +260,33 @@ export class ItemMenuButton extends Component {
   }
 }
 
+export const preventOverflowPopperConfig = {
+  modifiers: {
+    preventOverflow: {
+      boundariesElement: 'window'
+    }
+  }
+};
+
 export class EditPencilForTableRow extends Component {
   render() {
     return (
-      <OverlayTrigger
-        key='bottom'
-        placement='bottom'
-        overlay={
-          <Tooltip id='edit-row'>
-            {translate('common.edit')}
-          </Tooltip>
-        }
-      >
-        <td className='actions'>
-          <p onClick={this.props.clickAction}>
+      <td className='actions'>
+        <p onClick={this.props.clickAction}>
+          <OverlayTrigger
+            placement='bottom'
+            overlay={
+              <Tooltip id='edit-row'>
+                {translate('common.edit')}
+              </Tooltip>
+            }
+          >
             <span className='edit'>
               <i className="material-icons md-dark">edit</i>
             </span>
-          </p>
-        </td>
-      </OverlayTrigger>
+          </OverlayTrigger>
+        </p>
+      </td>
     );
   }
 }
@@ -287,23 +294,23 @@ export class EditPencilForTableRow extends Component {
 export class InfoForTableRow extends Component {
   render() {
     return (
-      <OverlayTrigger
-        key='bottom'
-        placement='bottom'
-        overlay={
-          <Tooltip id='row-details'>
-            {translate('common.details')}
-          </Tooltip>
-        }
-      >
-        <td className='actions'>
-          <p onClick={this.props.clickAction}>
+      <td className='actions'>
+        <p onClick={this.props.clickAction}>
+          <OverlayTrigger
+            placement='bottom'
+            overlay={
+              <Tooltip id='row-details'>
+                {translate('common.details')}
+              </Tooltip>
+            }
+            popperConfig={preventOverflowPopperConfig}
+          >
             <span className='detail-info'>
               <i className='material-icons md-dark'>info</i>
             </span>
-          </p>
-        </td>
-      </OverlayTrigger>
+          </OverlayTrigger>
+        </p>
+      </td>
     );
   }
 }
@@ -311,23 +318,23 @@ export class InfoForTableRow extends Component {
 export class DeleteForTableRow extends Component {
   render() {
     return (
-      <OverlayTrigger
-        key='bottom'
-        placement='bottom'
-        overlay={
-          <Tooltip id='delete-row'>
-            {translate('common.delete')}
-          </Tooltip>
-        }
-      >
-        <td className='actions'>
-          <p onClick={this.props.clickAction}>
+      <td className='actions'>
+        <p onClick={this.props.clickAction}>
+          <OverlayTrigger
+            placement='bottom'
+            overlay={
+              <Tooltip id='delete-row'>
+                {translate('common.delete')}
+              </Tooltip>
+            }
+            popperConfig={preventOverflowPopperConfig}
+          >
             <span className='delete'>
               <i className='material-icons md-dark'>delete</i>
             </span>
-          </p>
-        </td>
-      </OverlayTrigger>
+          </OverlayTrigger>
+        </p>
+      </td>
     );
   }
 }
