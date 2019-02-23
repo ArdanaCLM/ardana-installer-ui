@@ -153,6 +153,16 @@ class DeployAddServers extends BaseUpdateWizardPage {
   getPlaybooksAndSteps = () => {
 
     const PLAYBOOK_POSSIBLE_STEPS = [{
+      name: constants.BM_POWER_UP_PLAYBOOK,
+      label: translate('server.deploy.progress.powerup'),
+      playbooks: [constants.BM_POWER_UP_PLAYBOOK + '.yml'],
+      payload: {'extra-vars': {'nodelist': ''}}
+    }, {
+      name: constants.BM_WAIT_FOR_SSH_PLAYBOOK,
+      label: translate('server.deploy.progress.waitssh'),
+      playbooks: [constants.BM_WAIT_FOR_SSH_PLAYBOOK + '.yml'],
+      payload: {'extra-vars': {'nodelist': ''}}
+    }, {
       name: constants.WIPE_DISKS_PLAYBOOK,
       label: translate('server.deploy.progress.wipe-disks'),
       playbooks: [constants.WIPE_DISKS_PLAYBOOK + '.yml'],
@@ -196,11 +206,16 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
     let newHostNames =
       this.props.operationProps.newHosts.map(host => host['ansible_hostname']);
+    let ids =
+      this.props.operationProps.newHosts.map(host => host['id']);
     this.playbooks = this.steps.map(step => {
       let retBook = {name: step.name};
       if (step.payload) {
         if(step.payload.limit) {
           step.payload.limit = newHostNames.join(',');
+        }
+        if(step.payload['extra-vars']) {
+          step.payload['extra-vars'].nodelist = ids.join(',');
         }
         retBook.payload = step.payload;
       }
@@ -232,7 +247,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
 
   renderPlaybookProgress () {
     this.getPlaybooksAndSteps();
-    // common_payload will be merged with individual playbook payload when luanch
+    // common_payload will be merged with individual playbook payload when launch
     // playbook in PlaybookProgress
     let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
     return (

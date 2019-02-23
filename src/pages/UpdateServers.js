@@ -721,7 +721,7 @@ class UpdateServers extends BaseUpdateWizardPage {
                   // get old node instances
                   let oldHost =
                     getHostFromCloudModel(this.state.internalModel.toJS(), server.id);
-                  fetchJson('/api/v2/compute/instances/' + oldHost.ansible_hostname)
+                  fetchJson('/api/v2/compute/instances/' + oldHost.hostname)
                     .then(response => {
                       this.setState({loading: false});
                       // If the old compute is not reachable and has instances

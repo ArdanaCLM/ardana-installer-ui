@@ -57,12 +57,34 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   }
 
   componentDidMount() {
-    if (this.needGetHostName()) {
+    if (this.needGetHostNames()) {
       this.setState({loading: true});
       getInternalModel()
         .then((cloudModel) => {
           this.setState({loading: false});
-          this.getHostName(cloudModel);
+          let oldHost =
+            getHostFromCloudModel(cloudModel, this.props.operationProps.oldServer.id);
+          let newHost =
+            getHostFromCloudModel(cloudModel, this.props.operationProps.server.id);
+          if (oldHost && newHost) {
+            let opProps = Object.assign({}, this.props.operationProps);
+            // save the host names for old compute node
+            opProps.oldServer['hostname'] = oldHost['hostname'];
+            opProps.oldServer['ansible_hostname'] = oldHost['ansible_hostname'];
+            // save the host names for new compute node
+            opProps.server['hostname'] = newHost['hostname'];
+            opProps.server['ansible_hostname'] = newHost['ansible_hostname'];
+            this.props.updateGlobalState('operationProps', opProps);
+            this.checkEncryptKeyAndProceed();
+          }
+          else { // no old or new hostname, should not happen, just in case
+            this.setState({
+              processErrorBanner: translate(
+                'server.deploy.progress.compute.emptyhost', this.props.operationProps.oldServer.id,
+                oldHost, this.props.operationProps.server.id, newHost),
+              overallStatus: constants.STATUS.FAILED
+            });
+          }
         })
         .catch((error) => {
           this.setState({
@@ -75,36 +97,10 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }
   }
 
-  needGetHostName() {
+  needGetHostNames() {
     return (
       !this.props.operationProps.oldServer.hostname ||
       !this.props.operationProps.server.hostname);
-  }
-
-  getHostName(cloudModel) {
-    let oldHost =
-      getHostFromCloudModel(cloudModel, this.props.operationProps.oldServer.id);
-    let newHost =
-      getHostFromCloudModel(cloudModel, this.props.operationProps.server.id);
-    if (oldHost && newHost) {
-      let opProps = Object.assign({}, this.props.operationProps);
-      // save the host names for old compute node
-      opProps.oldServer['hostname'] = oldHost['hostname'];
-      opProps.oldServer['ansible_hostname'] = oldHost['ansible_hostname'];
-      // save the host names for new compute node
-      opProps.server['hostname'] = newHost['hostname'];
-      opProps.server['ansible_hostname'] = newHost['ansible_hostname'];
-      this.props.updateGlobalState('operationProps', opProps);
-      this.checkEncryptKeyAndProceed();
-    }
-    else { // no old or new hostname, should not happen, just in case
-      this.setState({
-        processErrorBanner: translate(
-          'server.deploy.progress.compute.emptyhost', this.props.operationProps.oldServer.id,
-          oldHost, this.props.operationProps.server.id, newHost),
-        overallStatus: constants.STATUS.FAILED
-      });
-    }
   }
 
   updatePageStatus = (status, error) => {
