@@ -30,8 +30,11 @@ class PrepareAddCompute extends PrepareAddServers {
   }
 
   renderFooterButtons (showCancel, showRetry) {
-    // TODO handle retry
-    return this.renderNavButtons(showCancel, false);
+    // Will have a specific cancel confirmation message when user clicks
+    // cancel button.
+    let cancelMsg = translate(
+      'server.replace.compute.failure.cancel.confirm', this.props.operationProps.server.id);
+    return this.renderNavButtons(showCancel, showRetry, cancelMsg);
   }
 }
 

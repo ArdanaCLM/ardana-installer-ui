@@ -544,6 +544,7 @@ class PlaybookProgress extends Component {
     // extra vars to playbooks that do not use them has no ill effects.
     let payload = {'extra-vars': {automate: 'true', rekey: ''}};
 
+    debugger
     for (const override of [this.props.payload, playbook.payload]) {
       if (override) {
         for (const [key, value] of Object.entries(override)) {

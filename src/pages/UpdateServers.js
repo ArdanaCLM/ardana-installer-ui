@@ -38,8 +38,8 @@ import { getHostFromCloudModel } from '../utils/ModelUtils.js';
 
 const DeleteServerProcessPages = [
     {
-      name: 'DeleteCompute',
-      component: UpdateServerPages.DeleteCompute
+      name: 'DeleteComputeHost',
+      component: UpdateServerPages.DeleteComputeHost
     }
   ],
   DeactivateServerProcessPages = [
@@ -462,18 +462,48 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
-  deleteComputeHost(id) {
+  async deleteComputeHost(id) {
+    let server = this.state.serverStatuses[id];
     this.setState({
       confirmDelete: {
         show: true,
-        loading: false,
+        loading: true,
         id: id
       }
     });
+    try {
+      let promises = [getReachability(server['ip-addr'])];
+      let [conectivityStatus] = await Promise.all(promises);
+      this.setState(prev => ({
+        serverStatuses: {
+          ...prev.serverStatuses,
+          [id]: {
+            ...prev.serverStatuses[id],
+            internal: {
+              ...prev.serverStatuses[id].internal,
+              isReachable: conectivityStatus
+            }
+          }
+        },
+        confirmDelete: {
+          ...prev.confirmDelete,
+          loading: false
+        }
+      }));
+    }
+    catch (error) {
+      let msg = translate('server.delete.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDelete: undefined
+      });
+    }
   }
 
   performDeleteComputeHost() {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
     let { id } = this.state.confirmDelete;
     const theProps = {
       oldServer: this.state.serverStatuses[id].internal
@@ -485,7 +515,6 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   async activateComputeHost(id) {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
     const  props = {
       target: this.state.serverStatuses[id].internal
     };
@@ -537,13 +566,12 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   async performDeactivateAndOrMigration() {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
     let props = {
       oldServer: this.state.serverStatuses[this.state.confirmDeactivate.id].internal
     };
 
-    if (this.state.confirmDeactivate.migrate) {
-      props.server = this.state.confirmDeactivate.migrationTarget.internal;
+    if (this.state.confirmDeactivate.migrationTarget) {
+      props.server = this.state.confirmDeactivate.migrationTarget;
     }
 
     this.setState({
