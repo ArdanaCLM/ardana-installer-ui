@@ -616,7 +616,7 @@
     "server.addcompute.deploy.failure": "Failed to deploy newly added compute server",
     "server.addserver.compute.deploy": "Deploying Compute Servers",
     "server.addcompute.deploy": "Deploying Compute Server",
-    "server.addserver.deploy.confirm": "The deployment for new servers will take a while. It will validate and commit data and run playbooks.  \n\n Are you sure you want to proceed? Select Yes to proceed.",
+    "server.addserver.deploy.confirm": "The deployment for new servers will take a while. It will validate and commit data and run playbooks. Ensure the new servers are powered on and reachable.   \n\n Are you sure you want to proceed? Select Yes to proceed.",
     "server.deploy.progress.wipe-disks": "Wipe data disks",
     "server.deploy.progress.gen-hosts-file": "Generate Host Files",
     "server.deploy.progress.addserver.deploy": "Deploy New Server(s)",
