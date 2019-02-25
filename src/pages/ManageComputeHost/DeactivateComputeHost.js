@@ -15,7 +15,7 @@
 
 import DisableComputeServiceNetwork from '../ReplaceServer/DisableComputeServiceNetwork';
 import { translate } from '../../localization/localize';
-import { NOVA_STOP_PLAYBOOK } from '../../utils/constants';
+import * as constants from '../../utils/constants';
 
 const MIGRATE_INSTANCES = 'migrate_instances',
   DISABLE_COMPUTE_SERVICE = 'nova_deactivate';
@@ -46,7 +46,7 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
       playbooks: [DISABLE_COMPUTE_SERVICE]
     },{
       label: translate('server.deactivate_services.text', this.props.operationProps.oldServer.id),
-      playbooks: [`${NOVA_STOP_PLAYBOOK}.yml`],
+      playbooks: [`${constants.NOVA_STOP_PLAYBOOK}.yml`],
       payload: {
         limit: this.props.operationProps.oldServer.hostname
       }
@@ -66,12 +66,16 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
       name: DISABLE_COMPUTE_SERVICE,
       action: ::this.disableCompServices
     }, {
-      name: NOVA_STOP_PLAYBOOK,
+      name: constants.NOVA_STOP_PLAYBOOK,
       payload: {
         limit: this.props.operationProps.oldServer.hostname
       }
     });
     return playbooks;
+  }
+
+  needGetHostNames() {
+    return false;
   }
 }
 
