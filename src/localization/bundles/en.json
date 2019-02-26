@@ -691,6 +691,8 @@
     "server.migrate.prompt": "Select a computer host to migrate the instances on {0} host to.",
     "server.deactivate.confirm.message_instances_cant_be_migrated": "Are you sure you want to deactivate this compute server ({0})? It is currently hosting {1} instance(s) which may be terminated for made in accessible by this action.",
     "server.delete.confirm.message": "Are you sure you want to delete this compute server, {0}?",
+    "server.delete.error": "Failed to delete server {0}",
+    "server.delete.ardana.password": "Enter password for {0}",
     "server.activate.error": "Failed to activate compute service on {0}: {1}",
     "server.deactivate_services.text": "Remove {0} from Nova scheduler",
 
@@ -715,8 +717,10 @@
     "server.deploy.installos.failure": "Failed to install SLES OS on compute host {0}.",
     "server.deploy.retry.confirm": "Retry will rerun the failed playbook. Check the log for errors and if there were any issues, resolve them before proceeding. \n\n Do you want to continue?",
     "server.deploy.failure.cancel.confirm": "Cancelling will close the window, and any error messages will no longer be available to view.\n\nDo you want to cancel?",
-    "server.addserver.failure.cancel.confirm": "Check the log for errors and if there were any issues, resolve them before proceeding. The following steps need to be performed manually on the cloud deployer before clicking Yes to continue... \n1. Remove the new compute server(s) from ~/openstack/my_cloud/definition/data/servers.yml. \n2. git commit -a -m 'commit message'. \n3. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost config-processor-run.yml \n4. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost ready-deployment.yml  \n\n If the Add Server page continues to display the removed servers, refresh the page using the web browser. To retry deployment, re-add the servers to the appropriate role, and click the \"Deploy\" button. \n\n Do you want to continue?",
-    "server.addserver.installos.cancel.confirm": "This will cancel the OS installation for the new compute server(s). \n\nDo you want to continue? ",
+    "server.addserver.failure.cancel.confirm": "Cancelling will close the window, and any error messages will no longer be available to view. \nThe following steps need to be performed manually on the cloud deployer before clicking Yes to continue... \n1. Remove the new compute server(s) from ~/openstack/my_cloud/definition/data/servers.yml. \n2. git commit -a -m 'commit message'. \n3. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost config-processor-run.yml \n4. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost ready-deployment.yml  \n\n If the Add Server page continues to display the removed servers, refresh the page using the web browser. To retry deployment, re-add the servers to the appropriate role, and click the \"Deploy\" button. \n\n Do you want to cancel?",
+    "server.addserver.installos.cancel.confirm": "This will cancel the OS installation for the new compute server(s). c ",
+    "server.replace.compute.osinstall.failure.cancel.confirm": "Cancelling wil close the window and any error messages will no longer be available to view. \nAfter cancel, the new and undeployed compute server {0} shows up in servers Summary page, go to Add server page and unassign the role before replace compute server {1} again.  \n\nDo you want to cancel?",
+    "server.replace.compute.failure.cancel.confirm": "Cancelling will close the window, and any error messages will no longer be available to view. \nThe following steps need to be performed manually on the cloud deployer before clicking Yes to continue... \n1. Remove the new compute server {0} from ~/openstack/my_cloud/definition/data/servers.yml. \n2. git commit -a -m 'commit message'. \n3. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost config-processor-run.yml \n4. ~/openstack/ardana/ansible/ansible-playbook -i hosts/localhost ready-deployment.yml  \n\n If the Summary page continues to display the removed server, refresh the page using the web browser.  \n\n Do you want to cancel?",
 
     "table.column.header.id" : "Server ID",
     "table.column.header.ip-addr" : "IP address",

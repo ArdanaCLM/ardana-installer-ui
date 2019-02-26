@@ -13,14 +13,13 @@
 * limitations under the License.
 **/
 
-import ActivateComputeHost from './ActivateComputeHost';
-import DeactivateComputeHost from './DeactivateComputeHost';
-import DeleteComputeHost from './DeleteComputeHost';
+import DeleteCompute from '../ReplaceServer/DeleteCompute.js';
 
-const ManageComputeHost = {
-  ActivateComputeHost,
-  DeactivateComputeHost,
-  DeleteComputeHost
-};
+class DeleteComputeHost extends DeleteCompute {
 
-export default ManageComputeHost;
+  renderFooterButtons (showCancel, showRetry) {
+    return this.renderNavButtons(false, showRetry);
+  }
+}
+
+export default DeleteComputeHost;

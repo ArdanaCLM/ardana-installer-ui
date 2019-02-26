@@ -77,6 +77,10 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
   needGetHostNames() {
     return false;
   }
+
+  renderFooterButtons (showCancel, showRetry) {
+    return this.renderNavButtons(false, showRetry);
+  }
 }
 
 export default DeactivateComputeHost;
