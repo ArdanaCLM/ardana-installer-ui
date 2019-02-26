@@ -542,8 +542,8 @@ class UpdateServers extends BaseUpdateWizardPage {
       oldServer: this.state.serverStatuses[this.state.confirmDeactivate.id].internal
     };
 
-    if (this.state.confirmDeactivate.migrate) {
-      props.server = this.state.confirmDeactivate.migrationTarget.internal;
+    if (this.state.confirmDeactivate.migrationTarget) {
+      props.server = this.state.confirmDeactivate.migrationTarget;
     }
 
     this.setState({
