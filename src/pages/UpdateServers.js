@@ -14,6 +14,7 @@
 **/
 
 import React from 'react';
+import { isEmpty } from 'lodash';
 import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
 import { ActionButton } from '../components/Buttons.js';
 import CollapsibleTable from '../components/CollapsibleTable.js';
@@ -35,11 +36,12 @@ import { getInternalModel } from './topology/TopologyUtils';
 import { fromJS } from 'immutable';
 import { isMonascaInstalled } from '../utils/MonascaUtils.js';
 import { getHostFromCloudModel } from '../utils/ModelUtils.js';
+import { ValidatingInput } from '../components/ValidatingInput.js';
 
 const DeleteServerProcessPages = [
     {
-      name: 'DeleteCompute',
-      component: UpdateServerPages.DeleteCompute
+      name: 'DeleteComputeHost',
+      component: UpdateServerPages.DeleteComputeHost
     }
   ],
   DeactivateServerProcessPages = [
@@ -83,7 +85,10 @@ class UpdateServers extends BaseUpdateWizardPage {
       // need the expanded model to match up server info for Nova and Monasca
       internalModel: undefined,        // a copy of the full internal model for matching up hostnames
       monasca: undefined,               // whether monasca is installed
-      serverMonascaStatuses: {}
+      serverMonascaStatuses: {},
+
+      // current user that run the UI
+      osUsername: undefined
     };
   }
 
@@ -122,6 +127,9 @@ class UpdateServers extends BaseUpdateWizardPage {
         const model = await getInternalModel();
         this.setState({ internalModel: fromJS(model) });
       }
+      if(!this.state.osUsername) {
+        this.getUsername();
+      }
       let promises = [
         this.getServerStatuses(),
         this.checkMonasca()
@@ -139,6 +147,13 @@ class UpdateServers extends BaseUpdateWizardPage {
           loading: false
         };
       });
+    }
+  }
+
+  async getUsername() {
+    let response = await fetchJson('/api/v2/user');
+    if(response?.username) {
+      this.setState({osUsername: response['username']});
     }
   }
 
@@ -462,21 +477,53 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
-  deleteComputeHost(id) {
+  async deleteComputeHost(id) {
+    let server = this.state.serverStatuses[id];
     this.setState({
       confirmDelete: {
         show: true,
-        loading: false,
-        id: id
+        loading: true,
+        id: id,
+        osPassword: ''
       }
     });
+    try {
+      let promises = [getReachability(server['ip-addr'])];
+      let [conectivityStatus] = await Promise.all(promises);
+      this.setState(prev => ({
+        serverStatuses: {
+          ...prev.serverStatuses,
+          [id]: {
+            ...prev.serverStatuses[id],
+            internal: {
+              ...prev.serverStatuses[id].internal,
+              isReachable: conectivityStatus
+            }
+          }
+        },
+        confirmDelete: {
+          ...prev.confirmDelete,
+          loading: false
+        }
+      }));
+    }
+    catch (error) {
+      let msg = translate('server.delete.error', error.toString());
+      this.setState({
+        errorMessages: [
+          ...this.state.errorMessages,
+          msg
+        ],
+        confirmDelete: undefined
+      });
+    }
   }
 
   performDeleteComputeHost() {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
-    let { id } = this.state.confirmDelete;
+    let { id, osPassword } = this.state.confirmDelete;
     const theProps = {
-      oldServer: this.state.serverStatuses[id].internal
+      oldServer: this.state.serverStatuses[id].internal,
+      osPassword: osPassword
     };
     this.setState({
       confirmDelete: undefined
@@ -485,7 +532,6 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   async activateComputeHost(id) {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
     const  props = {
       target: this.state.serverStatuses[id].internal
     };
@@ -537,13 +583,12 @@ class UpdateServers extends BaseUpdateWizardPage {
   }
 
   async performDeactivateAndOrMigration() {
-    // TODO (SCRD-5292) allow user to specify encryption key before this playbook
     let props = {
       oldServer: this.state.serverStatuses[this.state.confirmDeactivate.id].internal
     };
 
-    if (this.state.confirmDeactivate.migrate) {
-      props.server = this.state.confirmDeactivate.migrationTarget.internal;
+    if (this.state.confirmDeactivate.migrationTarget) {
+      props.server = this.state.confirmDeactivate.migrationTarget;
     }
 
     this.setState({
@@ -566,6 +611,16 @@ class UpdateServers extends BaseUpdateWizardPage {
         }
       };
     });
+  }
+
+  handleOsPasswordChangeForDelComp = (e) => {
+    const value = e.target.value;
+    this.setState(prev => ({
+      confirmDelete: {
+        ...prev.confirmDelete,
+        osPassword: value
+      }
+    }));
   }
 
   renderDeactivateConfirmModal() {
@@ -623,21 +678,31 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   renderDeleteConfirmModal() {
     if (!this.state.confirmDelete || !this.state.confirmDelete.show) return;
-    let { id, loading } = this.state.confirmDelete;
+    let { id, loading, osPassword } = this.state.confirmDelete;
     return (
       <YesNoModal
         title={translate('server.deploy.progress.delete_compute')} yesAction={::this.performDeleteComputeHost}
         noAction={() => this.setState({confirmDelete: undefined})}
-        disableYes={loading}
+        disableYes={loading || isEmpty(this.state.confirmDelete.osPassword)}
       >
-        <p>
+        <div>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
           <If condition={!loading}>
             {translate('server.delete.confirm.message', id)}
+            <div className='password-line'>
+              <div className='password-heading'>
+                {translate('server.delete.ardana.password', this.state.osUsername) + '*'}
+              </div>
+              <div className='password-input'>
+                <ValidatingInput isRequired='true' inputName='osPassword'
+                  inputType='password' inputValue={osPassword}
+                  inputAction={::this.handleOsPasswordChangeForDelComp}/>
+              </div>
+            </div>
           </If>
-        </p>
+        </div>
       </YesNoModal>
     );
   }
@@ -865,7 +930,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         title={translate('server.replace.heading', this.state.serverToReplace.id)}
         cancelAction={this.handleCancelReplaceServer}
         doneAction={this.handleDoneReplaceServer}
-        data={this.state.serverToReplace}
+        data={this.state.serverToReplace} osUsername={this.state.osUsername}
         {...newProps}>
       </ReplaceServerDetails>
     );

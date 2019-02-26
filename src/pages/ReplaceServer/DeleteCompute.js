@@ -58,18 +58,28 @@ class DeleteCompute extends BaseUpdateWizardPage {
         fetchJson('/api/v2/server?source=sm,ov,manual'),
         fetchJson('/api/v2/cobbler')
       ];
+      let hasCobblerServer = false;
       const [ servers, cobblerStatus ] = await Promise.all(promises);
+      // if cobbler is present go find the old compute
+      if(cobblerStatus.cobbler) {
+        const [cobblerServers] = await Promise.all([fetchJson('/api/v2/cobbler/servers')]);
+        let names = cobblerServers.map(server => server.name);
+        hasCobblerServer = names?.includes(this.props.operationProps.oldServer.id);
+      }
       this.setState({
         servers,
         cobblerPresent: cobblerStatus.cobbler,
+        cobblerServerPresent: hasCobblerServer,
         loading: false
       });
       this.checkEncryptKeyAndProceed();
+
     } catch(error) {
       let msg = `Failed to get list of servers or cobbler presence flag: ${error.toString()}`;
       console.log(msg, error); // eslint-disable-line no-console
       this.setState({
-        cobblerPresent: true,
+        cobblerPresent: true, // will run cobbler-deploy
+        cobblerServerPresent: false, // will not try to remove server from cobbler
         loading: false
       });
       this.checkEncryptKeyAndProceed();
@@ -363,13 +373,15 @@ class DeleteCompute extends BaseUpdateWizardPage {
       playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     });
 
-    if(this.state.cobblerPresent) {
+    if(this.state.cobblerServerPresent) {
       // remove from cobbler
       steps.push({
         label: translate('server.deploy.progress.remove_from_cobbler'),
         playbooks: [REMOVE_FROM_COBBLER]
       });
+    }
 
+    if(this.state.cobblerPresent) {
       steps.push({
         label: translate('server.deploy.progress.cobbler_deploy'),
         playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
@@ -454,14 +466,16 @@ class DeleteCompute extends BaseUpdateWizardPage {
       payload: {'extra-vars': {'remove_deleted_servers': 'y', 'free_unused_addresses': 'y'}}
     });
 
-    if(this.state.cobblerPresent) {
+    if(this.state.cobblerServerPresent) {
       playbooks.push({
         name: REMOVE_FROM_COBBLER,
         action: ((logger) => {
           return this.removeFromCobbler(logger);
         })
       });
+    }
 
+    if(this.state.cobblerPresent) {
       playbooks.push({
         name: constants.COBBLER_DEPLOY_PLAYBOOK,
         payload: {'extra-vars': {'ardanauser_password': this.props.operationProps.osPassword}}
@@ -556,9 +570,17 @@ class DeleteCompute extends BaseUpdateWizardPage {
     );
   }
 
+  renderFooterButtons (showCancel, showRetry) {
+    // Will have a specific cancel confirmation message when user clicks
+    // cancel button.
+    let cancelMsg = translate(
+      'server.replace.compute.failure.cancel.confirm', this.props.operationProps.server.id);
+    return this.renderNavButtons(showCancel, showRetry, cancelMsg);
+  }
+
   render() {
     //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>
@@ -567,9 +589,9 @@ class DeleteCompute extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content'>
           <If condition={this.isValidToRenderPlaybookProgress()}>{this.renderPlaybookProgress()}</If>
-          <If condition={cancel}>{this.renderProcessError()}</If>
+          <If condition={failed}>{this.renderProcessError()}</If>
         </div>
-        {this.renderNavButtons(cancel)}
+        {this.renderFooterButtons(failed, failed)}
         {this.renderPartialFailedConfirmation()}
         {this.renderManualShutdownConfirmation()}
         {this.renderEncryptKeyModal()}

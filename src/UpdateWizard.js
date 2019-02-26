@@ -249,11 +249,10 @@ class UpdateWizard extends InstallWizard {
   // has something wrong with update, cancel to go back to
   // the page where the update process is originated
   cancelUpdate = () => {
-    // TODO Is there a need additional cancel logic?
     this.closeUpdate();
   }
 
-  retryUpdate = () => {
+  retryUpdate = async() => {
     // Remove the playbook status 3 and playId
     if (this.state.playbookStatus) {
       let playStatus = this.state.playbookStatus.slice();
@@ -265,7 +264,7 @@ class UpdateWizard extends InstallWizard {
           play.status = '';
         }
       });
-      this.updateGlobalState('playbookStatus', playStatus);
+      await  this.updateGlobalState('playbookStatus', playStatus);
       // Refresh the current page
       window.location.reload();
     }

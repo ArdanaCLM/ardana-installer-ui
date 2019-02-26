@@ -34,9 +34,9 @@ class InstanceMigrationMonitor extends Component {
       migrating: props.migrationData.length, //list of instances with migration started
       pollingTime: new Date()
     };
-    // time out after 30 minutes
+    // time out after 60 minutes
     this.expired = new Date(this.state.pollingTime);
-    this.expired.setMinutes(this.state.pollingTime.getMinutes() + 30);
+    this.expired.setMinutes(this.state.pollingTime.getMinutes() + 60);
   }
 
   componentDidMount() {

@@ -29,7 +29,6 @@ import {
   from '../utils/ModelUtils.js';
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
-import { fetchJson } from '../utils/RestUtils.js';
 import { ConfirmModal } from './Modals.js';
 
 
@@ -44,7 +43,7 @@ class ReplaceServerDetails extends Component {
       inputValue: this.initInputs(props),
 
       selectedServerId: undefined,
-      osUsername: undefined,
+      osUsername: props.osUsername,
       osPassword: undefined,
 
       isValid: this.initInputsValid(props),
@@ -53,15 +52,6 @@ class ReplaceServerDetails extends Component {
       serverGroups: getServerGroups(props.model),
       encryptKey: props.encryptKey || ''
     };
-  }
-
-  componentDidMount() {
-    fetchJson('/api/v2/user')
-      .then(responseData => {
-        this.setState({
-          osUsername: responseData['username']
-        });
-      });
   }
 
   initInputs = (props) => {

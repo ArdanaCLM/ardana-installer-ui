@@ -133,7 +133,7 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
           </If>
           {this.renderEncryptKeyModal()}
         </div>
-        {this.renderNavButtons(failed)}
+        {this.renderNavButtons(false, failed)}
       </div>
     );
   }

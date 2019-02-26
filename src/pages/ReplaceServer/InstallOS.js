@@ -95,7 +95,11 @@ class InstallOS extends BaseUpdateWizardPage {
   render() {
 
     //assume for replace , we do one server at a time
-    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
+    let cancelMsg = translate(
+      'server.replace.compute.osinstall.failure.cancel.confirm',
+      this.props.operationProps.server.id,
+      this.props.operationProps.oldServer.id);
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading} />
@@ -107,9 +111,9 @@ class InstallOS extends BaseUpdateWizardPage {
             {this.renderPlaybookProgress()}
           </If>
           {this.renderEncryptKeyModal()}
-          <If condition={cancel}>{this.renderProcessError()}</If>
+          <If condition={failed}>{this.renderProcessError()}</If>
         </div>
-        {this.renderNavButtons(cancel)}
+        {this.renderNavButtons(failed, failed, cancelMsg)}
       </div>
     );
   }

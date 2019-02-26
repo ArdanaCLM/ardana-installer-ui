@@ -205,7 +205,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
         retBook.payload = step.payload;
       }
       // When this component is used in replace compute flow.
-      // Have a old server and old server is not reachable
+      // Have an old server and it is not reachable
       // special case for ARDANA_GEN_HOSTS_FILE_PLAYBOOK to exclude
       // the old server
       else if(step.name === constants.ARDANA_GEN_HOSTS_FILE_PLAYBOOK) {

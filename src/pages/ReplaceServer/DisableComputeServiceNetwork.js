@@ -535,9 +535,17 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     );
   }
 
+  renderFooterButtons (showCancel, showRetry) {
+    // Will have a specific cancel confirmation message when user clicks
+    // cancel button.
+    let cancelMsg = translate(
+      'server.replace.compute.failure.cancel.confirm', this.props.operationProps.server.id);
+    return this.renderNavButtons(showCancel, showRetry, cancelMsg);
+  }
+
   render() {
     //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
+    let failed =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>
@@ -546,9 +554,9 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content'>
           <If condition={this.isValidToRenderPlaybookProgress()}>{this.renderPlaybookProgress()}</If>
-          <If condition={cancel}>{this.renderProcessError()}</If>
+          <If condition={failed}>{this.renderProcessError()}</If>
         </div>
-        {this.renderNavButtons(cancel)}
+        {this.renderFooterButtons(failed, failed)}
         {this.renderPartialFailedConfirmation()}
         {this.renderMigrationMonitorModal()}
         {this.renderEncryptKeyModal()}
