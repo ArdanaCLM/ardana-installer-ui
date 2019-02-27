@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { setAuthToken, clearAuthToken } from '../utils/Auth.js';
-import { navigateTo, navigateBack, wasRedirectedToLogin } from '../utils/RouteUtils.js';
+import { navigateTo, wasRedirectedToLogin } from '../utils/RouteUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { GetSshPassphraseModal } from '../components/Modals.js';
@@ -49,15 +49,11 @@ class LoginPage extends Component {
   }
 
   navigate = () => {
-    if (wasRedirectedToLogin()) {
-      navigateBack();
+    const search = new URLSearchParams(window.location.search);
+    if (search.get('start')?.startsWith('installer')) {
+      navigateTo('/', undefined, search.toString());
     } else {
-      const search = new URLSearchParams(window.location.search);
-      if (search.get('start')?.startsWith('installer')) {
-        navigateTo('/', undefined, search.toString());
-      } else {
-        navigateTo('/services/info');
-      }
+      navigateTo('/services/info');
     }
   }
 

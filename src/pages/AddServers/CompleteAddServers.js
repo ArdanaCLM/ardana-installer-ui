@@ -25,10 +25,10 @@ import { alphabetically } from '../../utils/Sort.js';
 class CompleteAddServers extends BaseUpdateWizardPage {
   renderServerList() {
     let serverList = this.props.operationProps.newHosts.sort((a, b) => {
-      return alphabetically(a['display_hostname'],b['display_hostname']);
+      return alphabetically(a['hostname'],b['hostname']);
     }).map((host,idx) => {
       return (
-        <li key={idx}>{host['display_hostname']}
+        <li key={idx}>{host['hostname']}
           <ul className='complete-serverdetails'>
             <li key={1}> {translate('id.with_colon') + ' ' + host['id']} </li>
             <li key={2}> {translate('server.details.ip') + ' ' + host['ip']} </li>

@@ -17,7 +17,7 @@ import React from 'react';
 
 import { translate } from '../../localization/localize.js';
 import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
-import { STATUS } from '../../utils/constants.js';
+import * as constants from '../../utils/constants.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
 import { getHostFromCloudModel } from '../../utils/ModelUtils.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
@@ -32,7 +32,6 @@ import { getInternalModel } from '../topology/TopologyUtils.js';
 const DISABLE_COMPUTE_SERVICE = 'disable_compute_service';
 const REMOVE_FROM_AGGREGATES = 'remove_from_aggregates';
 const MIGRATE_INSTANCES = 'migrate_instances';
-const MIGRATE_INSTANCES_SKIP = 'migrate_instances_skip';
 const DISABLE_NETWORK_AGENTS = 'disable_network_agents';
 
 // This is the page to disable compute service, delete aggregates
@@ -44,7 +43,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     super(props);
     this.state = {
       ...this.state,
-      overallStatus: STATUS.UNKNOWN, // overall status of entire playbook
+      overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: '',
       loading: false,
       // confirmation dialog when results contain failed
@@ -58,7 +57,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
   }
 
   componentDidMount() {
-    if (!this.props.operationProps.oldServer.hostname) {
+    if (this.needGetHostNames()) {
       this.setState({loading: true});
       getInternalModel()
         .then((cloudModel) => {
@@ -83,13 +82,13 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
               processErrorBanner: translate(
                 'server.deploy.progress.compute.emptyhost', this.props.operationProps.oldServer.id,
                 oldHost, this.props.operationProps.server.id, newHost),
-              overallStatus: STATUS.FAILED
+              overallStatus: constants.STATUS.FAILED
             });
           }
         })
         .catch((error) => {
           this.setState({
-            processErrorBanner: error.toString(), overallStatus: STATUS.FAILED, loading: false
+            processErrorBanner: error.toString(), overallStatus: constants.STATUS.FAILED, loading: false
           });
         });
     }
@@ -98,9 +97,15 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }
   }
 
+  needGetHostNames() {
+    return (
+      !this.props.operationProps.oldServer.hostname ||
+      !this.props.operationProps.server.hostname);
+  }
+
   updatePageStatus = (status, error) => {
     this.setState({overallStatus: status});
-    if (status === STATUS.FAILED) {
+    if (status === constants.STATUS.FAILED) {
       const errorMsg = error?.message || '';
       this.setState({
         processErrorBanner:
@@ -110,7 +115,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     }
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != STATUS.COMPLETE;
+  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
 
   isValidToRenderPlaybookProgress = () => {
     return (
@@ -339,19 +344,24 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       playbooks: [REMOVE_FROM_AGGREGATES]
     }];
 
-    if (this.props.operationProps.oldServer.isReachable && this.props.operationProps.server) {
-      steps.push({
-        label: translate('server.deploy.progress.migrate_instances'),
-        playbooks: [MIGRATE_INSTANCES]
-      });
-    }
-    // if the old compute is not reachable, at this point
-    // user has confirmed earlier that no instances migration is ok
-    else {
-      steps.push({
-        label: translate('server.deploy.progress.migrate_instances.skip'),
-        playbooks: [MIGRATE_INSTANCES_SKIP]
-      });
+    if (this.props.operationProps.oldServer.hasInstances &&
+        this.props.operationProps.server) {
+      if(this.props.operationProps.oldServer.isReachable) {
+        // Migrate instances when old compute host is reachable
+        // and has instances
+        steps.push({
+          label: translate('server.deploy.progress.migrate_instances'),
+          playbooks: [MIGRATE_INSTANCES]
+        });
+      }
+      else {
+        // Evacuate instances when the old compute is not reachable, it
+        // has instances and compute hosts are configured with shared storage
+        steps.push({
+          label: translate('server.deploy.progress.evacuate_instances'),
+          playbooks: [constants.NOVA_HOST_EVACUATE_PLAYBOOK + '.yml']
+        });
+      }
     }
 
     steps.push({
@@ -374,14 +384,28 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       })
     }];
 
-    // migrate instances when old compute host is reachable
-    if(this.props.operationProps.oldServer.isReachable && this.props.operationProps.server) {
-      playbooks.push({
-        name: MIGRATE_INSTANCES,
-        action: ((logger) => {
-          return this.migrateInstances(logger);
-        })
-      });
+    if(this.props.operationProps.oldServer.hasInstances &&
+       this.props.operationProps.server) {
+      // Migrate instances when old compute host is reachable
+      // and has instances
+      if(this.props.operationProps.oldServer.isReachable) {
+        playbooks.push({
+          name: MIGRATE_INSTANCES,
+          action: ((logger) => {
+            return this.migrateInstances(logger);
+          })
+        });
+      }
+      else {
+        // Evacuate instances when the old compute is not reachable, it
+        // has instances and compute hosts are configured with shared storage
+        playbooks.push({
+          name: constants.NOVA_HOST_EVACUATE_PLAYBOOK,
+          payload: {'extra-vars': {
+            'failed_comp_host': this.props.operationProps.oldServer.hostname,
+            'target_comp_host': this.props.operationProps.server.hostname}}
+        });
+      }
     }
 
     playbooks.push({
@@ -506,14 +530,14 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     return (
       <div className='banner-container'>
         <ErrorBanner message={this.state.processErrorBanner}
-          show={this.state.overallStatus === STATUS.FAILED}/>
+          show={this.state.overallStatus === constants.STATUS.FAILED}/>
       </div>
     );
   }
 
   render() {
     //if error happens, cancel button shows up
-    let cancel =  this.state.overallStatus === STATUS.FAILED;
+    let cancel =  this.state.overallStatus === constants.STATUS.FAILED;
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>

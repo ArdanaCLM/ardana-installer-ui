@@ -34,6 +34,7 @@ import { BaseInputModal, ConfirmModal, YesNoModal } from '../components/Modals.j
 import { getInternalModel } from './topology/TopologyUtils';
 import { fromJS } from 'immutable';
 import { isMonascaInstalled } from '../utils/MonascaUtils.js';
+import { getHostFromCloudModel } from '../utils/ModelUtils.js';
 
 const DeleteServerProcessPages = [
     {
@@ -409,7 +410,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     if(isComputeNode(this.state.serverToReplace)) {
       theProps.oldServer = {
         id: this.state.serverToReplace['id'], 'ip': this.state.serverToReplace['ip-addr'],
-        isReachable: this.state.isOldServerReachable
+        isReachable: this.state.isOldServerReachable, hasInstances: this.state.oldServerHasInstances
       };
       // will always activate the newly added compute server
       theProps.activate = true;
@@ -596,8 +597,9 @@ class UpdateServers extends BaseUpdateWizardPage {
         title={translate('server.deactivate.confirm.title', id)}
         yesAction={::this.performDeactivateAndOrMigration}
         noAction={() => this.setState({confirmDeactivate: undefined})}
-        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}>
-        <h2>
+        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}
+      >
+        <p>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
@@ -610,9 +612,9 @@ class UpdateServers extends BaseUpdateWizardPage {
           <If condition={!loading && instances?.length === 0}>
             {translate('server.deactivate.confirm.message', id)}
           </If>
-        </h2>
-        <If condition={haveInstances && otherHosts > 0}>
-          <h2>{translate('server.migrate.prompt', id)}</h2>
+        </p>
+        <If condition={haveInstances && otherHosts.length > 0}>
+          <p>{translate('server.migrate.prompt', id)}</p>
           {choices}
         </If>
       </YesNoModal>
@@ -626,15 +628,16 @@ class UpdateServers extends BaseUpdateWizardPage {
       <YesNoModal
         title={translate('server.deploy.progress.delete_compute')} yesAction={::this.performDeleteComputeHost}
         noAction={() => this.setState({confirmDelete: undefined})}
-        disableYes={loading}>
-        <h2>
+        disableYes={loading}
+      >
+        <p>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
           <If condition={!loading}>
             {translate('server.delete.confirm.message', id)}
           </If>
-        </h2>
+        </p>
       </YesNoModal>
     );
   }
@@ -712,10 +715,42 @@ class UpdateServers extends BaseUpdateWizardPage {
               if (error.status == 404) {
                 if(isComputeNode(server)) {
                   this.setState({
-                    loading: false,
                     serverToReplace: server,
-                    isOldServerReachable: false,
-                    showNoMigrationWarning: true});
+                    isOldServerReachable: false
+                  });
+                  // get old node instances
+                  let oldHost =
+                    getHostFromCloudModel(this.state.internalModel.toJS(), server.id);
+                  fetchJson('/api/v2/compute/instances/' + oldHost.hostname)
+                    .then(response => {
+                      this.setState({loading: false});
+                      // If the old compute is not reachable and has instances
+                      // will show warning to make sure the compute hosts
+                      // have shared storage if user wants to proceed.
+                      if (response?.length > 0) {
+                        this.setState({
+                          oldServerHasInstances: true,
+                          showComputeNotReachableWarning: true});
+                      }
+                      // If the old compute is not reachable but has no instances
+                      // will proceed without instance migrations step.
+                      else {
+                        this.setState({oldServerHasInstances: false, showReplaceModal: true});
+                      }
+                    })
+                    // Had errors to determine instances. Will show
+                    // warning to indicate the error and make sure the compute
+                    // hosts have shared storage if user wants to proceed.
+                    .catch((error) => {
+                      this.setState({
+                        loading: false,
+                        oldServerCheckInstancesError: error.toString(),
+                        // If user chooses to proceed with error
+                        // will do host-evacuate step
+                        oldServerHasInstances: true,
+                        showComputeNotReachableWarning: true,
+                      });
+                    });
                 }
                 else {
                   console.log(   // eslint-disable-line no-console
@@ -752,7 +787,14 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   proceedOldComputeNotReachable = () => {
     this.setState({
-      showNoMigrationWarning: false, showReplaceModal: true});
+      showComputeNotReachableWarning: false, showReplaceModal: true});
+  }
+
+  cancelOldComputeNotReachable = () => {
+    this.setState({
+      showComputeNotReachableWarning: false, serverToReplace: undefined,
+      oldServerCheckInstancesError: undefined
+    });
   }
 
   renderSharedWarning() {
@@ -779,14 +821,28 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
-  renderNoMigrationWarning() {
-    if (this.state.showNoMigrationWarning) {
+  renderComputeNotReachableWarning() {
+    if (this.state.showComputeNotReachableWarning) {
+      let warnMsg = '';
+      // If we failed to get instances and user still chooses to
+      // proceed, will treat it as it has instances and run
+      // nova-host-evacuate playbook
+      if(this.state.oldServerCheckInstancesError) {
+        warnMsg = translate(
+          'replace.server.compute.notreachable.instances.error.warning',
+          this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'],
+          this.state.oldServerCheckInstancesError);
+      }
+      else {
+        warnMsg = translate(
+          'replace.server.compute.notreachable.warning',
+          this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr']);
+      }
       return (
         <YesNoModal title={translate('warning')}
           yesAction={this.proceedOldComputeNotReachable}
-          noAction={() => this.setState({showNoMigrationWarning: false, serverToReplace: undefined})}>
-          {translate('replace.server.nomigration.warning',
-            this.state.serverToReplace['id'], this.state.serverToReplace['ip-addr'])}
+          noAction={this.cancelOldComputeNotReachable}>
+          {warnMsg}
         </YesNoModal>
       );
     }
@@ -883,7 +939,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {this.state.showReplaceModal && this.renderReplaceServerModal()}
         {this.renderSharedWarning()}
         {this.renderPowerOffWarning()}
-        {this.renderNoMigrationWarning()}
+        {this.renderComputeNotReachableWarning()}
         {this.renderValidationErrorModal()}
         {this.renderDeactivateConfirmModal()}
         {this.renderDeleteConfirmModal()}

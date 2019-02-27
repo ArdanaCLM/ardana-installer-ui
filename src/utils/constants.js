@@ -92,4 +92,6 @@ export const MONASCA_TRANSFORM_DEPLOY_PLAYBOOK = 'monasca-transform-deploy';
 
 export const COMMIT_MODEL_CHANGE_ACTION = 'commit_model_change';
 
+export const NOVA_HOST_EVACUATE_PLAYBOOK ='nova-host-evacuate';
+
 
