@@ -77,7 +77,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     this.setState({overallStatus: status});
     if (status === constants.STATUS.FAILED) {
       const errorMsg = error?.message || '';
-      this.setState({invalidMsg: translate('server.replace.prepare.failure', errorMsg)});
+      this.setState({invalidMsg: translate('server.replace.controller.failure', errorMsg)});
     }
   }
 
