@@ -67,7 +67,7 @@ class DeployAddCompute extends DeployAddServers {
     // Will have a specific cancel confirmation message when user clicks
     // cancel button.
     let cancelMsg = translate(
-      'server.replace.compute.failure.cancel.confirm', this.props.operationProps.server.id);
+      'server.replace.compute.failure.add.cancel.confirm', this.props.operationProps.server.id);
     return this.renderNavButtons(showCancel, showRetry, cancelMsg);
   }
 }

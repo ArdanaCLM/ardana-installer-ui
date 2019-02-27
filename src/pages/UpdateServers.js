@@ -157,6 +157,26 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
+  async hasInstances(server) {
+    let oldHost =
+      getHostFromCloudModel(this.state.internalModel.toJS(), server.id);
+    try {
+      let response = await fetchJson('/api/v2/compute/instances/' + oldHost.hostname);
+      if (response?.length > 0) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch(error) {
+      this.setState({oldServerCheckInstancesError: error.toString()});
+      // If failed to check instances, will always to run instances
+      // migration or evacuation
+      return true;
+    }
+  }
+
   /**
    * checks to see if Monasca is installed, and if it is, triggers a call to the status
    * of each server in the model
@@ -761,13 +781,16 @@ class UpdateServers extends BaseUpdateWizardPage {
           this.setState({loading: true});
 
           postJson('api/v2/connection_test', {host: server['ip-addr']})
-            .then(result => {
+            .then(async(result) => {
               if(isComputeNode(server)) {
+                // check if old server has instances when old server is reachable
+                let oSvrHasInstances = await this.hasInstances(server);
                 this.setState({
                   loading: false,
                   showReplaceModal: true,
                   serverToReplace: server,
-                  isOldServerReachable: true
+                  isOldServerReachable: true,
+                  oldServerHasInstances: oSvrHasInstances
                 });
               }
               else {
@@ -776,46 +799,36 @@ class UpdateServers extends BaseUpdateWizardPage {
                 this.setState({loading: false, showPowerOffWarning: true});
               }
             })
-            .catch(error => {
+            .catch(async(error) => {
               if (error.status == 404) {
                 if(isComputeNode(server)) {
                   this.setState({
                     serverToReplace: server,
                     isOldServerReachable: false
                   });
-                  // get old node instances
-                  let oldHost =
-                    getHostFromCloudModel(this.state.internalModel.toJS(), server.id);
-                  fetchJson('/api/v2/compute/instances/' + oldHost.hostname)
-                    .then(response => {
-                      this.setState({loading: false});
-                      // If the old compute is not reachable and has instances
-                      // will show warning to make sure the compute hosts
-                      // have shared storage if user wants to proceed.
-                      if (response?.length > 0) {
-                        this.setState({
-                          oldServerHasInstances: true,
-                          showComputeNotReachableWarning: true});
-                      }
-                      // If the old compute is not reachable but has no instances
-                      // will proceed without instance migrations step.
-                      else {
-                        this.setState({oldServerHasInstances: false, showReplaceModal: true});
-                      }
-                    })
-                    // Had errors to determine instances. Will show
-                    // warning to indicate the error and make sure the compute
-                    // hosts have shared storage if user wants to proceed.
-                    .catch((error) => {
-                      this.setState({
-                        loading: false,
-                        oldServerCheckInstancesError: error.toString(),
-                        // If user chooses to proceed with error
-                        // will do host-evacuate step
-                        oldServerHasInstances: true,
-                        showComputeNotReachableWarning: true,
-                      });
-                    });
+                  // check if old server has instances when old server is not reachable
+                  let oSvrHasInstances = await this.hasInstances(server);
+
+                  this.setState({loading: false});
+
+                  // If the old compute is not reachable and has instances
+                  // will show warning to make sure the compute hosts
+                  // have shared storage if user wants to proceed.
+                  // Or had errors to determine instances. Will show
+                  // warning to indicate the error and make sure the compute
+                  // hosts have shared storage if user wants to proceed.
+                  if(oSvrHasInstances) {
+                    this.setState({
+                      oldServerHasInstances: oSvrHasInstances,
+                      showComputeNotReachableWarning: true});
+                  }
+                  else {
+                    // If the old compute is not reachable but has no instances
+                    // will proceed
+                    this.setState({
+                      oldServerHasInstances: oSvrHasInstances,
+                      showReplaceModal: true});
+                  }
                 }
                 else {
                   console.log(   // eslint-disable-line no-console
