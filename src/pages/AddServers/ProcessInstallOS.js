@@ -106,10 +106,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
 
   render() {
     // If error happens, will show cancel and retry buttons.
-    // Will have a specific cancel confirmation message when user clicks
-    // cancel button.
     let failed =  this.state.overallStatus === constants.STATUS.FAILED;
-    let cancelMsg = translate('server.deploy.failure.cancel.confirm');
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
@@ -120,7 +117,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
           {this.isValidToRenderPlaybookProgress() && this.renderPlaybookProgress()}
           {failed && this.renderProcessError()}
         </div>
-        {this.renderNavButtons(failed, failed, cancelMsg)}
+        {this.renderNavButtons(failed, failed)}
       </div>
     );
   }

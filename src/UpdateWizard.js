@@ -264,7 +264,7 @@ class UpdateWizard extends InstallWizard {
           play.status = '';
         }
       });
-      await  this.updateGlobalState('playbookStatus', playStatus);
+      await this.updateGlobalState('playbookStatus', playStatus);
       // Refresh the current page
       window.location.reload();
     }
