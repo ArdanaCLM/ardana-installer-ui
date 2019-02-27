@@ -1,4 +1,4 @@
-// (c) Copyright 2018 SUSE LLC
+// (c) Copyright 2018-2019 SUSE LLC
 /**
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 **/
 
 import React, { Component } from 'react';
-import { ProgressBar } from 'react-bootstrap';
 import { translate } from '../../localization/localize.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { fetchJson } from '../../utils/RestUtils.js';
@@ -171,7 +170,10 @@ class InstanceMigrationMonitor extends Component {
 
   render() {
     const migratedPct =
-      parseFloat(this.state.migrated / this.props.migrationData.length).toFixed(2) * 100;
+      parseFloat(this.state.migrated / this.props.migrationData.length).toFixed(2) * 100,
+      barClassNames = 'progress-bar bg-success' + (migratedPct < 5 ? ' zero' : ''),
+      finished = this.state.migrated === this.props.migrationData.length,
+      barContainerClassNames = 'progress' + (!finished ? ' active' : '');
     return (
       <ConfirmModal
         title={this.props.title}
@@ -181,9 +183,15 @@ class InstanceMigrationMonitor extends Component {
             this.props.operationProps.oldServer.hostname, this.props.operationProps.server.hostname)}
           </div>
           <div className='message-line'>{this.renderMigrationProgressInfo()}</div>
-          <ProgressBar animated={this.state.migrated < this.props.migrationData.length}
-            striped now={migratedPct}
-            label={translate('server.deploy.progress.migration_pct', migratedPct)}/>
+          <div className={barContainerClassNames}>
+            <div className={barClassNames} role="progressbar" style={{width: `${migratedPct}%`}} aria-valuenow="25"
+              aria-valuemin="0" aria-valuemax="100">
+              {translate('server.deploy.progress.migration_pct', migratedPct)}
+            </div>
+          </div>
+          <If condition={!finished}>
+            <i className="eos-icons eos-icon-loading"></i>
+          </If>
           {this.renderErrorMessage()}
         </div>
       </ConfirmModal>
