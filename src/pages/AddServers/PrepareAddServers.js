@@ -110,7 +110,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
   renderFooterButtons (showCancel, showRetry) {
     // Will have a specific cancel confirmation message when user clicks
     // cancel button.
-    let cancelMsg = translate('server.addserver.failure.cancel.confirm');
+    let cancelMsg = translate('server.addserver.failure.prep.cancel.confirm');
     return this.renderNavButtons(showCancel, showRetry, cancelMsg);
   }
 
