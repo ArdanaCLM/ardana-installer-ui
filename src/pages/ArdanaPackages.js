@@ -14,12 +14,17 @@
 **/
 
 import React, { Component } from 'react';
+import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
 import { alphabetically } from '../utils/Sort.js';
-import { fetchJson } from '../utils/RestUtils.js';
+import { fetchJson, isCloudConfigEncrypted} from '../utils/RestUtils.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { SearchBar } from '../components/ServerUtils.js';
+import { SetEncryptKeyModal } from '../components/Modals.js';
+
+// global variable used to cache encryptKey
+var encryptKey = undefined;
 
 class ArdanaPackages extends Component {
 
@@ -29,13 +34,40 @@ class ArdanaPackages extends Component {
       packages: undefined,
       error: undefined,
       showLoadingMask: false,
-      searchText: ''
+      searchText: '',
+      // deal with encryptKey
+      showEncryptKeyModal: false
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
+    let isEncrypted = await isCloudConfigEncrypted();
+    // get global var encryptKey
+    let enKey = encryptKey;
+    if(isEncrypted && isEmpty(enKey)) {
+      // Use the cached global var encryptKey so we don't
+      // prompt every time when access this page
+      this.setState({showEncryptKeyModal: true});
+    }
+    else {
+      this.getPackages(enKey);
+    }
+  }
+
+  handleEncryptKey =  (enKey) => {
+    this.setState({showEncryptKeyModal: false});
+    // save in the global variable
+    encryptKey = enKey;
+    this.getPackages(enKey);
+  }
+
+  getPackages = (encryptKey) => {
     this.setState({showLoadingMask: true});
-    fetchJson('/api/v2/packages')
+    let extraParams = undefined;
+    if(!isEmpty(encryptKey)) {
+      extraParams = {headers: {'encrypt': encryptKey}};
+    }
+    fetchJson('/api/v2/packages', extraParams)
       .then(responseData => {
         this.setState({packages: responseData.cloud_installed_packages, showLoadingMask: false});
       })
@@ -68,6 +100,16 @@ class ArdanaPackages extends Component {
     this.setState({searchText: filterText});
   }
 
+  renderEncryptKeyModal() {
+    return (
+      <If condition={this.state.showEncryptKeyModal}>
+        <SetEncryptKeyModal title={translate('warning')}
+          doneAction={this.handleEncryptKey}>
+        </SetEncryptKeyModal>
+      </If>
+    );
+  }
+
   render() {
     let rows = [];
     if (this.state.packages) {
@@ -88,6 +130,7 @@ class ArdanaPackages extends Component {
     return (
       <div>
         {this.renderErrorMessage()}
+        {this.renderEncryptKeyModal()}
         <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
           <div className='header-row'>
