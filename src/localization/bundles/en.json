@@ -600,7 +600,7 @@
     "server.replace": "Server Replacement in Progress",
     "server.replace.complete.heading": "Completed Server Replacement",
     "server.replace.complete": "Completed replacing server {0}",
-    "server.replace.prepare.failure": "Failed to prepare for replacing server. {0}",
+    "server.replace.controller.failure": "Failed to replace controller.  Check the \"Replacing a Controller Node\" section of the SUSE OpenStack Cloud Operations guide for troubleshooting. {0}",
     "update.commit.failure": "Failed to commit update changes. {0}",
     "install.progress.failure": "Failed to install SLES OS",
     "server.retrieve.discovered.servers.error": "Failed to retrieve discovered servers. {0}",
