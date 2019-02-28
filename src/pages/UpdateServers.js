@@ -508,8 +508,7 @@ class UpdateServers extends BaseUpdateWizardPage {
       }
     });
     try {
-      let promises = [getReachability(server['ip-addr'])];
-      let [conectivityStatus] = await Promise.all(promises);
+      let conectivityStatus = await getReachability(server['ip-addr']);
       this.setState(prev => ({
         serverStatuses: {
           ...prev.serverStatuses,
