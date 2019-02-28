@@ -471,7 +471,7 @@ class AssignServerRoles extends BaseWizardPage {
       if(this.props.isUpdateMode) {
         // only want to have the roles where it matches rolesLimit
         let matchData = results.data.filter(row =>
-          row['role'] === '' || matchRolesLimit(row['role'], this.props.rolesLimit)
+          isEmpty(row['role']) || matchRolesLimit(row['role'], this.props.rolesLimit)
         );
         results.data = matchData;
       }
