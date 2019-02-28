@@ -62,7 +62,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
       const [ servers, cobblerStatus ] = await Promise.all(promises);
       // if cobbler is present go find the old compute
       if(cobblerStatus.cobbler) {
-        const [cobblerServers] = await Promise.all([fetchJson('/api/v2/cobbler/servers')]);
+        const cobblerServers = await fetchJson('/api/v2/cobbler/servers');
         let names = cobblerServers.map(server => server.name);
         hasCobblerServer = names?.includes(this.props.operationProps.oldServer.id);
       }
