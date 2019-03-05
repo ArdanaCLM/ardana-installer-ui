@@ -25,6 +25,7 @@ import { AlarmDonut } from '../components/Graph';
 import { ErrorMessage } from '../components/Messages.js';
 import ContextMenu from '../components/ContextMenu.js';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 const MONASCA_SERVICES_MAP = {
   ardana: 'ardana',
@@ -241,7 +242,6 @@ class ServiceInfo extends Component {
       menuLocation: undefined,
       // deal with encryptKey
       isEncrypted: false,
-      encryptKey: '',
       showEncryptKeyModal: false
     };
   }
@@ -337,31 +337,33 @@ class ServiceInfo extends Component {
   }
 
   handleRunStatus = () => {
-    if((this.state.isEncrypted && !isEmpty(this.state.encryptKey)) ||
+    let enKey = getCachedEncryptKey();
+    if((this.state.isEncrypted && !isEmpty(enKey)) ||
        !this.state.isEncrypted) {
-      this.showRunStatusPlaybookModal(this.state.encryptKey);
+      this.showRunStatusPlaybookModal(enKey);
     }
     else {
       this.setState({showEncryptKeyModal: true});
     }
   }
 
-  showRunStatusPlaybookModal = () => {
+  showRunStatusPlaybookModal = (enkey) => {
     const playbookName = this.getPlaybookName();
     this.setState({
       showActionMenu: false,
       showRunStatusPlaybookModal: true,
       playbooks: [{
         name: playbookName,
-        payload: {'extra-vars': {encrypt: this.state.encryptKey || ''}}
+        payload: {'extra-vars': {encrypt: enkey || ''}}
       }],
       steps: [{label: 'status', playbooks: [playbookName + '.yml']}],
     });
   }
 
   handleSaveEncryptKey = async (encryptKey) => {
-    await this.setState({showEncryptKeyModal: false, encryptKey: encryptKey});
-    this.showRunStatusPlaybookModal();
+    await this.setState({showEncryptKeyModal: false});
+    setCachedEncryptKey(encryptKey);
+    this.showRunStatusPlaybookModal(encryptKey);
   }
 
   renderMenuItems = () => {

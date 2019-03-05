@@ -20,6 +20,7 @@ import { ErrorBanner } from '../../components/Messages.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import * as constants from '../../utils/constants.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 let PLAYBOOK_STEPS = [
   {
@@ -51,6 +52,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook
       processErrorBanner: ''
     };
@@ -83,7 +85,7 @@ class ProcessInstallOS extends BaseUpdateWizardPage {
         'extra-vars': {
           'nodelist': this.props.operationProps.selectedToInstallOS.map(e => e.id).join(','),
           'ardanauser_password': this.props.operationProps.osInstallPassword,
-          'encrypt': this.props.encryptKey || ''
+          'encrypt': getCachedEncryptKey() || ''
         }
       }
     }];

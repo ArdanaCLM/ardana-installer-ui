@@ -37,6 +37,7 @@ import { fromJS } from 'immutable';
 import { isMonascaInstalled } from '../utils/MonascaUtils.js';
 import { getHostFromCloudModel } from '../utils/ModelUtils.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
+import { setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 const DeleteServerProcessPages = [
     {
@@ -431,7 +432,7 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     // save the encryptKey in global cache so it could be retrieved later
     if(this.props.isEncrypted) {
-      await this.props.updateGlobalState('encryptKey', theProps.encryptKey);
+      await setCachedEncryptKey(theProps.encryptKey);
     }
 
     // existing server id and ip-addr for non-compute node

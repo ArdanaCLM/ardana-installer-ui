@@ -21,6 +21,7 @@ import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import * as constants from '../../utils/constants.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 
 // This is the deployment page for adding compute servers
@@ -234,7 +235,7 @@ class DeployAddServers extends BaseUpdateWizardPage {
     this.getPlaybooksAndSteps();
     // common_payload will be merged with individual playbook payload when launch
     // playbook in PlaybookProgress
-    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
+    let common_payload = {'extra-vars': {encrypt: getCachedEncryptKey() || ''}};
     return (
       <PlaybookProgress
         payload={common_payload}

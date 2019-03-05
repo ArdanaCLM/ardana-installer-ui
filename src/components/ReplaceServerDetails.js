@@ -30,6 +30,7 @@ import {
 import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
 import { ConfirmModal } from './Modals.js';
+import { getCachedEncryptKey } from '../utils/MiscUtils.js';
 
 
 class ReplaceServerDetails extends Component {
@@ -50,7 +51,7 @@ class ReplaceServerDetails extends Component {
       isOsPasswordValid: undefined,
       nicMappings: getNicMappings(props.model),
       serverGroups: getServerGroups(props.model),
-      encryptKey: props.encryptKey || ''
+      encryptKey: getCachedEncryptKey() || ''
     };
   }
 

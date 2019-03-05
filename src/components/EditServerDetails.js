@@ -25,6 +25,7 @@ import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
 import { getNicMappings, getServerGroups, genUID } from '../utils/ModelUtils.js';
 import { ConfirmModal } from './Modals.js';
+import { getCachedEncryptKey } from '../utils/MiscUtils.js';
 
 class EditServerDetails extends Component {
   constructor(props) {
@@ -37,7 +38,7 @@ class EditServerDetails extends Component {
       showAddNicMapping: false,
       nicMappings: getNicMappings(props.model),
       serverGroups: getServerGroups(props.model),
-      encryptKey: props.encryptKey || ''
+      encryptKey: getCachedEncryptKey() || ''
     };
   }
 

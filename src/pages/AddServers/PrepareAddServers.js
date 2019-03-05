@@ -21,6 +21,8 @@ import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { translate } from '../../localization/localize.js';
 import * as constants from '../../utils/constants.js';
 import { postJson } from '../../utils/RestUtils.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
+
 
 // This is the prepare page for adding compute servers
 // process. It will first commit the model changes and start
@@ -31,6 +33,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       overallStatus: constants.STATUS.UNKNOWN, // overall status of entire playbook and commit
       processErrorBanner: '',
     };
@@ -89,7 +92,7 @@ class PrepareAddServers extends BaseUpdateWizardPage {
       }),
     }, {
       name: constants.PRE_DEPLOYMENT_PLAYBOOK,
-      payload:  {'extra-vars': {encrypt: this.props.encryptKey || ''}}
+      payload:  {'extra-vars': {encrypt: getCachedEncryptKey() || ''}}
     }];
     return (
       <PlaybookProgress

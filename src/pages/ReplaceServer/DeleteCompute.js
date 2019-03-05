@@ -25,6 +25,7 @@ import { ConfirmModal } from '../../components/Modals.js';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
 import * as constants from '../../utils/constants.js';
 import { removeServerFromModel, getMergedServer, genUID } from '../../utils/ModelUtils.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 const MANUAL_SHUTDOWN = 'manual_shutdown';
 const DELETE_COMPUTE_SERVICE = 'delete_compute_service';
@@ -552,7 +553,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     let playbooks = this.getPlaybooks();
     // common_payload will be merged with individual playbook payload when luanch
     // playbook in PlaybookProgress
-    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
+    let common_payload = {'extra-vars': {encrypt: getCachedEncryptKey() || ''}};
     return (
       <PlaybookProgress
         payload={common_payload}

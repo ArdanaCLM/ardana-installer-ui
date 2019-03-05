@@ -25,6 +25,8 @@ import { BaseInputModal, YesNoModal } from '../components/Modals.js';
 import { translate } from '../localization/localize.js';
 import { getServerRoles, isRoleAssignmentValid, hasConflictAddresses } from '../utils/ModelUtils.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
+
 
 const ROLE_LIMIT = ['COMPUTE'];
 
@@ -136,7 +138,7 @@ class AddServers extends BaseUpdateWizardPage {
     postJson('/api/v2/config_processor')
       .then(() => {
         this.setState({validating: false});
-        if((this.props.isEncrypted && !isEmpty(this.props.encryptKey)) || !this.props.isEncrypted) {
+        if((this.props.isEncrypted && !isEmpty(getCachedEncryptKey())) || !this.props.isEncrypted) {
           this.startAddServers();
         }
         else { // encrypted but don't have encryptKey
@@ -284,7 +286,7 @@ class AddServers extends BaseUpdateWizardPage {
   // overwrite function in parent
   handleSaveEncryptKey = async (encryptKey) => {
     this.setState({showEncryptKeyModal: false});
-    await this.props.updateGlobalState('encryptKey', encryptKey);
+    await setCachedEncryptKey(encryptKey);
     this.startAddServers();
   }
 

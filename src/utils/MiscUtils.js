@@ -87,4 +87,21 @@ export function logProgressError(logger, error, msg)  {
   }
 }
 
+// A global variable used to cache encryptKey
+var gEncryptKey = undefined;
 
+/**
+ * Helper function to get the global var gEncryptKey
+ * @returns gEncryptKey
+ */
+export function getCachedEncryptKey() {
+  return gEncryptKey;
+}
+
+/**
+ * Helper function to set the global var gEncryptKey
+ * @param key
+ */
+export function setCachedEncryptKey(key) {
+  gEncryptKey = key;
+}

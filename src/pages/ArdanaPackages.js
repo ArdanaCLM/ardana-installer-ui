@@ -22,9 +22,8 @@ import { LoadingMask } from '../components/LoadingMask.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { SearchBar } from '../components/ServerUtils.js';
 import { SetEncryptKeyModal } from '../components/Modals.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 
-// global variable used to cache encryptKey
-var encryptKey = undefined;
 
 class ArdanaPackages extends Component {
 
@@ -42,8 +41,7 @@ class ArdanaPackages extends Component {
 
   async componentWillMount() {
     let isEncrypted = await isCloudConfigEncrypted();
-    // get global var encryptKey
-    let enKey = encryptKey;
+    let enKey = getCachedEncryptKey();
     if(isEncrypted && isEmpty(enKey)) {
       // Use the cached global var encryptKey so we don't
       // prompt every time when access this page
@@ -56,8 +54,7 @@ class ArdanaPackages extends Component {
 
   handleEncryptKey =  (enKey) => {
     this.setState({showEncryptKeyModal: false});
-    // save in the global variable
-    encryptKey = enKey;
+    setCachedEncryptKey(enKey);
     this.getPackages(enKey);
   }
 

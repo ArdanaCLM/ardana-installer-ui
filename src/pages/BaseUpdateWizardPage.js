@@ -21,6 +21,7 @@ import { ErrorBanner, ErrorMessage } from '../components/Messages.js';
 import { translate } from '../localization/localize.js';
 import { YesNoModal } from '../components/Modals.js';
 import { SetEncryptKeyModal } from '../components/Modals.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 /**
  * This base class handles the functions common to update process
@@ -74,12 +75,12 @@ class BaseUpdateWizardPage extends BaseWizardPage {
 
   handleSaveEncryptKey = async (encryptKey) => {
     this.setState({showEncryptKeyModal: false});
-    await this.props.updateGlobalState('encryptKey', encryptKey);
+    await setCachedEncryptKey(encryptKey);
     this.setState({showPlaybookProcess: true});
   }
 
   checkEncryptKeyAndProceed = () => {
-    if((this.props.isEncrypted && !isEmpty(this.props.encryptKey)) ||
+    if((this.props.isEncrypted && !isEmpty(getCachedEncryptKey())) ||
       !this.props.isEncrypted) {
       this.setState({ showPlaybookProcess: true});
     }
