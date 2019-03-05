@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
-    "bootstrap": "4.1.2",
+    "bootstrap": "4.3.1",
     "eos-icons": "^2.0.3",
     "history": "^4.7.2",
     "html-webpack-plugin": "^3.2.0",
