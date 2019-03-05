@@ -26,6 +26,7 @@ import { ValidatingInput } from '../components/ValidatingInput.js';
 import HelpText from '../components/HelpText.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 const OS_INSTALL_STEPS = [
   {
@@ -64,7 +65,7 @@ class SelectServersToProvision extends BaseWizardPage {
       sshPassphrase: '',
       hasError: false,
       errorMsg: '',
-      encryptKey: props.encryptKey || ''
+      encryptKey: getCachedEncryptKey() || ''
     };
 
     this.ips = [];
@@ -171,7 +172,7 @@ class SelectServersToProvision extends BaseWizardPage {
   handleSaveEncryptKey = async (e) => {
     const encryptKey = e.target.value;
     this.setState({encryptKey: encryptKey});
-    await this.props.updateGlobalState('encryptKey', encryptKey);
+    await setCachedEncryptKey(encryptKey);
   }
 
   handleOsInstallPassword = (e) => {

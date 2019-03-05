@@ -25,6 +25,7 @@ import { LoadingMask } from '../../components/LoadingMask.js';
 import { isEmpty } from 'lodash';
 import { ConfirmModal } from '../../components/Modals.js';
 import { ActionButton } from '../../components/Buttons.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 class ReplaceController extends BaseUpdateWizardPage {
 
@@ -50,7 +51,7 @@ class ReplaceController extends BaseUpdateWizardPage {
         // Force a re-render if the page is still shown (user may navigate away while waiting)
         if (this.refs.ReplaceController) {
           // deal with refresh case
-          if(this.props.isEncrypted && isEmpty(this.props.encryptKey)) {
+          if(this.props.isEncrypted && isEmpty(getCachedEncryptKey())) {
             this.setState({showEncryptKeyModal: true});
           }
           this.setState({internalModel: yml, showLoadingMask: false});
@@ -70,7 +71,7 @@ class ReplaceController extends BaseUpdateWizardPage {
   // overwrite function in parent
   handleSaveEncryptKey = async (encryptKey) => {
     this.setState({showEncryptKeyModal: false});
-    await this.props.updateGlobalState('encryptKey', encryptKey);
+    await setCachedEncryptKey(encryptKey);
   }
 
   updatePageStatus = (status, error) => {
@@ -321,7 +322,7 @@ class ReplaceController extends BaseUpdateWizardPage {
     }
     // common_payload will be merged with individual playbook payload when luanch
     // playbook in PlaybookProgress
-    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
+    let common_payload = {'extra-vars': {encrypt: getCachedEncryptKey() || ''}};
     return (
       <PlaybookProgress
         payload={common_payload}

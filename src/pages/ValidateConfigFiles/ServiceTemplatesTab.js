@@ -21,6 +21,7 @@ import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { ErrorMessage, InfoBanner } from '../../components/Messages.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import HelpText from '../../components/HelpText.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 class EditTemplateFile extends Component {
   constructor(props) {
@@ -144,7 +145,7 @@ class ServiceTemplatesTab extends Component {
       errorContent: undefined,
 
       //deal with encryptKey
-      encryptKey: props.encryptKey || ''
+      encryptKey: getCachedEncryptKey() || ''
     };
   }
 

@@ -20,6 +20,7 @@ import BaseUpdateWizardPage from '../BaseUpdateWizardPage.js';
 import { PlaybookProgress } from '../../components/PlaybookProgress.js';
 import { ErrorBanner } from '../../components/Messages.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 class InstallOS extends BaseUpdateWizardPage {
 
@@ -79,7 +80,7 @@ class InstallOS extends BaseUpdateWizardPage {
         'extra-vars': {
           'nodelist': this.props.operationProps.server.id,
           'ardanauser_password': installPass,
-          'encrypt': this.props.encryptKey || ''
+          'encrypt': getCachedEncryptKey() || ''
         }
       }
     }];

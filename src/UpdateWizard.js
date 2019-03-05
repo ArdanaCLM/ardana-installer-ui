@@ -67,8 +67,6 @@ class UpdateWizard extends InstallWizard {
       // Indicate if the cloud configuration isEncrypted. If it is true,
       // it will force user to input encryptKey.
       isEncrypted: false,
-      // encryptKey from user input if isEncrypted is true otherwise it is empty.
-      encryptKey: ''
     };
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
@@ -77,7 +75,7 @@ class UpdateWizard extends InstallWizard {
     this.globalStateVars =
       this.globalStateVars.concat([
         'currentMenuName', 'processMenuName', 'processOperation', 'operationProps', 'safeMode', 'expandedGroup',
-        'encryptKey', 'isEncrypted'
+        'isEncrypted'
       ]);
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API

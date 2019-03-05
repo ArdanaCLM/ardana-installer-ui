@@ -24,6 +24,7 @@ import { PlaybookProgress } from '../../components/PlaybookProgress';
 import { putJson } from '../../utils/RestUtils';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
 import { ARDANA_START_PLAYBOOK } from '../../utils/constants';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 const NOVA_ACTIVATE = 'nova_activate';
 
@@ -111,7 +112,7 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
       playbooks = this.getPlaybooks(),
       // common_payload will be merged with individual playbook payload when luanch
       // playbook in PlaybookProgress
-      common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
+      common_payload = {'extra-vars': {encrypt: getCachedEncryptKey() || ''}};
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading || this.state.loading}/>

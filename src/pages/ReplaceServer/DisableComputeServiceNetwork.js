@@ -26,7 +26,7 @@ import { putJson, deleteJson } from '../../utils/RestUtils.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import InstanceMigrationMonitor from './InstanceMigrationMonitor.js';
-import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
+import { logProgressResponse, logProgressError, getCachedEncryptKey } from '../../utils/MiscUtils.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
 
 const DISABLE_COMPUTE_SERVICE = 'disable_compute_service';
@@ -517,7 +517,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
     let playbooks = this.getPlaybooks();
     // common_payload will be merged with individual playbook payload when luanch
     // playbook in PlaybookProgress
-    let common_payload = {'extra-vars': {encrypt: this.props.encryptKey || ''}};
+    let common_payload = {'extra-vars': {encrypt: getCachedEncryptKey() || ''}};
     return (
       <PlaybookProgress
         payload={common_payload}

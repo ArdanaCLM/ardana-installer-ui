@@ -22,6 +22,7 @@ import { ErrorMessage } from '../../components/Messages.js';
 import { YesNoModal } from '../../components/Modals.js';
 import SelectServersToProvision from '../SelectServersToProvision.js';
 import { postJson } from '../../utils/RestUtils.js';
+import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 // This page allow the user to select newly added compute
 // servers to install SLES on them
@@ -31,6 +32,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
     super(props);
 
     this.state = {
+      ...this.state,
       // show confirm
       showInstallConfirmModal: false,
       // error msg
@@ -42,8 +44,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     if(this.props.operationProps !== prevProps.operationProps ||
-      this.props.isEncrypted !== prevProps.isEncrypted ||
-      this.props.encryptKey !== prevProps.encryptKey) {
+      this.props.isEncrypted !== prevProps.isEncrypted) {
       let isValid =
       !isEmpty(this.props.operationProps.selectedToInstallOS) &&
       !isEmpty(this.props.operationProps.osInstallPassword) &&
@@ -51,7 +52,7 @@ class SelectInstallOS extends BaseUpdateWizardPage {
         (this.props.operationProps.sshPassphraseRequired &&
         !isEmpty(this.props.operationProps.sshPassphrase))) &&
       (!this.props.isEncrypted ||
-        (this.props.isEncrypted && !isEmpty(this.props.encryptKey)));
+        (this.props.isEncrypted && !isEmpty(getCachedEncryptKey())));
       this.setState({isValid: isValid});
     }
   }

@@ -43,6 +43,7 @@ import { MODEL_SERVER_PROPS, MODEL_SERVER_PROPS_ALL, IS_MS_EDGE, IS_MS_IE } from
 import { YesNoModal } from '../components/Modals.js';
 import HelpText from '../components/HelpText.js';
 import '../utils/MiscUtils';
+import { setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 const AUTODISCOVER_TAB = '1';
 const MANUALADD_TAB = '2';
@@ -601,8 +602,8 @@ class AssignServerRoles extends BaseWizardPage {
     this.setState({showEditServerModal: false, activeRowData: undefined});
 
     if(this.props.isEncrypted && !isEmpty(encryptKey)) {
-      // update global vars so encryptKey can be available later
-      await this.props.updateGlobalState('encryptKey', encryptKey);
+      // update a global var
+      await setCachedEncryptKey(encryptKey);
     }
   }
 
@@ -1591,7 +1592,6 @@ class AssignServerRoles extends BaseWizardPage {
       if(this.props.isUpdateMode) {
         extraProps.isUpdateMode = this.props.isUpdateMode;
         extraProps.isEncrypted = this.props.isEncrypted;
-        extraProps.encryptKey = this.props.encryptKey;
       }
     } else {
       extraProps.ids = [];

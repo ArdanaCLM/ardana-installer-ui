@@ -22,6 +22,7 @@ import { ErrorMessage } from '../components/Messages.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import * as constants from '..//utils/constants.js';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
+import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 
 // services that have corresponding -reconfigure.yml and -status.yml files
 const UPDATEABLE_SERVICES = [
@@ -42,7 +43,7 @@ class ServiceConfiguration extends Component {
       error: undefined,
       // deal with encryptKey
       isEncrypted: false,
-      encryptKey: ''
+      encryptKey: getCachedEncryptKey() || '' // need it to change the update button
     };
     this.playbooksToRun = undefined;
   }
@@ -93,8 +94,8 @@ class ServiceConfiguration extends Component {
   }
 
   handleEncryptKey = (key) => {
-    // will not save in global cache
     this.setState({encryptKey: key});
+    setCachedEncryptKey(key);
   }
 
   updateProgressStatus = (msg, playbooks) => {
@@ -175,7 +176,6 @@ class ServiceConfiguration extends Component {
       let handleEncryption = {};
       if(this.state.isEncrypted) {
         handleEncryption.handleEncryptKey = this.handleEncryptKey;
-        handleEncryption.encryptKey = this.state.encryptKey;
       }
       return (
         <div className='column-layout'>
