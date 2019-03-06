@@ -602,7 +602,6 @@ class AssignServerRoles extends BaseWizardPage {
     this.setState({showEditServerModal: false, activeRowData: undefined});
 
     if(this.props.isEncrypted && !isEmpty(encryptKey)) {
-      // update a global var
       await setCachedEncryptKey(encryptKey);
     }
   }
