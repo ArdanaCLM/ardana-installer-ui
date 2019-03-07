@@ -20,6 +20,7 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from '../components/Buttons.js';
 import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
+import { LabeledDropdownWithButton } from '../components/LabeledDropdown.js';
 import {
   IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
   createExcludesValidator, chainValidators, NoWhiteSpaceValidator }
@@ -31,6 +32,7 @@ import HelpText from '../components/HelpText.js';
 import { Map, List } from 'immutable';
 import { ConfirmModal } from './Modals.js';
 import { getCachedEncryptKey } from '../utils/MiscUtils.js';
+import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings';
 
 
 class ReplaceServerDetails extends Component {
@@ -322,6 +324,7 @@ class ReplaceServerDetails extends Component {
             </div>
             <div className='input-body'>
               <ListDropdown name='id' value={this.state.selectedServerId || ''}
+                moreClass='has-button'
                 optionList={availableServerIds} emptyOption={emptyOptProps}
                 selectAction={this.handleSelectAvailableServer}/>
             </div>
@@ -347,7 +350,7 @@ class ReplaceServerDetails extends Component {
         <div className='message-line'>
           {translate('common.encryptkey.message')}</div>
         <div className='server-details-container'>
-          <InputLine
+          <InputLine moreClass='has-button'
             isRequired={this.props.isEncrypted} inputName={'encryptKey'}
             inputType={'password'} label={'validate.deployment.encryptKey'}
             inputValue={this.state.encryptKey}
@@ -366,6 +369,7 @@ class ReplaceServerDetails extends Component {
             <div className='info-body'>{this.state.osUsername}</div>
           </div>
           <InputLine
+            moreClass='has-button'
             isRequired={this.state.isInstallOsSelected || isComputeNode(this.props.data)} inputName={'osPassword'}
             inputType={'password'} label={'server.pass.prompt'}
             inputValue={this.state.osPassword || ''}
@@ -374,7 +378,7 @@ class ReplaceServerDetails extends Component {
     }
   }
 
-  renderDropDown(name, list, handler, title) {
+  renderDropdownLineWithButton(required, title, name, list, buttonLabel, buttonAction, handler) {
     let emptyOptProps = '';
     if(isEmpty(this.state.inputValue.get(name))) {
       emptyOptProps = {
@@ -383,15 +387,32 @@ class ReplaceServerDetails extends Component {
       };
     }
     return (
-      <div className='detail-line'>
-        <div className='detail-heading'>{translate(title) + '*'}</div>
-        <div className='input-body'>
-          <ListDropdown name={this.props.name} value={this.state.inputValue.get(name)}
-            optionList={list} emptyOption={emptyOptProps} selectAction={handler}/>
-        </div>
-      </div>
+      <LabeledDropdownWithButton
+        label={title} name={name} value={this.state.inputValue.get(name)} optionList={list}
+        isRequired={required} selectAction={handler}
+        emptyOption={emptyOptProps} buttonAction={buttonAction} buttonLabel={buttonLabel}/>
     );
   }
+
+
+  addServerGroup(event) {
+    event?.preventDefault();
+    this.setState({showAddServerGroup: true});
+  }
+
+  addNicMapping(event) {
+    event?.preventDefault();
+    this.setState({showAddNicMapping: true});
+  }
+
+  closeAddServerGroup() {
+    this.setState({showAddServerGroup: false, serverGroups: getServerGroups(this.props.model)});
+  }
+
+  closeAddNicMapping() {
+    this.setState({showAddNicMapping: false, nicMappings: getNicMappings(this.props.model)});
+  }
+
 
   renderNewComputeInfo(existingIpAddresses) {
     if(isComputeNode(this.props.data)) {
@@ -406,7 +427,7 @@ class ReplaceServerDetails extends Component {
           <div className='message-line'>
             {translate('server.replace.compute.details.message')}</div>
           <div className='server-details-container'>
-            <InputLine
+            <InputLine moreClass='has-button'
               isRequired={true} disabled={isDisabled} inputName='id' label='server.id.prompt'
               inputValidate={chainValidators(
                 NoWhiteSpaceValidator(translate('input.validator.id.spaces.error')),
@@ -414,15 +435,17 @@ class ReplaceServerDetails extends Component {
               )}
               inputValue={this.state.inputValue.get('id')}
               inputAction={this.handleInputChange} />
-            <InputLine
+            <InputLine moreClass='has-button'
               isRequired={true} inputName='ip-addr' label='server.ip.prompt'
               inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
               inputValue={this.state.inputValue.get('ip-addr')}
               inputAction={this.handleInputChange}/>
-            {this.renderDropDown('server-group', this.state.serverGroups, this.handleSelectGroup,
-              'server.group.prompt')}
-            {this.renderDropDown('nic-mapping', this.state.nicMappings, this.handleSelectNicMapping,
-              'server.nicmapping.prompt')}
+            {this.renderDropdownLineWithButton(
+              true, 'server.group.prompt', 'server-group', this.state.serverGroups,
+              'server.group.prompt', ::this.addServerGroup, ::this.handleSelectGroup)}
+            {this.renderDropdownLineWithButton(
+              true, 'server.nicmapping.prompt', 'nic-mapping', this.state.nicMappings,
+              'server.nicmapping.prompt', ::this.addNicMapping, ::this.handleSelectNicMapping)}
           </div>
         </div>
       );
@@ -438,22 +461,22 @@ class ReplaceServerDetails extends Component {
         <div className='message-line'>{translate('server.replace.details.message')}</div>
         <div className='server-details-container'>
           <InputLine
-            isRequired={isRequired} inputName='mac-addr' label='server.mac.prompt'
+            isRequired={isRequired} inputName='mac-addr' label='server.mac.prompt' moreClass='has-button'
             inputValidate={chainValidators(MacAddressValidator, createExcludesValidator(existingMacAddreses))}
             inputValue={this.state.inputValue.get('mac-addr')}
             inputAction={this.handleInputChange} />
           <InputLine
-            isRequired={isRequired} inputName='ilo-ip' label='server.ipmi.ip.prompt'
+            isRequired={isRequired} inputName='ilo-ip' label='server.ipmi.ip.prompt' moreClass='has-button'
             inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
             inputValue={this.state.inputValue.get('ilo-ip')}
             inputAction={this.handleInputChange} />
           <InputLine
-            isRequired={isRequired} inputName='ilo-user' label='server.ipmi.username.prompt'
+            isRequired={isRequired} inputName='ilo-user' label='server.ipmi.username.prompt' moreClass='has-button'
             inputValue={this.state.inputValue.get('ilo-user')}
             inputAction={this.handleInputChange}/>
           <InputLine
             isRequired={isRequired} inputType='password' inputName='ilo-password' label='server.ipmi.password.prompt'
-            inputValue={this.state.inputValue.get('ilo-password')}
+            inputValue={this.state.inputValue.get('ilo-password')} moreClass='has-button'
             inputAction={this.handleInputChange}/>
         </div>
       </div>
@@ -505,16 +528,42 @@ class ReplaceServerDetails extends Component {
     );
   }
 
+  renderAddServerGroup() {
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='server-group' onHide={::this.closeAddServerGroup}
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={true}/>
+    );
+  }
+
+  renderAddNicMapping() {
+    return (
+      <EditCloudSettings model={this.props.model}
+        oneTab='nic-mapping' onHide={::this.closeAddNicMapping}
+        updateGlobalState={this.props.updateGlobalState}
+        isUpdateMode={true}/>
+    );
+  }
+
   render() {
     return (
-      <ConfirmModal className={this.props.className} title={this.props.title}
-        onHide={this.props.cancelAction} footer={this.renderFooter()}>
-        <div className='replace-server-details'>
-          <form onSubmit={::this.handleDone}>
-            {this.renderServerContent()}
-          </form>
-        </div>
-      </ConfirmModal>
+      <>
+        <ConfirmModal className={this.props.className} title={this.props.title}
+          onHide={this.props.cancelAction} footer={this.renderFooter()}>
+          <div className='replace-server-details'>
+            <form onSubmit={::this.handleDone}>
+              {this.renderServerContent()}
+            </form>
+          </div>
+        </ConfirmModal>
+        <If condition={this.state.showAddServerGroup}>
+          {this.renderAddServerGroup()}
+        </If>
+        <If condition={this.state.showAddNicMapping}>
+          {this.renderAddNicMapping()}
+        </If>
+      </>
     );
   }
 }
