@@ -25,6 +25,7 @@ import {
 } from '../utils/ModelUtils.js';
 import { loadServerDiskUtilization } from '../utils/MonascaUtils.js';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { isProduction } from '../utils/ConfigHelper.js';
 
 class CollapsibleTable extends Component {
   constructor(props) {
@@ -70,7 +71,17 @@ class CollapsibleTable extends Component {
   }
 
   formatServerObjects = () => {
-    const servers = this.props.model.getIn(['inputModel','servers']);
+    let servers = this.props.model.getIn(['inputModel','servers']);
+
+    // Filter out the servers which are not in internalModel in day2 production
+    // this.props.internalModel is used to determine if this is day2
+    // Using internalModel to check is a relative way to determine if the servers
+    // are deployed or not.
+    if(isProduction() && this.props.internalModel !== undefined) {
+      let internalServerIds =
+        this.props.internalModel.getIn(['internal', 'servers']).toJS().map(server => server.id);
+      servers = servers.filter(server => internalServerIds.includes(server.get('id')));
+    }
     // Create a map of role names to list of servers in each, e.g.
     //   { 'COMPUTE':[{name:'one',...},{name:'two',...},  'CONTROLLER': [...]}
     let groupMap = Map();
