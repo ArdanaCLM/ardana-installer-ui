@@ -208,6 +208,11 @@ class PlaybookProgress extends Component {
   }
 
   getProgress() {
+    let globalPlaybookStatus = this.getGlobalPlaybookStatus();
+    let hasFailed = globalPlaybookStatus.some((playbook) => {
+      return playbook.status === STATUS.FAILED;
+    });
+
     let progresses =  this.props.steps.map((step, index) => {
       let status = STATUS.NOT_STARTED, i = 0;
 
@@ -260,6 +265,12 @@ class PlaybookProgress extends Component {
             break;//there is at least 1 started playbook
           }
         }
+      }
+
+      // if the global playbook status has failed then any in progress
+      // playbooks must also be failed
+      if (hasFailed && status === STATUS.IN_PROGRESS) {
+        status = STATUS.FAILED;
       }
 
       const statusClass = this.getStatusCSSClass(status);
