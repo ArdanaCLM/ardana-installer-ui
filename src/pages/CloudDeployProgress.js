@@ -39,6 +39,8 @@ class CloudDeployProgress extends BaseWizardPage {
   constructor(props) {
     super(props);
 
+    this.playbooks = [];
+
     this.state = {
       loading: false,
       internalModel: undefined,
@@ -74,7 +76,7 @@ class CloudDeployProgress extends BaseWizardPage {
     if (this.props.playbookStatus) {
       // remove playbook status for any playbook in this.playbooks
       let playStatus = this.props.playbookStatus.filter(status =>
-        !this.playbooks.includes(status.name));
+        !this.playbooks.map(play => play.name).includes(status.name));
       this.props.updateGlobalState('playbookStatus', playStatus);
     }
   }
@@ -94,6 +96,7 @@ class CloudDeployProgress extends BaseWizardPage {
     if (this.props.deployConfig.wipeDisks) {
       let newDeployConfig = JSON.parse(JSON.stringify(this.props.deployConfig));
       newDeployConfig.wipeDisks = false;
+      newDeployConfig.nodeListForWipeDisk = undefined;
       this.props.updateGlobalState('deployConfig', newDeployConfig);
     }
     super.goBack(e);
@@ -173,7 +176,7 @@ class CloudDeployProgress extends BaseWizardPage {
     // choose between site or site with wipedisks (installui-wipe-and-site)
     //let sitePlaybook = constants.SITE_PLAYBOOK;
     let steps = this.getSteps();
-    let playbooks = this.getPlaybooks();
+    this.playbooks = this.getPlaybooks();
 
     // Build the payload from the deployment configuration page options
     let common_payload = {};
@@ -207,7 +210,7 @@ class CloudDeployProgress extends BaseWizardPage {
               updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
               playbookStatus = {this.props.playbookStatus}
               steps = {steps}
-              playbooks = {playbooks} payload = {common_payload}/>
+              playbooks = {this.playbooks} payload = {common_payload}/>
           </If>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}
