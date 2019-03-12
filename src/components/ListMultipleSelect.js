@@ -16,6 +16,13 @@ import React, { Component } from 'react';
 
 class ListMultipleSelect extends  Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedOptions: props.selectedOptions
+    };
+  }
+
   handleChange = (e) => {
     let options = e.target.options;
     let selOpts = [];
@@ -29,8 +36,13 @@ class ListMultipleSelect extends  Component {
   }
 
   render() {
-    let options = this.props.optionList.map((opt) => {
-      return <option key={opt} value={opt}>{opt}</option>;
+    let options = this.props.options.map((opt) => {
+      if (this.state.selectedOptions?.includes(opt)) {
+        return <option selected key={opt} value={opt}>{opt}</option>;
+      }
+      else {
+        return <option key={opt} value={opt}>{opt}</option>;
+      }
     });
 
     let classname = 'server-detail-multiselect';

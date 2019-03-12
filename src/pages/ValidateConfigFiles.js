@@ -382,11 +382,11 @@ class ConfigForm extends Component {
     if (!props.deployConfig) {
       this.state = {
         wipeDisks: false,
-        nodeListForWipeDisk: [],
+        nodeListForWipeDisk: undefined,
         encryptKey: '',
         verbosity: 0,
         clearServers: false,
-        sshPassphrase: ''
+        sshPassphrase: '',
       };
     } else {
       this.state = props.deployConfig;
@@ -515,10 +515,10 @@ class ConfigForm extends Component {
                 value='wipedisks'
                 checked={this.state.wipeDisks}
                 onChange={this.handleWipeDisks}/>
-              <div>{this.state.nodeListForWipeDisk.join(',')}</div>
+              <div>{this.state.nodeListForWipeDisk?.join(',')}</div>
               <If condition={this.state.wipeDisks}>
-                <ListMultipleSelect name='nodelist' optionList={this.props.nodeList}
-                  selectAction={this.handleSelectWipeDiskNodes}/>
+                <ListMultipleSelect name='nodelist' selectedOptions={this.state.nodeListForWipeDisk}
+                  options={this.props.nodeList} selectAction={this.handleSelectWipeDiskNodes}/>
               </If>
             </div>
           </div>

@@ -597,8 +597,6 @@ class PlaybookProgress extends Component {
 
     } else {
       const playbookName = this.getPlaybookName(playbook);
-      //console.log('name=' + playbookName)
-      //console.log('payload=' + JSON.stringify(payload))
       postJson('/api/v2/playbooks/' + playbookName, payload)
         .then(response => {
           const playId = response['id'];
