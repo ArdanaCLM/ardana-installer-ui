@@ -26,6 +26,7 @@ import HelpText from '../components/HelpText.js';
 import { InfoBanner } from '../components/Messages.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
 import { STATUS } from '../utils/constants.js';
+import ListMultipleSelect from '../components/ListMultipleSelect.js';
 
 const INVALID = 0;
 const VALID = 1;
@@ -381,6 +382,7 @@ class ConfigForm extends Component {
     if (!props.deployConfig) {
       this.state = {
         wipeDisks: false,
+        nodeListForWipeDisk: [],
         encryptKey: '',
         verbosity: 0,
         clearServers: false,
@@ -392,7 +394,18 @@ class ConfigForm extends Component {
   }
 
   handleWipeDisks = () => {
-    this.setState({wipeDisks: !this.state.wipeDisks});
+    // this.setState({wipeDisks: !this.state.wipeDisks});
+    this.setState(preState => {
+      // wipeDisk is true
+      if(preState.wipeDisks) {
+        //now wipeDisk is false
+        return {wipeDisks : !preState.wipeDisks, nodeListForWipeDisk: undefined};
+      }
+      else {
+        //now wipeDisk is true
+        return {wipeDisks : !preState.wipeDisks};
+      }
+    });
   }
 
   handlePasswordChange = (e) => {
@@ -406,6 +419,10 @@ class ConfigForm extends Component {
   handleSshPassphrase = (e) => {
     this.setState({sshPassphrase: e.target.value});
     this.props.passAction(e.target.value);
+  }
+
+  handleSelectWipeDiskNodes = (selected) => {
+    this.setState({nodeListForWipeDisk: selected});
   }
 
   renderSshPassphrase() {
@@ -434,20 +451,6 @@ class ConfigForm extends Component {
   render() {
     return (
       <div className='config-form'>
-        <div className='detail-line'>
-          <div className='row'>
-            <div className='col-4 label-container'>
-              {translate('validate.deployment.doWipeDisks')}
-              <HelpText tooltipText={translate('validate.deployment.doWipeDisks.tooltip')}/>
-            </div>
-            <div className='col-8 checkbox-line'>
-              <input type='checkbox'
-                value='wipedisks'
-                checked={this.state.wipeDisks}
-                onChange={this.handleWipeDisks}/>
-            </div>
-          </div>
-        </div>
 
         <div className='detail-line'>
           <div className='row'>
@@ -501,6 +504,26 @@ class ConfigForm extends Component {
           </div>
         </div>
 
+        <div className='detail-line'>
+          <div className='row'>
+            <div className='col-4 label-container'>
+              {translate('validate.deployment.doWipeDisks')}
+              <HelpText tooltipText={translate('validate.deployment.doWipeDisks.tooltip')}/>
+            </div>
+            <div className='col-8 checkbox-line'>
+              <input type='checkbox'
+                value='wipedisks'
+                checked={this.state.wipeDisks}
+                onChange={this.handleWipeDisks}/>
+              <div>{this.state.nodeListForWipeDisk.join(',')}</div>
+              <If condition={this.state.wipeDisks}>
+                <ListMultipleSelect name='nodelist' optionList={this.props.nodeList}
+                  selectAction={this.handleSelectWipeDiskNodes}/>
+              </If>
+            </div>
+          </div>
+        </div>
+
         {this.renderSshPassphrase()}
 
       </div>
@@ -517,7 +540,7 @@ class ConfigPage extends BaseWizardPage {
       isBackable: true,
       showNavButtons: true,
       disableTab: false,
-      requiresPassword: false,
+      requiresPassword: false
     };
   }
 
@@ -552,9 +575,9 @@ class ConfigPage extends BaseWizardPage {
     this.props.back(false);
   }
 
-  goForward(e) {
+  async goForward(e) {
     e.preventDefault();
-    this.props.updateGlobalState('deployConfig', this.refs.configFormData.state);
+    await this.props.updateGlobalState('deployConfig', this.refs.configFormData.state);
     this.props.next(this.isError());
   }
 
@@ -583,6 +606,8 @@ class ConfigPage extends BaseWizardPage {
   }
 
   render() {
+    const nodeIdList =
+      this.props.model?.getIn(['inputModel', 'servers']).map(server => server.get('id')).sort();
     return (
       <div className='wizard-page'>
         <div className='content-header'>
@@ -608,7 +633,7 @@ class ConfigPage extends BaseWizardPage {
             <Tab disabled={this.state.disableTab}
               eventKey={TAB.CONFIG_FORM} title={translate('validate.tab.config')}>
               <ConfigForm ref='configFormData' deployConfig={this.props.deployConfig}
-                requiresPassword={this.state.requiresPassword}
+                requiresPassword={this.state.requiresPassword} nodeList={nodeIdList}
                 passAction={this.setSshPassphrase}/>
             </Tab>
           </Tabs>

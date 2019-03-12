@@ -13,12 +13,16 @@
 * limitations under the License.
 **/
 import React from 'react';
+import { isEmpty } from 'lodash';
 
 import { translate } from '../localization/localize.js';
 import * as constants from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
+import { getInternalModel } from './topology/TopologyUtils.js';
+import {LoadingMask} from '../components/LoadingMask';
+
 
 /*
   Navigation rules:
@@ -30,65 +34,31 @@ import { ErrorBanner } from '../components/Messages.js';
   that the playbook should be launched.
 */
 
-const PLAYBOOK_STEPS = [
-  {
-    label: translate('deploy.progress.config-processor-run'),
-    playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.ready-deployment'),
-    playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.predeployment'),
-    playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step1'),
-    playbooks: [constants.NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step2'),
-    playbooks: [
-      constants.NOVA_DEPLOY_PLAYBOOK + '.yml', constants.IRONIC_DEPLOY_PLAYBOOK + '.yml',
-      constants.MAGNUM_DEPLOY_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step3'),
-    playbooks: [
-      constants.MONASCA_AGENT_DEPLOY_PLAYBOOK + '.yml', constants.MONASCA_DEPLOY_PLAYBOOK + '.yml',
-      constants.MONASCA_TRANSFORM_DEPLOY_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step4'),
-    playbooks: [
-      constants.CEPH_DEPLOY_PLAYBOOK + '.yml', constants.CINDER_DEPLOY_PLAYBOOK + '.yml',
-      constants.SWIFT_DEPLOY_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step5'),
-    playbooks: [constants.ARDANA_STATUS_PLAYBOOK + '.yml']
-  },
-  {
-    label: translate('deploy.progress.step6'),
-    playbooks: [
-      //either site.yml or installui-wipe-and-site.yml
-      constants.SITE_PLAYBOOK + '.yml', constants.DAYZERO_SITE_PLAYBOOK + '.yml'],
-    orCondition: true
-  }
-];
-
 class CloudDeployProgress extends BaseWizardPage {
 
   constructor(props) {
     super(props);
 
-    this.playbooks = [];
-
     this.state = {
+      loading: false,
+      internalModel: undefined,
       overallStatus: constants.STATUS.UNKNOWN // overall status of entire playbook
     };
   }
+  async componentWillMount() {
+    // If wipeDisks checked and nodeListForWipeDisk is not empty, we need to limit
+    // nodes for wipeDisks
+    // If wipeDisks checked and nodeListForWipeDisk is empty, we will wipeDisks for
+    // all the nodes
+    if(!this.state.internalModel && this.props.deployConfig.wipeDisks &&
+      !isEmpty(this.props.deployConfig.nodeListForWipeDisk)) {
+      this.setState({loading: true});
+      const model = await getInternalModel();
+      this.setState({loading: false});
+      this.setState({internalModel: model});
+    }
+  }
+
   setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
   setBackButtonDisabled = () => this.state.overallStatus != constants.STATUS.FAILED;
 
@@ -129,46 +99,116 @@ class CloudDeployProgress extends BaseWizardPage {
     super.goBack(e);
   }
 
-  render() {
-    // choose between site or site with wipedisks (installui-wipe-and-site)
-    let sitePlaybook = constants.SITE_PLAYBOOK;
+  getSteps = () => {
+    let steps = [{
+      label: translate('deploy.progress.config-processor-run'),
+      playbooks: [constants.CONFIG_PROCESSOR_RUN_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.ready-deployment'),
+      playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.predeployment'),
+      playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.step1'),
+      playbooks: [constants.NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.step2'),
+      playbooks: [
+        constants.NOVA_DEPLOY_PLAYBOOK + '.yml', constants.IRONIC_DEPLOY_PLAYBOOK + '.yml',
+        constants.MAGNUM_DEPLOY_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.step3'),
+      playbooks: [
+        constants.MONASCA_AGENT_DEPLOY_PLAYBOOK + '.yml', constants.MONASCA_DEPLOY_PLAYBOOK + '.yml',
+        constants.MONASCA_TRANSFORM_DEPLOY_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.step4'),
+      playbooks: [
+        constants.CEPH_DEPLOY_PLAYBOOK + '.yml', constants.CINDER_DEPLOY_PLAYBOOK + '.yml',
+        constants.SWIFT_DEPLOY_PLAYBOOK + '.yml']
+    }, {
+      label: translate('deploy.progress.step5'),
+      playbooks: [constants.ARDANA_STATUS_PLAYBOOK + '.yml']
+    }];
 
-    // Build the payload from the deployment configuration page options
-    let payload = {};
-    if (this.props.deployConfig) {
-      if (this.props.deployConfig['wipeDisks']) {
-        sitePlaybook = constants.DAYZERO_SITE_PLAYBOOK;
-      }
-      payload['verbose'] = this.props.deployConfig['verbosity'];
-      payload['extra-vars'] = {};
-      // don't prompt "Are you sure?" questions for wipedisks
-      payload['extra-vars']['automate'] = 'true';
-      if (this.props.deployConfig['encryptKey']) {
-        payload['extra-vars']['encrypt'] = this.props.deployConfig['encryptKey'];
-        payload['extra-vars']['rekey'] = '';
-      } else {
-        payload['extra-vars']['encrypt'] = '';
-        payload['extra-vars']['rekey'] = '';
-      }
-      if (this.props.deployConfig['clearServers']) {
-        payload['extra-vars']['remove_deleted_servers'] = 'y';
-        payload['extra-vars']['free_unused_addresses'] = 'y';
-      }
+    if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
+      steps.push({
+        label: translate('server.deploy.progress.wipe-disks'),
+        playbooks: [constants.WIPE_DISKS_PLAYBOOK + '.yml'],
+      });
     }
 
-    this.playbooks = [constants.PRE_DEPLOYMENT_PLAYBOOK, sitePlaybook];
+    steps.push({
+      label: translate('deploy.progress.step6'),
+      playbooks: [constants.SITE_PLAYBOOK + '.yml'],
+    });
+
+    return steps;
+  }
+
+  getPlaybooks = () => {
+    let playbooks = [constants.PRE_DEPLOYMENT_PLAYBOOK];
+    if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
+      let book = { name: constants.WIPE_DISKS_PLAYBOOK };
+      // If user specified wipeDisks nodes, will have limit payload
+      // If user didn't specify wipeDisks nodes but wipe disks check,
+      // will wipe disk for all the nodes.
+      if(this.state.internalModel && !isEmpty(this.props.deployConfig.nodeListForWipeDisk)) {
+        let hosts = this.state.internalModel['internal']['servers'];
+        hosts = hosts.filter(host=> {
+          return this.props.deployConfig.nodeListForWipeDisk.includes(host.id);
+        });
+        let  ansibleHosts = hosts.map(host => host['ardana_ansible_host']);
+        book.payload =  {limit: ansibleHosts.join(',')};
+      }
+
+      playbooks.push(book);
+    }
+    playbooks.push({name: constants.SITE_PLAYBOOK});
+    return playbooks;
+  }
+
+  render() {
+    // choose between site or site with wipedisks (installui-wipe-and-site)
+    //let sitePlaybook = constants.SITE_PLAYBOOK;
+    let steps = this.getSteps();
+    let playbooks = this.getPlaybooks();
+
+    // Build the payload from the deployment configuration page options
+    let common_payload = {};
+    if (this.props.deployConfig) {
+      common_payload['verbose'] = this.props.deployConfig['verbosity'];
+      common_payload['extra-vars'] = {};
+      // don't prompt "Are you sure?" questions for wipedisks
+      common_payload['extra-vars']['automate'] = 'true';
+      if (this.props.deployConfig['encryptKey']) {
+        common_payload['extra-vars']['encrypt'] = this.props.deployConfig['encryptKey'];
+        common_payload['extra-vars']['rekey'] = '';
+      } else {
+        common_payload['extra-vars']['encrypt'] = '';
+        common_payload['extra-vars']['rekey'] = '';
+      }
+      if (this.props.deployConfig['clearServers']) {
+        common_payload['extra-vars']['remove_deleted_servers'] = 'y';
+        common_payload['extra-vars']['free_unused_addresses'] = 'y';
+      }
+    }
 
     return (
       <div className='wizard-page'>
         <div className='content-header'>
           {this.renderHeading(translate('deploy.progress.heading'))}
         </div>
+        <LoadingMask show={this.state.loading}/>
         <div className='wizard-content'>
-          <PlaybookProgress
-            updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-            playbookStatus = {this.props.playbookStatus}
-            steps = {PLAYBOOK_STEPS}
-            playbooks = {this.playbooks} payload = {payload}/>
+          <If condition={!this.state.loading}>
+            <PlaybookProgress
+              updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
+              playbookStatus = {this.props.playbookStatus}
+              steps = {steps}
+              playbooks = {playbooks} payload = {common_payload}/>
+          </If>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}
               show={this.state.overallStatus === constants.STATUS.FAILED}/>
