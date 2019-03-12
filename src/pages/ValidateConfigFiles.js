@@ -38,6 +38,19 @@ const TAB = {
   CONFIG_FORM: 'CONFIG_FORM'
 };
 
+
+const ErrorAlert = (props) => (
+  <Alert key='validate-invalid' variant='danger'>
+    <div>
+      {translate('validate.config.files.msg.invalid')}
+      <br/>
+      <pre className='log'>
+        {props.message}
+      </pre>
+    </div>
+  </Alert>
+);
+
 class EditFile extends Component {
 
   constructor(props) {
@@ -82,39 +95,34 @@ class EditFile extends Component {
   }
 
   render() {
-    let errorMsgPanel = '';
-    let editPanelCssClass = 'file-editor col-md-12';
-    if (this.props.valid === INVALID) {//TODO - need a max height on the errorMsgPanel
-      errorMsgPanel =
-        <div className="col-md-6 errorMsgPanel">{translate('validate.config.files.msg.invalid')}<br/>
-          <pre className="log">{this.props.invalidMsg}</pre></div>;
-      editPanelCssClass = 'file-editor col-md-6';
-    }
+    //TODO - need a max height on the errorMsgPanel
+    let editPanelCssClass = `file-editor ${this.props.valid === INVALID ? 'col-md-6 verticalLine' : 'col-md-12'}`;
 
     return (
-
-      <div>
+      <div className="validate-config-files">
         <h3>{this.props.file.name}</h3>
         <div className='row'>
-          <div className='col-md-12'>
-            <div className={editPanelCssClass}>
-              <Choose>
-                <When condition={this.state.loading}>
-                  <h3>{translate('loading.pleasewait')}</h3>
-                </When>
-                <Otherwise>
-                  <ValidatingInput
-                    inputValue={this.state.contents}
-                    inputName='fileContents'
-                    inputType='textarea'
-                    inputValidate={YamlValidator}
-                    inputAction={this.handleChange}
-                  />
-                </Otherwise>
-              </Choose>
-            </div>
-            {errorMsgPanel}
+          <div className={editPanelCssClass}>
+            <Choose>
+              <When condition={this.state.loading}>
+                <h3>{translate('loading.pleasewait')}</h3>
+              </When>
+              <Otherwise>
+                <ValidatingInput
+                  inputValue={this.state.contents}
+                  inputName='fileContents'
+                  inputType='textarea'
+                  inputValidate={YamlValidator}
+                  inputAction={this.handleChange}
+                />
+              </Otherwise>
+            </Choose>
           </div>
+          <If condition={this.props.valid === INVALID}>
+            <div className="col-md-6">
+              <ErrorAlert message={this.props.invalidMsg} />
+            </div>
+          </If>
         </div>
         <div className='btn-row'>
           <ActionButton type='default'
@@ -153,15 +161,7 @@ class DisplayFileList extends Component {
       );
     } else {
       return (
-        <Alert key='validate-invalid' variant='danger'>
-          <div>
-            {translate('validate.config.files.msg.invalid')}
-            <br/>
-            <pre className='log'>
-              {this.props.invalidMsg}
-            </pre>
-          </div>
-        </Alert>
+        <ErrorAlert message={this.props.invalidMsg} />
       );
     }
   }
