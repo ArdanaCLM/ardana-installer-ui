@@ -387,7 +387,7 @@ class ConfigForm extends Component {
         encryptKey: '',
         verbosity: 0,
         clearServers: false,
-        sshPassphrase: '',
+        sshPassphrase: ''
       };
     } else {
       this.state = props.deployConfig;
@@ -549,7 +549,7 @@ class ConfigPage extends BaseWizardPage {
       isBackable: true,
       showNavButtons: true,
       disableTab: false,
-      requiresPassword: false
+      requiresPassword: false,
     };
   }
 

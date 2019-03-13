@@ -21,7 +21,7 @@ import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { getInternalModel } from './topology/TopologyUtils.js';
-import {LoadingMask} from '../components/LoadingMask';
+import { LoadingMask } from '../components/LoadingMask.js';
 
 
 /*
