@@ -26,7 +26,7 @@ import HelpText from '../components/HelpText.js';
 import { InfoBanner } from '../components/Messages.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
 import { STATUS } from '../utils/constants.js';
-import ListMultipleSelect from '../components/ListMultipleSelect.js';
+import TransferTable from '../components/TransferTable.js';
 
 const INVALID = 0;
 const VALID = 1;
@@ -382,7 +382,8 @@ class ConfigForm extends Component {
     if (!props.deployConfig) {
       this.state = {
         wipeDisks: false,
-        nodeListForWipeDisk: undefined,
+        nodeListForWipeDisk: undefined, // rightList
+        nodeListNotForWipeDisk: undefined, //leftList
         encryptKey: '',
         verbosity: 0,
         clearServers: false,
@@ -394,16 +395,15 @@ class ConfigForm extends Component {
   }
 
   handleWipeDisks = () => {
-    // this.setState({wipeDisks: !this.state.wipeDisks});
     this.setState(preState => {
-      // wipeDisk is true
       if(preState.wipeDisks) {
-        //now wipeDisk is false
-        return {wipeDisks : !preState.wipeDisks, nodeListForWipeDisk: undefined};
+        //now wipeDisks is from true to false
+        return {wipeDisks : !preState.wipeDisks, nodeListForWipeDisk: [], nodeListNotForWipeDisk: []};
       }
       else {
-        //now wipeDisk is true
-        return {wipeDisks : !preState.wipeDisks};
+        //now wipeDisks is from false to true
+        return {
+          wipeDisks : !preState.wipeDisks, nodeListForWipeDisk: this.props.nodeList, nodeListNotForWipeDisk: []};
       }
     });
   }
@@ -419,10 +419,6 @@ class ConfigForm extends Component {
   handleSshPassphrase = (e) => {
     this.setState({sshPassphrase: e.target.value});
     this.props.passAction(e.target.value);
-  }
-
-  handleSelectWipeDiskNodes = (selected) => {
-    this.setState({nodeListForWipeDisk: selected});
   }
 
   renderSshPassphrase() {
@@ -446,6 +442,14 @@ class ConfigForm extends Component {
         </div>
       );
     }
+  }
+
+  handleUpdateLeftTable = (list) => {
+    this.setState({nodeListNotForWipeDisk: list});
+  }
+
+  handleUpdateRightTable = (list) => {
+    this.setState({nodeListForWipeDisk: list});
   }
 
   render() {
@@ -515,10 +519,15 @@ class ConfigForm extends Component {
                 value='wipedisks'
                 checked={this.state.wipeDisks}
                 onChange={this.handleWipeDisks}/>
-              <div>{this.state.nodeListForWipeDisk?.join(',')}</div>
               <If condition={this.state.wipeDisks}>
-                <ListMultipleSelect name='nodelist' selectedOptions={this.state.nodeListForWipeDisk}
-                  options={this.props.nodeList} selectAction={this.handleSelectWipeDiskNodes}/>
+                <TransferTable
+                  moreClass='wipe-disk-node-select'
+                  leftList={this.state.nodeListNotForWipeDisk}
+                  rightList={this.state.nodeListForWipeDisk}
+                  updateLeftList={this.handleUpdateLeftTable}
+                  updateRightList={this.handleUpdateRightTable}
+                  leftTableHeader={translate('provision.server.left.table')}
+                  rightTableHeader={translate('provision.server.right.table')}/>
               </If>
             </div>
           </div>
@@ -607,7 +616,7 @@ class ConfigPage extends BaseWizardPage {
 
   render() {
     const nodeIdList =
-      this.props.model?.getIn(['inputModel', 'servers']).map(server => server.get('id')).sort();
+      this.props.model?.getIn(['inputModel', 'servers']).toJS().map(server => server.id).sort();
     return (
       <div className='wizard-page'>
         <div className='content-header'>

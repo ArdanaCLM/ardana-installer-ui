@@ -47,13 +47,14 @@ class CloudDeployProgress extends BaseWizardPage {
       overallStatus: constants.STATUS.UNKNOWN // overall status of entire playbook
     };
   }
+
   async componentWillMount() {
-    // If wipeDisks checked and nodeListForWipeDisk is not empty, we need to limit
+    // If wipeDisks checked and nodeListNotForWipeDisk is not empty, we need to limit
     // nodes for wipeDisks
-    // If wipeDisks checked and nodeListForWipeDisk is empty, we will wipeDisks for
+    // If wipeDisks checked and nodeListNotForWipeDisk is empty, we will wipeDisks for
     // all the nodes
     if(!this.state.internalModel && this.props.deployConfig.wipeDisks &&
-      !isEmpty(this.props.deployConfig.nodeListForWipeDisk)) {
+      !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
       this.setState({loading: true});
       const model = await getInternalModel();
       this.setState({loading: false});
@@ -69,7 +70,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   // Clear out the global playbookStatus entry for PRE_DEPLOYMENT_PLAYBOOK,
-  // DAYZERO_SITE_PLAYBOOK or SITE_PLAYBOOK
+  // WIPE_DISKS_PLAYBOOK or SITE_PLAYBOOK
   // which permits running the deploy multiple times when have errors and
   // need to go back
   resetPlaybookStatus = () => {
@@ -97,6 +98,7 @@ class CloudDeployProgress extends BaseWizardPage {
       let newDeployConfig = JSON.parse(JSON.stringify(this.props.deployConfig));
       newDeployConfig.wipeDisks = false;
       newDeployConfig.nodeListForWipeDisk = undefined;
+      newDeployConfig.nodeListNotForWipeDisk = undefined;
       this.props.updateGlobalState('deployConfig', newDeployConfig);
     }
     super.goBack(e);
@@ -152,13 +154,14 @@ class CloudDeployProgress extends BaseWizardPage {
 
   getPlaybooks = () => {
     let playbooks = [constants.PRE_DEPLOYMENT_PLAYBOOK];
+
     if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
       let book = { name: constants.WIPE_DISKS_PLAYBOOK };
-      // If user specified wipeDisks nodes, will have limit payload
-      // If user didn't specify wipeDisks nodes but wipe disks check,
-      // will wipe disk for all the nodes.
-      if(this.state.internalModel && !isEmpty(this.props.deployConfig.nodeListForWipeDisk)) {
+      // If user unselected nodes from wipeDisks, will have limit payload
+      // If user didn't unselected wipeDisks nodes, will wipe disk for all the nodes.
+      if(this.state.internalModel && !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
         let hosts = this.state.internalModel['internal']['servers'];
+        // find the ansible host names for the nodes need to be wiped disks
         hosts = hosts.filter(host=> {
           return this.props.deployConfig.nodeListForWipeDisk.includes(host.id);
         });
@@ -169,12 +172,11 @@ class CloudDeployProgress extends BaseWizardPage {
       playbooks.push(book);
     }
     playbooks.push({name: constants.SITE_PLAYBOOK});
+
     return playbooks;
   }
 
   render() {
-    // choose between site or site with wipedisks (installui-wipe-and-site)
-    //let sitePlaybook = constants.SITE_PLAYBOOK;
     let steps = this.getSteps();
     this.playbooks = this.getPlaybooks();
 
