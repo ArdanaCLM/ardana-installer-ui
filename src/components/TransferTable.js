@@ -28,10 +28,15 @@ class InnerTable extends Component {
           <td>{item}</td></tr>);
       }
     }));
+    let tableClass = 'table-container rounded-corner';
+    if(this.props.moreClass) {
+      tableClass =
+        'table-container ' + this.props.moreClass + ' rounded-corner';
+    }
     return (
       <div>
         <h5>{this.props.header}</h5>
-        <div className='table-container rounded-corner'>
+        <div className={tableClass}>
           <table><tbody>{lines}</tbody></table>
         </div>
       </div>
@@ -140,16 +145,20 @@ class TransferTable extends Component {
   }
 
   render() {
+    let buttonClass = 'transfer-button-container';
+    if(this.props.moreClass) {
+      buttonClass = buttonClass + ' ' + this.props.moreClass;
+    }
     return (
       <div className='transfer-table'>
         <div className='table-width'>
-          <InnerTable items={this.props.leftList}
+          <InnerTable moreClass={this.props.moreClass} items={this.props.leftList}
             clickAction={(event) => this.selectOnTable(true, event)}
             header={this.props.leftTableHeader}
             selectedItems={this.state.selectedLeft}/>
         </div>
 
-        <div className='transfer-button-container'>
+        <div className={buttonClass}>
           <div className='inner-button-container'>
             <AssignmentButton clickAction={this.transferAllToRight} type='double-right'
               isDisabled={this.props.leftList.length == 0}/>
@@ -163,7 +172,7 @@ class TransferTable extends Component {
         </div>
 
         <div className='table-width'>
-          <InnerTable items={this.props.rightList}
+          <InnerTable moreClass={this.props.moreClass} items={this.props.rightList}
             clickAction={(event) => this.selectOnTable(false, event)}
             header={this.props.rightTableHeader}
             selectedItems={this.state.selectedRight}/>
