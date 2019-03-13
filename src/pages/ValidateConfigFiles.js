@@ -444,11 +444,11 @@ class ConfigForm extends Component {
     }
   }
 
-  handleUpdateLeftTable = (list) => {
+  handleUpdateWipeDiskLeftTable = (list) => {
     this.setState({nodeListNotForWipeDisk: list});
   }
 
-  handleUpdateRightTable = (list) => {
+  handleUpdateWipeDiskRightTable = (list) => {
     this.setState({nodeListForWipeDisk: list});
   }
 
@@ -524,8 +524,8 @@ class ConfigForm extends Component {
                   moreClass='wipe-disk-node-select'
                   leftList={this.state.nodeListNotForWipeDisk}
                   rightList={this.state.nodeListForWipeDisk}
-                  updateLeftList={this.handleUpdateLeftTable}
-                  updateRightList={this.handleUpdateRightTable}
+                  updateLeftList={this.handleUpdateWipeDiskLeftTable}
+                  updateRightList={this.handleUpdateWipeDiskRightTable}
                   leftTableHeader={translate('provision.server.left.table')}
                   rightTableHeader={translate('provision.server.right.table')}/>
               </If>
