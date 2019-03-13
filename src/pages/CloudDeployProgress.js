@@ -153,7 +153,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   getPlaybooks = () => {
-    let playbooks = [constants.PRE_DEPLOYMENT_PLAYBOOK];
+    let playbooks = [{name: constants.PRE_DEPLOYMENT_PLAYBOOK}];
 
     if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
       let book = { name: constants.WIPE_DISKS_PLAYBOOK };
