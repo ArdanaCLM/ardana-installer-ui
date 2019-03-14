@@ -149,7 +149,7 @@
     "validate.config.sshPassphrase.error": "Error with supplied SSH passphrase: {0}",
     "validate.config.sshPassphrase.missing": "An SSH passphrase is required in the Deployment tab.",
     "validate.deployment.doWipeDisks": "Wipe data disks",
-    "validate.deployment.doWipeDisks.tooltip": "Wipes the GPT(MBR) on the disks' partitions before cloud deployment.",
+    "validate.deployment.doWipeDisks.tooltip": "Wipes the data and destroys the GPT and MBR on each non-system disk before cloud deployment.",
     "validate.deployment.doWipeDisks.warning": "Warning: all data disks on selected servers will be wiped.",
     "validate.deployment.encryptKey": "Encryption key",
     "validate.deployment.encryptKey.tooltip": "Password used to encrypt sensitive data and service passwords.",
