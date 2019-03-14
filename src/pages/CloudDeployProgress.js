@@ -154,7 +154,7 @@ class CloudDeployProgress extends BaseWizardPage {
   }
 
   getCloudInternalModel = (logger) => {
-    logger('Getting Cloud Internal Model...');
+    logger('Getting cloud internal model...');
     return getInternalModel()
       .then(cloudModel => {
         this.internalModel = cloudModel;
