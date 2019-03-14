@@ -21,7 +21,8 @@ import BaseWizardPage from './BaseWizardPage.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { getInternalModel } from './topology/TopologyUtils.js';
-import { LoadingMask } from '../components/LoadingMask.js';
+
+const GET_CLOUD_INTERNAL_MODEL = 'get_cloud_internal_model';
 
 
 /*
@@ -40,26 +41,11 @@ class CloudDeployProgress extends BaseWizardPage {
     super(props);
 
     this.playbooks = [];
+    this.internalModel = undefined;
 
     this.state = {
-      loading: false,
-      internalModel: undefined,
       overallStatus: constants.STATUS.UNKNOWN // overall status of entire playbook
     };
-  }
-
-  async componentWillMount() {
-    // If wipeDisks checked and nodeListNotForWipeDisk is not empty, we need to limit
-    // nodes for wipeDisks
-    // If wipeDisks checked and nodeListNotForWipeDisk is empty, we will wipeDisks for
-    // all the nodes
-    if(!this.state.internalModel && this.props.deployConfig.wipeDisks &&
-      !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
-      this.setState({loading: true});
-      const model = await getInternalModel();
-      this.setState({loading: false});
-      this.setState({internalModel: model});
-    }
   }
 
   setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
@@ -114,7 +100,29 @@ class CloudDeployProgress extends BaseWizardPage {
     }, {
       label: translate('deploy.progress.predeployment'),
       playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
-    }, {
+    }];
+
+    if (this.props.deployConfig && this.props.deployConfig.wipeDisks) {
+      // If wipeDisks checked and nodeListNotForWipeDisk is not empty, need to limit
+      // nodes for wipeDisks. Get the internal model so can get ansible host names
+      if(!isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
+        steps.push({
+          label: translate('server.deploy.progress.get_internalmodel'),
+          playbooks: [GET_CLOUD_INTERNAL_MODEL],
+        });
+      }
+
+      // If wipeDisks checked and nodeListNotForWipeDisk is not empty, need to limit
+      // nodes for wipeDisks
+      // If wipeDisks checked and nodeListNotForWipeDisk is empty, will wipeDisks for
+      // all the nodes
+      steps.push({
+        label: translate('server.deploy.progress.wipe-disks'),
+        playbooks: [constants.WIPE_DISKS_PLAYBOOK + '.yml'],
+      });
+    }
+
+    steps = steps.concat([{
       label: translate('deploy.progress.step1'),
       playbooks: [constants.NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
     }, {
@@ -135,14 +143,7 @@ class CloudDeployProgress extends BaseWizardPage {
     }, {
       label: translate('deploy.progress.step5'),
       playbooks: [constants.ARDANA_STATUS_PLAYBOOK + '.yml']
-    }];
-
-    if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
-      steps.push({
-        label: translate('server.deploy.progress.wipe-disks'),
-        playbooks: [constants.WIPE_DISKS_PLAYBOOK + '.yml'],
-      });
-    }
+    }]);
 
     steps.push({
       label: translate('deploy.progress.step6'),
@@ -152,15 +153,43 @@ class CloudDeployProgress extends BaseWizardPage {
     return steps;
   }
 
+  getCloudInternalModel = (logger) => {
+    logger('Getting Cloud Internal Model...');
+    return getInternalModel()
+      .then(cloudModel => {
+        this.internalModel = cloudModel;
+        logger('Successfully got cloud internal model.');
+      })
+      .catch(error => {
+        const logMsg =
+          'Error: Failed to get cloud internal model. ' + error.toString();
+        logger(logMsg);
+        const msg =
+          translate('server.deploy.progress.get_internalmodel.failure',
+            error.toString());
+        throw new Error(msg);
+      });
+  }
+
   getPlaybooks = () => {
     let playbooks = [{name: constants.PRE_DEPLOYMENT_PLAYBOOK}];
 
-    if (this.props.deployConfig && this.props.deployConfig['wipeDisks']) {
+    if (this.props.deployConfig && this.props.deployConfig.wipeDisks &&
+        !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
+      playbooks.push({
+        name: GET_CLOUD_INTERNAL_MODEL,
+        action: ((logger) => {
+          return this.getCloudInternalModel(logger);
+        })
+      });
+    }
+
+    if (this.props.deployConfig && this.props.deployConfig.wipeDisks) {
       let book = { name: constants.WIPE_DISKS_PLAYBOOK };
       // If user unselected nodes from wipeDisks, will have limit payload
       // If user didn't unselected wipeDisks nodes, will wipe disk for all the nodes.
-      if(this.state.internalModel && !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
-        let hosts = this.state.internalModel['internal']['servers'];
+      if(this.internalModel && !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
+        let hosts = this.internalModel['internal']['servers'];
         // find the ansible host names for the nodes need to be wiped disks
         hosts = hosts.filter(host=> {
           return this.props.deployConfig.nodeListForWipeDisk.includes(host.id);
@@ -205,15 +234,12 @@ class CloudDeployProgress extends BaseWizardPage {
         <div className='content-header'>
           {this.renderHeading(translate('deploy.progress.heading'))}
         </div>
-        <LoadingMask show={this.state.loading}/>
         <div className='wizard-content'>
-          <If condition={!this.state.loading}>
-            <PlaybookProgress
-              updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
-              playbookStatus = {this.props.playbookStatus}
-              steps = {steps}
-              playbooks = {this.playbooks} payload = {common_payload}/>
-          </If>
+          <PlaybookProgress
+            updatePageStatus = {this.updatePageStatus} updateGlobalState = {this.props.updateGlobalState}
+            playbookStatus = {this.props.playbookStatus}
+            steps = {steps}
+            playbooks = {this.playbooks} payload = {common_payload}/>
           <div className='banner-container'>
             <ErrorBanner message={translate('deploy.progress.failure')}
               show={this.state.overallStatus === constants.STATUS.FAILED}/>
