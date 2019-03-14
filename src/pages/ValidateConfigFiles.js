@@ -63,7 +63,6 @@ class EditFile extends Component {
   }
 
   componentWillMount() {
-    this.setState({loading: true});
     fetchJson('/api/v2/model/files/' + this.props.file.name)
       .then((response) => {
         this.setState({contents: response, loading: false});
@@ -72,13 +71,13 @@ class EditFile extends Component {
 
   handleDone = () => {
     this.props.setChanged();
-    this.props.doneEditingFile();
 
     this.setState({loading: true});
     postJson('/api/v2/model/files/' + this.props.file.name, JSON.stringify(this.state.contents))
       .then(() => {
         this.setState({loading: false});
         this.props.loadModel();
+        this.props.doneEditingFile();
       });
   }
 
@@ -174,6 +173,13 @@ class DisplayFileList extends Component {
     }
   }
 
+  handleLinkClick(file) {
+    return (event) => {
+      event?.preventDefault?.();
+      this.props.onEditClick(file);
+    };
+  }
+
   render() {
     // make a copy of the yml file list and sort them by description
     var fileList = this.props.files.slice();
@@ -188,7 +194,7 @@ class DisplayFileList extends Component {
         </li>);
       }
       return (<li key={index}>
-        <a href="#" onClick={() => this.props.onEditClick(file)}>
+        <a href="#" onClick={this.handleLinkClick(file)}>
           {file.description + (file.changed ? ' *' : '')}
         </a>
       </li>);
@@ -220,7 +226,7 @@ class DisplayFileList extends Component {
   }
 }
 
-class ValidateConfigFiles extends Component {
+export class ValidateConfigFiles extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -310,36 +316,30 @@ class ValidateConfigFiles extends Component {
       });
   }
 
-  renderBody() {
-    if (this.state.editingFile === '') {
-      return (
-        <DisplayFileList
-          files={this.state.configFiles}
-          back={this.props.back}
-          next={this.props.next}
-          onValidateClick={() => this.validateModel()}
-          onEditClick={(file) => this.editFile(file)}
-          valid={this.state.valid}
-          invalidMsg={this.state.invalidMsg}
-        />);
-    } else {
-      return (
-        <EditFile
-          file={this.state.editingFile}
-          doneEditingFile={() => this.doneEditingFile()}
-          valid={this.state.valid}
-          setChanged={() => this.setChanged()}
-          loadModel={this.props.loadModel}
-          invalidMsg={this.state.invalidMsg}
-        />
-      );
-    }
-  }
-
   render() {
     return (
       <div>
-        {this.renderBody()}
+        <If condition={this.state.editingFile === ''}>
+          <DisplayFileList
+            files={this.state.configFiles}
+            back={this.props.back}
+            next={this.props.next}
+            onValidateClick={() => this.validateModel()}
+            onEditClick={(file) => this.editFile(file)}
+            valid={this.state.valid}
+            invalidMsg={this.state.invalidMsg}
+          />
+        </If>
+        <If condition={this.state.editingFile !== ''}>
+          <EditFile
+            file={this.state.editingFile}
+            doneEditingFile={() => this.doneEditingFile()}
+            valid={this.state.valid}
+            setChanged={() => this.setChanged()}
+            loadModel={this.props.loadModel}
+            invalidMsg={this.state.invalidMsg}
+          />
+        </If>
       </div>
     );
   }

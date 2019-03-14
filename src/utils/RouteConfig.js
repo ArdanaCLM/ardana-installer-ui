@@ -32,6 +32,7 @@ import Services from '../pages/topology/Services.js';
 import Network from '../pages/topology/Networks.js';
 import Servers from '../pages/topology/Servers.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
+import ModelConfiguration from '../pages/ModelConfiguration';
 import { isProduction } from './ConfigHelper.js';
 
 class ServerSummary extends  Component {
@@ -59,6 +60,7 @@ export const routes = [
       { name: translate('information'), slug: '/services/info', component: ServiceInfo },
       { name: translate('packages.ardana'), slug: '/services/packages', component: ArdanaPackages },
       { name: translate('configuration'), slug: '/services/configuration', component: ServiceConfiguration },
+      { name: translate('model'), slug: '/services/model', component: ModelConfiguration },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
   },
