@@ -520,6 +520,7 @@ class ConfigForm extends Component {
                 checked={this.state.wipeDisks}
                 onChange={this.handleWipeDisks}/>
               <If condition={this.state.wipeDisks}>
+                <div className='wipe-disk-warning'>{translate('validate.deployment.doWipeDisks.warning')}</div>
                 <TransferTable
                   moreClass='wipe-disk-node-select'
                   leftList={this.state.nodeListNotForWipeDisk}
