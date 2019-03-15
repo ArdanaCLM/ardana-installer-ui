@@ -22,7 +22,7 @@ import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { getInternalModel } from './topology/TopologyUtils.js';
 
-const GET_CLOUD_INTERNAL_MODEL = 'get_cloud_internal_model';
+const GET_GEN_CLOUD_MODEL = 'get_generated_cloud_model';
 
 
 /*
@@ -80,7 +80,7 @@ class CloudDeployProgress extends BaseWizardPage {
     this.resetPlaybookStatus();
 
     // reset wipeDisks to false
-    if (this.props.deployConfig.wipeDisks) {
+    if (this.props.deployConfig?.wipeDisks) {
       let newDeployConfig = JSON.parse(JSON.stringify(this.props.deployConfig));
       newDeployConfig.wipeDisks = false;
       newDeployConfig.nodeListForWipeDisk = undefined;
@@ -88,6 +88,24 @@ class CloudDeployProgress extends BaseWizardPage {
       this.props.updateGlobalState('deployConfig', newDeployConfig);
     }
     super.goBack(e);
+  }
+
+  getCloudInternalModel = (logger) => {
+    logger('Getting the generated cloud model...');
+    return getInternalModel()
+      .then(cloudModel => {
+        this.internalModel = cloudModel;
+        logger('Successfully got the generated cloud model.');
+      })
+      .catch(error => {
+        const logMsg =
+          'Error: Failed to get the generated cloud model. ' + error.toString();
+        logger(logMsg);
+        const msg =
+          translate('server.deploy.progress.get_cloudmodel.failure',
+            error.toString());
+        throw new Error(msg);
+      });
   }
 
   getSteps = () => {
@@ -102,13 +120,13 @@ class CloudDeployProgress extends BaseWizardPage {
       playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     }];
 
-    if (this.props.deployConfig && this.props.deployConfig.wipeDisks) {
+    if (this.props.deployConfig?.wipeDisks) {
       // If wipeDisks checked and nodeListNotForWipeDisk is not empty, need to limit
       // nodes for wipeDisks. Get the internal model so can get ansible host names
       if(!isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
         steps.push({
-          label: translate('server.deploy.progress.get_internalmodel'),
-          playbooks: [GET_CLOUD_INTERNAL_MODEL],
+          label: translate('server.deploy.progress.get_cloudmodel'),
+          playbooks: [GET_GEN_CLOUD_MODEL],
         });
       }
 
@@ -153,38 +171,20 @@ class CloudDeployProgress extends BaseWizardPage {
     return steps;
   }
 
-  getCloudInternalModel = (logger) => {
-    logger('Getting cloud internal model...');
-    return getInternalModel()
-      .then(cloudModel => {
-        this.internalModel = cloudModel;
-        logger('Successfully got cloud internal model.');
-      })
-      .catch(error => {
-        const logMsg =
-          'Error: Failed to get cloud internal model. ' + error.toString();
-        logger(logMsg);
-        const msg =
-          translate('server.deploy.progress.get_internalmodel.failure',
-            error.toString());
-        throw new Error(msg);
-      });
-  }
-
   getPlaybooks = () => {
     let playbooks = [{name: constants.PRE_DEPLOYMENT_PLAYBOOK}];
 
-    if (this.props.deployConfig && this.props.deployConfig.wipeDisks &&
+    if (this.props.deployConfig?.wipeDisks &&
         !isEmpty(this.props.deployConfig.nodeListNotForWipeDisk)) {
       playbooks.push({
-        name: GET_CLOUD_INTERNAL_MODEL,
+        name: GET_GEN_CLOUD_MODEL,
         action: ((logger) => {
           return this.getCloudInternalModel(logger);
         })
       });
     }
 
-    if (this.props.deployConfig && this.props.deployConfig.wipeDisks) {
+    if (this.props.deployConfig?.wipeDisks) {
       let book = { name: constants.WIPE_DISKS_PLAYBOOK };
       // If user unselected nodes from wipeDisks, will have limit payload
       // If user didn't unselected wipeDisks nodes, will wipe disk for all the nodes.
