@@ -17,7 +17,7 @@
 .spinners-container {
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   margin: auto;
@@ -28,15 +28,6 @@
     width: 36px;
     height: 36px;
   }
-}
-
-// the modal mask calculations are not a great way to handle this, as they require
-// updates if the underlying styling changes
-// TODO - improve this
-.input-modal-mask {
-  top: -66px;
-  height: 113%;
-  border-radius: 5px;
 }
 
 .spinners {
@@ -60,6 +51,3 @@
   font-weight: bold;
 }
 
-.details-modal-mask {
-  position: fixed;
-}

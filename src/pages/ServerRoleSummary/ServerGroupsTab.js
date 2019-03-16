@@ -248,7 +248,7 @@ class ServerGroupsTab extends Component {
           </div>
         </If>
         <If condition={this.state.loading}>
-          <LoadingMask className='input-modal-mask' show={this.state.loading}></LoadingMask>
+          <LoadingMask show={this.state.loading}></LoadingMask>
         </If>
       </div>
     );

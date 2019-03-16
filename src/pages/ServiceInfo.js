@@ -460,7 +460,7 @@ class ServiceInfo extends Component {
             title={translate('services.details', this.state.selectedService.name)}/>
         </If>
         {this.renderErrorMessage()}
-        <LoadingMask className='details-modal-mask' show={this.state.showLoadingMask}></LoadingMask>
+        <LoadingMask show={this.state.showLoadingMask}></LoadingMask>
         <div className='menu-tab-content'>
           <div className='header'>{translate('services.info')}</div>
           <table className='table'>
