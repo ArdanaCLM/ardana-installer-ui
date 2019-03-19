@@ -291,7 +291,7 @@ class ConnectionCredsInfo extends Component {
 
   renderLoadingMask() {
     return (
-      <LoadingMask className='input-modal-mask' show={this.state.loading}></LoadingMask>
+      <LoadingMask show={this.state.loading}></LoadingMask>
     );
   }
 
