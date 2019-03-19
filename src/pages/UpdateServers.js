@@ -124,15 +124,16 @@ class UpdateServers extends BaseUpdateWizardPage {
           };
         });
       }
+      let internalModel = this.state.internalModel;
       if(!this.state.internalModel) {
-        const model = await getInternalModel();
-        this.setState({ internalModel: fromJS(model) });
+        internalModel = fromJS(await getInternalModel());
+        this.setState({ internalModel });
       }
       if(!this.state.osUsername) {
         this.getUsername();
       }
       let promises = [
-        this.getServerStatuses(),
+        this.getServerStatuses(internalModel),
         this.checkMonasca()
       ];
       await Promise.all(promises);
@@ -253,8 +254,10 @@ class UpdateServers extends BaseUpdateWizardPage {
     }
   }
 
-  async getServerStatuses() {
-    let internalModelServers = this.state.internalModel?.getIn(['internal', 'servers']).toJS();
+  async getServerStatuses(internalModel) {
+    // make sure the model it loaded, we need to fetch some things from it.
+    await this.props.loadModel();
+    let internalModelServers = internalModel?.getIn(['internal', 'servers']).toJS();
     let servers = this.props.model?.getIn(['inputModel','servers']).toJS()
       .filter(s => s.role.includes('COMPUTE'))
       .map(s => {
