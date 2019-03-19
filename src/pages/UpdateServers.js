@@ -573,6 +573,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         getReachability(server['ip-addr'])
       ];
       let [ instances, conectivityStatus ] = await Promise.all(promises);
+      let hasInstances = instances?.length > 0;
       this.setState(prev => ({
         serverStatuses: {
           ...prev.serverStatuses,
@@ -580,7 +581,8 @@ class UpdateServers extends BaseUpdateWizardPage {
             ...prev.serverStatuses[id],
             internal: {
               ...prev.serverStatuses[id].internal,
-              isReachable: conectivityStatus
+              isReachable: conectivityStatus,
+              hasInstances: hasInstances
             }
           }
         },

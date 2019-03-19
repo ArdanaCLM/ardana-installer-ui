@@ -318,7 +318,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
   }
 
-  getSteps = () => {
+  getSteps() {
     let steps = [];
     if (this.props.operationProps.oldServer.isReachable) {
       steps.push({
@@ -398,7 +398,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     return steps;
   }
 
-  getPlaybooks = () => {
+  getPlaybooks() {
     let playbooks = [];
 
     if (this.props.operationProps.oldServer.isReachable) {

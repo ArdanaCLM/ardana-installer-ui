@@ -90,8 +90,12 @@ export const MONASCA_AGENT_DEPLOY_PLAYBOOK = 'monasca-agent-deploy';
 export const MONASCA_REBUILD_PRETASKS_PLAYBOOK = 'monasca-rebuild-pretasks';
 export const MONASCA_TRANSFORM_DEPLOY_PLAYBOOK = 'monasca-transform-deploy';
 
-export const COMMIT_MODEL_CHANGE_ACTION = 'commit_model_change';
-
 export const NOVA_HOST_EVACUATE_PLAYBOOK ='nova-host-evacuate';
+
+export const COMMIT_MODEL_CHANGE_ACTION = 'commit_model_change';
+export const DISABLE_COMPUTE_SERVICE_ACTION = 'disable_compute_service';
+export const REMOVE_FROM_AGGREGATES_ACTION = 'remove_from_aggregates';
+export const MIGRATE_INSTANCES_ACTIOIN = 'migrate_instances';
+export const DISABLE_NETWORK_AGENTS_ACTION = 'disable_network_agents';
 
 
