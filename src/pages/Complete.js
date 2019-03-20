@@ -42,7 +42,12 @@ class Complete extends BaseWizardPage {
         linksLoaing: false
       });
     } catch(error) {
-      console.log('Unable to retrieve external URLs'); // eslint-disable-line no-console
+      console.log('Unable to retrieve external URLs', error); // eslint-disable-line no-console
+      this.setState({
+        linksError: typeof error === 'string' ? error : error.message || JSON.stringify(error),
+        links: null,
+        linksLoaing: false
+      });
     }
   }
 
@@ -56,7 +61,7 @@ class Complete extends BaseWizardPage {
         {translate('complete.message.body3', modelName)}</div>);
     }
 
-    let links = Object.keys(this.state.links).filter(linkName => {
+    let links = Object.keys(this.state.links || {}).filter(linkName => {
       return this.state.links[linkName]?.length > 0;
     }).map(linkName => {
       return <li className='body-link' key={linkName}>
@@ -82,17 +87,20 @@ class Complete extends BaseWizardPage {
           <div className='body-header'>
             {translate(
               'complete.message.body4',
-              <a href={this.state.links['ardana-service']}>{translate('day2.product.title')}</a>
+              <a href={this.state.links?.['ardana-service']}>{translate('day2.product.title')}</a>
             )}
           </div>
           <div className='body-header'>{translate('complete.message.link.heading')}</div>
           <If condition={this.state.linksLoaing}>
             <h4>{translate('loading.pleasewait')}</h4>
           </If>
-          <If condition={!this.state.linksLoaing}>
+          <If condition={!this.state.linksLoaing && this.state.links}>
             <ul className="body-list">
               {links}
             </ul>
+          </If>
+          <If condition={!this.state.linksLoaing && !this.state.links}>
+            <p>{translate('complete.message.linksError', this.state.linksError)}</p>
           </If>
         </Modal.Body>
       </Modal>

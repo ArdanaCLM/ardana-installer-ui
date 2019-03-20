@@ -730,6 +730,8 @@
     "server.replace.compute.failure.delete.cancel.confirm": "Canceling could potentially leave the process of deleting the old compute server {0} in a bad state. It will close the window, and any error messages will no longer be available to view. \n\nProceed with cancellation?",
     "server.replace.compute.failure.disable.cancel.confirm": "Canceling could potentially leave the process of disabling the old compute server {0} in a bad state. It will close the window, and any error messages will no longer be available to view. \n\nProceed with cancellation?",
 
+    "complete.message.linksError": "There was an error fetching the links ({0}).",
+
     "table.column.header.id" : "Server ID",
     "table.column.header.ip-addr" : "IP address",
     "table.column.header.server-group" : "Server group",
