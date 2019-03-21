@@ -224,28 +224,30 @@ class ReplaceServerDetails extends Component {
     });
   }
 
+  copyFromServer(server, inputValue, isValid) {
+    // Copy the fields of interest from known servers, and set the validity
+    // of each field depending on whether it is populated
+    for (let key of this.getInputNames()) {
+      const valueToCopy = server[key] || '';
+      inputValue = inputValue.set(key, valueToCopy);
+      // if it is compute node, not isInstallOsSelected, mac-addr and ipmpi
+      // info can be empty
+      if(isComputeNode(this.props.data) && !this.state.isInstallOsSelected &&
+        REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
+        isValid = isValid.set(key, (valueToCopy.length > 0) || undefined);
+      }
+      else {
+        isValid = isValid.set(key, (valueToCopy.length > 0));
+      }
+    }
+    return { inputValue, isValid };
+  }
+
   handleSelectAvailableServer = (serverId) => {
     const server = this.props.availableServers.find(server => server.id === serverId);
     if (server) {
       this.setState((prev) => {
-        let inputValue = prev.inputValue;
-        let isValid = prev.isValid;
-
-        // Copy the fields of interest from known servers, and set the validity
-        // of each field depending on whether it is populated
-        for (let key of this.getInputNames()) {
-          const valueToCopy = server[key] || '';
-          inputValue = inputValue.set(key, valueToCopy);
-          // if it is compute node, not isInstallOsSelected, mac-addr and ipmpi
-          // info can be empty
-          if(isComputeNode(this.props.data) && !this.state.isInstallOsSelected &&
-            REPLACE_SERVER_MAC_IPMI_PROPS.includes(key)) {
-            isValid = isValid.set(key, (valueToCopy.length > 0) || undefined);
-          }
-          else {
-            isValid = isValid.set(key, (valueToCopy.length > 0));
-          }
-        }
+        let { inputValue, isValid } = this.copyFromServer(server, prev.inputValue, prev.isValid);
         return {
           selectedServerId: serverId,
           inputValue: inputValue,
@@ -483,6 +485,16 @@ class ReplaceServerDetails extends Component {
     );
   }
 
+  copyExistingDetails() {
+    this.setState(prev => {
+      let { inputValue, isValid } = this.copyFromServer(this.props.data, prev.inputValue, prev.isValid);
+      return {
+        inputValue: inputValue,
+        isValid: isValid,
+      };
+    });
+  }
+
   renderServerContent() {
     const modelServers = this.props.model.getIn(['inputModel','servers'])
       .filter(s => s.get('id') != this.props.data.id);
@@ -497,6 +509,9 @@ class ReplaceServerDetails extends Component {
         <div className='server-details-container'>
           {this.renderDetailsTable()}
         </div>
+        <buitton className="btn btn-default inline-button standalone" onClick={::this.copyExistingDetails}>
+          {translate('common.copy_existing')}
+        </buitton>
         {this.renderNewComputeInfo(existingIpAddresses)}
         {this.renderMACIPMIInfo(existingMacAddreses, existingIpAddresses)}
         {this.renderAvailableServers()}

@@ -737,5 +737,7 @@
     "table.column.header.server-group" : "Server group",
     "table.column.header.nic-mapping" : "NIC mapping",
     "table.column.header.mac-addr" : "MAC address",
-    "table.column.header.monascaStatus" : "Status"
+    "table.column.header.monascaStatus" : "Status",
+
+    "common.copy_existing": "Copy details"
 }
