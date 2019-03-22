@@ -609,8 +609,8 @@ class UpdateServers extends BaseUpdateWizardPage {
       oldServer: this.state.serverStatuses[this.state.confirmDeactivate.id].internal
     };
 
-    if (this.state.confirmDeactivate.migrationTarget) {
-      props.server = this.state.confirmDeactivate.migrationTarget;
+    if (this.state.confirmDeactivate.targetServer) {
+      props.server = this.state.confirmDeactivate.targetServer;
     }
 
     this.setState({
@@ -620,16 +620,16 @@ class UpdateServers extends BaseUpdateWizardPage {
     this.props.startUpdateProcess('DeactivateServer', DeactivateServerProcessPages, props);
   }
 
-  selectMigrationTarget(event) {
+  selectTargetServer(event) {
     const id = event.target.value,
-      migrationTarget = this.state.serverStatuses[id].internal;
+      targetServer = this.state.serverStatuses[id].internal;
 
     this.setState((prev) => {
       return {
         confirmDeactivate: {
           ...prev.confirmDeactivate,
-          migrationTarget,
-          migrationTargetId: id
+          targetServer,
+          targetId: id
         }
       };
     });
@@ -647,12 +647,13 @@ class UpdateServers extends BaseUpdateWizardPage {
 
   renderDeactivateConfirmModal() {
     if (!this.state.confirmDeactivate || !this.state.confirmDeactivate.show) return;
-    const { id, instances, loading, migrationTargetId } = this.state.confirmDeactivate,
-      haveInstances = instances?.length > 0;
+    const { id, instances, loading, targetId } = this.state.confirmDeactivate,
+      // server to be deactivated
+      server = this.state.serverStatuses[id].internal;
 
     let choices = [], otherHosts = [];
 
-    if (haveInstances) {
+    if (server.hasInstances) {
       otherHosts = Object.keys(this.state.serverStatuses)
         .filter(id => id !== this.state.confirmDeactivate?.id);
       choices =
@@ -660,8 +661,8 @@ class UpdateServers extends BaseUpdateWizardPage {
           const server = this.state.serverStatuses[id];
           return <div key={server.id} className="form-check">
             <input className="form-check-input" type="radio" name={server.id} id={server.id}
-              value={server.id} checked={migrationTargetId === server.id}
-              onChange={::this.selectMigrationTarget}/>
+              value={server.id} checked={targetId === server.id}
+              onChange={::this.selectTargetServer}/>
             <label className="form-check-label" htmlFor={server.id}>
               {server.id}
             </label>
@@ -674,24 +675,32 @@ class UpdateServers extends BaseUpdateWizardPage {
         title={translate('server.deactivate.confirm.title', id)}
         yesAction={::this.performDeactivateAndOrMigration}
         noAction={() => this.setState({confirmDeactivate: undefined})}
-        disableYes={loading || (!loading && haveInstances && !migrationTargetId && otherHosts.length > 0)}
+        disableYes={loading || (!loading && server.hasInstances && !targetId && otherHosts.length > 0)}
       >
         <p>
           <If condition={loading}>
             {translate('loading.pleasewait')}
           </If>
-          <If condition={!loading && instances?.length > 0 && otherHosts.length > 0}>
-            {translate('server.deactivate.confirm.message_instances', id, instances.length)}
+          <If condition={!loading && server.hasInstances && server.isReachable && otherHosts.length > 0}>
+            {translate('server.deactivate.confirm.message_instances_migrate', id, instances.length)}
           </If>
-          <If condition={!loading && instances?.length > 0 && otherHosts.length === 0}>
-            {translate('server.deactivate.confirm.message_instances_cant_be_migrated', id, instances.length)}
+          <If condition={!loading && server.hasInstances && !server.isReachable && otherHosts.length > 0}>
+            {translate('server.deactivate.confirm.message_instances_evacuate', id, instances.length)}
           </If>
-          <If condition={!loading && instances?.length === 0}>
+          <If condition={!loading && server.hasInstances && otherHosts.length === 0}>
+            {translate('server.deactivate.confirm.message_instances_terminate', id, instances.length)}
+          </If>
+          <If condition={!loading && !server.hasInstances}>
             {translate('server.deactivate.confirm.message', id)}
           </If>
         </p>
-        <If condition={haveInstances && otherHosts.length > 0}>
-          <p>{translate('server.migrate.prompt', id)}</p>
+        <If condition={server.hasInstances && otherHosts.length > 0}>
+          <If condition={server.isReachable}>
+            <p>{translate('server.migrate.prompt', id)}</p>
+          </If>
+          <If condition={!server.isReachable}>
+            <p>{translate('server.evacuate.prompt', id)}</p>
+          </If>
           {choices}
         </If>
       </YesNoModal>
