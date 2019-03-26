@@ -16,7 +16,6 @@ import React from 'react';
 import '../styles/deployer.less';
 import { translate, translateModelName } from '../localization/localize.js';
 import BaseWizardPage from './BaseWizardPage';
-import { fetchJson } from '../utils/RestUtils.js';
 import { Modal } from 'react-bootstrap';
 
 const linkTranslations = {
@@ -26,30 +25,6 @@ const linkTranslations = {
 };
 
 class Complete extends BaseWizardPage {
-
-  constructor() {
-    super();
-    this.state = {
-      links: {},
-      linksLoaing: true
-    };
-  }
-
-  async componentDidMount() {
-    try {
-      this.setState({
-        links: await fetchJson('/api/v2/external_urls'),
-        linksLoaing: false
-      });
-    } catch(error) {
-      console.log('Unable to retrieve external URLs', error); // eslint-disable-line no-console
-      this.setState({
-        linksError: typeof error === 'string' ? error : error.message || JSON.stringify(error),
-        links: null,
-        linksLoaing: false
-      });
-    }
-  }
 
   render() {
     const modelName = translateModelName(this.props.model.get('name'));
@@ -61,12 +36,16 @@ class Complete extends BaseWizardPage {
         {translate('complete.message.body3', modelName)}</div>);
     }
 
-    let links = Object.keys(this.state.links || {}).filter(linkName => {
-      return this.state.links[linkName]?.length > 0;
+    let usefulLinks = Object.keys(this.props.usefulLinks || {}).filter(linkName => {
+      return this.props.usefulLinks[linkName]?.length > 0;
     }).map(linkName => {
-      return <li className='body-link' key={linkName}>
-        <a href={this.state.links[linkName]}>{linkTranslations[linkName]}</a>
-      </li>;
+      return (
+        <li className='body-link' key={linkName}>
+          <a href={this.props.usefulLinks[linkName]}>
+            {linkTranslations[linkName]}
+          </a>
+        </li>
+      );
     });
 
     return (
@@ -78,7 +57,9 @@ class Complete extends BaseWizardPage {
         size="lg"
       >
         <Modal.Header>
-          <div className='icon-container'><i className='material-icons complete-icon'>done</i></div>
+          <div className='icon-container'>
+            <i className='material-icons complete-icon'>done</i>
+          </div>
           <div>{this.renderHeading(translate('complete.heading'))}</div>
           <div className='sub-heading'>{translate('complete.message.body1')}</div>
         </Modal.Header>
@@ -87,21 +68,15 @@ class Complete extends BaseWizardPage {
           <div className='body-header'>
             {translate(
               'complete.message.body4',
-              <a href={this.state.links?.['ardana-service']}>{translate('day2.product.title')}</a>
+              <a href={this.props.usefulLinks?.['ardana-service']}>
+                {translate('day2.product.title')}
+              </a>
             )}
           </div>
           <div className='body-header'>{translate('complete.message.link.heading')}</div>
-          <If condition={this.state.linksLoaing}>
-            <h4>{translate('loading.pleasewait')}</h4>
-          </If>
-          <If condition={!this.state.linksLoaing && this.state.links}>
-            <ul className="body-list">
-              {links}
-            </ul>
-          </If>
-          <If condition={!this.state.linksLoaing && !this.state.links}>
-            <p>{translate('complete.message.linksError', this.state.linksError)}</p>
-          </If>
+          <ul className='body-list'>
+            {usefulLinks}
+          </ul>
         </Modal.Body>
       </Modal>
     );

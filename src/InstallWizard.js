@@ -71,7 +71,8 @@ class InstallWizard extends Component {
 
     // Indicate which of the above state variables are passed to wizard pages and can be set by them
     this.globalStateVars = [
-      'model', 'playbookStatus', 'connectionInfo', 'deployConfig', 'wizardLoading', 'wizardLoadingErrors'
+      'model', 'playbookStatus', 'connectionInfo', 'deployConfig',
+      'wizardLoading', 'wizardLoadingErrors', 'usefulLinks'
     ];
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
