@@ -18,6 +18,7 @@ import { isEmpty } from 'lodash';
 import { translate } from '../localization/localize.js';
 import * as constants from '../utils/constants.js';
 import BaseWizardPage from './BaseWizardPage.js';
+import { fetchJson } from '../utils/RestUtils.js';
 import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { getInternalModel } from './topology/TopologyUtils.js';
@@ -200,6 +201,17 @@ class CloudDeployProgress extends BaseWizardPage {
 
       playbooks.push(book);
     }
+
+    playbooks.push({
+      name: 'get_external_links',
+      action: ((logger) => {
+        return fetchJson('api/v2/external_urls')
+          .then((response) => {
+            this.props.updateGlobalState('usefulLinks', response);
+          });
+      })
+    });
+
     playbooks.push({name: constants.SITE_PLAYBOOK});
 
     return playbooks;
