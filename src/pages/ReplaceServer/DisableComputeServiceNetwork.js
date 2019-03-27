@@ -363,10 +363,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       playbooks: [constants.REMOVE_FROM_AGGREGATES_ACTION]
     }];
 
-    let instancesSteps = this.getStepsForInstances();
-    if(instancesSteps?.length > 0) {
-      steps = steps.concat(instancesSteps);
-    }
+    steps = steps.concat(this.getStepsForInstances());
 
     steps.push({
       label: translate('server.deploy.progress.disable_network_agents'),
@@ -417,10 +414,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       })
     }];
 
-    let instancesPlaybooks = this.getPlaybooksForInstances();
-    if(instancesPlaybooks?.length > 0) {
-      playbooks = playbooks.concat(instancesPlaybooks);
-    }
+    playbooks = playbooks.concat(this.getPlaybooksForInstances());
 
     playbooks.push({
       name: constants.DISABLE_NETWORK_AGENTS_ACTION,
