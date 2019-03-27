@@ -70,6 +70,7 @@ class DeleteComputeHost extends DeleteCompute {
     const apiUrl =
       '/api/v2/compute/aggregates/' + this.props.operationProps.oldServer.hostname;
     logger('DELETE ' + apiUrl);
+    // Following logMsg will show up in the PlaybookProgress's log view in English
     return deleteJson(apiUrl)
       .then((response) => {
         const logMsg =
@@ -78,14 +79,16 @@ class DeleteComputeHost extends DeleteCompute {
         logProgressResponse(logger, response, logMsg);
       })
       .catch((error) => {
-        // have no compute service for the old compute node
-        // move on
+        // Have no compute service for the old compute node and move on
         if (error.status === 410) {
           const logMsg =
             'Warning: No aggregates found for compute host ' +
             this.props.operationProps.oldServer.hostname + ', continue...';
           logger(logMsg);
         }
+        // Backend deletes host aggregates one by one, it returns 500 error when some
+        // host aggregates are successfully deleted and some failed. UI will
+        // will pop up a confirmation dialog for user to decide to move on or stop.
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.deleted?.length > 0) {
           const logMsg =
@@ -94,11 +97,13 @@ class DeleteComputeHost extends DeleteCompute {
           return this.partialFailureDialogPromise(
             logger, error, logMsg, 'server.deploy.progress.remove_from_aggregates.hasfailed');
         }
+        // Other errors are thrown, the playbook step will fail
         else {
           const logMsg =
             'Error: Failed to remove aggregates for compute host ' +
             this.props.operationProps.oldServer.hostname + '. ' + error.toString();
           logProgressError(logger, error, logMsg);
+          // msg will show up in the PlaybookProgress's error banner in localized language
           const msg =
             translate('server.deploy.progress.remove_from_aggregates.failure',
               this.props.operationProps.oldServer.hostname,
@@ -113,6 +118,7 @@ class DeleteComputeHost extends DeleteCompute {
       '/api/v2/network/agents/' + this.props.operationProps.oldServer.hostname +
       '/disable';
     logger('PUT ' + apiUrl);
+    // Following logMsg will show up in the PlaybookProgress's log view in English
     return putJson(apiUrl)
       .then((response) => {
         const logMsg =
@@ -121,14 +127,16 @@ class DeleteComputeHost extends DeleteCompute {
         logProgressResponse(logger, response, logMsg);
       })
       .catch((error) => {
-        // have no network agents for the old compute node
-        // move on
+        // Have no network agents for the old compute node and move on
         if(error.status === 410) {
           const logMsg =
             'No network agents found for compute host ' +
             this.props.operationProps.oldServer.hostname + ', continue...';
           logger(logMsg);
         }
+        // Backend deletes network agents one by one, it returns 500 error when
+        // some network agents are successfully deleted and some failed. UI will
+        // pop up a confirmation dialog for user to decide to move on or stop.
         else if(error.status === 500 &&
           error.value?.contents?.failed && error.value?.contents?.disabled?.length > 0) {
           const logMsg =
@@ -137,11 +145,13 @@ class DeleteComputeHost extends DeleteCompute {
           return this.partialFailureDialogPromise(
             logger, error, logMsg, 'server.deploy.progress.disable_network_agents.hasfailed');
         }
+        // Other errors are thrown, the playbook step will fail
         else {
           const logMsg =
             'Error: Failed to disable network agents for compute host ' +
             this.props.operationProps.oldServer.hostname + '. ' + error.toString();
           logProgressError(logger, error, logMsg);
+          // msg will show up in the PlaybookProgress's error banner in localized language
           const msg =
             translate('server.deploy.progress.disable_network_agents.failure',
               this.props.operationProps.oldServer.hostname,
