@@ -330,13 +330,26 @@ class InstallWizard extends Component {
   // Pages within the installer may request that the model be forceably loaded
   // from disk, espcially when a change is made to directly to the model files
   // to the model.  Returns a promise
-  loadModel = () => fetchJson('/api/v2/model')
-    .then(responseData => {
-      this.setState({'model': fromJS(responseData)});
-    })
-    .catch((error) => {
-      console.log('Unable to retrieve saved model');// eslint-disable-line no-console
-    })
+  loadModel = () => {
+    // If there is a pending promise to fetch the model return that promise.
+    if(!this.fetchModelPromise) {
+      this.fetchModelPromise = new Promise((resolve, reject) => {
+        fetchJson('/api/v2/model')
+          .then(responseData => {
+            this.setState({'model': fromJS(responseData)}, () => {
+              this.fetchModelPromise = undefined;
+              resolve();
+            });
+          })
+          .catch((error) => {
+            console.log('Unable to retrieve saved model');// eslint-disable-line no-console
+            this.fetchModelPromise = undefined;
+            reject(error);
+          });
+      });
+    }
+    return this.fetchModelPromise;
+  }
 
   // Pages within the installer may request that the model be saved to disk,
   // which is especially important when some significant change has been made
