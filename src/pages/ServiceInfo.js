@@ -325,7 +325,8 @@ class ServiceInfo extends Component {
   }
 
   getStatusPlaybookName(name) {
-    switch(name.toLowerCase()) {
+    name = name.toLowerCase();
+    switch(name) {
     case 'ardana':
       name = 'ardana-service';
       break;
