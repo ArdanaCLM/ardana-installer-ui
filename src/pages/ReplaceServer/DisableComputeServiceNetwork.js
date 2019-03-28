@@ -396,9 +396,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
             'target_comp_host': this.props.operationProps.server.hostname}}
         });
       }
-
-      return playbooks;
     }
+    return playbooks;
   }
 
   getPlaybooks() {

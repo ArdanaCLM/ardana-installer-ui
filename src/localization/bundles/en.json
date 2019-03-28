@@ -685,9 +685,9 @@
 
     "server.deactivate.error": "Failed to deactivate server {0}",
     "server.deactivate.confirm.title": "Deactivate {0}?",
-    "server.deactivate.confirm.message": "Are you sure you want to deactivate this compute server, {0}?",
-    "server.deactivate.confirm.message_instances_migrate": "Are you sure you want to deactivate this compute server, {0} it is currently hosting {1} instance(s) which will need to be migrated?",
-    "server.deactivate.confirm.message_instances_evacuate": "Are you sure you want to deactivate this compute server, {0} it is not reachable and currently hosting {1} instance(s) which will need to be evacuated? Make sure the compute server is configured with block storage or shared storage.",
+    "server.deactivate.confirm.message": "Are you sure you want to deactivate this compute server {0}?",
+    "server.deactivate.confirm.message_instances_migrate": "Are you sure you want to deactivate this compute server {0}, it is currently hosting {1} instance(s) which will need to be migrated?",
+    "server.deactivate.confirm.message_instances_evacuate": "Are you sure you want to deactivate this compute server {0}, it is not reachable and currently hosting {1} instance(s) which will need to be evacuated? Make sure the compute server is configured with block storage or shared storage.",
     "server.activate.text": "Activate {0}",
     "server.activate_service.text": "Add {0} to Nova scheduler",
     "server.deactivate.text": "Deactivate {0}",
