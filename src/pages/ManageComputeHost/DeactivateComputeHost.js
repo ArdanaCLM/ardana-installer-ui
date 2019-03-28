@@ -34,13 +34,15 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
 
     steps = steps.concat(this.getStepsForInstances());
 
-    steps.push({
-      label: translate('server.deactivate_services.text', this.props.operationProps.oldServer.id),
-      playbooks: [`${constants.NOVA_STOP_PLAYBOOK}.yml`],
-      payload: {
-        limit: this.props.operationProps.oldServer.hostname
-      }
-    });
+    if (this.props.operationProps.oldServer.isReachable) {
+      steps.push({
+        label: translate('server.deactivate_services.text', this.props.operationProps.oldServer.id),
+        playbooks: [`${constants.NOVA_STOP_PLAYBOOK}.yml`],
+        payload: {
+          limit: this.props.operationProps.oldServer.hostname
+        }
+      });
+    }
     return steps;
   }
 
@@ -52,12 +54,14 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
 
     playbooks = playbooks.concat(this.getPlaybooksForInstances());
 
-    playbooks.push({
-      name: constants.NOVA_STOP_PLAYBOOK,
-      payload: {
-        limit: this.props.operationProps.oldServer.hostname
-      }
-    });
+    if (this.props.operationProps.oldServer.isReachable) {
+      playbooks.push({
+        name: constants.NOVA_STOP_PLAYBOOK,
+        payload: {
+          limit: this.props.operationProps.oldServer.hostname
+        }
+      });
+    }
     return playbooks;
   }
 
