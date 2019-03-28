@@ -29,11 +29,14 @@ class ServerTable extends Component {
         // when it is in addserver mode, if we have a list of deployed servers
         if(this.props.isUpdateMode &&
            this.props.deployedServers && this.props.deployedServers.length > 0) {
-          // if the server item is NOT in the deployedServers, will present
+          // If the server item is NOT in the deployedServers, will present
           // editAction and deleteAction
-          if(!this.props.deployedServers.some(server => {
+          // Or if isSafeMode is false, will present editAction and deleteAction
+          // And if any other playbook in progress, will not present editActioin
+          // and deleteAction
+          if((!this.props.deployedServers.some(server => {
             return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
-          }) || !this.props.isSafeMode) {
+          }) || !this.props.isSafeMode) && !this.props.progressOperation) {
             extraProps.editAction = this.props.editAction;
             extraProps.deleteAction = this.props.deleteAction;
           }

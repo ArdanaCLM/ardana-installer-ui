@@ -1416,6 +1416,8 @@ class AssignServerRoles extends BaseWizardPage {
       };
 
       extraProps.isSafeMode = this.state.isSafeModeChecked;
+      //check if anything is in progress
+      extraProps.progressOperation = this.props.processOperation;
     }
     return (
       <ServerRolesAccordion
