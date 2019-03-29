@@ -688,7 +688,7 @@ class UpdateServers extends BaseUpdateWizardPage {
             {translate('server.deactivate.confirm.message_instances_evacuate', id, instances.length)}
           </If>
           <If condition={!loading && server.hasInstances && otherHosts.length === 0}>
-            {translate('server.deactivate.confirm.message_instances_terminate', id, instances.length, id)}
+            {translate('server.deactivate.confirm.message_instances_terminate', id, instances.length)}
           </If>
           <If condition={!loading && !server.hasInstances}>
             {translate('server.deactivate.confirm.message', id)}
