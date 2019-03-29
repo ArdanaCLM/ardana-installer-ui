@@ -249,8 +249,18 @@ class ServiceInfo extends Component {
   async componentWillMount() {
     this.setState({showLoadingMask: true});
     fetchJson('/api/v2/endpoints')
-      .then(responseData => {
-        this.setState({services: responseData, showLoadingMask: false});
+      .then(endpoints => {
+        fetchJson('/api/v2/playbooks')
+          .then(playbooks => {
+            let serviceList = endpoints.map(endpoint => {
+              if (playbooks.includes(this.getStatusPlaybookName(endpoint.name))) {
+                endpoint.hasStatusPlaybook = true;
+              }
+              return endpoint;
+            });
+
+            this.setState({services: serviceList, showLoadingMask: false});
+          });
       })
       .then(::this.getIsEncrypted())
       .catch((error) => {
@@ -314,9 +324,9 @@ class ServiceInfo extends Component {
     this.setState({showActionMenu: false, showDetailsModal: true});
   }
 
-  getPlaybookName = () => {
-    let name;
-    switch(this.state.selectedService.name.toLowerCase()) {
+  getStatusPlaybookName(name) {
+    name = name.toLowerCase();
+    switch(name) {
     case 'ardana':
       name = 'ardana-service';
       break;
@@ -331,7 +341,7 @@ class ServiceInfo extends Component {
       name = 'ops-console';
       break;
     default:
-      name = this.state.selectedService.name.toLowerCase();
+      break;
     }
     return name + '-status';
   }
@@ -348,7 +358,7 @@ class ServiceInfo extends Component {
   }
 
   showRunStatusPlaybookModal = (enkey) => {
-    const playbookName = this.getPlaybookName();
+    const playbookName = this.getStatusPlaybookName(this.state.selectedService.name);
     this.setState({
       showActionMenu: false,
       showRunStatusPlaybookModal: true,
@@ -367,12 +377,14 @@ class ServiceInfo extends Component {
   }
 
   renderMenuItems = () => {
-    const menuItems = [
-      {show: true, key: 'common.details', action: this.showDetailsModal},
-      {show: true, key: 'services.run.status', action: this.handleRunStatus},
+    let menuItems = [
+      {key: 'common.details', action: this.showDetailsModal}
     ];
+    if (this.state.selectedService.hasStatusPlaybook) {
+      menuItems.push({key:'services.run.status', action: this.handleRunStatus});
+    }
     return (
-      <ContextMenu show={this.state.showActionMenu} items={menuItems} location={this.state.menuLocation}
+      <ContextMenu items={menuItems} location={this.state.menuLocation}
         close={() => this.setState({showActionMenu: false})}/>
     );
   }
@@ -429,6 +441,7 @@ class ServiceInfo extends Component {
           const selectedSrv = {
             name: srv.name[0].toUpperCase() + srv.name.substr(1),
             description: srv.description,
+            hasStatusPlaybook: srv.hasStatusPlaybook,
             status: status,
             endpoints: endpoints
           };
