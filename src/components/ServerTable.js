@@ -77,7 +77,7 @@ class ServerTable extends Component {
       this.props.tableConfig.columns.map((colDef, index) => {
         if(!colDef.hidden) {
           return (
-            <th key={keyCount++}>{translate('server.item.' + colDef.name)}</th>
+            <th key={keyCount++} className='notDraggable'>{translate('server.item.' + colDef.name)}</th>
           );
         }
       });
