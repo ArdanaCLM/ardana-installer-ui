@@ -229,13 +229,8 @@ class PlaybookProgress extends Component {
       if (status === STATUS.NOT_STARTED) {
         let stepCompletedPlaybooks = this.getStepCompletedPlaybooks(step);
 
-        // if there is an or condition, it means one of the playbooks completes, the
-        // step completes. For example site.yml or installui-wipe-and-site.yml
-        if (step.orCondition && stepCompletedPlaybooks.length > 0) {
-          status = STATUS.COMPLETE;
-        }
-        // check the ideal case where all the playbooks in the step ran and completed
-        else if (stepCompletedPlaybooks.length === step.playbooks.length) {
+        // Check if all the playbooks in the step ran and completed
+        if (stepCompletedPlaybooks.length === step.playbooks.length) {
           status = STATUS.COMPLETE;
         }
         // have some playbooks completed, need to check if this step completed
@@ -580,6 +575,9 @@ class PlaybookProgress extends Component {
       this.updateGlobalPlaybookStatus(playbook.name, 0, STATUS.IN_PROGRESS);
       this.props.updatePageStatus(STATUS.IN_PROGRESS);
 
+      // Record the action will start
+      this.playbookStarted(playbook.name);
+
       let promise = playbook.action(this.logMessage);
       if(!(promise instanceof Promise)) {
         // this step gave us back something that was not a Promise.
@@ -750,7 +748,7 @@ class PlaybookProgress extends Component {
    * callback for when a playbook starts, the UI component will track which
    * playbooks out of the needed set have started/finished to show status
    * to the user
-   * @param {String} the playbook filename
+   * @param {String} the playbook filename or action name
    */
   playbookStarted = (stepPlaybook) => {
     this.setState((prevState) => {
