@@ -15,13 +15,13 @@
 import React, { Component } from 'react';
 
 import { translate } from '../../localization/localize.js';
-import { ActionButton } from '../../components/Buttons.js';
+import { ActionButton, LoadFileButton } from '../../components/Buttons.js';
 import { alphabetically } from '../../utils/Sort.js';
 import { fetchJson, postJson, deleteJson } from '../../utils/RestUtils.js';
 import { ErrorMessage, InfoBanner } from '../../components/Messages.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import HelpText from '../../components/HelpText.js';
-import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
+import { getCachedEncryptKey, readFile } from '../../utils/MiscUtils.js';
 
 class EditTemplateFile extends Component {
   constructor(props) {
@@ -307,6 +307,28 @@ class ServiceTemplatesTab extends Component {
     );
   }
 
+  async handleSesUpload(file) {
+    this.setState({ loading: true });
+    let fileContents = await readFile(file);
+    await postJson('/api/v2/service/files/ses/ses_config.yml', JSON.stringify(fileContents));
+    this.setState(prevState => ({
+      loading: false,
+      serviceFiles: prevState.serviceFiles.map(serviceFile => {
+        if(serviceFile.service === 'ses') {
+          serviceFile.files.push('ses_config.yml');
+          if(serviceFile.changedFiles) {
+            serviceFile.changedFiles.push('ses_config.yml');
+          } else {
+            serviceFile.changedFiles = ['ses_config.yml'];
+          }
+        }
+        return serviceFile;
+      })
+    }));
+    this.props.hasChange?.(true);
+    this.props.enableSes?.(true);
+  }
+
   renderFileSection() {
     if(this.state.editFile) {
       return (
@@ -346,6 +368,16 @@ class ServiceTemplatesTab extends Component {
             </li>
           );
         });
+      if(item.service === 'ses' && !item.files.some(f => f === 'ses_config.yml')) {
+        fileList.push(
+          <li className='file-upload' key='upload_file'>
+            <LoadFileButton
+              displayLabel={translate('upload.ses_file')}
+              extensions=".yml"
+              clickAction={::this.handleSesUpload} />
+          </li>
+        );
+      }
       return (
         <li key={index}>
           <span className='service-heading' onClick={() => this.handleToggleService(item)}>

@@ -105,3 +105,16 @@ class EncryptKey {
 var encryptKey = new EncryptKey();
 export const getCachedEncryptKey = ::encryptKey.getCachedEncryptKey;
 export const setCachedEncryptKey = ::encryptKey.setCachedEncryptKey;
+
+/**
+ * A helper to read a file from disk to string
+ * @param {File} file
+ */
+export function readFile(file) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = event => resolve(event.target.result);
+    reader.onerror = reader.onabort = reject;
+    reader.readAsText(file);
+  });
+}

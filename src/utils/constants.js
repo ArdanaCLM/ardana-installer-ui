@@ -106,4 +106,4 @@ export const VALID = 1;
 export const UNKNOWN = -1;
 export const VALIDATING = 2;
 
-
+export const DEPLOY_SES_PLAYBOOK = 'ses-deploy';
