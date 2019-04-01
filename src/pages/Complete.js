@@ -21,10 +21,37 @@ import { Modal } from 'react-bootstrap';
 const linkTranslations = {
   horizon: translate('complete.message.link1'),
   opsconsole: translate('complete.message.link2'),
-  'ardana-service': translate('day2.product.title')
+  'ardana-service': translate('day2.product.title'),
+  'suse-documentation': translate('complete.message.docs.link')
 };
 
 class Complete extends BaseWizardPage {
+
+  renderUsefulLinks() {
+    let links = Object.keys(this.props.usefulLinks || {}).filter((name) => {
+      return this.props.usefulLinks[name]?.length > 0;
+    }).map((name) => {
+      return {
+        name: name,
+        url: this.props.usefulLinks[name]
+      };
+    });
+
+    links.push({
+      name: 'suse-documentation',
+      url: 'https://www.suse.com/documentation/'
+    });
+
+    return links.map((link) => {
+      return (
+        <li className='body-link' key={link.name}>
+          <a href={link.url}>
+            {linkTranslations[link.name]}
+          </a>
+        </li>
+      );
+    });
+  }
 
   render() {
     const modelName = translateModelName(this.props.model.get('name'));
@@ -35,18 +62,6 @@ class Complete extends BaseWizardPage {
       modelLines.push(<div className='body-line' key='modelLine2'>
         {translate('complete.message.body3', modelName)}</div>);
     }
-
-    let usefulLinks = Object.keys(this.props.usefulLinks || {}).filter(linkName => {
-      return this.props.usefulLinks[linkName]?.length > 0;
-    }).map(linkName => {
-      return (
-        <li className='body-link' key={linkName}>
-          <a href={this.props.usefulLinks[linkName]}>
-            {linkTranslations[linkName]}
-          </a>
-        </li>
-      );
-    });
 
     return (
       <Modal
@@ -75,7 +90,7 @@ class Complete extends BaseWizardPage {
           </div>
           <div className='body-header'>{translate('complete.message.link.heading')}</div>
           <ul className='body-list'>
-            {usefulLinks}
+            {this.renderUsefulLinks()}
           </ul>
         </Modal.Body>
       </Modal>
