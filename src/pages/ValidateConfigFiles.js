@@ -141,10 +141,15 @@ class EditFile extends Component {
 class DisplayFileList extends Component {
   getMessage() {
     if (this.props.valid === UNKNOWN) {
+      let infoMessages = [];
+      if(!this.props.allowsDeploy) {
+        infoMessages.push(<InfoBanner key='info0' message={translate('validate.config.files.msg.info0')}/>);
+      }
+      infoMessages.push(<InfoBanner key='info1' message={translate('validate.config.files.msg.info1')}/>);
+      infoMessages.push(<InfoBanner key='info2' message={translate('validate.config.files.msg.info2')}/>);
       return (
         <div>
-          <InfoBanner message={translate('validate.config.files.msg.info1')}/>
-          <InfoBanner message={translate('validate.config.files.msg.info2')}/>
+          {infoMessages}
         </div>);
     } else if (this.props.valid === VALIDATING) {
       return (
@@ -329,6 +334,7 @@ export class ValidateConfigFiles extends Component {
             onEditClick={(file) => this.editFile(file)}
             valid={this.state.valid}
             invalidMsg={this.state.invalidMsg}
+            allowsDeploy={this.props.allowsDeploy}
           />
         </If>
         <If condition={this.state.editingFile !== ''}>
@@ -632,7 +638,8 @@ class ConfigPage extends BaseWizardPage {
                 loadModel={this.props.loadModel}
                 requiresPassword={this.state.requiresPassword}
                 sshPassphrase={this.state.sshPassphrase}
-                setRequiresPassword={this.setRequiresPassword}/>
+                setRequiresPassword={this.setRequiresPassword}
+                allowsDeploy={true}/>
 
             </Tab>
             <Tab disabled={this.state.disableTab}
