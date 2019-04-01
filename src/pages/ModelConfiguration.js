@@ -27,7 +27,7 @@ class ModelConfiguration extends Component {
     return <div className='menu-tab-content'>
       <ValidateConfigFiles disableTab={this.noop()} showNavButtons={this.noop()} enableBackButton={this.noop()}
         enableNextButton={this.noop()} setRequiresPassword={this.noop()} loadModel={this.noop()}
-        requiresPassword={false} sshPassphrase={undefined} />
+        requiresPassword={false} sshPassphrase={undefined} allowsDeploy={false} />
     </div>;
   }
 }

@@ -139,6 +139,7 @@
     "validate.config.files.heading": "Review configuration files",
     "validate.config.files.validate": "Validate",
     "validate.config.files.deploy": "Deploy",
+    "validate.config.files.msg.info0": "Validated model changes will be committed but are not automatically deployed. The model may be edited here in support of server add/replace use cases, or as needed to support service configuration changes. The deployment update process should be completed on the servers or configuration pages respectively.",
     "validate.config.files.msg.info1": "Click on a configuration file to view or edit its content.",
     "validate.config.files.msg.info2": "Click the Validate button to run the configuration processor.",
     "validate.config.files.msg.valid": "Validation succeeded and changes have been committed.",
