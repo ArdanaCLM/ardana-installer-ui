@@ -121,7 +121,7 @@ class ServerRowItem extends Component {
     if(badInput) {
       requiredUpdate = true;
     }
-    let cName = this.props.isDraggable ? 'draggable' : '';
+    let cName = this.props.isDraggable ? 'draggable' : 'notDraggable';
     cName = requiredUpdate ? cName + ' required-update' : cName;
 
     // if the item is not draggable, we don't present edit and delete
