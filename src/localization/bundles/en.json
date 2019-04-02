@@ -449,6 +449,7 @@
     "complete.message.link.heading": "Useful links:",
     "complete.message.link1": "OpenStack Horizon UI",
     "complete.message.link2": "Ops Console UI",
+    "complete.message.docs.link": "SUSE documentation",
 
     "deploy.progress.heading": "Cloud deployment in progress",
     "deploy.progress.config-processor-run": "Config processor run",
