@@ -29,11 +29,6 @@ import InstanceMigrationMonitor from './InstanceMigrationMonitor.js';
 import { logProgressResponse, logProgressError, getCachedEncryptKey } from '../../utils/MiscUtils.js';
 import { getInternalModel } from '../topology/TopologyUtils.js';
 
-const DISABLE_COMPUTE_SERVICE = 'disable_compute_service';
-const REMOVE_FROM_AGGREGATES = 'remove_from_aggregates';
-const MIGRATE_INSTANCES = 'migrate_instances';
-const DISABLE_NETWORK_AGENTS = 'disable_network_agents';
-
 // This is the page to disable compute service, delete aggregates
 // migrate instances to the new compute host and disable network
 // agents for the old compute host
@@ -335,15 +330,8 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
       });
   }
 
-  getSteps() {
-    let steps = [{
-      label: translate('server.deploy.progress.disable_compute_service'),
-      playbooks: [DISABLE_COMPUTE_SERVICE]
-    }, {
-      label: translate('server.deploy.progress.remove_from_aggregates'),
-      playbooks: [REMOVE_FROM_AGGREGATES]
-    }];
-
+  getStepsForInstances() {
+    let steps = [];
     if (this.props.operationProps.oldServer.hasInstances &&
         this.props.operationProps.server) {
       if(this.props.operationProps.oldServer.isReachable) {
@@ -351,7 +339,7 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         // and has instances
         steps.push({
           label: translate('server.deploy.progress.migrate_instances'),
-          playbooks: [MIGRATE_INSTANCES]
+          playbooks: [constants.MIGRATE_INSTANCES_ACTIOIN]
         });
       }
       else {
@@ -363,34 +351,36 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         });
       }
     }
+    return steps;
+  }
+
+  getSteps() {
+    let steps = [{
+      label: translate('server.deploy.progress.disable_compute_service'),
+      playbooks: [constants.DISABLE_COMPUTE_SERVICE_ACTION]
+    }, {
+      label: translate('server.deploy.progress.remove_from_aggregates'),
+      playbooks: [constants.REMOVE_FROM_AGGREGATES_ACTION]
+    }];
+
+    steps = steps.concat(this.getStepsForInstances());
 
     steps.push({
       label: translate('server.deploy.progress.disable_network_agents'),
-      playbooks: [DISABLE_NETWORK_AGENTS]
+      playbooks: [constants.DISABLE_NETWORK_AGENTS_ACTION]
     });
     return steps;
   }
 
-  getPlaybooks() {
-    let playbooks = [{
-      name: DISABLE_COMPUTE_SERVICE,
-      action: ((logger) => {
-        return this.disableCompServices(logger);
-      })
-    }, {
-      name: REMOVE_FROM_AGGREGATES,
-      action: ((logger) => {
-        return this.removeAggregates(logger);
-      })
-    }];
-
+  getPlaybooksForInstances() {
+    let playbooks = [];
     if(this.props.operationProps.oldServer.hasInstances &&
        this.props.operationProps.server) {
       // Migrate instances when old compute host is reachable
       // and has instances
       if(this.props.operationProps.oldServer.isReachable) {
         playbooks.push({
-          name: MIGRATE_INSTANCES,
+          name: constants.MIGRATE_INSTANCES_ACTIOIN,
           action: ((logger) => {
             return this.migrateInstances(logger);
           })
@@ -407,9 +397,26 @@ class DisableComputeServiceNetwork extends BaseUpdateWizardPage {
         });
       }
     }
+    return playbooks;
+  }
+
+  getPlaybooks() {
+    let playbooks = [{
+      name: constants.DISABLE_COMPUTE_SERVICE_ACTION,
+      action: ((logger) => {
+        return this.disableCompServices(logger);
+      })
+    }, {
+      name: constants.REMOVE_FROM_AGGREGATES_ACTION,
+      action: ((logger) => {
+        return this.removeAggregates(logger);
+      })
+    }];
+
+    playbooks = playbooks.concat(this.getPlaybooksForInstances());
 
     playbooks.push({
-      name: DISABLE_NETWORK_AGENTS,
+      name: constants.DISABLE_NETWORK_AGENTS_ACTION,
       action: ((logger) => {
         return this.disableNetworkAgents(logger);
       })

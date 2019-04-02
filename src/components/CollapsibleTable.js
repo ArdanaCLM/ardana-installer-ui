@@ -225,10 +225,9 @@ class CollapsibleTable extends Component {
       key: 'common.details', action: () => this.setState(
         {showServerDetailsModal: true}, () => {this.loadServerDetails(row, 0);})
     }];
-
-    if (row.role.includes('COMPUTE')) {
-      // show replace button when there is no process operation going on
-      if (!this.props.processOperation) {
+    // show replace button when there is no process operation going on
+    if (!this.props.processOperation) {
+      if (row.role.includes('COMPUTE')) {
         items.push({
           key: 'common.replace',
           action: this.props.replaceServer,
@@ -260,13 +259,14 @@ class CollapsibleTable extends Component {
           }
         }
       }
-    } else {
-      // not compute node
-      items.push({
-        key: 'common.replace',
-        action: this.props.replaceServer,
-        callbackData: row
-      });
+      else {
+        // not compute node
+        items.push({
+          key: 'common.replace',
+          action: this.props.replaceServer,
+          callbackData: row
+        });
+      }
     }
     return items;
   }

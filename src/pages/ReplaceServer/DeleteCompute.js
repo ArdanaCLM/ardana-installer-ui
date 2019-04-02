@@ -24,7 +24,7 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ConfirmModal } from '../../components/Modals.js';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
 import * as constants from '../../utils/constants.js';
-import { removeServerFromModel, getMergedServer, genUID } from '../../utils/ModelUtils.js';
+import { removeServerFromModel, getMergedServer, genUID, isComputeNode } from '../../utils/ModelUtils.js';
 import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
 
 const MANUAL_SHUTDOWN = 'manual_shutdown';
@@ -53,6 +53,11 @@ class DeleteCompute extends BaseUpdateWizardPage {
   }
 
   async componentDidMount() {
+    // Check after delete this compute server, there are any compute servers left
+    let compServers =
+      this.props.model?.getIn(['inputModel','servers']).toJS().filter(e => isComputeNode(e));
+    this.hasComputeServer = (compServers?.length - 1) > 0;
+
     this.setState({loading: true});
     try {
       const promises = [
@@ -318,7 +323,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
   }
 
-  getSteps = () => {
+  getSteps() {
     let steps = [];
     if (this.props.operationProps.oldServer.isReachable) {
       steps.push({
@@ -382,7 +387,9 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
     }
 
-    if(this.state.cobblerPresent) {
+    // When cobblerPresent and still have compute servers after delete, will call
+    // cobbler-deploy playbook
+    if(this.state.cobblerPresent && this.hasComputeServer) {
       steps.push({
         label: translate('server.deploy.progress.cobbler_deploy'),
         playbooks: [constants.COBBLER_DEPLOY_PLAYBOOK + '.yml']
@@ -398,7 +405,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     return steps;
   }
 
-  getPlaybooks = () => {
+  getPlaybooks() {
     let playbooks = [];
 
     if (this.props.operationProps.oldServer.isReachable) {
@@ -476,7 +483,9 @@ class DeleteCompute extends BaseUpdateWizardPage {
       });
     }
 
-    if(this.state.cobblerPresent) {
+    // When cobblerPresent and still have compute servers after delete, will call
+    // cobbler-deploy playbook
+    if(this.state.cobblerPresent && this.hasComputeServer) {
       playbooks.push({
         name: constants.COBBLER_DEPLOY_PLAYBOOK,
         payload: {'extra-vars': {'ardanauser_password': this.props.operationProps.osPassword}}

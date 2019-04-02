@@ -17,9 +17,6 @@ import DisableComputeServiceNetwork from '../ReplaceServer/DisableComputeService
 import { translate } from '../../localization/localize';
 import * as constants from '../../utils/constants';
 
-const MIGRATE_INSTANCES = 'migrate_instances',
-  DISABLE_COMPUTE_SERVICE = 'nova_deactivate';
-
 class DeactivateComputeHost extends DisableComputeServiceNetwork {
   constructor(props) {
     super(props);
@@ -29,48 +26,42 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
     };
   }
 
-  canMigrate() {
-    return this.props.operationProps.oldServer.isReachable && this.props.operationProps.server;
-  }
-
   getSteps() {
-    let steps = [];
-    if (this.canMigrate()) {
+    let steps = [{
+      label: translate('server.deploy.progress.disable_compute_service'),
+      playbooks: [constants.DISABLE_COMPUTE_SERVICE_ACTION]
+    }];
+
+    steps = steps.concat(this.getStepsForInstances());
+
+    if (this.props.operationProps.oldServer.isReachable) {
       steps.push({
-        label: translate('server.deploy.progress.migrate_instances'),
-        playbooks: [MIGRATE_INSTANCES]
+        label: translate('server.deactivate_services.text', this.props.operationProps.oldServer.id),
+        playbooks: [`${constants.NOVA_STOP_PLAYBOOK}.yml`],
+        payload: {
+          limit: this.props.operationProps.oldServer.hostname
+        }
       });
     }
-    steps.push({
-      label: translate('server.deploy.progress.disable_compute_service'),
-      playbooks: [DISABLE_COMPUTE_SERVICE]
-    },{
-      label: translate('server.deactivate_services.text', this.props.operationProps.oldServer.id),
-      playbooks: [`${constants.NOVA_STOP_PLAYBOOK}.yml`],
-      payload: {
-        limit: this.props.operationProps.oldServer.hostname
-      }
-    });
     return steps;
   }
 
   getPlaybooks() {
-    let playbooks = [];
-    if (this.canMigrate()) {
+    let playbooks = [{
+      name: constants.DISABLE_COMPUTE_SERVICE_ACTION,
+      action: ::this.disableCompServices
+    }];
+
+    playbooks = playbooks.concat(this.getPlaybooksForInstances());
+
+    if (this.props.operationProps.oldServer.isReachable) {
       playbooks.push({
-        name: MIGRATE_INSTANCES,
-        action: ::this.migrateInstances
+        name: constants.NOVA_STOP_PLAYBOOK,
+        payload: {
+          limit: this.props.operationProps.oldServer.hostname
+        }
       });
     }
-    playbooks.push({
-      name: DISABLE_COMPUTE_SERVICE,
-      action: ::this.disableCompServices
-    }, {
-      name: constants.NOVA_STOP_PLAYBOOK,
-      payload: {
-        limit: this.props.operationProps.oldServer.hostname
-      }
-    });
     return playbooks;
   }
 
