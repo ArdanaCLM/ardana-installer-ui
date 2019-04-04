@@ -457,6 +457,7 @@
     "deploy.progress.commit": "Model committed",
     "deploy.progress.ready-deployment": "Ready deployment",
     "deploy.progress.predeployment": "Pre-Deployment",
+    "deploy.progress.external-urls": "Persisting endpoints",
     "deploy.progress.step1": "Network configuration",
     "deploy.progress.step2": "Compute nodes deployed",
     "deploy.progress.step3": "Monitoring nodes deployed",

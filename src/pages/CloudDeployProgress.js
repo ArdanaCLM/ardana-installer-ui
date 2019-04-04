@@ -23,6 +23,7 @@ import { PlaybookProgress } from '../components/PlaybookProgress.js';
 import { ErrorBanner } from '../components/Messages.js';
 import { getInternalModel } from './topology/TopologyUtils.js';
 
+const GET_EXTERNAL_LINKS = 'get_external_links';
 const GET_GEN_CLOUD_MODEL = 'get_generated_cloud_model';
 
 
@@ -141,6 +142,11 @@ class CloudDeployProgress extends BaseWizardPage {
       });
     }
 
+    steps.push({
+      label: translate('deploy.progress.external-urls'),
+      playbooks: [GET_EXTERNAL_LINKS]
+    });
+
     steps = steps.concat([{
       label: translate('deploy.progress.step1'),
       playbooks: [constants.NETWORK_INTERFACE_DEPLOY_PLAYBOOK + '.yml']
@@ -203,11 +209,17 @@ class CloudDeployProgress extends BaseWizardPage {
     }
 
     playbooks.push({
-      name: 'get_external_links',
+      name: GET_EXTERNAL_LINKS,
       action: ((logger) => {
         return fetchJson('api/v2/external_urls')
           .then((response) => {
             this.props.updateGlobalState('usefulLinks', response);
+          })
+          .catch((error) => {
+            logger('Warning: Failed to fetch from api/v2/external_urls.');
+            logger('Unable to complete the "Persisting endpoints" step: ' +
+              `${error.toString()}.`
+            );
           });
       })
     });

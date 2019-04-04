@@ -77,7 +77,8 @@ class InstallWizard extends Component {
 
     // Indicate which of the state variables will be persisted to, and loaded from, the progress API
     this.persistedStateVars = [
-      'currentStep', 'steps', 'playbookStatus', 'connectionInfo', 'deployConfig'
+      'currentStep', 'steps', 'playbookStatus', 'connectionInfo',
+      'deployConfig', 'usefulLinks'
     ];
   }
 
