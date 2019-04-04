@@ -217,8 +217,7 @@ class CloudDeployProgress extends BaseWizardPage {
           })
           .catch((error) => {
             logger('Warning: Failed to fetch from api/v2/external_urls.');
-            logger('Unable to complete the ' +
-              `"${translate('deploy.progress.external-urls')}" step: ` +
+            logger('Unable to complete the "Persisting endpoints" step: ' +
               `${error.toString()}.`
             );
           });
