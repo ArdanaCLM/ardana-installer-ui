@@ -226,7 +226,7 @@ class ConnectionCredsInfo extends Component {
       callbackData[category] = {};
 
       if (this.state.inputValue.getIn([category,'checked'])) {
-        // Move secured, checked, and sessionKey to he top level
+        // Move secured, checked, and sessionKey to the top level
         callbackData[category].secured = this.state.inputValue.getIn([category,'secured']);
         callbackData[category].checked = this.state.inputValue.getIn([category,'checked']);
         callbackData[category].sessionKey = this.state.inputValue.getIn([category,'sessionKey']);
@@ -249,6 +249,12 @@ class ConnectionCredsInfo extends Component {
         this.setState({loading: false});
         if(this.state.smTestStatus !== TEST_STATUS.INVALID &&
           this.state.ovTestStatus !== TEST_STATUS.INVALID) {
+          // Capture the session key after test
+          for (const category of ['sm','ov']) {
+            if (this.state.inputValue.getIn([category,'checked'])) {
+              callbackData[category].sessionKey = this.state.inputValue.getIn([category,'sessionKey']);
+            }
+          }
           this.props.doneAction(callbackData);
         }
       });
