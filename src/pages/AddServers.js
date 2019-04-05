@@ -26,6 +26,7 @@ import { translate } from '../localization/localize.js';
 import { getServerRoles, isRoleAssignmentValid, hasConflictAddresses } from '../utils/ModelUtils.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
+import  * as constants  from '../utils/constants.js';
 
 
 const ROLE_LIMIT = ['COMPUTE'];
@@ -33,7 +34,7 @@ const ROLE_LIMIT = ['COMPUTE'];
 class AddServers extends BaseUpdateWizardPage {
   constructor(props) {
     super(props);
-    this.checkInputs = ['nic-mapping', 'server-group'];
+
     this.state = {
       ...this.state,
       deployedServers: undefined,
@@ -233,7 +234,7 @@ class AddServers extends BaseUpdateWizardPage {
         newIds?.length > 0 && !this.props.processOperation &&
         this.hasValidNewServers() &&
         getServerRoles(this.props.model, ROLE_LIMIT).every(role => {
-          return isRoleAssignmentValid(role, this.checkInputs);
+          return isRoleAssignmentValid(role, constants.MODEL_SERVER_PROP_CHECK_NULL);
         })
       );
     }
@@ -295,7 +296,7 @@ class AddServers extends BaseUpdateWizardPage {
   renderAddPage() {
     return (
       <AssignServerRoles
-        rolesLimit={ROLE_LIMIT} checkInputs={this.checkInputs}
+        rolesLimit={ROLE_LIMIT}
         deployedServers={this.state.deployedServers}
         isUpdateMode={true} {...this.props}>
       </AssignServerRoles>

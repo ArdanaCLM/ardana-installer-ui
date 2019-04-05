@@ -43,6 +43,8 @@ export const REPLACE_SERVER_MAC_IPMI_PROPS =  [
 
 export const MODEL_SERVER_PROPS_ALL = MODEL_SERVER_PROPS.concat(['role', 'uid']);
 
+export const MODEL_SERVER_PROP_CHECK_NULL = ['nic-mapping', 'server-group', 'ip-addr'];
+
 export const IS_MS_EDGE = /Edge/.test(window.navigator.userAgent);
 
 export const IS_MS_IE = /MSIE\s|Trident\/7\./.test(window.navigator.userAgent);
