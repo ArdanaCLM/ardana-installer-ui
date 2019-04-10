@@ -399,7 +399,7 @@ class DeleteCompute extends BaseUpdateWizardPage {
     // remove from monasca ping if there is monasca
     steps.push({
       label: translate('server.deploy.progress.update-monasca'),
-      playbooks: [constants.MONASCA_DEPLOY_PLAYBOOK + '.yml']
+      playbooks: [constants.MONASCA_AGENT_REMOVE_HOST_ALIVE_CHECK + '.yml']
     });
 
     return steps;
@@ -493,8 +493,10 @@ class DeleteCompute extends BaseUpdateWizardPage {
     }
 
     playbooks.push({
-      name: constants.MONASCA_DEPLOY_PLAYBOOK,
-      payload: {'tags': 'active_ping_checks'}
+      name: constants.MONASCA_AGENT_REMOVE_HOST_ALIVE_CHECK,
+      payload: {
+        'tags': 'remove_compute_host_alive_check',
+        'extra-vars': {'compute_hostname': this.props.operationProps.oldServer.ansible_hostname}}
     });
 
     return playbooks;

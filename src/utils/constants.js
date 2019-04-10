@@ -91,6 +91,7 @@ export const MONASCA_DEPLOY_PLAYBOOK = 'monasca-deploy';
 export const MONASCA_AGENT_DEPLOY_PLAYBOOK = 'monasca-agent-deploy';
 export const MONASCA_REBUILD_PRETASKS_PLAYBOOK = 'monasca-rebuild-pretasks';
 export const MONASCA_TRANSFORM_DEPLOY_PLAYBOOK = 'monasca-transform-deploy';
+export const MONASCA_AGENT_REMOVE_HOST_ALIVE_CHECK = 'monasca-agent-remove-host-alive-check';
 
 export const NOVA_HOST_EVACUATE_PLAYBOOK ='nova-host-evacuate';
 
