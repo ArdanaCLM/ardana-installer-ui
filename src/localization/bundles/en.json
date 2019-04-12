@@ -140,7 +140,7 @@
     "validate.config.files.validate": "Validate",
     "validate.config.files.deploy": "Deploy",
     "validate.config.files.msg.warning": "Modifying the model directly may result in the cloud being in a bad state.",
-    "validate.config.files.msg.info0": "Click Prepare Deployment to run config-processor-run.yml and ready-deployment.yml playbooks. Click Deploy to deploy the changes to the cloud.",
+    "validate.config.files.msg.info0": "Click Prepare deployment to run config-processor-run.yml and ready-deployment.yml playbooks. Click Deploy to deploy the changes to the cloud.",
     "validate.config.files.msg.info1": "Click on a configuration file to view or edit its content.",
     "validate.config.files.msg.info2": "Click the Validate button to run the configuration processor.",
     "validate.config.files.msg.valid": "Validation succeeded and changes have been committed.",
