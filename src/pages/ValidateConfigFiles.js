@@ -23,7 +23,7 @@ import { Alert, Tabs, Tab } from 'react-bootstrap';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import Dropdown from '../components/Dropdown.js';
 import HelpText from '../components/HelpText.js';
-import { InfoBanner } from '../components/Messages.js';
+import { InfoBanner, ErrorBanner} from '../components/Messages.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
 import * as constants from '../utils/constants.js';
 import TransferTable from '../components/TransferTable.js';
@@ -138,6 +138,11 @@ class DisplayFileList extends Component {
   getMessage() {
     if (this.props.valid === constants.UNKNOWN) {
       let infoMessages = [];
+      if(this.props.isUpdateMode) {
+        infoMessages.push(
+          <ErrorBanner show={true} key='warning' message={translate('validate.config.files.msg.warning')}/>
+        );
+      }
       infoMessages.push(<InfoBanner key='info1' message={translate('validate.config.files.msg.info1')}/>);
       infoMessages.push(<InfoBanner key='info2' message={translate('validate.config.files.msg.info2')}/>);
       if(this.props.isUpdateMode) {

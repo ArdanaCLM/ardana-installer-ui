@@ -32,9 +32,7 @@ import Services from '../pages/topology/Services.js';
 import Network from '../pages/topology/Networks.js';
 import Servers from '../pages/topology/Servers.js';
 import ServerRoles from '../pages/topology/ServerRoles.js';
-/*
 import ModelConfiguration from '../pages/ModelConfiguration';
-*/
 import { isProduction } from './ConfigHelper.js';
 import { UpdateModelPages } from '../pages/ModelConfiguration/UpdateModelPages.js';
 
