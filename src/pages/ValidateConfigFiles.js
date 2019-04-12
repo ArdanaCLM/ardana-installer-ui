@@ -378,7 +378,7 @@ export class ValidateConfigFiles extends Component {
     if (this.state.valid === constants.VALID) {
       this.setState({valid: constants.UNKNOWN});
       if(this.props.isUpdateMode) {
-        this.props.updateValidationStatus(constants.VALIDATING);
+        this.props.updateValidationStatus(constants.UNKNOWN);
       }
     }
 
