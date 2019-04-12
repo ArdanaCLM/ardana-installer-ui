@@ -139,7 +139,7 @@
     "validate.config.files.heading": "Review configuration files",
     "validate.config.files.validate": "Validate",
     "validate.config.files.deploy": "Deploy",
-    "validate.config.files.msg.info0": "Validated model changes will be committed but are not automatically deployed. The model may be edited here in support of server add/replace use cases, or as needed to support service configuration changes. The deployment update process should be completed on the servers or configuration pages respectively.",
+    "validate.config.files.msg.info0": "Click Prepare Deployment to run config-processor-run.yml and ready-deployment.yml playbooks. Click Deploy to deploy the changes to the cloud.",
     "validate.config.files.msg.info1": "Click on a configuration file to view or edit its content.",
     "validate.config.files.msg.info2": "Click the Validate button to run the configuration processor.",
     "validate.config.files.msg.valid": "Validation succeeded and changes have been committed.",
@@ -477,6 +477,14 @@
     "deploy.cancel.message": "Playbook cancelled.",
     "deploy.get.log.error": "Failed to get the log for playbook {0} - {1}. {2}",
     "deploy.progress.failure": "Cloud provisioning has failed. Please review the errors in the log, hit Back, address the issue by editing any necessary files, re-run Validate, and Deploy again.",
+
+    "update.progress.heading": "Cloud update deployment in progress",
+    "update.progress.failure": "Failed to deploy cloud update",
+    "update.deploy.confirm": "The deployment of the model update may disrupt your cloud.  Do you want to proceed?",
+    "update.model.heading": "Update model files",
+    "update.prepare.progress.heading": "Preparing model update deployment in progress",
+    "update.deploy.prepare": "Prepare deployment",
+    "update.prepare.deploy.confirm": "Running config-processor-run.yml and ready-deployment.yml playbooks for the model update may cause inconsistency of the cloud. Do you want to proceed? ",
 
     "install.progress.heading": "SLES installation in progress",
     "install.progress.step1": "Verify IPMI connectivity",

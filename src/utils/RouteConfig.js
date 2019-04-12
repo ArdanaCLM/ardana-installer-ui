@@ -24,7 +24,7 @@ import { AlarmDonutTest } from '../pages/AlarmDonutTest';
 import AddServers from '../pages/AddServers.js';
 import { AddServersPages } from '../pages/AddServers/AddServersPages.js';
 import UpdateServers from '../pages/UpdateServers.js';
-import UpdateServerPages from '../pages/UpdateServerPages';
+import UpdateServerPages from '../pages/UpdateServerPages.js';
 import UpdateWizard from '../UpdateWizard.js';
 import ControlPlanes from '../pages/topology/ControlPlanes.js';
 import Regions from '../pages/topology/Regions.js';
@@ -36,6 +36,7 @@ import ServerRoles from '../pages/topology/ServerRoles.js';
 import ModelConfiguration from '../pages/ModelConfiguration';
 */
 import { isProduction } from './ConfigHelper.js';
+import { UpdateModelPages } from '../pages/ModelConfiguration/UpdateModelPages.js';
 
 class ServerSummary extends  Component {
   render() {
@@ -53,6 +54,14 @@ class AddServersPage extends  Component {
   }
 }
 
+class ModelConfigurationPage extends  Component {
+  render() {
+    return(
+      <UpdateWizard pageSet={UpdateModelPages} menuComponent={ModelConfiguration} menuName='/services/model'/>
+    );
+  }
+}
+
 /**
  * Define all fixed entries on the navigation menu
  */
@@ -62,9 +71,7 @@ export const routes = [
       { name: translate('information'), slug: '/services/info', component: ServiceInfo },
       { name: translate('packages.ardana'), slug: '/services/packages', component: ArdanaPackages },
       { name: translate('configuration'), slug: '/services/configuration', component: ServiceConfiguration },
-      /*
-      { name: translate('model'), slug: '/services/model', component: ModelConfiguration },
-      */
+      { name: translate('model'), slug: '/services/model', component: ModelConfigurationPage },
       { name: translate('roles'), slug: '/services/roles', component: ServicesPerRole },
     ]
   },

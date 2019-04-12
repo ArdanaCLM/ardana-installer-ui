@@ -100,4 +100,10 @@ export const REMOVE_FROM_AGGREGATES_ACTION = 'remove_from_aggregates';
 export const MIGRATE_INSTANCES_ACTIOIN = 'migrate_instances';
 export const DISABLE_NETWORK_AGENTS_ACTION = 'disable_network_agents';
 
+// Model validation status
+export const INVALID = 0;
+export const VALID = 1;
+export const UNKNOWN = -1;
+export const VALIDATING = 2;
+
 
