@@ -20,7 +20,7 @@ import BaseUpdateWizardPage from './BaseUpdateWizardPage.js';
 import { ValidateConfigFiles } from './ValidateConfigFiles';
 import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
 import { UpdateModelPages } from './ModelConfiguration/UpdateModelPages.js';
-import { YesNoModal } from '../components/Modals.js';
+import { UpdateModelConfirmModal } from '../components/Modals.js';
 import { translate } from '../localization/localize.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { ActionButton } from '../components/Buttons.js';
@@ -36,43 +36,25 @@ class ModelConfiguration extends BaseUpdateWizardPage {
       wizardLoadingErrors: props.wizardLoadingErrors,
       // Indicator of validation status
       modelValid: constants.UNKNOWN,
-      // Show confirm dialog when user clicks Deploy
-      showDeployConfirmModal: false,
-      // Show confirm dialog when user clicks Prepare Deployment
-      showPrepareConfirmModal: false,
-      // Whether or not is the Deploy button clicked
+      // Show confirm dialog when user clicks Update
+      showUpdateConfirmModal: false,
+      // Whether or not users wants to run full deployment
       isDeploy: false,
     };
   }
 
   startUpdateModel = () => {
+    let opProps = {'isDeploy': this.state.isDeploy};
     let pages = [{
       name: 'UpdateModelProcess', component: UpdateModelPages.UpdateModelProcess}];
-    this.props.startUpdateProcess('UpdateModelProcess', pages);
+    this.props.startUpdateProcess('UpdateModelProcess', pages, opProps);
   };
 
-  updateModel = () => {
-    this.setState({showDeployConfirmModal: false});
+  updateModel = async (isDeploy) => {
+    await this.setState({showUpdateConfirmModal: false, isDeploy: isDeploy});
 
     if((this.props.isEncrypted && !isEmpty(getCachedEncryptKey())) || !this.props.isEncrypted) {
       this.startUpdateModel();
-    }
-    else { // encrypted but don't have encryptKey
-      this.setState({showEncryptKeyModal: true, isDeploy: true});
-    }
-  }
-
-  startPrepareUpdateModel = () => {
-    let pages = [{
-      name: 'UpdateModelPrepareProcess', component: UpdateModelPages.UpdateModelPrepareProcess}];
-    this.props.startUpdateProcess('UpdateModelPrepareProcess', pages);
-  };
-
-  prepareUpdateModel = () => {
-    this.setState({showPrepareConfirmModal: false});
-
-    if((this.props.isEncrypted && !isEmpty(getCachedEncryptKey())) || !this.props.isEncrypted) {
-      this.startPrepareUpdateModel();
     }
     else { // encrypted but don't have encryptKey
       this.setState({showEncryptKeyModal: true});
@@ -83,15 +65,7 @@ class ModelConfiguration extends BaseUpdateWizardPage {
   handleSaveEncryptKey = async (encryptKey) => {
     this.setState({showEncryptKeyModal: false});
     await setCachedEncryptKey(encryptKey);
-    this.setState(prev => {
-      if(prev.isDeploy) {
-        this.startUpdateModel();
-      }
-      else {
-        this.startPrepareUpdateModel();
-      }
-      return {isDeploy: false};
-    });
+    this.startUpdateModel();
   }
 
   noop() {
@@ -107,26 +81,22 @@ class ModelConfiguration extends BaseUpdateWizardPage {
     );
   }
 
-  isDeployable = () => {
+  isUpdatable = () => {
     return (
       !this.props.wizardLoadingErrors && !this.props.processOperation &&
       this.state.modelValid === constants.VALID
     );
   }
 
-  handleDeploy = () => {
-    this.setState({showDeployConfirmModal: true});
-  }
-
-  handlePrepare = () => {
-    this.setState({showPrepareConfirmModal: true});
+  handleUpdate = () => {
+    this.setState({showUpdateConfirmModal: true});
   }
 
   updateValidationStatus = (status) => {
     this.setState({modelValid : status});
   }
 
-  renderUpdateModel() {
+  renderUpdateModelFiles() {
     return <div className='menu-tab-content'>
       <ValidateConfigFiles disableTab={this.noop()} showNavButtons={this.noop()}
         enableBackButton={this.noop()} updateValidationStatus={this.updateValidationStatus}
@@ -135,53 +105,23 @@ class ModelConfiguration extends BaseUpdateWizardPage {
     </div>;
   }
 
-  renderDeployConfirmModal() {
+  renderUpdateConfirmModal() {
     return (
-      <If condition={this.state.showDeployConfirmModal}>
-        <YesNoModal title={translate('warning')}
-          yesAction={this.updateModel}
-          noAction={() => this.setState({showDeployConfirmModal: false})}>
-          {translate('update.deploy.confirm')}
-        </YesNoModal>
+      <If condition={this.state.showUpdateConfirmModal}>
+        <UpdateModelConfirmModal
+          doneAction={this.updateModel}
+          cancelAction={() => this.setState({showUpdateConfirmModal: false})}/>
       </If>
-    );
-  }
-
-  renderPrepareConfirmModal() {
-    return (
-      <If condition={this.state.showPrepareConfirmModal}>
-        <YesNoModal title={translate('warning')}
-          yesAction={this.prepareUpdateModel}
-          noAction={() => this.setState({showPrepareConfirmModal: false})}>
-          {translate('update.prepare.deploy.confirm')}
-        </YesNoModal>
-      </If>
-    );
-  }
-
-  renderDeployButton() {
-    return (
-      <ActionButton
-        clickAction={this.handleDeploy}
-        displayLabel={translate('common.deploy')}
-        isDisabled={!this.isDeployable()}/>
-    );
-  }
-
-  renderPrepareButton() {
-    return (
-      <ActionButton
-        clickAction={this.handlePrepare}
-        displayLabel={translate('update.deploy.prepare')}
-        isDisabled={!this.isDeployable()}/>
     );
   }
 
   renderFooterButtons() {
     return (
       <div className='btn-row footer-container'>
-        {this.renderPrepareButton()}
-        {this.renderDeployButton()}
+        <ActionButton
+          clickAction={this.handleUpdate}
+          displayLabel={translate('common.update')}
+          isDisabled={!this.isUpdatable()}/>
       </div>
     );
   }
@@ -197,7 +137,7 @@ class ModelConfiguration extends BaseUpdateWizardPage {
         </div>
         <div className='wizard-content'>
           <If condition={this.isValidToRenderModelConfig()}>
-            {this.renderUpdateModel()}
+            {this.renderUpdateModelFiles()}
           </If>
         </div>
         <If condition={this.isValidToRenderModelConfig()}>
@@ -207,8 +147,7 @@ class ModelConfiguration extends BaseUpdateWizardPage {
           {this.renderWizardLoadingErrors(
             this.state.wizardLoadingErrors, this.handleCloseLoadingErrorMessage)}
         </If>
-        {this.renderDeployConfirmModal()}
-        {this.renderPrepareConfirmModal()}
+        {this.renderUpdateConfirmModal()}
         {this.renderEncryptKeyModal()}
       </div>
     );

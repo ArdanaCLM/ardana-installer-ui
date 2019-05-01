@@ -14,9 +14,7 @@
 **/
 
 import UpdateModelProcess from './UpdateModelProcess.js';
-import UpdateModelPrepareProcess from './UpdateModelPrepareProcess.js';
 
 export const UpdateModelPages = {
-  'UpdateModelProcess': UpdateModelProcess,
-  'UpdateModelPrepareProcess': UpdateModelPrepareProcess,
+  'UpdateModelProcess': UpdateModelProcess
 };

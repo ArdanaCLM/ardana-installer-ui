@@ -52,10 +52,6 @@ class UpdateModelProcess extends BaseUpdateWizardPage {
     }
   }
 
-  getHeaderTitle() {
-    return translate('update.progress.heading');
-  }
-
   getDeploySteps() {
     return [{
       label: translate('deploy.progress.step1'),
@@ -102,13 +98,18 @@ class UpdateModelProcess extends BaseUpdateWizardPage {
       label: translate('deploy.progress.predeployment'),
       playbooks: [constants.PRE_DEPLOYMENT_PLAYBOOK + '.yml']
     }];
-    steps = steps.concat(this.getDeploySteps());
+    if(this.props.operationProps.isDeploy) {
+      steps = steps.concat(this.getDeploySteps());
+    }
 
     let playbooks = [{
       name: constants.PRE_DEPLOYMENT_PLAYBOOK,
       payload:  {'extra-vars': {encrypt: getCachedEncryptKey() || ''}}
     }];
-    playbooks = playbooks.concat(this.getDeployPlaybooks());
+
+    if(this.props.operationProps.isDeploy) {
+      playbooks = playbooks.concat(this.getDeployPlaybooks());
+    }
 
     return (
       <PlaybookProgress
@@ -129,11 +130,13 @@ class UpdateModelProcess extends BaseUpdateWizardPage {
   render() {
     // If error happens, will show retry buttons.
     let failed =  this.state.overallStatus === constants.STATUS.FAILED;
+    let headingKey =
+      this.props.operationProps.isDeploy ? 'update.progress.heading' : 'update.prepare.progress.heading';
     return (
       <div className='wizard-page'>
         <LoadingMask show={this.props.wizardLoading}/>
         <div className='content-header'>
-          {this.renderHeading(this.getHeaderTitle())}
+          {this.renderHeading(translate(headingKey))}
         </div>
         <div className='wizard-content'>
           <If condition={!this.props.wizardLoading && this.state.showPlaybookProcess}>
