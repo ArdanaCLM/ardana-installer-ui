@@ -483,10 +483,10 @@
     "update.progress.heading": "Cloud update deployment in progress",
     "update.prepare.progress.heading": "Preparing model update deployment in progress",
     "update.progress.failure": "Failed to deploy cloud update",
-    "update.deploy.confirm": "The deployment of the model update may disrupt your cloud.  Do you want to proceed?",
+    "update.deploy.confirm": "Deploying a model update may disrupt cloud operations. Proceed with model update?",
     "update.model.heading": "Update model files",
     "update.model.confirm.title": "Update model",
-    "update.model.confirm.msg": "This will run config-processor-run.yml and ready-deployment.yml playbooks for the model update. Check Run full deployment if want to deploy the model changes to the cloud. \n\nRunning prepare deployemnt playbooks or full deployment playbooks may cause inconsistency of the cloud. Do you want to proceed? ",
+    "update.model.confirm.msg": "This will run config-processor-run.yml and ready-deployment.yml playbooks to update the model. Check \"Run full deployment\" to deploy the model changes to the cloud. \n\nRunning prepare deployment playbooks or full deployment playbooks may cause inconsistency of the cloud. Proceed with model update?",
     "update.model.confirm.deploy": "Run full deployment",
 
     "install.progress.heading": "SLES installation in progress",

@@ -234,7 +234,7 @@ export class UpdateModelConfirmModal extends Component {
     const footer = (
       <div className="btn-row">
         <ActionButton type='default'
-          clickAction={this.props.cancelAction} displayLabel={translate('no')}/>
+          clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
           clickAction={::this.handleDoneAction} displayLabel={translate('ok')}/>
       </div>
