@@ -39,7 +39,7 @@ class Complete extends BaseWizardPage {
 
     links.push({
       name: 'suse-documentation',
-      url: 'https://www.suse.com/documentation/'
+      url: 'https://www.suse.com/documentation/suse-openstack-cloud-9/'
     });
 
     return links.map((link) => {
