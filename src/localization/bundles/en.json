@@ -140,7 +140,7 @@
     "validate.config.files.heading": "Review configuration files",
     "validate.config.files.validate": "Validate",
     "validate.config.files.deploy": "Deploy",
-    "validate.config.files.msg.warning": "Modifying the model directly is an advanced use case and should be done with caution as incorrect changes may result in the cloud being in a bad state",
+    "validate.config.files.msg.warning": "Modifying the model directly is an advanced use case and should be done with caution as incorrect changes may result in the cloud being in a bad state.",
     "validate.config.files.msg.info0": "Click Update to run playbooks to prepare deployment or deploy the changes.",
     "validate.config.files.msg.info1": "Click on a configuration file to view or edit its content.",
     "validate.config.files.msg.info2": "Click the Validate button to run the configuration processor.",
@@ -482,7 +482,7 @@
 
     "update.progress.heading": "Cloud update deployment in progress",
     "update.prepare.progress.heading": "Preparing model update deployment in progress",
-    "update.progress.failure": "Failed to deploy cloud update",
+    "update.progress.failure": "Failed to deploy cloud update.",
     "update.deploy.confirm": "Deploying a model update may disrupt cloud operations. Proceed with model update?",
     "update.model.heading": "Update model files",
     "update.model.confirm.title": "Update model",

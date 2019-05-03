@@ -236,7 +236,7 @@ export class UpdateModelConfirmModal extends Component {
         <ActionButton type='default'
           clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
         <ActionButton
-          clickAction={::this.handleDoneAction} displayLabel={translate('ok')}/>
+          clickAction={::this.handleDoneAction} displayLabel={translate('common.update')}/>
       </div>
     );
 
