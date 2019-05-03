@@ -23,15 +23,10 @@ import { Alert, Tabs, Tab } from 'react-bootstrap';
 import ServiceTemplatesTab from './ValidateConfigFiles/ServiceTemplatesTab.js';
 import Dropdown from '../components/Dropdown.js';
 import HelpText from '../components/HelpText.js';
-import { InfoBanner } from '../components/Messages.js';
+import { InfoBanner, ErrorBanner} from '../components/Messages.js';
 import { ValidatingInput } from '../components/ValidatingInput.js';
-import { STATUS } from '../utils/constants.js';
+import * as constants from '../utils/constants.js';
 import TransferTable from '../components/TransferTable.js';
-
-const INVALID = 0;
-const VALID = 1;
-const UNKNOWN = -1;
-const VALIDATING = 2;
 
 const TAB = {
   MODEL_FILES: 'MODEL_FILES',
@@ -96,7 +91,8 @@ class EditFile extends Component {
 
   render() {
     //TODO - need a max height on the errorMsgPanel
-    let editPanelCssClass = `file-editor ${this.props.valid === INVALID ? 'col-md-6 verticalLine' : 'col-md-12'}`;
+    let editPanelCssClass =
+      `file-editor ${this.props.valid === constants.INVALID ? 'col-md-6 verticalLine' : 'col-md-12'}`;
 
     return (
       <div className="validate-config-files">
@@ -118,7 +114,7 @@ class EditFile extends Component {
               </Otherwise>
             </Choose>
           </div>
-          <If condition={this.props.valid === INVALID}>
+          <If condition={this.props.valid === constants.INVALID}>
             <div className="col-md-6">
               <ErrorAlert message={this.props.invalidMsg} />
             </div>
@@ -140,25 +136,30 @@ class EditFile extends Component {
 
 class DisplayFileList extends Component {
   getMessage() {
-    if (this.props.valid === UNKNOWN) {
+    if (this.props.valid === constants.UNKNOWN) {
       let infoMessages = [];
-      if(!this.props.allowsDeploy) {
-        infoMessages.push(<InfoBanner key='info0' message={translate('validate.config.files.msg.info0')}/>);
+      if(this.props.isUpdateMode) {
+        infoMessages.push(
+          <ErrorBanner show={true} key='warning' message={translate('validate.config.files.msg.warning')}/>
+        );
       }
       infoMessages.push(<InfoBanner key='info1' message={translate('validate.config.files.msg.info1')}/>);
       infoMessages.push(<InfoBanner key='info2' message={translate('validate.config.files.msg.info2')}/>);
+      if(this.props.isUpdateMode) {
+        infoMessages.push(<InfoBanner key='info0' message={translate('validate.config.files.msg.info0')}/>);
+      }
       return (
         <div>
           {infoMessages}
         </div>);
-    } else if (this.props.valid === VALIDATING) {
+    } else if (this.props.valid === constants.VALIDATING) {
       return (
         <div>
           <i className="eos-icons eos-icon-loading mr-3"></i>
           {translate('validate.config.files.msg.validating')}
         </div>
       );
-    } else if (this.props.valid === VALID) {
+    } else if (this.props.valid === constants.VALID) {
       return (
         <Alert key='validate-success' variant='success'>
           {translate('validate.config.files.msg.valid')}
@@ -172,9 +173,9 @@ class DisplayFileList extends Component {
   }
 
   getIcon() {
-    if (this.props.valid === VALID) {
+    if (this.props.valid === constants.VALID) {
       return (<i className='material-icons validate-result-icon valid'>check_circle</i>);
-    } else if (this.props.valid === INVALID) {
+    } else if (this.props.valid === constants.INVALID) {
       return (<i className='material-icons validate-result-icon invalid'>error</i>);
     }
   }
@@ -194,7 +195,7 @@ class DisplayFileList extends Component {
       return (descA < descB) ? -1 : (descA > descB) ? 1 : 0;});
 
     var list = fileList.map((file, index) => {
-      if (this.props.valid === VALIDATING) {
+      if (this.props.valid === constants.VALIDATING) {
         return (<li key={index}>
           {file.description + (file.changed ? ' *' : '')}
         </li>);
@@ -221,7 +222,7 @@ class DisplayFileList extends Component {
           </div>
           <div>
             <ActionButton
-              isDisabled={this.props.valid === VALIDATING}
+              isDisabled={this.props.valid === constants.VALIDATING}
               displayLabel={translate('validate.config.files.validate')}
               clickAction={() => this.props.onValidateClick()}/>
             {this.getIcon()}
@@ -237,10 +238,10 @@ export class ValidateConfigFiles extends Component {
     super(props);
     this.state = {
       configFiles: [],
-      valid: UNKNOWN,
+      valid: constants.UNKNOWN,
       editingFile: '',
       invalidMsg: '',
-      commit: STATUS.NOT_STARTED
+      commit: constants.STATUS.NOT_STARTED
     };
 
     // retrieve a list of yml files
@@ -259,7 +260,10 @@ export class ValidateConfigFiles extends Component {
   }
 
   validateModel = () => {
-    this.setState({valid: VALIDATING, invalidMsg: ''});
+    this.setState({valid: constants.VALIDATING, invalidMsg: ''});
+    if(this.props.isUpdateMode) {
+      this.props.updateValidationStatus(constants.VALIDATING);
+    }
     this.props.disableTab(true);
     this.props.enableBackButton(false);
     this.props.enableNextButton(false);
@@ -267,7 +271,10 @@ export class ValidateConfigFiles extends Component {
     if (this.props.requiresPassword) {
       if (!this.props.sshPassphrase) {
         this.props.enableNextButton(false);
-        this.setState({valid: INVALID, invalidMsg: translate('validate.config.sshPassphrase.missing')});
+        this.setState({valid: constants.INVALID, invalidMsg: translate('validate.config.sshPassphrase.missing')});
+        if(this.props.isUpdateMode) {
+          this.props.updateValidationStatus(constants.INVALID);
+        }
         this.props.disableTab(false);
         this.props.enableBackButton(true);
       } else {
@@ -280,7 +287,7 @@ export class ValidateConfigFiles extends Component {
           })
           .catch((error) => {
             this.props.enableNextButton(false);
-            this.setState({valid: INVALID,
+            this.setState({valid: constants.INVALID,
               invalidMsg: translate('validate.config.sshPassphrase.error', error.value['error_msg'])});
             this.props.disableTab(false);
             this.props.enableBackButton(true);
@@ -298,17 +305,23 @@ export class ValidateConfigFiles extends Component {
         const commitMessage = {'message': 'Committed via Ardana DayZero Installer'};
         postJson('/api/v2/model/commit', commitMessage)
           .then(() => {
-            this.setState({valid: VALID, commit: STATUS.COMPLETE});
+            this.setState({valid: constants.VALID, commit: constants.STATUS.COMPLETE});
             this.props.disableTab(false);
             this.props.enableBackButton(true);
             this.props.enableNextButton(true);
             this.clearAllChangeMarkers();
+            if(this.props.isUpdateMode) {
+              this.props.updateValidationStatus(constants.VALID);
+            }
           })
           .catch((error) => {
             this.setState({
-              valid: INVALID,
+              valid: constants.INVALID,
               invalidMsg: translate('deploy.commit.failure', error.toString()),
-              commit: STATUS.FAILED});
+              commit: constants.STATUS.FAILED});
+            if(this.props.isUpdateMode) {
+              this.props.updateValidationStatus(constants.INVALID);
+            }
             this.props.disableTab(false);
             this.props.enableBackButton(true);
             this.props.enableNextButton(false);
@@ -316,9 +329,12 @@ export class ValidateConfigFiles extends Component {
       })
       .catch(error => {
         this.props.enableNextButton(false);
-        this.setState({valid: INVALID, invalidMsg: error.value.log});
+        this.setState({valid: constants.INVALID, invalidMsg: error.value.log});
         this.props.disableTab(false);
         this.props.enableBackButton(true);
+        if(this.props.isUpdateMode) {
+          this.props.updateValidationStatus(constants.INVALID);
+        }
       });
   }
 
@@ -334,8 +350,7 @@ export class ValidateConfigFiles extends Component {
             onEditClick={(file) => this.editFile(file)}
             valid={this.state.valid}
             invalidMsg={this.state.invalidMsg}
-            allowsDeploy={this.props.allowsDeploy}
-          />
+            isUpdateMode={this.props.isUpdateMode}/>
         </If>
         <If condition={this.state.editingFile !== ''}>
           <EditFile
@@ -360,8 +375,11 @@ export class ValidateConfigFiles extends Component {
   setChanged() {
     this.props.enableNextButton(false);
 
-    if (this.state.valid === VALID) {
-      this.setState({valid: UNKNOWN});
+    if (this.state.valid === constants.VALID) {
+      this.setState({valid: constants.UNKNOWN});
+      if(this.props.isUpdateMode) {
+        this.props.updateValidationStatus(constants.UNKNOWN);
+      }
     }
 
     var updatedList = this.state.configFiles.map((val) => {
@@ -638,8 +656,7 @@ class ConfigPage extends BaseWizardPage {
                 loadModel={this.props.loadModel}
                 requiresPassword={this.state.requiresPassword}
                 sshPassphrase={this.state.sshPassphrase}
-                setRequiresPassword={this.setRequiresPassword}
-                allowsDeploy={true}/>
+                setRequiresPassword={this.setRequiresPassword}/>
 
             </Tab>
             <Tab disabled={this.state.disableTab}

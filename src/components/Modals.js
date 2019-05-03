@@ -217,3 +217,44 @@ export class SetEncryptKeyModal extends Component {
     );
   }
 }
+
+export class UpdateModelConfirmModal extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {deploy: false};
+  }
+
+  handleDoneAction = (event) => {
+    event?.preventDefault();
+    this.props.doneAction(this.state.deploy);
+  }
+
+  render() {
+    const footer = (
+      <div className="btn-row">
+        <ActionButton type='default'
+          clickAction={this.props.cancelAction} displayLabel={translate('cancel')}/>
+        <ActionButton
+          clickAction={::this.handleDoneAction} displayLabel={translate('common.update')}/>
+      </div>
+    );
+
+    return (
+      <div>
+        <ConfirmModal title={translate('update.model.confirm.title')}
+          onHide={this.props.cancelAction} footer={footer}>
+          <form onSubmit={::this.handleDoneAction}>
+            <div>{translate('update.model.confirm.msg')}</div>
+            <div className='passphrase-line'>
+              <input className='checkbox-input' type='checkbox' value='deploy'
+                checked={this.state.deploy}
+                onChange={(e) => this.setState({deploy: e.target.checked})}/>
+              {translate('update.model.confirm.deploy')}
+            </div>
+          </form>
+        </ConfirmModal>
+      </div>
+    );
+  }
+}

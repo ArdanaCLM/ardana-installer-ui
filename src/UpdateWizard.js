@@ -219,7 +219,7 @@ class UpdateWizard extends InstallWizard {
     steps[0].stepProgress = STATUS.IN_PROGRESS;
 
     this.setState(prev => ({
-      operationProps: Object.assign({}, prev.operationProps, extraOpProps),
+      operationProps: extraOpProps ? Object.assign({}, prev.operationProps, extraOpProps) : undefined,
       currentStep: 0,
       pages: pages,
       steps: steps,
