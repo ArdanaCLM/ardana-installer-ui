@@ -45,7 +45,7 @@ class Complete extends BaseWizardPage {
     return links.map((link) => {
       return (
         <li className='body-link' key={link.name}>
-          <a href={link.url}>
+          <a href={link.url} target="_blank" rel="noopener noreferrer">
             {linkTranslations[link.name]}
           </a>
         </li>
