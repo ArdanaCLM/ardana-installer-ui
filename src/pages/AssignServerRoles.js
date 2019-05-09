@@ -305,12 +305,18 @@ class AssignServerRoles extends BaseWizardPage {
 
   renderEditServerAddedManuallyModal = () => {
     if (this.state.showEditServerAddedManuallyModal) {
+      let extraProps = {};
+      if(this.props.isUpdateMode) {
+        extraProps.isUpdateMode = this.props.isUpdateMode;
+        extraProps.processOperation = this.props.processOperation;
+        extraProps.rolesLimit = this.props.rolesLimit;
+      }
       return (
         <ServersAddedManually model={this.props.model}
           closeAction={this.closeEditServerAddedManuallyModal} updateGlobalState={this.props.updateGlobalState}
           updateAction={this.updateServerAddedManually} serversAddedManually={this.state.serversAddedManually}
           rawDiscoveredServers={this.state.rawDiscoveredServers} server={this.state.activeRowData}
-          rolesLimit={this.props.rolesLimit} isUpdateMode={this.props.isUpdateMode}
+          {...extraProps}
         />
       );
     }
@@ -1248,9 +1254,16 @@ class AssignServerRoles extends BaseWizardPage {
       });
 
     let tableId = 'leftTableId' + type;
+    // In day2 UI, if any process is in progress, for example replacing a server is
+    // in progress, will not allow drag and drop
+    let extraProps = {};
+    if(this.props.isUpdateMode) {
+      extraProps.isUpdateMode = this.props.isUpdateMode;
+      extraProps.processOperation = this.props.processOperation;
+    }
     return (
       <ServerTable
-        id={tableId}
+        id={tableId} {...extraProps}
         tableConfig={tableConfig}
         tableData={filteredAvailableServers}
         viewAction={this.handleShowServerDetails}
@@ -1296,15 +1309,21 @@ class AssignServerRoles extends BaseWizardPage {
     } else {
       // When there are no servers yet added, the tab shows just
       // two buttons instead of content
+      let isDisabled = false;
+      // In day2 UI, if any process is in progress, for example replacing a server is
+      // in progress, will disable add server manually and import servers from a csv file
+      if(this.props.isUpdateMode && this.props.processOperation) {
+        isDisabled = true;
+      }
       return (
         <div className='centered'>
           <div className='stacked'>
             <ActionButton
-              clickAction={this.handleAddServerManually}
+              clickAction={this.handleAddServerManually} isDisabled={isDisabled}
               displayLabel={translate('add.server.add')}/>
           </div>
           <LoadFileButton
-            clickAction={this.handleAddServerFromCSV}
+            clickAction={this.handleAddServerFromCSV} isDisabled={isDisabled}
             displayLabel={translate('add.server.add.csv')}/>
         </div>
       );
@@ -1345,6 +1364,12 @@ class AssignServerRoles extends BaseWizardPage {
   renderSearchBar() {
     if (this.state.selectedServerTabKey === MANUALADD_TAB &&
       this.state.serversAddedManually.length > 0) {
+      let isDisabled = false;
+      // In day2 UI, if any process is in progress, for example replacing a server is
+      // in progress, will disable add server manually and import servers from a csv file
+      if(this.props.isUpdateMode && this.props.processOperation) {
+        isDisabled = true;
+      }
       return (
         <div className='action-line table-header-wrapper'>
           <div className='action-item-left'>
@@ -1355,10 +1380,10 @@ class AssignServerRoles extends BaseWizardPage {
           </div>
           <div>
             <div className='btn-row action-item-right'>
-              <ActionButton type='default'
+              <ActionButton type='default' isDisabled={isDisabled}
                 clickAction={this.handleAddServerManually}
                 displayLabel={translate('add.server.add')}/>
-              <LoadFileButton type='default'
+              <LoadFileButton type='default'  isDisabled={isDisabled}
                 clickAction={this.handleAddServerFromCSV}
                 displayLabel={translate('add.server.add.csv.alt')}/>
             </div>
@@ -1428,7 +1453,7 @@ class AssignServerRoles extends BaseWizardPage {
 
       extraProps.isSafeMode = this.state.isSafeModeChecked;
       //check if anything is in progress
-      extraProps.progressOperation = this.props.processOperation;
+      extraProps.processOperation = this.props.processOperation;
     }
     return (
       <ServerRolesAccordion
