@@ -124,20 +124,10 @@ class ServerRowItem extends Component {
     let cName = this.props.isDraggable ? 'draggable' : 'notDraggable';
     cName = requiredUpdate ? cName + ' required-update' : cName;
 
-    // if the item is not draggable, we don't present edit and delete
-    // actions, add empty td to push the info button to the last col
-    let emptyCols = [];
-    if(!this.props.isDraggable) {
-      for(let i = 0; i < 2; i++) {
-        emptyCols.push(<td key={i}><p></p></td>);
-      }
-    }
-
     return (
       <tr className={cName}
         draggable={this.props.isDraggable} onDragStart={(event) => this.drag(event, this.props.data)}>
         {this.renderServerColumns()}
-        {emptyCols}
         {this.props.viewAction && this.renderInfoRow()}
         {this.props.editAction && this.renderEditRow()}
         {this.props.deleteAction && this.renderDeleteRow()}

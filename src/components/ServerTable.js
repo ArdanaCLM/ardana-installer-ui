@@ -26,30 +26,42 @@ class ServerTable extends Component {
       this.props.tableData.map((row, index) => {
         let extraProps = {};
         extraProps.isDraggable = true;
-        // when it is in addserver mode, if we have a list of deployed servers
-        if(this.props.isUpdateMode &&
-           this.props.deployedServers && this.props.deployedServers.length > 0) {
-          // If the server item is NOT in the deployedServers, will present
-          // editAction and deleteAction
-          // Or if isSafeMode is false, will present editAction and deleteAction
-          // And if any other playbook in progress, will not present editActioin
-          // and deleteAction
-          if((!this.props.deployedServers.some(server => {
-            return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
-          }) || !this.props.isSafeMode) && !this.props.progressOperation) {
+        // when it is day2 UI
+        if(this.props.isUpdateMode) {
+          // if we have a list of deployed servers for the server role table
+          if (this.props.id == 'rightTableId' &&
+            this.props.deployedServers && this.props.deployedServers.length > 0) {
+            // If the server item is NOT in the deployedServers, will present
+            // editAction and deleteAction
+            // Or if isSafeMode is false, will present editAction and deleteAction
+            // And if any other playbook in progress, will not present editActioin
+            // and deleteAction
+            if ((!this.props.deployedServers.some(server => {
+              return server['id'] === row['id'] && server['ip-addr'] === row['ip-addr'];
+            }) || !this.props.isSafeMode) && !this.props.processOperation) {
+              extraProps.editAction = this.props.editAction;
+              extraProps.deleteAction = this.props.deleteAction;
+            }
+            // if the server item is in the deployedServers, will NOT present
+            // editAction and deleteAction and item is not draggable
+            else {
+              extraProps.isDraggable = false;
+            }
+
+            // check if any newly added servers have duplicate addresses
+            extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
+            extraProps.checkNewDupAddresses['deployedServerIds'] =
+              this.props.deployedServers.map(server => server.id);
+          }
+          // If is the manually added servers or auto discovered servers table, will prevent drag and drop
+          // when process is in progress, for example replacing a server is in progress
+          else if (this.props.id.startsWith('leftTableId')) {
+            if(this.props.processOperation) {
+              extraProps.isDraggable = false;
+            }
             extraProps.editAction = this.props.editAction;
             extraProps.deleteAction = this.props.deleteAction;
           }
-          // if the server item is in the deployedServers, will NOT present
-          // editAction and deleteAction and item is not draggable
-          else {
-            extraProps.isDraggable = false;
-          }
-
-          // check if any newly added servers have duplicate addresses
-          extraProps.checkNewDupAddresses = this.props.checkNewDupAddresses;
-          extraProps.checkNewDupAddresses['deployedServerIds'] =
-            this.props.deployedServers.map(server => server.id);
         }
         else {
           extraProps.editAction = this.props.editAction;

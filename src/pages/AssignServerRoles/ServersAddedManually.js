@@ -246,7 +246,9 @@ class ServersAddedManually extends Component {
         <form onSubmit={::this.saveAndClose}>
           <div className='server-details-container'>
             {this.renderInputLine(true, 'server.id.prompt', 'id', 'text', createExcludesValidator(existingIds))}
-            {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
+            <If condition={!this.props.isUpdateMode || !this.props.processOperation} >
+              {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
+            </If>
             {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
             {this.renderDropdownLineWithButton(
               true, 'server.group.prompt', 'server-group', serverGroups,
