@@ -25,6 +25,7 @@ import { putJson } from '../../utils/RestUtils';
 import { logProgressResponse, logProgressError } from '../../utils/MiscUtils.js';
 import { ARDANA_START_PLAYBOOK } from '../../utils/constants';
 import { getCachedEncryptKey } from '../../utils/MiscUtils.js';
+import * as constants from '../../utils/constants';
 
 const NOVA_ACTIVATE = 'nova_activate';
 
@@ -104,6 +105,13 @@ class ActivateComputeHost extends BaseUpdateWizardPage {
         translate('server.activate.error', this.props.operationProps.target.hostname, 'UNKNOWN');
     }
     this.setState(state);
+  }
+
+  setCloseButtonDisabled = () => {
+    // Disable the close button when playbooks/actions haven't started at all or
+    // one of the playbooks or actions is still in progress
+    return this.state.overallStatus === constants.STATUS.IN_PROGRESS ||
+      this.state.overallStatus === constants.STATUS.UNKNOWN;
   }
 
   render() {
