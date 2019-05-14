@@ -69,6 +69,13 @@ class DeactivateComputeHost extends DisableComputeServiceNetwork {
     return false;
   }
 
+  setCloseButtonDisabled = () => {
+    // Disable the close button when playbooks/actions haven't started at all or
+    // one of the playbooks or actions is still in progress
+    return this.state.overallStatus === constants.STATUS.IN_PROGRESS ||
+      this.state.overallStatus === constants.STATUS.UNKNOWN;
+  }
+
   renderFooterButtons (showCancel, showRetry) {
     return this.renderNavButtons(false, showRetry);
   }
