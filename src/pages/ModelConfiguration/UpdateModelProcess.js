@@ -87,6 +87,14 @@ class UpdateModelProcess extends BaseUpdateWizardPage {
     }];
   }
 
+  setCloseButtonDisabled = () => {
+    // Disable the close button when playbooks/actions haven't started at all or
+    // one of the playbooks or actions is still in progress
+    return this.state.overallStatus === constants.STATUS.IN_PROGRESS ||
+      this.state.overallStatus === constants.STATUS.UNKNOWN;
+  }
+
+
   renderPlaybookProgress () {
     let steps = [{
       label: translate('deploy.progress.config-processor-run'),
