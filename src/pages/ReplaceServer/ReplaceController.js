@@ -42,7 +42,12 @@ class ReplaceController extends BaseUpdateWizardPage {
     };
   }
 
-  setNextButtonDisabled = () => this.state.overallStatus != constants.STATUS.COMPLETE;
+  setCloseButtonDisabled = () => {
+    // Disable the close button when playbooks haven't start at all or
+    // One playbook is in progress
+    return this.state.overallStatus === constants.STATUS.IN_PROGRESS ||
+      this.state.overallStatus === constants.STATUS.UNKNOWN;
+  }
 
   componentWillMount() {
     this.setState({showLoadingMask: true});

@@ -89,6 +89,10 @@ class BaseUpdateWizardPage extends BaseWizardPage {
     }
   }
 
+  setCloseButtonDisabled() {
+    return false;
+  }
+
   renderCancelConfirmModal(cancelMsg) {
     return (
       <If condition={this.state.showCancelConfirmModal}>
@@ -116,7 +120,8 @@ class BaseUpdateWizardPage extends BaseWizardPage {
   renderCloseButton() {
     if(this.props.close) {
       return (
-        <CloseButton clickAction={this.closeUpdateProcess}/>
+        <CloseButton clickAction={this.closeUpdateProcess}
+          isDisabled={this.setCloseButtonDisabled()}/>
       );
     }
   }
