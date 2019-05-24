@@ -22,6 +22,7 @@ import { translate } from '../localization/localize.js';
 import { YesNoModal } from '../components/Modals.js';
 import { SetEncryptKeyModal } from '../components/Modals.js';
 import { getCachedEncryptKey, setCachedEncryptKey } from '../utils/MiscUtils.js';
+import * as constants from '../utils/constants.js';
 
 /**
  * This base class handles the functions common to update process
@@ -89,9 +90,20 @@ class BaseUpdateWizardPage extends BaseWizardPage {
     }
   }
 
-  setCloseButtonDisabled() {
-    return false;
+  setCloseButtonDisabled(overallStatus) {
+    // If the page does not have overallStatus, it is the last status page, will have close
+    // button enabled.
+    if(!overallStatus) {
+      return false;
+    }
+    else {
+      // Disable the close button when playbooks/actions haven't started at all or
+      // one of the playbooks or actions is still in progress
+      return overallStatus === constants.STATUS.IN_PROGRESS ||
+        overallStatus === constants.STATUS.UNKNOWN;
+    }
   }
+
 
   renderCancelConfirmModal(cancelMsg) {
     return (
@@ -121,7 +133,7 @@ class BaseUpdateWizardPage extends BaseWizardPage {
     if(this.props.close) {
       return (
         <CloseButton clickAction={this.closeUpdateProcess}
-          isDisabled={this.setCloseButtonDisabled()}/>
+          isDisabled={this.setCloseButtonDisabled(this.state.overallStatus)}/>
       );
     }
   }
