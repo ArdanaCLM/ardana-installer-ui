@@ -119,7 +119,7 @@ class ServiceConfiguration extends Component {
   }
 
   getPlaybooks = () => {
-    let playbooksToRun = {};
+    let playbooksToRun = {playbooks: []};
     const changedServices = this.serviceTemplatesTab.getChangedServices();
     if (changedServices?.length > 0) {
       playbooksToRun.steps = [{
@@ -129,10 +129,18 @@ class ServiceConfiguration extends Component {
         label: translate('deploy.progress.ready-deployment'),
         playbooks: [constants.READY_DEPLOYMENT_PLAYBOOK + '.yml']
       }];
+      playbooksToRun.playbooks.push(constants.PRE_DEPLOYMENT_PLAYBOOK);
+      if(this.state.sesEnabled) {
+        playbooksToRun.steps.push({
+          label: translate('deploy.ses'),
+          playbooks: [`${constants.DEPLOY_SES_PLAYBOOK}.yml`]
+        });
+        changedServices.push('cinder', 'glance', 'nova'); // we want to be sure ardana-reconfigure is triggered.
+        playbooksToRun.playbooks.push(constants.DEPLOY_SES_PLAYBOOK);
+      }
       const serviceName = changedServices[0];
       if (changedServices.length === 1 && UPDATEABLE_SERVICES.includes(serviceName)) {
-        playbooksToRun.playbooks = [
-          constants.PRE_DEPLOYMENT_PLAYBOOK, serviceName + '-reconfigure', serviceName + '-status'];
+        playbooksToRun.playbooks.push(serviceName + '-reconfigure', serviceName + '-status');
         playbooksToRun.steps.push({
           label: translate('deploy.progress.update'),
           playbooks: [serviceName + '-reconfigure.yml']
@@ -141,8 +149,7 @@ class ServiceConfiguration extends Component {
           playbooks: [serviceName + '-status.yml']
         });
       } else {
-        playbooksToRun.playbooks = [
-          constants.PRE_DEPLOYMENT_PLAYBOOK, constants.ARDANA_RECONFIGURE_PLAYBOOK];
+        playbooksToRun.playbooks.push(constants.ARDANA_RECONFIGURE_PLAYBOOK);
         playbooksToRun.steps.push({
           label: translate('deploy.progress.update'),
           playbooks: [constants.ARDANA_RECONFIGURE_PLAYBOOK + '.yml']
@@ -154,6 +161,10 @@ class ServiceConfiguration extends Component {
 
   toDisableUpdate = () => {
     return !this.state.isChanged || (this.state.isEncrypted && isEmpty(this.state.encryptKey));
+  }
+
+  setSesEnabled(sesEnabled) {
+    this.setState({ sesEnabled });
   }
 
   renderContent = () => {
@@ -181,6 +192,7 @@ class ServiceConfiguration extends Component {
         <div className='column-layout'>
           <div className='header'>{translate('services.configuration.update')}</div>
           <ServiceTemplatesTab revertable disableTab={() => {}}
+            enableSes={::this.setSesEnabled}
             showNavButtons={this.showActionButtons} hasChange={this.handleChange}
             {...handleEncryption}
             ref={instance => {this.serviceTemplatesTab = instance;}}/>

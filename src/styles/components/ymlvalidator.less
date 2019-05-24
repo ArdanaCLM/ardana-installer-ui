@@ -121,13 +121,19 @@
     cursor: pointer;
   }
 
-  .file-list a {
-    color: @sb-cerulean-900;
-    line-height: 1.5em;
-    &:hover {
-      color: @sb-blue-400;
-      text-decoration: underline;
-      cursor: pointer;
+  .file-list {
+    a {
+      color: @sb-cerulean-900;
+      line-height: 1.5em;
+      &:hover {
+        color: @sb-blue-400;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+    .file-upload button.btn.btn-link {
+      padding: 0;
+      font-weight: 400;
     }
   }
 }
