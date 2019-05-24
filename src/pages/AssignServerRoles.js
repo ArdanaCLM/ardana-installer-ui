@@ -1263,13 +1263,13 @@ class AssignServerRoles extends BaseWizardPage {
     }
     return (
       <ServerTable
-        id={tableId} {...extraProps}
+        id={tableId}
         tableConfig={tableConfig}
         tableData={filteredAvailableServers}
         viewAction={this.handleShowServerDetails}
         editAction={type === '_manual' ? this.showEditServerAddedManuallyModal : undefined}
-        deleteAction={this.handleDeleteServer}>
-      </ServerTable>
+        deleteAction={this.handleDeleteServer}
+        {...extraProps} />
     );
   }
 
