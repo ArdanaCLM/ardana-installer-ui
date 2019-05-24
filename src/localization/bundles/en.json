@@ -486,7 +486,7 @@
     "update.deploy.confirm": "Deploying a model update may disrupt cloud operations. Proceed with model update?",
     "update.model.heading": "Update model files",
     "update.model.confirm.title": "Update model",
-    "update.model.confirm.msg": "This will run config-processor-run.yml and ready-deployment.yml playbooks to update the model. Check \"Run full deployment\" to deploy the model changes to the cloud. \n\nRunning prepare deployment playbooks or full deployment playbooks may cause inconsistency of the cloud. Proceed with model update?",
+    "update.model.confirm.msg": "This will run config-processor-run.yml and ready-deployment.yml playbooks to update the model. Check \"Run full deployment\" to deploy the model changes to the cloud. \n\nRunning prepare deployment playbooks or full deployment playbooks may cause inconsistency of the cloud. During full deployment, the streaming status updates (including the log) may be interrupted and require a reload of the CLM Admin UI. \n\nProceed with model update?",
     "update.model.confirm.deploy": "Run full deployment",
 
     "install.progress.heading": "SLES installation in progress",
