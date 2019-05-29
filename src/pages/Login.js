@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 import { translate } from '../localization/localize.js';
 import { fetchJson, postJson } from '../utils/RestUtils.js';
 import { setAuthToken, clearAuthToken } from '../utils/Auth.js';
-import { navigateTo, wasRedirectedToLogin } from '../utils/RouteUtils.js';
+import { navigateTo } from '../utils/RouteUtils.js';
 import { ErrorMessage } from '../components/Messages.js';
 import { LoadingMask } from '../components/LoadingMask.js';
 import { GetSshPassphraseModal } from '../components/Modals.js';
@@ -102,7 +102,20 @@ class LoginPage extends Component {
         } else if (error.status == 403) {
           this.setState({errorMsg: translate('login.unprivileged')});
         } else if (error.status == 503) {
-          this.setState({errorMsg: translate('login.keystone.error')});
+          let docURL = 'https://www.suse.com/documentation/suse-openstack-cloud-9/' +
+            'doc-cloud-upstream-admin/admin/html/keystone/admin/identity-troubleshoot.html';
+          let docLink = (
+            <a href={docURL}>
+              {translate('login.keystone.error.docs.link')}
+            </a>
+          );
+          let error = (
+            <>
+              <p>{translate('login.keystone.error')}</p>
+              <p>{translate('login.keystone.error.docs', docLink)}</p>
+            </>
+          );
+          this.setState({errorMsg: error});
         } else {
           this.setState({errorMsg: translate('login.error', error)});
         }

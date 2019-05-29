@@ -20,7 +20,10 @@ class NotificationMessage extends Component {
 
   render() {
     let msgs = [];
-    if(Array.isArray(this.props.message)) {
+    if (React.isValidElement(this.props.message)) {
+      msgs = this.props.message;
+    }
+    else if(Array.isArray(this.props.message)) {
       this.props.message.forEach((msg, idx) => {
         msgs.push(<p key={idx}>{msg}</p>);
       });
