@@ -82,7 +82,10 @@
     "login.placeholder.password": "Enter your password...",
     "login.invalid": "Invalid username or password",
     "login.unprivileged": "Insufficient privileges",
-    "login.keystone.error": "Unable to establish connection to Keystone service",
+    "login.keystone.error": "Unable to establish connection to Keystone service.",
+    "login.keystone.error.docs": "Keystone may be down. Check the documentation to {0}.",
+    "login.keystone.error.docs.url": "https://www.suse.com/documentation/suse-openstack-cloud-9/doc-cloud-upstream-admin/admin/html/keystone/admin/identity-troubleshoot.html",
+    "login.keystone.error.docs.link": "Troubleshoot the Identity service",
     "login.error": "Login error: {0}",
 
     "install.intro.message.body1": "You are about to install a new cloud.",
