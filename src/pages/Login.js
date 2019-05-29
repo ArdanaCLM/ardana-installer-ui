@@ -102,10 +102,10 @@ class LoginPage extends Component {
         } else if (error.status == 403) {
           this.setState({errorMsg: translate('login.unprivileged')});
         } else if (error.status == 503) {
-          let docURL = 'https://www.suse.com/documentation/suse-openstack-cloud-9/' +
-            'doc-cloud-upstream-admin/admin/html/keystone/admin/identity-troubleshoot.html';
           let docLink = (
-            <a href={docURL}>
+            <a href={translate('login.keystone.error.docs.url')}
+              rel='noopener noreferrer'
+              target='_blank'>
               {translate('login.keystone.error.docs.link')}
             </a>
           );
