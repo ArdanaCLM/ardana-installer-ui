@@ -59,27 +59,29 @@ class EditTemplateFile extends Component {
       });
   }
 
-  handleSaveEdit = () => {
+  async handleSaveEdit() {
+    const changed = (this.state.original !== this.state.contents);
     if (this.props.revertable) {
       const origFile = this.props.editFile + '.bak';
-      if (this.state.original !== this.state.contents) {
+      if (changed) {
         // preserve original content into a backup file (only once) for a reversion later on
-        fetchJson('/api/v2/service/files/' +  origFile)
-          .catch((error) => {
-            postJson('/api/v2/service/files/' + origFile, JSON.stringify(this.state.original));
-          });
-        postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
-        this.props.changeAction(true);
+        try {
+          await fetchJson('/api/v2/service/files/' +  origFile);
+        }
+        catch(error) {
+          await postJson('/api/v2/service/files/' + origFile, JSON.stringify(this.state.original));
+        }
+        await postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
       } else {
         // update the file and remove backup file if new content is the same as original content
-        postJson('/api/v2/service/files/' +  this.props.editFile, JSON.stringify(this.state.original))
-          .then(() => {deleteJson('/api/v2/service/files/' +  origFile);});
-        this.props.changeAction(false);
+        await postJson('/api/v2/service/files/' +  this.props.editFile, JSON.stringify(this.state.original));
+        await deleteJson('/api/v2/service/files/' +  origFile);
       }
     } else {
-      postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
+      await postJson('/api/v2/service/files/' + this.props.editFile, JSON.stringify(this.state.contents));
     }
-    this.props.closeAction();
+    this.props.changeAction?.(changed);
+    this.props.closeAction(changed);
   }
 
   handleChange = (event) => {
@@ -87,7 +89,7 @@ class EditTemplateFile extends Component {
   }
 
   handleCancel() {
-    this.props.closeAction();
+    this.props.closeAction(false);
   }
 
   render() {
@@ -112,7 +114,7 @@ class EditTemplateFile extends Component {
             clickAction={() => this.handleCancel()}/>
           <ActionButton
             displayLabel={translate('save')}
-            clickAction={() => this.handleSaveEdit()}/>
+            clickAction={::this.handleSaveEdit}/>
         </div>
       </div>
     );
@@ -128,6 +130,10 @@ class ServiceTemplatesTab extends Component {
       // [{service: 'cinder', files: ['api-cinder.conf.j2', 'api.conf.j2']}]
       serviceFiles: undefined,
 
+      // Object of changed files.  The key is the service name, and the value is a set of
+      // files in that service that have changed
+      changedFiles: {},
+
       //used to determine if the edit dialog needs to be reloaded because the files have been
       //refreshed, after a revert for example
       fileLoadTime: undefined,
@@ -138,20 +144,37 @@ class ServiceTemplatesTab extends Component {
       // the service name of the file in editing
       editServiceName: undefined,
 
-      // expanded services
-      expandedServices: [],
+      // set of service names that are expanded
+      expandedServices: new Set(),
 
       // for error message
       errorContent: undefined,
 
       //deal with encryptKey
-      encryptKey: getCachedEncryptKey() || ''
+      encryptKey: getCachedEncryptKey() || '',
+
+      // is SES configured completely?
+      sesConfigured: undefined,
+
+      // SES config path indicated by ses/settings.yml
+      sesConfigPath: undefined,
     };
   }
 
   componentWillMount() {
-    //retrieve a list of j2 files for services
-    fetchJson('/api/v2/service/files')
+    this.populateForm();
+    // Whenever the screen is first shown (or re-shown after an update), clear
+    // the enableSes status to avoid SES being unnecessarily re-deployed
+    this.props.enableSes?.(false);
+  }
+
+  populateForm() {
+    this.setState({
+      loading: true
+    });
+    let promises = [];
+    //retrieve a list of files for services
+    promises.push(fetchJson('/api/v2/service/files')
       .then((responseData) => {
         this.setState({serviceFiles: responseData, fileLoadTime: Date.now()});
       })
@@ -163,109 +186,152 @@ class ServiceTemplatesTab extends Component {
             ]
           }
         });
-      });
+      }));
+    promises.push(fetchJson('/api/v2/ses/configure')
+      .then((response) => {
+        this.setState({
+          sesConfigured: response.ses_configured,
+          sesConfigPath: response.ses_config_path
+        });
+      }));
+    return Promise.all(promises).then(() => {
+      this.setState({ loading: false });
+    });
   }
 
-  handleEditFile = (seviceName, file) => {
-    this.setState({editServiceName: seviceName, editFile: file});
+  handleEditFile = (serviceName, file) => {
+    this.setState({editServiceName: serviceName, editFile: file});
     this.props.showNavButtons(false);
     this.props.disableTab(true);
   }
 
-  hasChange = (list) => {
-    let count = 0;
-    list.map((l) => {
-      if (l.changedFiles) {
-        count += l.changedFiles.length;
-      }
-    });
-    return count > 0;
-  }
+  hasChange = () => Object.values(this.state.changedFiles).some(s => s.size > 0);
 
-  recordChangedFile = (contentChanged) => {
-    const updatedList = this.state.serviceFiles.map((val) => {
-      if (val.service === this.state.editServiceName) {
-        const newChangedFiles = val.changedFiles ? val.changedFiles.slice() : [];
-        val.files.map((file) => {
-          if (file === this.state.editFile) {
-            if (contentChanged) {
-              newChangedFiles.push(file);
-            } else {
-              newChangedFiles.splice(newChangedFiles.indexOf(file), 1);
-            }
-          }
-        });
+  async recordChangedFile(contentChanged, service, file) {
+    // Captures the fact the the given service/file was changed (or became unchanged)
+    // If no service or file is specified, then this is being called in a situation
+    // such EditTemplateFile where the state already contains editServiceName and
+    // editFile.
+    // If any of the ses configuration has changed, then re-query the back-end to
+    // see whether to remember that ses has been enabled.
 
-        if (newChangedFiles.length > 0) {
-          val.changedFiles = newChangedFiles;
-        } else {
-          delete val.changedFiles;
-        }
+    const changedService = service || this.state.editServiceName;
+    const changedFile = file || this.state.editFile;
+
+    // If the ses settings or config has changed, set enableSes accordingly
+    if (contentChanged && changedService === 'ses') {
+      const response = await fetchJson('/api/v2/ses/configure');
+      this.setState({
+        sesConfigured: response.ses_configured,
+        sesConfigPath: response.ses_config_path,
+      });
+      this.props.enableSes?.(response.ses_configured);
+    }
+
+    this.setState(prevState => {
+
+      let newSet = new Set(prevState.changedFiles[changedService] || []);
+      if (contentChanged) {
+        newSet.add(changedFile);
+      } else {
+        newSet.delete(changedFile);
       }
-      return val;
-    });
-    this.setState({serviceFiles: updatedList});
-    this.props.hasChange(this.hasChange(updatedList));
+
+      // Create a new object with all of the same keys and values, but with the new
+      // changes applied
+      let newChanged = Object.assign({}, prevState.changedFiles, {[changedService]: newSet});
+      return {changedFiles: newChanged};
+    }, () => this.props.hasChange?.(this.hasChange()));
   }
 
   getChangedServices = () => {
-    const changedServices = this.state.serviceFiles.filter(srv => srv.changedFiles !== undefined)
-      .map(srv => srv.service);
-    return changedServices;
+    return this.state.serviceFiles.map(srv => srv.service)
+      .filter(srv => this.state.changedFiles[srv]?.size > 0);
   }
 
   removeOrigFiles = () => {
-    this.state.serviceFiles.map((val) => {
-      if (val.changedFiles) {
-        val.changedFiles.map((file) => {
-          const filename = val.service + '/' + file + '.bak';
-          deleteJson('/api/v2/service/files/' +  filename);
-        });
+    for (let [service, fileList] of Object.entries(this.state.changedFiles)) {
+      for (let file of fileList) {
+        const filename = service + '/' + file + '.bak';
+        deleteJson('/api/v2/service/files/' +  filename);
       }
-    });
+    }
   }
 
   revertChanges = () => {
-    const revertedList = this.state.serviceFiles.map((val) => {
-      if (val.changedFiles) {
-        val.changedFiles.map((file) => {
-          const filename = val.service + '/' + file;
-          // fetch original content, write it out to the current file, then remove the original copy
-          fetchJson('/api/v2/service/files/' +  filename + '.bak')
-            .then((response) => {
-              postJson('/api/v2/service/files/' + filename, JSON.stringify(response))
-                .then(() => {deleteJson('/api/v2/service/files/' +  filename + '.bak');});
-            });
-        });
-        delete val.changedFiles;
+    for (let [service, fileList] of Object.entries(this.state.changedFiles)) {
+      for (let file of fileList) {
+        const filename = service + '/' + file;
+        // fetch original content, write it out to the current file, then remove the original copy
+        fetchJson('/api/v2/service/files/' +  filename + '.bak')
+          .then((response) => {
+            postJson('/api/v2/service/files/' + filename, JSON.stringify(response))
+              .then(() => {
+                // If reverting ses/settings.yml, trigger a reload of the list
+                if (filename === 'ses/settings.yml') {
+                  this.populateForm();
+                  this.props.enableSes?.(false);
+                }
+                deleteJson('/api/v2/service/files/' +  filename + '.bak');
+              });
+          });
       }
-      return val;
-    });
-    this.setState({serviceFiles: revertedList, fileLoadTime: Date.now()});
-    this.props.hasChange(false);
+    }
+    this.setState({changedFiles: {}, fileLoadTime: Date.now()});
+    this.props.hasChange?.(false);
   }
 
-  handleCloseEdit = () => {
+  async handleCloseEdit(changed=false) {
+    const need_reload = changed && this.state.editServiceName === 'ses';
+    // It is important to clear out editServiceName and editFile before reloading, because while
+    // the reload is happening, the page may attempt to re-render and trigger ReactJS errors
     this.setState({editFile: undefined, editServiceName: undefined});
+    if (need_reload) {
+      await this.populateForm();
+    }
     this.props.showNavButtons(true);
     this.props.disableTab(false);
   }
 
-  handleToggleService = (item) => {
-    item.expanded = !item.expanded;
-    if(item.expanded) {
-      let openIndex = this.state.expandedServices.findIndex((itm) => {
-        return itm.service === item.service;
+  async handleSesUpload(file) {
+    // Handle uploading a new file.  Note that in this situation the containing component will
+    // not call recordChangedFile nor handleCloseEdit
+    this.setState({
+      loading: true,
+    });
+    try {
+      const fileContents = await readFile(file);
+      await postJson('/api/v2/service/files/ses/' + this.state.sesConfigPath, JSON.stringify(fileContents));
+      this.recordChangedFile(true, 'ses', file.name);  // also calls hasChange() and enableSes()
+
+      // Reload the list of files to reflect the fact that a new ses config
+      // file is available which may (or may not) be in the directory of config
+      // files and may (or may not) contain valid yaml
+      this.populateForm();
+
+    } catch(error) {
+      this.setState({
+        loading: false,
+        errorContent: {
+          messages: [
+            translate('upload.ses_file.failure'), error.toString()
+          ]
+        }
       });
-      let openS = this.state.expandedServices.slice();
-      openS.splice(openIndex, 1);
-      this.setState({expandedServices: openS});
     }
-    else {
-      let openS = this.state.expandedServices.slice();
-      openS.push(item);
-      this.setState({expandedServices: openS});
-    }
+  }
+
+
+  handleToggleService = (item) => {
+    this.setState((prevState) => {
+      let newExpanded = new Set(prevState.expandedServices);
+      if (newExpanded.has(item.service)) {
+        newExpanded.delete(item.service);
+      } else {
+        newExpanded.add(item.service);
+      }
+      return {expandedServices: newExpanded};
+    });
   }
 
   handleEncryptKeyChange = (e) => {
@@ -307,34 +373,12 @@ class ServiceTemplatesTab extends Component {
     );
   }
 
-  async handleSesUpload(file) {
-    this.setState({ loading: true });
-    let fileContents = await readFile(file);
-    await postJson('/api/v2/service/files/ses/ses_config.yml', JSON.stringify(fileContents));
-    this.setState(prevState => ({
-      loading: false,
-      serviceFiles: prevState.serviceFiles.map(serviceFile => {
-        if(serviceFile.service === 'ses') {
-          serviceFile.files.push('ses_config.yml');
-          if(serviceFile.changedFiles) {
-            serviceFile.changedFiles.push('ses_config.yml');
-          } else {
-            serviceFile.changedFiles = ['ses_config.yml'];
-          }
-        }
-        return serviceFile;
-      })
-    }));
-    this.props.hasChange?.(true);
-    this.props.enableSes?.(true);
-  }
-
   renderFileSection() {
     if(this.state.editFile) {
       return (
         <div className='col-12'>
           <h3>{this.state.editServiceName + ' - ' + this.state.editFile}</h3>
-          <EditTemplateFile closeAction={this.handleCloseEdit} changeAction={this.recordChangedFile}
+          <EditTemplateFile closeAction={::this.handleCloseEdit} changeAction={::this.recordChangedFile}
             editFile={this.state.editServiceName + '/' + this.state.editFile}
             fileLoadTime={this.state.fileLoadTime}
             revertable={this.props.revertable}/>
@@ -352,23 +396,21 @@ class ServiceTemplatesTab extends Component {
     }
   }
 
-  renderFileList(index, item) {
-    if(item.expanded) {
+  renderFileList(item) {
+    if(this.state.expandedServices.has(item.service)) {
       let fileList = [];
       item.files
         .sort((a, b) => alphabetically(a, b))
-        .map((file, idx) => {
-          let isChanged = false;
-          if (item.changedFiles) {
-            isChanged = item.changedFiles.indexOf(file) !== -1;
-          }
+        .map(file => {
+          const isChanged = this.state.changedFiles[item.service]?.has(file);
           fileList.push(
-            <li key={idx}>
+            <li key={file}>
               <a onClick={() => this.handleEditFile(item.service, file)}>{file + (isChanged ? ' *' : '')}</a>
             </li>
           );
         });
-      if(item.service === 'ses' && !item.files.some(f => f === 'ses_config.yml')) {
+      // Add a button to upload a SES config file
+      if(item.service === 'ses' && this.state.sesConfigPath && ! this.state.sesConfigured) {
         fileList.push(
           <li className='file-upload' key='upload_file'>
             <LoadFileButton
@@ -379,16 +421,16 @@ class ServiceTemplatesTab extends Component {
         );
       }
       return (
-        <li key={index}>
+        <li key={item.service}>
           <span className='service-heading' onClick={() => this.handleToggleService(item)}>
             <i className='material-icons'>keyboard_arrow_down</i>{item.service}</span>
           <ul className='file-list'>{fileList}</ul>
         </li>
       );
     }
-    else { // when service not expanded
+    else if (item.files?.length > 0) { // when service not expanded
       return (
-        <li key={index}>
+        <li key={item.service}>
           <span className='service-heading' onClick={() => this.handleToggleService(item)}>
             <i className='material-icons md-dark'>keyboard_arrow_right</i>{item.service}</span>
         </li>
@@ -397,17 +439,9 @@ class ServiceTemplatesTab extends Component {
   }
 
   renderServiceList() {
-    let serviceList = [];
-    this.state.serviceFiles
+    const serviceList = this.state.serviceFiles
       ?.sort((a,b) => alphabetically(a['service'], b['service']))
-      ?.forEach((item, index) => {
-        if(item.files?.length > 0) {
-          if(item.expanded === undefined) {
-            item.expanded = false;
-          }
-          serviceList.push(this.renderFileList(index, item));
-        }
-      });
+      ?.map(svc => this.renderFileList(svc));
 
     return (
       <div className='col-6 verticalLine'>
@@ -421,7 +455,7 @@ class ServiceTemplatesTab extends Component {
       <div className='template-service-files'>
         <div className='row'>
           {!this.state.editFile && this.renderServiceList()}
-          {this.renderFileSection()}
+          {!this.state.loading && this.renderFileSection()}
         </div>
         {this.renderErrorMessage()}
       </div>

@@ -751,6 +751,7 @@
     "server.replace.compute.failure.disable.cancel.confirm": "Canceling could potentially leave the process of disabling the old compute server {0} in a bad state. It will close the window, and any error messages will no longer be available to view. \n\nProceed with cancellation?",
 
     "upload.ses_file": "Upload SES config file",
+    "upload.ses_file.failure": "Unable to upload SES config file",
     "deploy.ses": "Deploy SES configuration files",
     "reconfigure.service": "Reconfiguring {0}",
 
