@@ -140,14 +140,19 @@ class ServiceConfiguration extends Component {
       }
       const serviceName = changedServices[0];
       if (changedServices.length === 1 && UPDATEABLE_SERVICES.includes(serviceName)) {
-        playbooksToRun.playbooks.push(serviceName + '-reconfigure', serviceName + '-status');
+        playbooksToRun.playbooks.push(serviceName + '-reconfigure');
         playbooksToRun.steps.push({
           label: translate('deploy.progress.update'),
           playbooks: [serviceName + '-reconfigure.yml']
-        }, {
-          label: translate('deploy.progress.run.status'),
-          playbooks: [serviceName + '-status.yml']
         });
+        // There is no ses-status.yml playbook, so avoid running it for ses changes
+        if (serviceName != 'ses') {
+          playbooksToRun.playbooks.push(serviceName + '-status');
+          playbooksToRun.steps.push({
+            label: translate('deploy.progress.run.status'),
+            playbooks: [serviceName + '-status.yml']
+          });
+        }
       } else {
         playbooksToRun.playbooks.push(constants.ARDANA_RECONFIGURE_PLAYBOOK);
         playbooksToRun.steps.push({
@@ -163,13 +168,13 @@ class ServiceConfiguration extends Component {
     return !this.state.isChanged || (this.state.isEncrypted && isEmpty(this.state.encryptKey));
   }
 
-  setSesEnabled(sesEnabled) {
-    this.setState({ sesEnabled });
+  setSesEnabled(enabled) {
+    this.setState({ sesEnabled: enabled });
   }
 
   renderContent = () => {
     if (this.state.showUpdateProgress) {
-      if (!this.playbooksToRun) {
+      if (this.serviceTemplatesTab) {
         this.playbooksToRun = this.getPlaybooks();
       }
       const payload = {'extra-vars': {encrypt: this.state.encryptKey || ''}};
