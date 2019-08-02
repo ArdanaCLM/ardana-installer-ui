@@ -22,7 +22,7 @@ import { ActionButton } from '../../components/Buttons.js';
 import { ValidatingInput } from '../../components/ValidatingInput.js';
 import { alphabetically } from '../../utils/Sort.js';
 import {
-  IpV4AddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator,
+  IpAddressValidator, VLANIDValidator, CidrValidator, UniqueNameValidator, AddressesValidator,
   NoWhiteSpaceValidator, chainValidators
 } from '../../utils/InputValidators.js';
 import { MODE } from '../../utils/constants.js';
@@ -348,7 +348,7 @@ class UpdateNetworks extends Component {
             <HelpText tooltipText={translate('tooltip.network.addresses')}/></div>
           {this.renderNetworkAddresses()}
           <div className='details-group-title'>{translate('network.gateway') + ':'}</div>
-          {this.renderNetworkInput('gateway-ip', 'text', false, translate('network.gateway'), IpV4AddressValidator)}
+          {this.renderNetworkInput('gateway-ip', 'text', false, translate('network.gateway'), IpAddressValidator)}
           <div className='details-group-title'>{translate('network.groups') + '*:'}</div>
           {this.renderNetworkGroup()}
           {this.renderTaggedVLAN()}

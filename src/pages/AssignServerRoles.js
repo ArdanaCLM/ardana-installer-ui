@@ -47,6 +47,7 @@ import { YesNoModal } from '../components/Modals.js';
 import HelpText from '../components/HelpText.js';
 import '../utils/MiscUtils';
 import { setCachedEncryptKey } from '../utils/MiscUtils.js';
+import { urlAddress } from '../utils/IPAddress.js';
 
 const AUTODISCOVER_TAB = '1';
 const MANUALADD_TAB = '2';
@@ -502,12 +503,12 @@ class AssignServerRoles extends BaseWizardPage {
   }
 
   getSmUrl(host, port) {
-    let url = 'https://' + host + ':' + (port <= 0 ? '443' : port) + '/rpc/api';
+    let url = 'https://' + urlAddress(host) + ':' + (port <= 0 ? '443' : port) + '/rpc/api';
     return url;
   }
 
   getSmUrlEmbedded() {
-    return window.location.protocol + '//' + window.location.host + '/rpc/api';
+    return window.location.protocol + '//' + urlAddress(window.location.host) + '/rpc/api';
   }
 
   getCookieOptions(minutes) {
@@ -540,7 +541,7 @@ class AssignServerRoles extends BaseWizardPage {
   setOvCredentials = (credsData) => {
     this.connections.ov = credsData.ov;
     this.connections.ov.apiUrl =
-      'https://' + this.connections.ov.creds.host;
+      'https://' + urlAddress(this.connections.ov.creds.host);
     //save the sessionKey to COOKIES
     COOKIES.set(
       'oneViewSessionKey', this.connections.ov.sessionKey, this.getCookieOptions(60)
