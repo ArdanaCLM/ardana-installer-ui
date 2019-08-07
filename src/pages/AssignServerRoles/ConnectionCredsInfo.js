@@ -18,7 +18,7 @@ import { InputLine } from '../../components/InputLine.js';
 import { ActionButton, ItemHelpButton } from '../../components/Buttons.js';
 import { postJson } from '../../utils/RestUtils.js';
 import {
-  IpV4AddressHostValidator, PortValidator
+  IpAddressHostValidator, PortValidator
 } from '../../utils/InputValidators.js';
 import { ErrorMessage, SuccessMessage } from '../../components/Messages.js';
 import { LoadingMask } from '../../components/LoadingMask.js';
@@ -26,6 +26,7 @@ import { isEmpty } from 'lodash';
 import { INPUT_STATUS } from '../../utils/constants.js';
 import { fromJS } from 'immutable';
 import {ConfirmModal} from '../../components/Modals';
+import { urlAddress } from '../../utils/IPAddress.js';
 
 const TEST_STATUS = INPUT_STATUS;
 
@@ -107,7 +108,7 @@ class ConnectionCredsInfo extends Component {
     this.setState(prev => ({inputValue: prev.inputValue.removeIn(['sm','sessionKey'])}));
     const sm = this.state.inputValue.get('sm');
 
-    let hostport = sm.get('host');
+    let hostport = urlAddress(sm.get('host'));
     if (sm.has('port')) {
       hostport += ':' + sm.get('port');
     }
@@ -312,7 +313,7 @@ class ConnectionCredsInfo extends Component {
           <div className='server-details-container'>
             <InputLine
               isRequired={true} inputName='host' label='server.host1.prompt'
-              inputValidate={IpV4AddressHostValidator}
+              inputValidate={IpAddressHostValidator}
               inputValue={this.state.inputValue.getIn([category, 'host'], '')}
               inputAction={(e,v,props) => this.handleInputChange(e,v,props.inputName,category)}/>
             <If condition={category === 'sm'}>

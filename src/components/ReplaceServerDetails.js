@@ -22,7 +22,7 @@ import { InputLine } from '../components/InputLine.js';
 import { ListDropdown } from '../components/ListDropdown.js';
 import { LabeledDropdownWithButton } from '../components/LabeledDropdown.js';
 import {
-  IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
+  IpAddressValidator, MacAddressValidator, UniqueIdValidator,
   createExcludesValidator, chainValidators, NoWhiteSpaceValidator }
   from '../utils/InputValidators.js';
 import {
@@ -437,7 +437,7 @@ class ReplaceServerDetails extends Component {
               inputAction={this.handleInputChange} />
             <InputLine moreClass='has-button'
               isRequired={true} inputName='ip-addr' label='server.ip.prompt'
-              inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
+              inputValidate={chainValidators(IpAddressValidator, createExcludesValidator(existingIpAddresses))}
               inputValue={this.state.inputValue.get('ip-addr')}
               inputAction={this.handleInputChange}/>
             {this.renderDropdownLineWithButton(
@@ -467,7 +467,7 @@ class ReplaceServerDetails extends Component {
             inputAction={this.handleInputChange} />
           <InputLine
             isRequired={isRequired} inputName='ilo-ip' label='server.ipmi.ip.prompt' moreClass='has-button'
-            inputValidate={chainValidators(IpV4AddressValidator, createExcludesValidator(existingIpAddresses))}
+            inputValidate={chainValidators(IpAddressValidator, createExcludesValidator(existingIpAddresses))}
             inputValue={this.state.inputValue.get('ilo-ip')}
             inputAction={this.handleInputChange} />
           <InputLine

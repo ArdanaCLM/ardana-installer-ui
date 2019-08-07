@@ -13,7 +13,7 @@
 * limitations under the License.
 **/
 import Papa from 'papaparse';
-import { IpV4AddressValidator, MacAddressValidator } from './InputValidators.js';
+import { IpAddressValidator, MacAddressValidator } from './InputValidators.js';
 import {translate} from '../localization/localize';
 
 /**
@@ -37,7 +37,7 @@ export function importCSV(file, restrictedValues, callback) {
     },
     'ip-addr': {
       unique: true,
-      validator: IpV4AddressValidator,
+      validator: IpAddressValidator,
       aliases: [ 'ip', 'ip-address' ],
       required: true
     },
@@ -49,7 +49,7 @@ export function importCSV(file, restrictedValues, callback) {
     },
     'ilo-ip': {
       unique: true,
-      validator: IpV4AddressValidator,
+      validator: IpAddressValidator,
       aliases: [ 'ipmi-ip', 'ipmi-ip-address', 'ilo-ip-address' ]
     },
     'ilo-user': {

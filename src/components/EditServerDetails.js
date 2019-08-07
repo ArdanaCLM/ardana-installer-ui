@@ -19,7 +19,7 @@ import { translate } from '../localization/localize.js';
 import { ActionButton } from './Buttons.js';
 import { InputLine } from './InputLine.js';
 import { LabeledDropdownWithButton } from './LabeledDropdown.js';
-import { IpV4AddressValidator, MacAddressValidator, UniqueIdValidator,
+import { IpAddressValidator, MacAddressValidator, UniqueIdValidator,
   chainValidators, NoWhiteSpaceValidator, createExcludesValidator }
   from '../utils/InputValidators.js';
 import { EditCloudSettings } from '../pages/ServerRoleSummary/EditCloudSettings.js';
@@ -202,9 +202,9 @@ class EditServerDetails extends Component {
             chainValidators(
               createExcludesValidator(
                 this.props.existIPAddressesModel,
-                translate('input.validator.ipv4address.exist.error')
+                translate('input.validator.ipaddress.exist.error')
               ),
-              IpV4AddressValidator
+              IpAddressValidator
             )
           )}
           {this.renderDropdownLineWithButton(
@@ -231,9 +231,9 @@ class EditServerDetails extends Component {
             chainValidators(
               createExcludesValidator(
                 this.props.existIPMIAddressesModel,
-                translate('input.validator.ipv4address.exist.error')
+                translate('input.validator.ipaddress.exist.error')
               ),
-              IpV4AddressValidator)
+              IpAddressValidator)
           )}
           {this.renderInput('ilo-user', 'text', false, 'server.ipmi.username.prompt')}
           {this.renderInput('ilo-password', 'password', false, 'server.ipmi.password.prompt')}

@@ -15,33 +15,17 @@
 import { translate } from '../localization/localize.js';
 import { safeLoad } from 'js-yaml';
 import { List } from 'immutable';
+import { isIPAddressValid, isIPv4AddressValid, isIPv4CidrValid, ipByteArray, isCidrValid } from './IPAddress';
 
-const IPV4ADDRESS =
-  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-const MACADDRESS =
-  /^[0-9a-fA-F]{2}([:])(?:[0-9a-fA-F]{2}\1){4}[0-9a-fA-F]{2}$/;
+const MACADDRESS = /^[0-9a-fA-F]{2}([:])(?:[0-9a-fA-F]{2}\1){4}[0-9a-fA-F]{2}$/;
 const HOST = /^(?=^.{1,254}$)(^(?:(?!\d+\.)[a-zA-Z0-9_-]{1,63}\.?)+(?:[a-zA-Z]{2,})$)/;
-const IPV4ADDRESS_HOST = new RegExp(
-  IPV4ADDRESS.toString().slice(1, IPV4ADDRESS.toString().length-1) + '|' +
-  HOST.toString().slice(1, HOST.toString().length-1)
-);
 const PORT = /^0*(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])$/;
 const PCI_ADDRESS = /^[0-9a-fA-F]{4}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F]$/;
 const NET_INTERFACE = /^[0-9a-zA-Z.:_]{1,16}$/;
-const CIDR =
-  /^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/(3[0-2]|[1-2]?[0-9])$/;
-const NETMASK = new RegExp('^(' +
-  /((255\.){3}(255|254|252|248|240|224|192|128|0+))|/.source +
-  /((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|/.source +
-  /((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|/.source +
-  /((255|254|252|248|240|224|192|128|0+)(\.0+){3})/.source + ')$'
-);
-const IPV4ADDRESS_RANGE =
-  /^(?:(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\s*-\s*(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;  //eslint-disable-line max-len
 
-export function IpV4AddressValidator(ipAddress) {
-  if(IPV4ADDRESS.exec(ipAddress) === null) {
-    return translate('input.validator.ipv4address.error');
+export function IpAddressValidator(ipAddress) {
+  if(! isIPAddressValid(ipAddress)) {
+    return translate('input.validator.ipaddress.error');
   }
 }
 
@@ -57,9 +41,9 @@ export function PortValidator(port) {
   }
 }
 
-export function IpV4AddressHostValidator(host) {
-  if(IPV4ADDRESS_HOST.exec(host) === null) {
-    return translate('input.validator.ipv4addresshost.error');
+export function IpAddressHostValidator(host) {
+  if(! isIPAddressValid(host) && host.match(HOST) === null) {
+    return translate('input.validator.ipaddresshost.error');
   }
 }
 
@@ -81,55 +65,55 @@ export function VLANIDValidator(vlanid) {
   }
 }
 
-
-// Convert an IP address (e.g. 10.1.0.24) into its equivalent integer (167837720)
-function ipAddrToInt(ip) {
-  // Split string into array of octets, converted to integers
-  const octets = ip.split('.').map(n => parseInt(n, 10));
-
-  // Convert to an integer.  The trailing >>> 0 converts the number to unsigned so we
-  // don't get huge negative values
-  return ((octets[0] << 24) + (octets[1] << 16) + (octets[2] << 8) + octets[3]) >>> 0;
-}
-
 export function CidrValidator(cidr) {
-  const match = CIDR.exec(cidr);
-  if(match === null) {
-    return translate('input.validator.cidr.error');
-  }
-
-  // match[1] is the ip address, match[2] is number of leading bits (the part after the slash)
-  const ip = ipAddrToInt(match[1]);
-  const bits = parseInt(match[2]);
-
-  // Verify that all of the values in the IP address portion after the leading
-  // bits are zeros.  For example, the CIDR 192.168.1.0/24 would be an integer address
-  // value of 0xC0A80100, and the last 8 bits (32-24) are required to be zeros.
-  if ((ip & (0xffffffff >>> bits)) !== 0) {
+  if (! isCidrValid(cidr)) {
     return translate('input.validator.cidr.error');
   }
 }
 
-export function AddressesValidator(addresses) {
-  // just one IPV4 address
-  if(addresses?.indexOf('-') === -1) {
-    if(IPV4ADDRESS.exec(addresses.trim()) === null) {
+export function IPv4CidrValidator(cidr) {
+  if (! isIPv4CidrValid(cidr)) {
+    return translate('input.validator.cidr.error');
+  }
+}
+
+export function AddressesValidator(addrs) {
+  const addresses = addrs?.trim() || '';
+
+  // just one address
+  if(! addresses.includes('-')) {
+    if(! isIPv4AddressValid(addresses)) {
       return translate('input.validator.addresses.error');
     }
   }
 
-  if(addresses?.indexOf('-') !== -1) { // just one range
-    if (IPV4ADDRESS_RANGE.exec(addresses.trim()) === null) {
+  else {
+
+    const ips = addresses.replace(/\s/g, '').split('-');
+    if(!isIPv4AddressValid(ips[0]) || !isIPv4AddressValid(ips[1])) {
       return translate('input.validator.addresses.error');
     }
+    let start_ip = ipByteArray(ips[0]);
+    let end_ip = ipByteArray(ips[1]);
 
-    var ips = addresses.replace(/\s/g, '').split('-');
-    var s_ip = ips[0];
-    var e_ip = ips[1];
-    var s_ip_num = ipAddrToInt(s_ip);
-    var e_ip_num = ipAddrToInt(e_ip);
+    let ordered = true;
+    for (let i=0; i<start_ip.length; i++) {
+      if (start_ip[i] < end_ip[i]) {
+        break;
+      }
+      if (start_ip[i] > end_ip[i]) {
+        ordered = false;
+        break;
+      }
 
-    if (s_ip_num >= e_ip_num) {
+      // If we have reached the last byte and all values are the same
+      // then the two addresses are identical and thus not ordered
+      if (i == start_ip.length-1) {
+        ordered = false;
+      }
+    }
+
+    if (! ordered) {
       return translate('input.validator.addresses.error');
     }
   }
@@ -156,25 +140,6 @@ export function YamlValidator(text) {
   } catch (e) {
     return translate('input.validator.yaml.error');
   }
-}
-
-export function NetmaskValidator(netmask) {
-  if (NETMASK.exec(netmask) === null) {
-    return translate('input.validator.netmask.error');
-  }
-}
-
-// return a validator that will validate an IP in in the netmask's subnet
-export function IpInNetmaskValidator(netmask) {
-  function validator(ip) {
-    const ipInt = ipAddrToInt(ip);
-    const netmaskInt = ipAddrToInt(netmask);
-    if(((ipInt & netmaskInt) >>> 0) !== ipInt) {
-      return translate('input.validator.netmask.ipinvalid.error');
-    }
-  }
-
-  return validator;
 }
 
 // Return a validator that requires the entered value to

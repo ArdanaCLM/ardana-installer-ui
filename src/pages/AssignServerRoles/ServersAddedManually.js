@@ -22,7 +22,7 @@ import { InputLine } from '../../components/InputLine.js';
 import { postJson, putJson } from '../../utils/RestUtils.js';
 import { MODEL_SERVER_PROPS_ALL } from '../../utils/constants.js';
 import { isEmpty } from 'lodash';
-import { IpV4AddressValidator, MacAddressValidator, createExcludesValidator } from '../../utils/InputValidators.js';
+import { IpAddressValidator, MacAddressValidator, createExcludesValidator } from '../../utils/InputValidators.js';
 import {
   genUID, getNicMappings, getServerGroups, getServerRoles, getAllOtherServerIds, matchRolesLimit
 } from '../../utils/ModelUtils.js';
@@ -249,7 +249,7 @@ class ServersAddedManually extends Component {
             <If condition={!this.props.isUpdateMode || !this.props.processOperation} >
               {this.renderDropdownLine(false, 'server.role.prompt', 'role', roles, defaultOption)}
             </If>
-            {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpV4AddressValidator)}
+            {this.renderInputLine(true, 'server.ip.prompt', 'ip-addr', 'text', IpAddressValidator)}
             {this.renderDropdownLineWithButton(
               true, 'server.group.prompt', 'server-group', serverGroups,
               'server.group.prompt', ::this.handleShowAddServerGroup)}
@@ -260,7 +260,7 @@ class ServersAddedManually extends Component {
           <div className='message-line'>{translate('server.ipmi.message')}</div>
           <div className='server-details-container'>
             {this.renderInputLine(false, 'server.mac.prompt', 'mac-addr', 'text', MacAddressValidator)}
-            {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpV4AddressValidator)}
+            {this.renderInputLine(false, 'server.ipmi.ip.prompt', 'ilo-ip', 'text', IpAddressValidator)}
             {this.renderInputLine(false, 'server.ipmi.username.prompt', 'ilo-user', 'text')}
             {this.renderInputLine(false, 'server.ipmi.password.prompt', 'ilo-password', 'password')}
           </div>

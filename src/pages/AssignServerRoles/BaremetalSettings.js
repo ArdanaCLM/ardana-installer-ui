@@ -15,52 +15,46 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IpV4AddressValidator, IpInNetmaskValidator, NetmaskValidator, chainValidators }
-  from '../../utils/InputValidators.js';
+import { IPv4CidrValidator } from '../../utils/InputValidators.js';
+import { toSubnetNetmask, toCidr } from '../../utils/IPAddress.js';
 import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
-import { fromJS } from 'immutable';
+import { Map } from 'immutable';
 
 class BaremetalSettings extends Component {
 
   constructor(props) {
     super(props);
     const baremetal = props.model.getIn(['inputModel', 'baremetal']).toJS();
+    this.origCidr = toCidr(baremetal.subnet, baremetal.netmask);
+
     this.state = {
-      subnet: baremetal.subnet,
-      netmask: baremetal.netmask,
+      cidr: this.origCidr,
       valid: true,
       maskingError: ''
     };
-    this.origBaremetal = JSON.parse(JSON.stringify(baremetal));
   }
 
   handleInputChange = (e, valid, props) => {
     let value = e.target.value;
     let key = props.inputName;
-    this.setState({[key]: value});
+    this.setState({[key]: value, valid: valid});
   }
 
-  checkSettingsChanged = () => {
-    return this.state.valid && ((this.origBaremetal.netmask !== this.state.netmask) ||
-      (this.origBaremetal.subnet !== this.state.subnet));
-  }
+  checkSettingsChanged = () => this.state.valid && this.state.cidr != this.origCidr;
 
   cancelBaremetalSettings = () => {
-    this.setState({netmask: this.origBaremetal.netmask, subnet: this.origBaremetal.subnet});
     this.props.cancelAction();
   }
 
   saveBaremetalSettings = () => {
-    let newSettings = {
-      subnet: this.state.subnet,
-      netmask: this.state.netmask
-    };
-    let model = this.props.model;
-    model = model.updateIn(['inputModel', 'baremetal'], settings => fromJS(newSettings));
+    const [subnet, netmask] = toSubnetNetmask(this.state.cidr);
+    const newSettings = Map({
+      subnet: subnet,
+      netmask: netmask,
+    });
+    const model = this.props.model.updateIn(['inputModel', 'baremetal'], settings => newSettings);
     this.props.updateGlobalState('model', model);
-    this.origBaremetal.subnet = this.state.subnet;
-    this.origBaremetal.netmask = this.state.netmask;
     this.props.cancelAction();
   }
 
@@ -82,13 +76,10 @@ class BaremetalSettings extends Component {
       >
         <div className='description-line'>{translate('add.server.set.network.description')}</div>
         <div className='server-details-container'>
-          <InputLine isRequired={true} label={'add.server.set.network.subnet'}
-            inputName={'subnet'} inputType={'text'}
-            inputValidate={chainValidators(IpV4AddressValidator, IpInNetmaskValidator(this.state.netmask))}
-            inputAction={this.handleInputChange} inputValue={this.state.subnet}/>
-          <InputLine isRequired={true} label={'add.server.set.network.netmask'}
-            inputName={'netmask'} inputType={'text'} inputValidate={NetmaskValidator}
-            inputAction={this.handleInputChange} inputValue={this.state.netmask}/>
+          <InputLine isRequired={true} label={'add.server.set.network.cidr'}
+            inputName={'cidr'} inputType={'text'}
+            inputValidate={IPv4CidrValidator}
+            inputAction={this.handleInputChange} inputValue={this.state.cidr}/>
           <div className='detail-line'>
             <div className='detail-heading'></div>
             <div className='input-body'>
