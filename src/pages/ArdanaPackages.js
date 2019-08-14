@@ -66,7 +66,14 @@ class ArdanaPackages extends Component {
     }
     fetchJson('/api/v2/packages', extraParams)
       .then(responseData => {
-        this.setState({packages: responseData.cloud_installed_packages, showLoadingMask: false});
+        let packages = [
+          ...responseData.cloud_installed_packages,
+          ...responseData.openstack_venv_packages.map(v => ({
+            name: v.name,
+            versions: v.installed
+          }))
+        ];
+        this.setState({packages, showLoadingMask: false});
       })
       .catch((error) => {
         this.setState({
