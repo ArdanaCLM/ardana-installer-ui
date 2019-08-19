@@ -259,7 +259,7 @@ class UpdateServers extends BaseUpdateWizardPage {
     await this.props.loadModel();
     let internalModelServers = internalModel?.getIn(['internal', 'servers']).toJS();
     let servers = this.props.model?.getIn(['inputModel','servers']).toJS()
-      .filter(s => s.role.includes('COMPUTE'))
+      .filter(s => isComputeNode(s))
       .map(s => {
         const internalServer = internalModelServers.filter(sev => sev.id === s.id)[0];
         if(internalServer !== undefined) {
@@ -973,6 +973,7 @@ class UpdateServers extends BaseUpdateWizardPage {
         {name: 'nic-mapping'},
         {name: 'mac-addr'},
         {name: 'monascaStatus', foundInProp: 'serverMonascaStatuses', hidden: !this.state.monasca},
+        {name: 'serverState', foundInProp: 'serverStates'},
         {name: 'ilo-ip', hidden: true},
         {name: 'ilo-user', hidden: true},
         {name: 'ilo-password', hidden: true},
@@ -982,6 +983,22 @@ class UpdateServers extends BaseUpdateWizardPage {
 
     const autoServers = this.state.servers.filter(s => s.source !== 'manual');
     const manualServers = this.state.servers.filter(s => s.source === 'manual');
+
+    let serverStates = {};
+
+    // servers that are not compute don't have a active/deactive state
+    this.props.model?.get('inputModel')?.get('servers')?.toJS()?.forEach(s => {
+      if(!isComputeNode(s)) {
+        serverStates[s.id] = translate('server.details.state.na');
+      }
+    });
+
+    if(this.state.serverStatuses) {
+      Object.keys(this.state.serverStatuses).forEach(id => {
+        let status = this.state.serverStatuses[id]?.status ? 'enabled' : 'disabled';
+        serverStates[id] = translate(`server.details.state.${status}`);
+      });
+    }
 
     // TODO: pass in array of menu items and callbacks
     return (
@@ -993,7 +1010,8 @@ class UpdateServers extends BaseUpdateWizardPage {
         processOperation={this.props.processOperation} serverStatuses={this.state.serverStatuses}
         activateComputeHost={::this.activateComputeHost} deactivateComputeHost={::this.deactivateComputeHost}
         serverMonascaStatuses={this.state.serverMonascaStatuses} internalModel={this.state.internalModel}
-        deleteComputeHost={::this.deleteComputeHost}/>
+        deleteComputeHost={::this.deleteComputeHost}
+        serverStates={serverStates}/>
     );
   }
 
