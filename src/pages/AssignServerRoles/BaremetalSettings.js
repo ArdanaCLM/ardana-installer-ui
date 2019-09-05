@@ -15,8 +15,8 @@
 import React, { Component } from 'react';
 import { translate } from '../../localization/localize.js';
 import { ConfirmModal } from '../../components/Modals.js';
-import { IPv4CidrValidator } from '../../utils/InputValidators.js';
-import { toSubnetNetmask, toCidr } from '../../utils/IPAddress.js';
+import { CidrValidator } from '../../utils/InputValidators.js';
+import { toCidr } from '../../utils/IPAddress.js';
 import { InputLine } from '../../components/InputLine.js';
 import { ActionButton } from '../../components/Buttons.js';
 import { Map } from 'immutable';
@@ -26,7 +26,11 @@ class BaremetalSettings extends Component {
   constructor(props) {
     super(props);
     const baremetal = props.model.getIn(['inputModel', 'baremetal']).toJS();
-    this.origCidr = toCidr(baremetal.subnet, baremetal.netmask);
+    if(baremetal.subnet && baremetal.netmask) {
+      this.origCidr = toCidr(baremetal.subnet, baremetal.netmask);
+    } else {
+      this.origCidr = baremetal.cidr;
+    }
 
     this.state = {
       cidr: this.origCidr,
@@ -48,10 +52,8 @@ class BaremetalSettings extends Component {
   }
 
   saveBaremetalSettings = () => {
-    const [subnet, netmask] = toSubnetNetmask(this.state.cidr);
     const newSettings = Map({
-      subnet: subnet,
-      netmask: netmask,
+      cidr: this.state.cidr,
     });
     const model = this.props.model.updateIn(['inputModel', 'baremetal'], settings => newSettings);
     this.props.updateGlobalState('model', model);
@@ -78,7 +80,7 @@ class BaremetalSettings extends Component {
         <div className='server-details-container'>
           <InputLine isRequired={true} label={'add.server.set.network.cidr'}
             inputName={'cidr'} inputType={'text'}
-            inputValidate={IPv4CidrValidator}
+            inputValidate={CidrValidator}
             inputAction={this.handleInputChange} inputValue={this.state.cidr}/>
           <div className='detail-line'>
             <div className='detail-heading'></div>
