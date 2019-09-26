@@ -52,8 +52,8 @@ to refresh `node_modules` and create `node_modules.tar.bz2`.
 
 To build the docker container:
 
-   docker build -t ardana-installer-ui .
+    docker build -t ardana-installer-ui .
 
 To run the built container:
 
-   docker run -it -p 2209:2209 ardana-installer-ui
+    docker run -it -p 2209:2209 ardana-installer-ui

@@ -1,4 +1,4 @@
-FROM opensuse/leap:15.0
+FROM opensuse/leap:15.1
 
 RUN  zypper -n update
 RUN  zypper -n install npm8
